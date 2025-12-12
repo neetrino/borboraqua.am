@@ -168,18 +168,85 @@ class AdminService {
   }
 
   /**
-   * Get orders
+   * Get orders with filters and pagination
    */
-  async getOrders(_filters: any) {
-    const orders = await db.order.findMany({
-      take: 100,
-      orderBy: { createdAt: "desc" },
-      include: {
-        items: true,
-      },
-    });
+  async getOrders(filters: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    paymentStatus?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+  } = {}) {
+    const page = filters.page || 1;
+    const limit = filters.limit || 20;
+    const skip = (page - 1) * limit;
 
-    return { data: orders };
+    const where: any = {};
+
+    // Apply status filter
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
+    // Apply payment status filter
+    if (filters.paymentStatus) {
+      where.paymentStatus = filters.paymentStatus;
+    }
+
+    // Determine sort field and order
+    const sortBy = filters.sortBy || 'createdAt';
+    const sortOrder = filters.sortOrder || 'desc';
+    
+    // Map frontend sort fields to database fields
+    const sortFieldMap: Record<string, string> = {
+      'total': 'total',
+      'createdAt': 'createdAt',
+    };
+    
+    const dbSortField = sortFieldMap[sortBy] || 'createdAt';
+    const orderBy: any = { [dbSortField]: sortOrder };
+
+    console.log('📦 [ADMIN SERVICE] getOrders with filters:', { where, page, limit, skip, orderBy });
+
+    // Get orders with pagination
+    const [orders, total] = await Promise.all([
+      db.order.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+        include: {
+          items: true,
+        },
+      }),
+      db.order.count({ where }),
+    ]);
+
+    // Format orders for response
+    const formattedOrders = orders.map((order: { id: string; number: string; status: string; paymentStatus: string; fulfillmentStatus: string; total: number; currency: string | null; customerEmail: string | null; customerPhone: string | null; createdAt: Date; items: Array<unknown> }) => ({
+      id: order.id,
+      number: order.number,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      fulfillmentStatus: order.fulfillmentStatus,
+      total: order.total,
+      currency: order.currency || 'AMD',
+      customerEmail: order.customerEmail || '',
+      customerPhone: order.customerPhone || '',
+      itemsCount: order.items.length,
+      createdAt: order.createdAt.toISOString(),
+    }));
+
+    return {
+      data: formattedOrders,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   /**
@@ -2128,6 +2195,136 @@ class AdminService {
       topProducts,
       topCategories,
       ordersByDay,
+    };
+  }
+
+  /**
+   * Get delivery settings
+   */
+  async getDeliverySettings() {
+    console.log('🚚 [ADMIN SERVICE] getDeliverySettings called');
+    
+    const setting = await db.settings.findUnique({
+      where: { key: 'delivery-locations' },
+    });
+
+    if (!setting) {
+      console.log('✅ [ADMIN SERVICE] Delivery settings not found, returning defaults');
+      return {
+        locations: [],
+      };
+    }
+
+    const value = setting.value as { locations?: Array<{ id?: string; country: string; city: string; price: number }> };
+    console.log('✅ [ADMIN SERVICE] Delivery settings loaded:', value);
+    return {
+      locations: value.locations || [],
+    };
+  }
+
+  /**
+   * Get delivery price for a specific city
+   */
+  async getDeliveryPrice(city: string, country: string = 'Armenia') {
+    console.log('🚚 [ADMIN SERVICE] getDeliveryPrice called:', { city, country });
+    
+    const setting = await db.settings.findUnique({
+      where: { key: 'delivery-locations' },
+    });
+
+    if (!setting) {
+      console.log('✅ [ADMIN SERVICE] Delivery settings not found, returning default price');
+      return 1000; // Default price
+    }
+
+    const value = setting.value as { locations?: Array<{ country: string; city: string; price: number }> };
+    const locations = value.locations || [];
+
+    // Find matching location (case-insensitive)
+    const location = locations.find(
+      (loc) => 
+        loc.city.toLowerCase().trim() === city.toLowerCase().trim() &&
+        loc.country.toLowerCase().trim() === country.toLowerCase().trim()
+    );
+
+    if (location) {
+      console.log('✅ [ADMIN SERVICE] Delivery price found:', location.price);
+      return location.price;
+    }
+
+    // If no exact match, try to find by city only (case-insensitive)
+    const cityMatch = locations.find(
+      (loc) => loc.city.toLowerCase().trim() === city.toLowerCase().trim()
+    );
+
+    if (cityMatch) {
+      console.log('✅ [ADMIN SERVICE] Delivery price found by city:', cityMatch.price);
+      return cityMatch.price;
+    }
+
+    // Return default price if no match found
+    console.log('✅ [ADMIN SERVICE] No delivery price found, returning default');
+    return 1000; // Default price
+  }
+
+  /**
+   * Update delivery settings
+   */
+  async updateDeliverySettings(data: { locations: Array<{ id?: string; country: string; city: string; price: number }> }) {
+    console.log('🚚 [ADMIN SERVICE] updateDeliverySettings called:', data);
+    
+    // Validate locations
+    if (!Array.isArray(data.locations)) {
+      throw {
+        status: 400,
+        type: "https://api.shop.am/problems/validation-error",
+        title: "Validation Error",
+        detail: "Locations must be an array",
+      };
+    }
+
+    // Validate each location
+    for (const location of data.locations) {
+      if (!location.country || !location.city) {
+        throw {
+          status: 400,
+          type: "https://api.shop.am/problems/validation-error",
+          title: "Validation Error",
+          detail: "Each location must have country and city",
+        };
+      }
+      if (typeof location.price !== 'number' || location.price < 0) {
+        throw {
+          status: 400,
+          type: "https://api.shop.am/problems/validation-error",
+          title: "Validation Error",
+          detail: "Price must be a non-negative number",
+        };
+      }
+    }
+
+    // Generate IDs for new locations
+    const locationsWithIds = data.locations.map((location, index) => ({
+      ...location,
+      id: location.id || `location-${Date.now()}-${index}`,
+    }));
+
+    const setting = await db.settings.upsert({
+      where: { key: 'delivery-locations' },
+      update: {
+        value: { locations: locationsWithIds },
+        updatedAt: new Date(),
+      },
+      create: {
+        key: 'delivery-locations',
+        value: { locations: locationsWithIds },
+        description: 'Delivery prices by country and city',
+      },
+    });
+
+    console.log('✅ [ADMIN SERVICE] Delivery settings updated:', setting);
+    return {
+      locations: locationsWithIds,
     };
   }
 }

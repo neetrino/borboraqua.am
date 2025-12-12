@@ -8,7 +8,7 @@ const nextConfig = {
   output: 'standalone',
     typescript: {
     ignoreBuildErrors: true, // TypeScript errors won't stop build
-  },
+  },     
   images: {
     remotePatterns: [
       {

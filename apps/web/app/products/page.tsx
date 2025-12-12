@@ -157,8 +157,11 @@ export default async function ProductsPage({ searchParams }: any) {
 
   return (
     <div className="w-full">
+      {/* Category Navigation - Full Width */}
+      <CategoryNavigation />
+      
+      {/* Products Header - With Container */}
       <div className={PAGE_CONTAINER}>
-        <CategoryNavigation />
         <ProductsHeader />
       </div>
 

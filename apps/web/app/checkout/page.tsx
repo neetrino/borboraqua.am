@@ -184,6 +184,8 @@ export default function CheckoutPage() {
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
   const [showShippingModal, setShowShippingModal] = useState(false);
   const [showCardModal, setShowCardModal] = useState(false);
+  const [deliveryPrice, setDeliveryPrice] = useState<number | null>(null);
+  const [loadingDeliveryPrice, setLoadingDeliveryPrice] = useState(false);
 
   // Debug: Log modal state changes
   useEffect(() => {
@@ -218,6 +220,42 @@ export default function CheckoutPage() {
 
   const paymentMethod = watch('paymentMethod');
   const shippingMethod = watch('shippingMethod');
+  const shippingCity = watch('shippingCity');
+
+  // Fetch delivery price when city changes
+  useEffect(() => {
+    const fetchDeliveryPrice = async () => {
+      if (shippingMethod === 'delivery' && shippingCity && shippingCity.trim().length > 0) {
+        setLoadingDeliveryPrice(true);
+        try {
+          console.log('🚚 [CHECKOUT] Fetching delivery price for city:', shippingCity);
+          const response = await apiClient.get<{ price: number }>('/api/v1/delivery/price', {
+            params: {
+              city: shippingCity.trim(),
+              country: 'Armenia',
+            },
+          });
+          console.log('✅ [CHECKOUT] Delivery price fetched:', response.price);
+          setDeliveryPrice(response.price);
+        } catch (err: any) {
+          console.error('❌ [CHECKOUT] Error fetching delivery price:', err);
+          // Use default price if error
+          setDeliveryPrice(1000);
+        } finally {
+          setLoadingDeliveryPrice(false);
+        }
+      } else {
+        setDeliveryPrice(null);
+      }
+    };
+
+    // Debounce the API call
+    const timeoutId = setTimeout(() => {
+      fetchDeliveryPrice();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [shippingCity, shippingMethod]);
 
   useEffect(() => {
     // Wait for auth to finish loading before checking
@@ -962,7 +1000,11 @@ export default function CheckoutPage() {
                   <span>
                     {shippingMethod === 'pickup' 
                       ? 'Free (Pickup)' 
-                      : formatPrice(2000, currency) + ' (Delivery)'}
+                      : loadingDeliveryPrice
+                        ? 'Loading...'
+                        : deliveryPrice !== null
+                          ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ' (Delivery)')
+                          : 'Enter city'}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
@@ -976,7 +1018,7 @@ export default function CheckoutPage() {
                       {formatPrice(
                         cart.totals.subtotal + 
                         cart.totals.tax + 
-                        (shippingMethod === 'delivery' ? 2000 : 0),
+                        (shippingMethod === 'delivery' && deliveryPrice !== null ? deliveryPrice : 0),
                         currency
                       )}
                     </span>
@@ -1219,13 +1261,24 @@ export default function CheckoutPage() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Shipping:</span>
-                      <span className="font-medium">{formatPrice(2000, currency)} (Delivery)</span>
+                      <span className="font-medium">
+                        {loadingDeliveryPrice
+                          ? 'Loading...'
+                          : deliveryPrice !== null
+                            ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ' (Delivery)')
+                            : shippingMethod === 'delivery' ? 'Enter city' : 'Free (Pickup)'}
+                      </span>
                     </div>
                     <div className="border-t border-gray-200 pt-2 mt-2">
                       <div className="flex justify-between">
                         <span className="font-semibold text-gray-900">Total:</span>
                         <span className="font-bold text-gray-900">
-                          {formatPrice(cart.totals.subtotal + cart.totals.tax + 2000, currency)}
+                          {formatPrice(
+                            cart.totals.subtotal + 
+                            cart.totals.tax + 
+                            (shippingMethod === 'delivery' && deliveryPrice !== null ? deliveryPrice : 0),
+                            currency
+                          )}
                         </span>
                       </div>
                     </div>
@@ -1538,7 +1591,11 @@ export default function CheckoutPage() {
                   <span className="font-medium">
                     {shippingMethod === 'pickup' 
                       ? 'Free (Pickup)' 
-                      : formatPrice(2000, currency) + ' (Delivery)'}
+                      : loadingDeliveryPrice
+                        ? 'Loading...'
+                        : deliveryPrice !== null
+                          ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ' (Delivery)')
+                          : 'Enter city'}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -1552,7 +1609,7 @@ export default function CheckoutPage() {
                       {formatPrice(
                         cart.totals.subtotal + 
                         cart.totals.tax + 
-                        (shippingMethod === 'delivery' ? 2000 : 0),
+                        (shippingMethod === 'delivery' && deliveryPrice !== null ? deliveryPrice : 0),
                         currency
                       )}
                     </span>

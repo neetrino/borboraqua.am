@@ -247,7 +247,7 @@ function CategoryNavigationContent() {
 
   if (loading) {
     return (
-      <div className="bg-white border-b border-gray-200 py-4">
+      <div className="bg-white border-b border-gray-200 py-4 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6 overflow-x-auto">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
@@ -296,9 +296,9 @@ function CategoryNavigationContent() {
   };
 
   return (
-    <div className="bg-white border-b border-gray-200 py-6">
+    <div className="bg-white border-b border-gray-200 py-6 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative px-8">
+        <div className="relative">
           {/* Левая стрелка - всегда видна, но неактивна когда нельзя прокрутить */}
           <button
             type="button"
@@ -322,7 +322,7 @@ function CategoryNavigationContent() {
           </button>
           <div
             ref={scrollContainerRef}
-            className="flex items-center gap-6 md:gap-8 overflow-x-auto scrollbar-hide pb-2"
+            className="flex items-center gap-6 md:gap-8 overflow-x-auto scrollbar-hide pb-2 pl-4 sm:pl-6"
             style={{ scrollBehavior: 'smooth' }}
           >
           {displayCategories.map((category) => {
@@ -423,7 +423,7 @@ function CategoryNavigationContent() {
 export function CategoryNavigation() {
   return (
     <Suspense fallback={
-      <div className="bg-white border-b border-gray-200 py-4">
+      <div className="bg-white border-b border-gray-200 py-4 w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6 overflow-x-auto">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (

@@ -18,7 +18,25 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const filters = {};
+    // Extract query parameters
+    const searchParams = req.nextUrl.searchParams;
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const status = searchParams.get('status') || undefined;
+    const paymentStatus = searchParams.get('paymentStatus') || undefined;
+    const sortBy = searchParams.get('sortBy') || undefined;
+    const sortOrder = searchParams.get('sortOrder') || undefined;
+
+    const filters = {
+      page,
+      limit,
+      ...(status && { status }),
+      ...(paymentStatus && { paymentStatus }),
+      ...(sortBy && { sortBy }),
+      ...(sortOrder && { sortOrder: sortOrder as 'asc' | 'desc' }),
+    };
+
+    console.log('📦 [ADMIN ORDERS] GET request with filters:', filters);
     const result = await adminService.getOrders(filters);
     return NextResponse.json(result);
   } catch (error: any) {

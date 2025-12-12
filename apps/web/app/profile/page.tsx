@@ -940,33 +940,6 @@ function ProfilePageContent() {
               </Button>
             </div>
           </form>
-
-          {/* Account Info */}
-          <div className="mt-8 pt-8 border-t border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-600">Email Verified:</span>
-                <span className={`ml-2 font-medium ${profile?.emailVerified ? 'text-green-600' : 'text-gray-400'}`}>
-                  {profile?.emailVerified ? 'Yes' : 'No'}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-600">Phone Verified:</span>
-                <span className={`ml-2 font-medium ${profile?.phoneVerified ? 'text-green-600' : 'text-gray-400'}`}>
-                  {profile?.phoneVerified ? 'Yes' : 'No'}
-                </span>
-              </div>
-              {profile?.createdAt && (
-                <div>
-                  <span className="text-gray-600">Member Since:</span>
-                  <span className="ml-2 font-medium text-gray-900">
-                    {new Date(profile.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
         </Card>
       )}
 

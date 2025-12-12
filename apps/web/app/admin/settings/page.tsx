@@ -120,16 +120,6 @@ export default function SettingsPage() {
                 defaultValue="Your shop description"
               />
             </div>
-            <div>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="mr-2"
-                />
-                <span className="text-sm font-medium text-gray-700">Enable maintenance mode</span>
-              </label>
-            </div>
           </div>
         </Card>
 

@@ -40,12 +40,15 @@ export default function OrdersPage() {
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState<OrdersResponse['meta'] | null>(null);
+  const [sortBy, setSortBy] = useState<string>('createdAt');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [updatingStatuses, setUpdatingStatuses] = useState<Set<string>>(new Set());
+  const [updatingPaymentStatuses, setUpdatingPaymentStatuses] = useState<Set<string>>(new Set());
   const [updateMessage, setUpdateMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
-  // Initialize filters from URL params on mount
+  // Initialize filters from URL params on mount and when URL changes
   useEffect(() => {
     if (searchParams) {
       const status = searchParams.get('status') || '';
@@ -53,7 +56,7 @@ export default function OrdersPage() {
       setStatusFilter(status);
       setPaymentStatusFilter(paymentStatus);
     }
-  }, []); // Only run on mount
+  }, [searchParams]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -67,7 +70,7 @@ export default function OrdersPage() {
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('📦 [ADMIN] Fetching orders...', { page, statusFilter, paymentStatusFilter });
+      console.log('📦 [ADMIN] Fetching orders...', { page, statusFilter, paymentStatusFilter, sortBy, sortOrder });
       
       const response = await apiClient.get<OrdersResponse>('/api/v1/admin/orders', {
         params: {
@@ -75,6 +78,8 @@ export default function OrdersPage() {
           limit: '20',
           status: statusFilter || '',
           paymentStatus: paymentStatusFilter || '',
+          sortBy: sortBy || '',
+          sortOrder: sortOrder || '',
         },
       });
 
@@ -86,14 +91,14 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, paymentStatusFilter]);
+  }, [page, statusFilter, paymentStatusFilter, sortBy, sortOrder]);
 
   useEffect(() => {
     if (isLoggedIn && isAdmin) {
       fetchOrders();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn, isAdmin, page, statusFilter, paymentStatusFilter]);
+  }, [isLoggedIn, isAdmin, page, statusFilter, paymentStatusFilter, sortBy, sortOrder]);
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
@@ -112,6 +117,19 @@ export default function OrdersPage() {
       case 'completed':
         return 'bg-green-100 text-green-800';
       case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPaymentStatusColor = (paymentStatus: string) => {
+    switch (paymentStatus.toLowerCase()) {
+      case 'paid':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'failed':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -137,6 +155,18 @@ export default function OrdersPage() {
       const hasAll = allIds.every(id => prev.has(id));
       return hasAll ? new Set() : new Set(allIds);
     });
+  };
+
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      // Toggle sort order if same column
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new column and default to descending
+      setSortBy(column);
+      setSortOrder('desc');
+    }
+    setPage(1); // Reset to first page when sorting changes
   };
 
   const handleBulkDelete = async () => {
@@ -223,6 +253,48 @@ export default function OrdersPage() {
     } finally {
       // Remove from updating set
       setUpdatingStatuses((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(orderId);
+        return newSet;
+      });
+    }
+  };
+
+  const handlePaymentStatusChange = async (orderId: string, newPaymentStatus: string) => {
+    try {
+      console.log('📝 [ADMIN] Changing order payment status:', { orderId, newPaymentStatus });
+      
+      // Add to updating set
+      setUpdatingPaymentStatuses((prev) => new Set(prev).add(orderId));
+      setUpdateMessage(null);
+
+      // Update order payment status via API
+      await apiClient.put(`/api/v1/admin/orders/${orderId}`, {
+        paymentStatus: newPaymentStatus,
+      });
+
+      console.log('✅ [ADMIN] Order payment status updated successfully');
+
+      // Update local state
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order.id === orderId ? { ...order, paymentStatus: newPaymentStatus } : order
+        )
+      );
+
+      // Show success message
+      setUpdateMessage({ type: 'success', text: 'Payment status updated successfully' });
+      setTimeout(() => setUpdateMessage(null), 3000);
+    } catch (err) {
+      console.error('❌ [ADMIN] Error updating order payment status:', err);
+      setUpdateMessage({ 
+        type: 'error', 
+        text: 'Failed to update payment status. Please try again.' 
+      });
+      setTimeout(() => setUpdateMessage(null), 5000);
+    } finally {
+      // Remove from updating set
+      setUpdatingPaymentStatuses((prev) => {
         const newSet = new Set(prev);
         newSet.delete(orderId);
         return newSet;
@@ -325,6 +397,22 @@ export default function OrdersPage() {
           </div>
         </Card>
 
+        {/* Selection Controls */}
+        <Card className="p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-700">
+              Selected {selectedIds.size} orders
+            </div>
+            <Button
+              variant="outline"
+              onClick={handleBulkDelete}
+              disabled={selectedIds.size === 0 || bulkDeleting}
+            >
+              {bulkDeleting ? 'Deleting...' : 'Delete selected'}
+            </Button>
+          </div>
+        </Card>
+
         {/* Orders Table */}
         <Card className="p-6">
           {loading ? (
@@ -362,14 +450,56 @@ export default function OrdersPage() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Payment
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Total
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                        onClick={() => handleSort('total')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Total
+                          <div className="flex flex-col">
+                            <svg 
+                              className={`w-3 h-3 ${sortBy === 'total' && sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-400'}`}
+                              fill="currentColor" 
+                              viewBox="0 0 20 20"
+                            >
+                              <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                            </svg>
+                            <svg 
+                              className={`w-3 h-3 -mt-1 ${sortBy === 'total' && sortOrder === 'desc' ? 'text-blue-600' : 'text-gray-400'}`}
+                              fill="currentColor" 
+                              viewBox="0 0 20 20"
+                            >
+                              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        </div>
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Items
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
+                      <th 
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
+                        onClick={() => handleSort('createdAt')}
+                      >
+                        <div className="flex items-center gap-1">
+                          Date
+                          <div className="flex flex-col">
+                            <svg 
+                              className={`w-3 h-3 ${sortBy === 'createdAt' && sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-400'}`}
+                              fill="currentColor" 
+                              viewBox="0 0 20 20"
+                            >
+                              <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                            </svg>
+                            <svg 
+                              className={`w-3 h-3 -mt-1 ${sortBy === 'createdAt' && sortOrder === 'desc' ? 'text-blue-600' : 'text-gray-400'}`}
+                              fill="currentColor" 
+                              viewBox="0 0 20 20"
+                            >
+                              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        </div>
                       </th>
                     </tr>
                   </thead>
@@ -415,13 +545,24 @@ export default function OrdersPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            order.paymentStatus === 'paid' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {order.paymentStatus}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            {updatingPaymentStatuses.has(order.id) ? (
+                              <div className="flex items-center gap-2">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                                <span className="text-xs text-gray-500">Updating...</span>
+                              </div>
+                            ) : (
+                              <select
+                                value={order.paymentStatus}
+                                onChange={(e) => handlePaymentStatusChange(order.id, e.target.value)}
+                                className={`px-2 py-1 text-xs font-medium rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${getPaymentStatusColor(order.paymentStatus)}`}
+                              >
+                                <option value="paid">Paid</option>
+                                <option value="pending">Pending</option>
+                                <option value="failed">Failed</option>
+                              </select>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {formatCurrency(order.total, order.currency)}
@@ -462,18 +603,6 @@ export default function OrdersPage() {
                   </div>
                 </div>
               )}
-              <div className="mt-4 flex items-center justify-between">
-                <div className="text-sm text-gray-700">
-                  Selected {selectedIds.size} orders
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={handleBulkDelete}
-                  disabled={selectedIds.size === 0 || bulkDeleting}
-                >
-                  {bulkDeleting ? 'Deleting...' : 'Delete selected'}
-                </Button>
-              </div>
             </>
           )}
         </Card>
