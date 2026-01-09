@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { apiClient } from '../lib/api-client';
 import { getStoredLanguage } from '../lib/language';
 import { ProductCard } from './ProductCard';
+import { t } from '../lib/i18n';
 
 interface Product {
   id: string;
@@ -37,11 +38,7 @@ interface Tab {
   filter: string | null;
 }
 
-const tabs: Tab[] = [
-  { id: 'new', label: 'NEW', filter: 'new' },
-  { id: 'bestseller', label: 'BESTSELLER', filter: 'bestseller' },
-  { id: 'featured', label: 'FEATURED', filter: 'featured' },
-];
+// Tabs will be generated dynamically with translations
 
 const PRODUCTS_PER_PAGE = 10;
 const MOBILE_GRID_LAYOUT =
@@ -53,10 +50,18 @@ const MOBILE_GRID_LAYOUT =
  * Similar to the reference design with underlined active tab
  */
 export function FeaturedProductsTabs() {
+  const language = getStoredLanguage();
   const [activeTab, setActiveTab] = useState<FilterType>('new');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Generate tabs with translations
+  const tabs: Tab[] = [
+    { id: 'new', label: t(language, 'home.featured_products.tab_new'), filter: 'new' },
+    { id: 'bestseller', label: t(language, 'home.featured_products.tab_bestseller'), filter: 'bestseller' },
+    { id: 'featured', label: t(language, 'home.featured_products.tab_featured'), filter: 'featured' },
+  ];
 
   /**
    * Fetch products based on active filter
@@ -88,7 +93,7 @@ export function FeaturedProductsTabs() {
       setProducts((response.data || []).slice(0, PRODUCTS_PER_PAGE));
     } catch (err: any) {
       console.error('❌ [FeaturedProductsTabs] Error fetching products:', err);
-      setError('Failed to load products');
+      setError(t(language, 'home.featured_products.errorLoading'));
       setProducts([]);
     } finally {
       setLoading(false);
@@ -115,10 +120,10 @@ export function FeaturedProductsTabs() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Title */}
         <h2 className="text-3xl font-bold text-gray-900 text-center">
-          Featured Products
+          {t(language, 'home.featured_products.title')}
         </h2>
         <p className="mt-3 mb-8 text-base text-gray-600 text-center">
-          Three quick picks: New arrivals, Bestsellers, and Featured picks
+          {t(language, 'home.featured_products.subtitle')}
         </p>
 
         {/* Tabs Navigation */}
@@ -136,7 +141,7 @@ export function FeaturedProductsTabs() {
                     : 'text-gray-600 hover:text-gray-900'
                   }
                 `}
-                aria-label={`Show ${tab.label} products`}
+                aria-label={t(language, 'home.featured_products.ariaShowProducts').replace('{label}', tab.label)}
                 aria-pressed={isActive}
               >
                 {tab.label}
@@ -176,7 +181,7 @@ export function FeaturedProductsTabs() {
               }}
               className="px-4 py-2 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors"
             >
-              Try Again
+              {t(language, 'home.featured_products.tryAgain')}
             </button>
           </div>
         ) : products.length > 0 ? (
@@ -187,7 +192,7 @@ export function FeaturedProductsTabs() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-gray-500">No products available in this category.</p>
+            <p className="text-gray-500">{t(language, 'home.featured_products.noProducts')}</p>
           </div>
         )}
       </div>
