@@ -51,6 +51,11 @@ const nextConfig = {
         hostname: 'cdn-icons-png.flaticon.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.figma.com',
+        pathname: '/api/mcp/asset/**',
+      },
     ],
     // Allow unoptimized images for development (images will use unoptimized prop)
     // Ensure image optimization is enabled for production

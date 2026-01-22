@@ -1,18 +1,30 @@
 import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Montserrat } from 'next/font/google';
 import './globals.css';
 import { ClientProviders } from '../components/ClientProviders';
-import { Header } from '../components/Header';
-import { Footer } from '../components/Footer';
-import { Breadcrumb } from '../components/Breadcrumb';
-import { MobileBottomNav } from '../components/MobileBottomNav';
+import { LayoutWrapper } from '../components/LayoutWrapper';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  variable: '--font-inter',
+});
+const montserrat = Montserrat({ 
+  subsets: ['latin'],
+  variable: '--font-montserrat',
+  weight: ['300', '400', '500', '700', '900'],
+});
 
 export const metadata: Metadata = {
   title: 'Shop - Professional E-commerce',
   description: 'Modern e-commerce platform',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -22,18 +34,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <body className={`${inter.className} bg-gray-50 text-gray-900 antialiased min-h-full`}>
+      <body className={`${inter.variable} ${montserrat.variable} ${inter.className} bg-gray-50 text-gray-900 antialiased min-h-full`}>
         <Suspense fallback={null}>
           <ClientProviders>
-            <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
-              <Header />
-              <Breadcrumb />
-              <main className="flex-1 w-full">
-                {children}
-              </main>
-              <Footer />
-              <MobileBottomNav />
-            </div>
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
           </ClientProviders>
         </Suspense>
       </body>
