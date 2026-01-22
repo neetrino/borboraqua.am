@@ -9,6 +9,12 @@
     max-width: 100vw !important;
   }
   
+  body {
+    overflow-y: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
   /* Prevent text selection and caret on all text elements */
   p, span, div, h1, h2, h3, h4, h5, h6, 
   li, td, th, label, strong, em, b, i, 
@@ -140,18 +146,59 @@
   margin-top: 0.25rem;
 }
 
-/* Home page - Pixel perfect Figma design - No scaling, no viewport sizing */
+/* Home page - Pixel perfect Figma design with responsive scaling */
 .home-page-container {
-  transform: none !important;
-  zoom: 1 !important;
-  scale: 1 !important;
   width: 1920px !important;
-  max-width: 100vw !important;
   height: 6637px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
   overflow-x: hidden !important;
   overflow-y: visible !important;
   position: relative !important;
+  transform-origin: top center !important;
+  display: block !important;
+  /* JavaScript will handle transform and positioning */
+}
+
+/* Ensure the main wrapper adjusts to scaled height for proper scrolling */
+.home-page-wrapper {
+  overflow: visible !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+  margin: 0 auto !important;
+  position: relative !important;
+  display: block !important;
+  /* Center the container inside */
+  text-align: center !important;
+}
+
+/* Calculate wrapper height based on scale */
+@media (max-width: 1919px) {
+  .home-page-wrapper {
+    min-height: calc(6637px * calc(100vw / 1920)) !important;
+    height: calc(6637px * calc(100vw / 1920)) !important;
+  }
+}
+
+@media (min-width: 1920px) {
+  .home-page-wrapper {
+    min-height: 6637px !important;
+    height: auto !important;
+  }
+}
+
+/* Ensure body/html don't cause horizontal overflow */
+html {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+body {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 

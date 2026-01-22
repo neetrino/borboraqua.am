@@ -93,12 +93,39 @@ interface ProductsResponse {
 export default function HomePage() {
   const router = useRouter();
   const { isLoggedIn } = useAuth();
+  const containerRef = useRef<HTMLDivElement>(null);
   
   // State for featured products
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set());
   const [carouselIndex, setCarouselIndex] = useState(0);
+
+  // Apply scaling based on viewport width
+  useEffect(() => {
+    const updateScale = () => {
+      if (containerRef.current) {
+        const viewportWidth = window.innerWidth;
+        const scale = Math.min(viewportWidth / 1920, 1);
+        // Use translateX(-50%) to center, then scale
+        containerRef.current.style.left = '50%';
+        containerRef.current.style.transform = `translateX(-50%) scale(${scale})`;
+        containerRef.current.style.transformOrigin = 'top center';
+        containerRef.current.style.position = 'relative';
+        containerRef.current.style.overflowX = 'hidden';
+        // Adjust margin-bottom to compensate for scaled height
+        if (scale < 1) {
+          containerRef.current.style.marginBottom = `${6637 * (1 - scale)}px`;
+        } else {
+          containerRef.current.style.marginBottom = '0';
+        }
+      }
+    };
+
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
 
   // Debug: Log carousel index changes
   useEffect(() => {
@@ -339,15 +366,14 @@ export default function HomePage() {
   };
 
   // Footer is at top-[6061px] with h-[576px], so total height = 6061 + 576 = 6637px
-  // Using exact pixel height from Figma, no viewport sizing, no scaling
+  // Using exact pixel height from Figma with responsive scaling
   return (
     <div 
+      ref={containerRef}
       className="bg-white relative w-[1920px] h-[6637px] home-page-container"
-      style={{ 
-        transform: 'none !important',
-        zoom: '1 !important',
-        scale: '1 !important',
-        margin: '0 auto',
+      style={{
+        display: 'block',
+        transformOrigin: 'top center',
       }}
     >
       {/* Header Section - Navigation Bar */}
