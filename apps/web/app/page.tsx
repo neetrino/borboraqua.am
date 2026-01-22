@@ -1,8 +1,12 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { figmaImages } from '../config/figma-images';
 import { getImageOverlayStyles, getOverlayDivStyles } from '../config/figma-image-overlays';
+import { apiClient } from '../lib/api-client';
+import { formatPrice, getStoredCurrency } from '../lib/currency';
+import { getStoredLanguage } from '../lib/language';
 
 // Figma MCP Image URLs - Updated from latest Figma design (2025-01-16)
 const imgBorborAguaLogoColorB2024Colored1 = "https://www.figma.com/api/mcp/asset/b106fddf-ddb7-4708-ad7a-7cb2873cb7c9";
@@ -59,7 +63,81 @@ const img18 = "https://www.figma.com/api/mcp/asset/65825bce-8684-4e63-8d01-3dca9
 const imgImage5 = "https://www.figma.com/api/mcp/asset/7b7935ae-703c-43dc-a360-739aa1ec8d91";
 const imgImage11 = "https://www.figma.com/api/mcp/asset/d72de48b-9390-4c6d-9bf5-10f0ad7b4699";
 
+// Product interface for featured products
+interface Product {
+  id: string;
+  slug: string;
+  title: string;
+  price: number;
+  image: string | null;
+  inStock: boolean;
+  brand: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+interface ProductsResponse {
+  data: Product[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 export default function HomePage() {
+  // State for featured products
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+
+  // Fetch featured products from backend
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        setProductsLoading(true);
+        console.log('📦 [HOMEPAGE] Fetching featured products...');
+        
+        const language = getStoredLanguage();
+        const params: Record<string, string> = {
+          page: '1',
+          limit: '3', // Get 3 products for featured section
+          lang: language,
+          filter: 'featured', // Try to get featured products
+        };
+
+        const response = await apiClient.get<ProductsResponse>('/api/v1/products', {
+          params,
+        });
+
+        console.log(`✅ [HOMEPAGE] Loaded ${response.data.length} featured products`);
+        
+        // If we got less than 3 products, try without filter to get any products
+        if (response.data.length < 3) {
+          console.log('⚠️ [HOMEPAGE] Less than 3 featured products, fetching any products...');
+          const fallbackParams: Record<string, string> = {
+            page: '1',
+            limit: '3',
+            lang: language,
+          };
+          const fallbackResponse = await apiClient.get<ProductsResponse>('/api/v1/products', {
+            params: fallbackParams,
+          });
+          setFeaturedProducts(fallbackResponse.data.slice(0, 3));
+        } else {
+          setFeaturedProducts(response.data.slice(0, 3));
+        }
+      } catch (err: any) {
+        console.error('❌ [HOMEPAGE] Error fetching featured products:', err);
+        setFeaturedProducts([]);
+      } finally {
+        setProductsLoading(false);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, []);
 
   // Footer is at top-[6061px] with h-[576px], so total height = 6061 + 576 = 6637px
   // Using exact pixel height from Figma, no viewport sizing, no scaling
@@ -260,112 +338,190 @@ export default function HomePage() {
           
           {/* Products Grid */}
           <div className="absolute h-[736.83px] left-[24px] right-[24px] top-[166px]">
-            {/* Product 1 - 19L */}
-            <div className="absolute bg-[rgba(255,255,255,0)] inset-[-12px_-11.66px_12px_1025px] rounded-[24px]">
-              <div className="absolute h-[563px] left-[98.83px] top-[12.91px] w-[277px]">
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                  <img alt="Product 19L" className="absolute h-[111.44%] left-[-62.35%] max-w-none top-0 w-[226.62%]" src={img1} />
-                </div>
-              </div>
-              <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[9px] pb-[16px] px-[16px] right-[9px] top-[599.91px]">
-                <div className="content-stretch flex items-end justify-between pr-[0.01px] relative shrink-0 w-full">
-                  <div className="content-stretch flex flex-col items-start relative shrink-0">
-                    <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                      <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white whitespace-nowrap">
-                        <p className="leading-[28px]">Natural spring water</p>
-                      </div>
-                    </div>
-                    <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                      <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[12px] tracking-[1.2px] uppercase whitespace-nowrap">
-                        <p className="leading-[16px]">19L </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="content-stretch flex flex-col items-start relative shrink-0">
-                    <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
-                      <p className="leading-[28px]">1800 AMD</p>
-                    </div>
+            {productsLoading ? (
+              // Loading state - show placeholder
+              <>
+                <div className="absolute bg-[rgba(255,255,255,0)] inset-[-12px_-11.66px_12px_1025px] rounded-[24px]">
+                  <div className="absolute h-[563px] left-[98.83px] top-[12.91px] w-[277px] bg-gray-300 animate-pulse rounded" />
+                  <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[9px] pb-[16px] px-[16px] right-[9px] top-[599.91px]">
+                    <div className="h-4 bg-gray-300 animate-pulse rounded w-3/4" />
+                    <div className="h-6 bg-gray-300 animate-pulse rounded w-1/3" />
                   </div>
                 </div>
-                <div className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full">
-                  <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
-                    <p className="leading-[24px]">Add to Cart</p>
-                  </div>
+                <div className="absolute bg-[rgba(255,255,255,0)] content-stretch flex flex-col gap-[24px] inset-[-12px_500.33px_12px_513px] items-center justify-center p-[8px] rounded-[24px]">
+                  <div className="h-[564px] w-[205px] bg-gray-300 animate-pulse rounded" />
                 </div>
-              </div>
-            </div>
-            
-            {/* Product 2 - 0.5L */}
-            <div className="absolute bg-[rgba(255,255,255,0)] content-stretch flex flex-col gap-[24px] inset-[-12px_500.33px_12px_513px] items-center justify-center p-[8px] rounded-[24px]">
-              <div className="h-[564px] relative shrink-0 w-[205px]">
-                <div className="absolute bg-clip-padding border-0 border-[transparent] border-solid inset-0 overflow-hidden pointer-events-none">
-                  <img alt="Product 0.5L" className="absolute h-[100.18%] left-[-87.8%] max-w-none top-[-0.09%] w-[275.61%]" src={img2} />
+                <div className="absolute bg-[rgba(255,255,255,0)] inset-[-12px_1013.34px_12px_0] rounded-[24px]">
+                  <div className="absolute h-[508px] left-[137px] top-[53px] w-[182px] bg-gray-300 animate-pulse rounded" />
                 </div>
-              </div>
-              <div className="relative shrink-0 w-[456.67px]">
-                <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col gap-[16px] items-start pb-[16px] px-[16px] relative w-full">
-                  <div className="content-stretch flex items-end justify-between relative shrink-0 w-full">
-                    <div className="content-stretch flex flex-col items-start relative shrink-0">
-                      <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                        <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white whitespace-nowrap">
-                          <p className="leading-[28px]">Natural Spring Water</p>
+              </>
+            ) : featuredProducts.length > 0 ? (
+              // Render actual products
+              featuredProducts.map((product, index) => {
+                const currency = getStoredCurrency();
+                const formattedPrice = formatPrice(product.price, currency);
+                
+                // Product positioning based on index (matching original layout)
+                const positions = [
+                  { className: "inset-[-12px_-11.66px_12px_1025px]", imageClass: "h-[563px] left-[98.83px] top-[12.91px] w-[277px]", imageStyle: "h-[111.44%] left-[-62.35%] max-w-none top-0 w-[226.62%]", contentClass: "left-[9px] pb-[16px] px-[16px] right-[9px] top-[599.91px]" },
+                  { className: "inset-[-12px_500.33px_12px_513px]", imageClass: "h-[564px] w-[205px]", imageStyle: "h-[100.18%] left-[-87.8%] max-w-none top-[-0.09%] w-[275.61%]", contentClass: "pb-[16px] px-[16px]" },
+                  { className: "inset-[-12px_1013.34px_12px_0]", imageClass: "h-[508px] left-[137px] top-[53px] w-[182px]", imageStyle: "h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%]", contentClass: "left-[16px] top-[600px] w-[424.66px]" }
+                ];
+                
+                const pos = positions[index] || positions[0];
+                const isSecondProduct = index === 1;
+                const isThirdProduct = index === 2;
+                
+                return (
+                  <div key={product.id} className={`absolute bg-[rgba(255,255,255,0)] ${pos.className} ${isSecondProduct ? 'content-stretch flex flex-col gap-[24px] items-center justify-center p-[8px]' : ''} rounded-[24px]`}>
+                    {isThirdProduct ? (
+                      <div className="absolute h-[714px] left-[9px] right-[9px] top-0">
+                        <div className={`absolute ${pos.imageClass}`}>
+                          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                            {product.image ? (
+                              <img 
+                                alt={product.title} 
+                                className={`absolute ${pos.imageStyle} object-contain`} 
+                                src={product.image} 
+                              />
+                            ) : (
+                              <div className={`absolute ${pos.imageStyle} bg-gray-300`} />
+                            )}
+                          </div>
+                        </div>
+                        <div className={`absolute content-stretch flex h-[44px] items-end justify-between ${pos.contentClass}`}>
+                          <div className="content-stretch flex flex-col items-start relative shrink-0">
+                            <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white">
+                                <p className="leading-[28px]">{product.title}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="content-stretch flex flex-col items-start relative shrink-0">
+                            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
+                              <p className="leading-[28px]">{formattedPrice}</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="absolute bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center left-[16px] py-[12px] rounded-[34px] top-[660px] w-[424.66px]">
+                          <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
+                            <p className="leading-[24px]">Add to Cart</p>
+                          </div>
                         </div>
                       </div>
-                      <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                        <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[12px] tracking-[1.2px] uppercase whitespace-nowrap">
-                          <p className="leading-[16px]">0.5L</p>
+                    ) : isSecondProduct ? (
+                      <>
+                        <div className={`h-[564px] relative shrink-0 w-[205px]`}>
+                          <div className="absolute bg-clip-padding border-0 border-[transparent] border-solid inset-0 overflow-hidden pointer-events-none">
+                            {product.image ? (
+                              <img 
+                                alt={product.title} 
+                                className={`absolute ${pos.imageStyle} object-contain`} 
+                                src={product.image} 
+                              />
+                            ) : (
+                              <div className={`absolute ${pos.imageStyle} bg-gray-300`} />
+                            )}
+                          </div>
+                        </div>
+                        <div className="relative shrink-0 w-[456.67px]">
+                          <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col gap-[16px] items-start pb-[16px] px-[16px] relative w-full">
+                            <div className="content-stretch flex items-end justify-between relative shrink-0 w-full">
+                              <div className="content-stretch flex flex-col items-start relative shrink-0">
+                                <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                                  <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white">
+                                    <p className="leading-[28px]">{product.title}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="content-stretch flex flex-col items-start relative shrink-0">
+                                <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
+                                  <p className="leading-[28px]">{formattedPrice}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full">
+                              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
+                                <p className="leading-[24px]">Add to Cart</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className={`absolute ${pos.imageClass}`}>
+                          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                            {product.image ? (
+                              <img 
+                                alt={product.title} 
+                                className={`absolute ${pos.imageStyle} object-contain`} 
+                                src={product.image} 
+                              />
+                            ) : (
+                              <div className={`absolute ${pos.imageStyle} bg-gray-300`} />
+                            )}
+                          </div>
+                        </div>
+                        <div className={`absolute content-stretch flex flex-col gap-[16px] items-start ${pos.contentClass}`}>
+                          <div className="content-stretch flex items-end justify-between pr-[0.01px] relative shrink-0 w-full">
+                            <div className="content-stretch flex flex-col items-start relative shrink-0">
+                              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                                <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white">
+                                  <p className="leading-[28px]">{product.title}</p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="content-stretch flex flex-col items-start relative shrink-0">
+                              <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
+                                <p className="leading-[28px]">{formattedPrice}</p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full">
+                            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
+                              <p className="leading-[24px]">Add to Cart</p>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })
+            ) : (
+              // Fallback to original hardcoded products if no products loaded
+              <>
+                <div className="absolute bg-[rgba(255,255,255,0)] inset-[-12px_-11.66px_12px_1025px] rounded-[24px]">
+                  <div className="absolute h-[563px] left-[98.83px] top-[12.91px] w-[277px]">
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      <img alt="Product 19L" className="absolute h-[111.44%] left-[-62.35%] max-w-none top-0 w-[226.62%]" src={img1} />
+                    </div>
+                  </div>
+                  <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[9px] pb-[16px] px-[16px] right-[9px] top-[599.91px]">
+                    <div className="content-stretch flex items-end justify-between pr-[0.01px] relative shrink-0 w-full">
+                      <div className="content-stretch flex flex-col items-start relative shrink-0">
+                        <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white whitespace-nowrap">
+                            <p className="leading-[28px]">Natural spring water</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="content-stretch flex flex-col items-start relative shrink-0">
+                        <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
+                          <p className="leading-[28px]">1800 AMD</p>
                         </div>
                       </div>
                     </div>
-                    <div className="content-stretch flex flex-col items-start relative shrink-0">
-                      <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
-                        <p className="leading-[28px]">247 AMD</p>
+                    <div className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full">
+                      <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
+                        <p className="leading-[24px]">Add to Cart</p>
                       </div>
                     </div>
                   </div>
-                  <div className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full">
-                    <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
-                      <p className="leading-[24px]">Add to Cart</p>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            </div>
-            
-            {/* Product 3 - Kids 0.5L */}
-            <div className="absolute bg-[rgba(255,255,255,0)] inset-[-12px_1013.34px_12px_0] rounded-[24px]">
-              <div className="absolute h-[714px] left-[9px] right-[9px] top-0">
-                <div className="absolute h-[508px] left-[137px] top-[53px] w-[182px]">
-                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <img alt="Product Kids 0.5L" className="absolute h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%]" src={img3} />
-                  </div>
-                </div>
-                <div className="absolute content-stretch flex h-[44px] items-end justify-between left-[16px] top-[600px] w-[424.66px]">
-                  <div className="content-stretch flex flex-col items-start relative shrink-0">
-                    <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                      <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white whitespace-nowrap">
-                        <p className="leading-[28px]">Natural Spring Water for kids</p>
-                      </div>
-                    </div>
-                    <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                      <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[12px] tracking-[1.2px] uppercase whitespace-nowrap">
-                        <p className="leading-[16px]">0.5L</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="content-stretch flex flex-col items-start relative shrink-0">
-                    <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
-                      <p className="leading-[28px]">168 AMD</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center left-[16px] py-[12px] rounded-[34px] top-[660px] w-[424.66px]">
-                  <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
-                    <p className="leading-[24px]">Add to Cart</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
             
             {/* Navigation Arrows */}
             <div className="absolute content-stretch flex h-[41px] items-center justify-between left-[calc(50%-0.5px)] top-[295px] translate-x-[-50%] w-[1621px]">
