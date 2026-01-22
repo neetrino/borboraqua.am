@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { figmaImages } from '../config/figma-images';
 import { getImageOverlayStyles, getOverlayDivStyles } from '../config/figma-image-overlays';
 import { apiClient } from '../lib/api-client';
 import { formatPrice, getStoredCurrency } from '../lib/currency';
 import { getStoredLanguage } from '../lib/language';
+import { useAuth } from '../lib/auth/AuthContext';
+import { CartIcon } from '../components/icons/CartIcon';
 
 // Figma MCP Image URLs - Updated from latest Figma design (2025-01-16)
 const imgBorborAguaLogoColorB2024Colored1 = "https://www.figma.com/api/mcp/asset/b106fddf-ddb7-4708-ad7a-7cb2873cb7c9";
@@ -88,9 +91,26 @@ interface ProductsResponse {
 }
 
 export default function HomePage() {
+  const router = useRouter();
+  const { isLoggedIn } = useAuth();
+  
   // State for featured products
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set());
+  const [carouselIndex, setCarouselIndex] = useState(0);
+
+  // Debug: Log carousel index changes
+  useEffect(() => {
+    console.log('🔄 [CAROUSEL] Index changed to:', carouselIndex, 'Total products:', featuredProducts.length);
+    console.log('🔄 [CAROUSEL] Showing products:', featuredProducts.slice(carouselIndex, carouselIndex + 3).map(p => p.title));
+  }, [carouselIndex, featuredProducts]);
+  
+  // State for header navigation
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchModalRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch featured products from backend
   useEffect(() => {
@@ -102,7 +122,7 @@ export default function HomePage() {
         const language = getStoredLanguage();
         const params: Record<string, string> = {
           page: '1',
-          limit: '3', // Get 3 products for featured section
+          limit: '9', // Get 9 products for carousel
           lang: language,
           filter: 'featured', // Try to get featured products
         };
@@ -113,20 +133,20 @@ export default function HomePage() {
 
         console.log(`✅ [HOMEPAGE] Loaded ${response.data.length} featured products`);
         
-        // If we got less than 3 products, try without filter to get any products
-        if (response.data.length < 3) {
-          console.log('⚠️ [HOMEPAGE] Less than 3 featured products, fetching any products...');
+        // If we got less than 9 products, try without filter to get any products
+        if (response.data.length < 9) {
+          console.log('⚠️ [HOMEPAGE] Less than 9 featured products, fetching any products...');
           const fallbackParams: Record<string, string> = {
             page: '1',
-            limit: '3',
+            limit: '9',
             lang: language,
           };
           const fallbackResponse = await apiClient.get<ProductsResponse>('/api/v1/products', {
             params: fallbackParams,
           });
-          setFeaturedProducts(fallbackResponse.data.slice(0, 3));
+          setFeaturedProducts(fallbackResponse.data.slice(0, 9));
         } else {
-          setFeaturedProducts(response.data.slice(0, 3));
+          setFeaturedProducts(response.data.slice(0, 9));
         }
       } catch (err: any) {
         console.error('❌ [HOMEPAGE] Error fetching featured products:', err);
@@ -138,6 +158,185 @@ export default function HomePage() {
 
     fetchFeaturedProducts();
   }, []);
+
+  // Handle click outside for search modal
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchModalRef.current && !searchModalRef.current.contains(event.target as Node)) {
+        setShowSearchModal(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Focus search input when modal opens
+  useEffect(() => {
+    if (showSearchModal && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [showSearchModal]);
+
+  // Close search modal on ESC key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showSearchModal) {
+        setShowSearchModal(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [showSearchModal]);
+
+  /**
+   * Handle search
+   */
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const query = searchQuery.trim();
+    const params = new URLSearchParams();
+    
+    if (query) {
+      params.set('search', query);
+    }
+    
+    setShowSearchModal(false);
+    const queryString = params.toString();
+    router.push(queryString ? `/products?${queryString}` : '/products');
+  };
+
+  /**
+   * Handle carousel navigation
+   */
+  const handlePreviousProducts = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    console.log('🔄 [CAROUSEL] Previous clicked, current index:', carouselIndex);
+    setCarouselIndex((prevIndex) => {
+      const newIndex = prevIndex - 3;
+      const totalProducts = featuredProducts.length;
+      console.log('🔄 [CAROUSEL] Previous - prevIndex:', prevIndex, 'newIndex:', newIndex, 'totalProducts:', totalProducts);
+      // If we go below 0, loop to the end
+      if (newIndex < 0) {
+        const lastGroupStart = Math.floor((totalProducts - 1) / 3) * 3;
+        console.log('🔄 [CAROUSEL] Looping to end, lastGroupStart:', lastGroupStart);
+        return lastGroupStart;
+      }
+      return newIndex;
+    });
+  };
+
+  const handleNextProducts = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    console.log('🔄 [CAROUSEL] Next clicked, current index:', carouselIndex);
+    setCarouselIndex((prevIndex) => {
+      const newIndex = prevIndex + 3;
+      const totalProducts = featuredProducts.length;
+      console.log('🔄 [CAROUSEL] Next - prevIndex:', prevIndex, 'newIndex:', newIndex, 'totalProducts:', totalProducts);
+      // If we exceed the total, loop back to start
+      if (newIndex >= totalProducts) {
+        console.log('🔄 [CAROUSEL] Looping to start');
+        return 0;
+      }
+      return newIndex;
+    });
+  };
+
+  /**
+   * Handle adding product to cart
+   */
+  const handleAddToCart = async (product: Product) => {
+    if (!product.inStock) {
+      return;
+    }
+
+    // If user is not logged in, redirect to login
+    if (!isLoggedIn) {
+      router.push(`/login?redirect=/`);
+      return;
+    }
+
+    setAddingToCart(prev => new Set(prev).add(product.id));
+
+    try {
+      // Get product details to get variant ID
+      interface ProductDetails {
+        id: string;
+        slug: string;
+        variants?: Array<{
+          id: string;
+          sku: string;
+          price: number;
+          stock: number;
+          available: boolean;
+        }>;
+      }
+
+      // Encode slug to handle special characters
+      const encodedSlug = encodeURIComponent(product.slug.trim());
+      const productDetails = await apiClient.get<ProductDetails>(`/api/v1/products/${encodedSlug}`);
+
+      if (!productDetails.variants || productDetails.variants.length === 0) {
+        alert('No variants available');
+        return;
+      }
+
+      const variantId = productDetails.variants[0].id;
+      
+      await apiClient.post(
+        '/api/v1/cart/items',
+        {
+          productId: product.id,
+          variantId: variantId,
+          quantity: 1,
+        }
+      );
+
+      // Trigger cart update event
+      window.dispatchEvent(new Event('cart-updated'));
+      console.log('✅ [HOMEPAGE] Product added to cart:', product.title);
+    } catch (error: any) {
+      console.error('❌ [HOMEPAGE] Error adding to cart:', error);
+      
+      // Check if error is about product not found
+      if (error?.message?.includes('does not exist') || error?.message?.includes('404') || error?.status === 404) {
+        alert('Product not found');
+        return;
+      }
+      
+      // Check if error is about insufficient stock
+      if (error.response?.data?.detail?.includes('No more stock available') || 
+          error.response?.data?.detail?.includes('exceeds available stock') ||
+          error.response?.data?.title === 'Insufficient stock') {
+        alert('No more stock available');
+        return;
+      }
+      
+      // If error is about authorization, redirect to login
+      if (error.message?.includes('401') || error.message?.includes('Unauthorized') || error?.status === 401) {
+        router.push(`/login?redirect=/`);
+      } else {
+        alert('Failed to add product to cart. Please try again.');
+      }
+    } finally {
+      setAddingToCart(prev => {
+        const next = new Set(prev);
+        next.delete(product.id);
+        return next;
+      });
+    }
+  };
 
   // Footer is at top-[6061px] with h-[576px], so total height = 6061 + 576 = 6637px
   // Using exact pixel height from Figma, no viewport sizing, no scaling
@@ -155,35 +354,58 @@ export default function HomePage() {
       <div className="fixed bg-[rgba(255,255,255,0.04)] backdrop-blur-[10px] content-stretch flex flex-col h-[73px] items-center justify-center left-1/2 px-[38px] py-[16px] rounded-[70px] top-[64px] translate-x-[-50%] w-[1668px] z-50">
         <div className="content-stretch flex gap-[320px] h-[56px] items-center justify-center relative shrink-0">
           {/* Logo */}
-          <div className="h-[31px] relative shrink-0 w-[101px]">
+          <div 
+            onClick={() => router.push('/')}
+            className="h-[31px] relative shrink-0 w-[101px] cursor-pointer"
+          >
             <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgBorborAguaLogoColorB2024Colored1} />
           </div>
           
           {/* Navigation Menu */}
           <div className="content-stretch flex font-['Inter:Bold',sans-serif] font-bold gap-[74px] items-end justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white uppercase whitespace-nowrap">
-            <div className="flex flex-col justify-center relative shrink-0">
+            <div 
+              onClick={() => router.push('/')}
+              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+            >
               <p className="leading-[20px]">HOME</p>
             </div>
-            <div className="flex flex-col justify-center relative shrink-0">
+            <div 
+              onClick={() => router.push('/products')}
+              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+            >
               <p className="leading-[20px]">SHOP</p>
             </div>
-            <div className="flex flex-col justify-center relative shrink-0">
+            <div 
+              onClick={() => router.push('/about')}
+              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+            >
               <p className="leading-[20px]">ABOUT US</p>
             </div>
-            <div className="flex flex-col justify-center relative shrink-0">
+            <div 
+              onClick={() => router.push('/contact')}
+              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+            >
               <p className="leading-[20px]">CONTACT US</p>
             </div>
-            <div className="flex flex-col justify-center relative shrink-0">
+            <div 
+              onClick={() => router.push('/blog')}
+              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+            >
               <p className="leading-[20px]">BLOG</p>
             </div>
           </div>
           
           {/* Search Icon */}
-          <div className="h-[21px] relative shrink-0 w-[151.051px]">
+          <div 
+            onClick={() => setShowSearchModal(true)}
+            className="h-[21px] relative shrink-0 w-[151.051px] cursor-pointer"
+          >
             <div className="absolute inset-[-2.38%_0]">
               <img alt="Search" className="block max-w-none size-full" src={imgFrame3292} />
             </div>
           </div>
+          
+      
         </div>
       </div>
 
@@ -193,6 +415,7 @@ export default function HomePage() {
       {/* Hero Section Decorative Group */}
       <div className="absolute inset-[3.74%_14.27%_90%_14.64%]">
         <img alt="Decorative Group" className="block max-w-none size-full" src={imgGroup2105} />
+  
       </div>
 
       {/* Hero Section - Main Content */}
@@ -229,12 +452,18 @@ export default function HomePage() {
           
           {/* Buttons */}
           <div className="content-center flex flex-wrap gap-[0px_16px] h-[76px] items-center justify-center pt-[16px] relative shrink-0 w-full">
-            <div className="bg-[#1ac0fd] content-stretch flex flex-col h-[60px] items-center justify-center pl-[63px] pr-[61px] py-[16px] relative rounded-[9999px] shrink-0 w-[185px]">
+            <div 
+              onClick={() => router.push('/products')}
+              className="bg-[#1ac0fd] content-stretch flex flex-col h-[60px] items-center justify-center pl-[63px] pr-[61px] py-[16px] relative rounded-[9999px] shrink-0 w-[185px] cursor-pointer hover:bg-[#00b8e6] transition-colors"
+            >
               <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white whitespace-nowrap">
                 <p className="leading-[24px]">Shop Now</p>
               </div>
             </div>
-            <div className="bg-[rgba(0,0,0,0)] content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] py-[16px] relative rounded-[9999px] shrink-0">
+            <div 
+              onClick={() => router.push('/about')}
+              className="bg-[rgba(0,0,0,0)] content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] py-[16px] relative rounded-[9999px] shrink-0 cursor-pointer hover:bg-white/10 transition-colors"
+            >
               <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold h-[19px] justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-[89px]">
                 <p className="leading-[24px] whitespace-pre-wrap">Learn More</p>
               </div>
@@ -356,24 +585,33 @@ export default function HomePage() {
                 </div>
               </>
             ) : featuredProducts.length > 0 ? (
-              // Render actual products
-              featuredProducts.map((product, index) => {
+              // Render actual products - show 3 at a time based on carouselIndex
+              (() => {
+                const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 3);
+                console.log('🔄 [CAROUSEL] Rendering products - carouselIndex:', carouselIndex, 'visibleProducts:', visibleProducts.length, 'total:', featuredProducts.length);
+                return visibleProducts.map((product, relativeIndex) => {
+                  const index = carouselIndex + relativeIndex;
                 const currency = getStoredCurrency();
                 const formattedPrice = formatPrice(product.price, currency);
                 
-                // Product positioning based on index (matching original layout)
+                // Product positioning based on relativeIndex (matching original layout)
+                // Always use relativeIndex (0, 1, 2) for the 3 visible products
                 const positions = [
                   { className: "inset-[-12px_-11.66px_12px_1025px]", imageClass: "h-[563px] left-[98.83px] top-[12.91px] w-[277px]", imageStyle: "h-[111.44%] left-[-62.35%] max-w-none top-0 w-[226.62%]", contentClass: "left-[9px] pb-[16px] px-[16px] right-[9px] top-[599.91px]" },
                   { className: "inset-[-12px_500.33px_12px_513px]", imageClass: "h-[564px] w-[205px]", imageStyle: "h-[100.18%] left-[-87.8%] max-w-none top-[-0.09%] w-[275.61%]", contentClass: "pb-[16px] px-[16px]" },
                   { className: "inset-[-12px_1013.34px_12px_0]", imageClass: "h-[508px] left-[137px] top-[53px] w-[182px]", imageStyle: "h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%]", contentClass: "left-[16px] top-[600px] w-[424.66px]" }
                 ];
                 
-                const pos = positions[index] || positions[0];
-                const isSecondProduct = index === 1;
-                const isThirdProduct = index === 2;
+                const pos = positions[relativeIndex] || positions[0];
+                const isSecondProduct = relativeIndex === 1;
+                const isThirdProduct = relativeIndex === 2;
                 
                 return (
-                  <div key={product.id} className={`absolute bg-[rgba(255,255,255,0)] ${pos.className} ${isSecondProduct ? 'content-stretch flex flex-col gap-[24px] items-center justify-center p-[8px]' : ''} rounded-[24px]`}>
+                  <div 
+                    key={product.id} 
+                    onClick={() => router.push(`/products/${product.slug}`)}
+                    className={`absolute bg-[rgba(255,255,255,0)] ${pos.className} ${isSecondProduct ? 'content-stretch flex flex-col gap-[24px] items-center justify-center p-[8px]' : ''} rounded-[24px] cursor-pointer`}
+                  >
                     {isThirdProduct ? (
                       <div className="absolute h-[714px] left-[9px] right-[9px] top-0">
                         <div className={`absolute ${pos.imageClass}`}>
@@ -403,11 +641,20 @@ export default function HomePage() {
                             </div>
                           </div>
                         </div>
-                        <div className="absolute bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center left-[16px] py-[12px] rounded-[34px] top-[660px] w-[424.66px]">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToCart(product);
+                          }}
+                          disabled={!product.inStock || addingToCart.has(product.id)}
+                          className="absolute bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center left-[16px] py-[12px] rounded-[34px] top-[660px] w-[424.66px] hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                        >
                           <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
-                            <p className="leading-[24px]">Add to Cart</p>
+                            <p className="leading-[24px]">
+                              {addingToCart.has(product.id) ? 'Adding...' : 'Add to Cart'}
+                            </p>
                           </div>
-                        </div>
+                        </button>
                       </div>
                     ) : isSecondProduct ? (
                       <>
@@ -440,11 +687,20 @@ export default function HomePage() {
                                 </div>
                               </div>
                             </div>
-                            <div className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToCart(product);
+                              }}
+                              disabled={!product.inStock || addingToCart.has(product.id)}
+                              className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            >
                               <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
-                                <p className="leading-[24px]">Add to Cart</p>
+                                <p className="leading-[24px]">
+                                  {addingToCart.has(product.id) ? 'Adding...' : 'Add to Cart'}
+                                </p>
                               </div>
-                            </div>
+                            </button>
                           </div>
                         </div>
                       </>
@@ -478,17 +734,27 @@ export default function HomePage() {
                               </div>
                             </div>
                           </div>
-                          <div className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddToCart(product);
+                            }}
+                            disabled={!product.inStock || addingToCart.has(product.id)}
+                            className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          >
                             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
-                              <p className="leading-[24px]">Add to Cart</p>
+                              <p className="leading-[24px]">
+                                {addingToCart.has(product.id) ? 'Adding...' : 'Add to Cart'}
+                              </p>
                             </div>
-                          </div>
+                          </button>
                         </div>
                       </>
                     )}
                   </div>
                 );
-              })
+              });
+              })()
             ) : (
               // Fallback to original hardcoded products if no products loaded
               <>
@@ -523,27 +789,22 @@ export default function HomePage() {
               </>
             )}
             
-            {/* Navigation Arrows */}
-            <div className="absolute content-stretch flex h-[41px] items-center justify-between left-[calc(50%-0.5px)] top-[295px] translate-x-[-50%] w-[1621px]">
-              <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
-                <div className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid col-1 content-stretch flex flex-col items-center justify-center ml-0 mt-0 px-[8.5px] py-[6.5px] relative rounded-[9999px] row-1 size-[56px]">
-                  <div className="relative shrink-0">
-                    <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
-                      <div className="flex items-center justify-center relative shrink-0">
-                        <div className="flex-none scale-y-[-100%]">
-                          <div className="h-[28px] relative w-[24.02px]">
-                            <img alt="Arrow" className="block max-w-none size-full" src={imgIcon} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+            {/* Navigation Arrows - Only show if we have more than 3 products */}
+            {featuredProducts.length > 3 && (
+              <div className="absolute content-stretch flex h-[41px] items-center justify-between left-[calc(50%-0.5px)] top-[295px] translate-x-[-50%] w-[1621px]">
+                {/* Debug indicator - remove in production */}
+                <div className="absolute left-1/2 top-[-30px] translate-x-[-50%] text-white text-xs bg-black/50 px-2 py-1 rounded z-20">
+                  Index: {carouselIndex} / Total: {featuredProducts.length}
                 </div>
-              </div>
-              <div className="flex items-center justify-center relative shrink-0">
-                <div className="flex-none rotate-[180deg] scale-y-[-100%]">
-                  <div className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch flex flex-col items-center justify-center px-[8.5px] py-[6.5px] relative rounded-[9999px] size-[56px]">
-                    <div className="relative shrink-0">
+                <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
+                  <div 
+                    onClick={(e) => {
+                      console.log('🔄 [CAROUSEL] Previous button clicked!');
+                      handlePreviousProducts(e);
+                    }}
+                    className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid col-1 content-stretch flex flex-col items-center justify-center ml-0 mt-0 px-[8.5px] py-[6.5px] relative rounded-[9999px] row-1 size-[56px] cursor-pointer hover:bg-white/10 transition-colors z-10"
+                  >
+                    <div className="relative shrink-0 pointer-events-none">
                       <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
                         <div className="flex items-center justify-center relative shrink-0">
                           <div className="flex-none scale-y-[-100%]">
@@ -556,8 +817,31 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
+                <div className="flex items-center justify-center relative shrink-0">
+                  <div className="flex-none rotate-[180deg] scale-y-[-100%]">
+                    <div 
+                      onClick={(e) => {
+                        console.log('🔄 [CAROUSEL] Next button clicked!');
+                        handleNextProducts(e);
+                      }}
+                      className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch flex flex-col items-center justify-center px-[8.5px] py-[6.5px] relative rounded-[9999px] size-[56px] cursor-pointer hover:bg-white/10 transition-colors z-10"
+                    >
+                      <div className="relative shrink-0 pointer-events-none">
+                        <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
+                          <div className="flex items-center justify-center relative shrink-0">
+                            <div className="flex-none scale-y-[-100%]">
+                              <div className="h-[28px] relative w-[24.02px]">
+                                <img alt="Arrow" className="block max-w-none size-full" src={imgIcon} />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
           
           {/* Pagination Dots */}
@@ -569,7 +853,10 @@ export default function HomePage() {
           
           {/* View All Products Button */}
           <div className="absolute content-stretch flex flex-col items-center left-[24px] right-[24px] top-[976px]">
-            <div className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] items-center px-[34px] py-[12px] relative rounded-[9999px] shrink-0">
+            <div 
+              onClick={() => router.push('/products')}
+              className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] items-center px-[34px] py-[12px] relative rounded-[9999px] shrink-0 cursor-pointer hover:border-[#00d1ff] hover:bg-[#00d1ff]/5 transition-all"
+            >
               <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#0f172a] text-[16px] text-center whitespace-nowrap">
                 <p className="leading-[24px]">View All Products</p>
               </div>
@@ -919,27 +1206,39 @@ export default function HomePage() {
                   </div>
                   <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-full">
                     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                      <div className="content-stretch flex items-start relative shrink-0 w-full">
+                      <div 
+                        onClick={() => router.push('/privacy')}
+                        className="content-stretch flex items-start relative shrink-0 w-full cursor-pointer hover:opacity-80 transition-opacity"
+                      >
                         <div className="flex flex-[1_0_0] flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] min-h-px min-w-px not-italic relative text-[16px] text-white">
                           <p className="leading-[24px] whitespace-pre-wrap">Privacy Policy</p>
                         </div>
                       </div>
                     </div>
                     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                      <div className="content-stretch flex items-start relative shrink-0 w-full">
+                      <div 
+                        onClick={() => router.push('/terms')}
+                        className="content-stretch flex items-start relative shrink-0 w-full cursor-pointer hover:opacity-80 transition-opacity"
+                      >
                         <div className="flex flex-[1_0_0] flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] min-h-px min-w-px not-italic relative text-[16px] text-white">
                           <p className="leading-[24px] whitespace-pre-wrap">Terms & Conditions</p>
                         </div>
                       </div>
                     </div>
                     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                      <div className="content-stretch flex items-start relative shrink-0 w-full">
+                      <div 
+                        onClick={() => router.push('/delivery-terms')}
+                        className="content-stretch flex items-start relative shrink-0 w-full cursor-pointer hover:opacity-80 transition-opacity"
+                      >
                         <div className="flex flex-[1_0_0] flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] min-h-px min-w-px not-italic relative text-[16px] text-white">
                           <p className="leading-[24px] whitespace-pre-wrap">Delivery Terms</p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-full">
+                    <div 
+                      onClick={() => router.push('/refund-policy')}
+                      className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-full cursor-pointer hover:opacity-80 transition-opacity"
+                    >
                       <p className="leading-[24px] whitespace-pre-wrap">Refund Policy</p>
                     </div>
                   </div>
@@ -954,21 +1253,30 @@ export default function HomePage() {
                   </div>
                   <div className="content-stretch flex flex-col gap-[16px] items-start relative shrink-0 w-full">
                     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                      <div className="content-stretch flex items-start relative shrink-0 w-full">
+                      <div 
+                        onClick={() => router.push('/about')}
+                        className="content-stretch flex items-start relative shrink-0 w-full cursor-pointer hover:opacity-80 transition-opacity"
+                      >
                         <div className="flex flex-[1_0_0] flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] min-h-px min-w-px not-italic relative text-[16px] text-white">
                           <p className="leading-[24px] whitespace-pre-wrap">About Us</p>
                         </div>
                       </div>
                     </div>
                     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                      <div className="content-stretch flex items-start relative shrink-0 w-full">
+                      <div 
+                        onClick={() => router.push('/contact')}
+                        className="content-stretch flex items-start relative shrink-0 w-full cursor-pointer hover:opacity-80 transition-opacity"
+                      >
                         <div className="flex flex-[1_0_0] flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] min-h-px min-w-px not-italic relative text-[16px] text-white">
                           <p className="leading-[24px] whitespace-pre-wrap">Contact</p>
                         </div>
                       </div>
                     </div>
                     <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                      <div className="content-stretch flex items-start relative shrink-0 w-full">
+                      <div 
+                        onClick={() => router.push('/products')}
+                        className="content-stretch flex items-start relative shrink-0 w-full cursor-pointer hover:opacity-80 transition-opacity"
+                      >
                         <div className="flex flex-[1_0_0] flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] min-h-px min-w-px not-italic relative text-[16px] text-white">
                           <p className="leading-[24px] whitespace-pre-wrap">Shop</p>
                         </div>
@@ -1267,6 +1575,38 @@ export default function HomePage() {
       <div className="absolute bottom-[17.71%] left-1/2 top-[80.63%] translate-x-[-50%] w-[78px]">
         <img alt="Vector" className="block max-w-none size-full" src={imgVector} />
       </div>
+
+      {/* Search Modal */}
+      {showSearchModal && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] flex items-start justify-center pt-20 px-4">
+          <div 
+            ref={searchModalRef}
+            className="w-full max-w-2xl bg-white rounded-xl shadow-2xl border border-gray-200/80 p-4 animate-in fade-in slide-in-from-top-2 duration-200"
+          >
+            <form onSubmit={handleSearch} className="flex items-center gap-2">
+              {/* Search Input */}
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="flex-1 h-11 px-4 border-2 border-gray-200 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent text-sm placeholder:text-gray-400"
+              />
+              
+              {/* Search Button */}
+              <button
+                type="submit"
+                className="h-11 px-6 bg-gray-900 text-white rounded-r-lg hover:bg-gray-800 transition-colors flex items-center justify-center"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
       
     </div>
   );

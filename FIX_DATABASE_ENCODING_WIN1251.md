@@ -102,3 +102,4 @@ A: Կախված է բազայի չափից: Փոքր բազաների համար
 1. `npm run check:db-encoding` - ստուգել կոդավորումը
 2. `npm run migrate:db-to-utf8` - ստանալ migration հրահանգներ
 
+

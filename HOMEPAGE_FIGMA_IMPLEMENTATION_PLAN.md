@@ -349,3 +349,4 @@ Home page-ը պետք է վերակառուցվի 100% pixel-perfect Figma desig
 - Desktop-only layout (ոչ responsive)
 - Եթե որևէ արժեք Figma-ում չկա → գրել TODO comment
 
+

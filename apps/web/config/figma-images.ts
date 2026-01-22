@@ -103,3 +103,4 @@ export const figmaImages = {
   img18: `${basePath}/img-18.png`,
 };
 
+
