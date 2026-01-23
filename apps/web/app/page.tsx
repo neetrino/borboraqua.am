@@ -13,8 +13,8 @@ import { CartIcon } from '../components/icons/CartIcon';
 
 // Figma MCP Image URLs - Updated from latest Figma design (2025-01-16)
 const imgBorborAguaLogoColorB2024Colored1 = "https://www.figma.com/api/mcp/asset/b106fddf-ddb7-4708-ad7a-7cb2873cb7c9";
-const imgDanielSinocaAancLsb0SU0Unsplash1 = "https://www.figma.com/api/mcp/asset/4d0bd127-e4d8-45e9-9ace-16bff1810201";
-const imgDanielSinocaAancLsb0SU0Unsplash2 = "https://www.figma.com/api/mcp/asset/1167763f-c5b0-46ec-87f2-01b536b28b93";
+const imgDanielSinocaAancLsb0SU0Unsplash1 = "https://www.figma.com/api/mcp/asset/4871f446-450c-4331-8d45-fc09cffddcdf";
+const imgDanielSinocaAancLsb0SU0Unsplash2 = "https://www.figma.com/api/mcp/asset/bc03b396-c7f6-4c82-8e98-d5787b0a9f5f";
 const img = "https://www.figma.com/api/mcp/asset/9bb170f3-78f7-41dc-a30d-f7aba37fbea1";
 const img1 = "https://www.figma.com/api/mcp/asset/3505a6b7-91e7-402f-a08d-2db92f4d6d86";
 const img2 = "https://www.figma.com/api/mcp/asset/d2d605c5-1270-4604-96ed-7891bee71207";
@@ -34,7 +34,7 @@ const imgShape2 = "https://www.figma.com/api/mcp/asset/90f42685-0444-4f5f-8e9d-3
 const imgEllipse42 = "https://www.figma.com/api/mcp/asset/5e6292ef-d0f8-47e3-828f-4727614e7e4d";
 const imgShape3 = "https://www.figma.com/api/mcp/asset/379c6514-3b13-4734-a155-88259968a700";
 const imgEllipse43 = "https://www.figma.com/api/mcp/asset/0259f224-0c94-469b-af5c-b1f43dcfe496";
-const imgGroup2105 = "https://www.figma.com/api/mcp/asset/95389e03-be84-4f80-9a6e-4be4a5819d74";
+const imgGroup2105 = "https://www.figma.com/api/mcp/asset/41b6e81d-4948-41fd-8e45-f0771ba49400";
 const imgIcon = "https://www.figma.com/api/mcp/asset/1f3f805e-d342-492d-b62f-0ee10262d176";
 const img4 = "https://www.figma.com/api/mcp/asset/3790c683-0678-49d5-9066-e1597763c958";
 const imgIcon1 = "https://www.figma.com/api/mcp/asset/308e9fce-055c-4fe7-b4ec-d6e5ac91d1ef";
@@ -59,13 +59,14 @@ const img10 = "https://www.figma.com/api/mcp/asset/7baa3994-4292-4f4e-90e4-fe1cc
 const img11 = "https://www.figma.com/api/mcp/asset/633f76bb-f52a-4959-b35b-401335056328";
 const img12 = "https://www.figma.com/api/mcp/asset/27e6bac6-d566-4b22-b028-292442439ef7";
 const img13 = "https://www.figma.com/api/mcp/asset/45f9a2ad-6701-4905-a022-65619c9caa48";
+const img13Decorative = "https://www.figma.com/api/mcp/asset/cc815d32-3501-4133-9848-3d322d6a7db8";
 const img14 = "https://www.figma.com/api/mcp/asset/74737aa6-9360-47e1-979e-42223e542b5e";
 const img15 = "https://www.figma.com/api/mcp/asset/babaf6e8-f74e-4a66-ab54-0fb95309f75b";
 const img16 = "https://www.figma.com/api/mcp/asset/1ef0b957-39c5-4b9d-9afd-b90d72ff4570";
 const img18 = "https://www.figma.com/api/mcp/asset/65825bce-8684-4e63-8d01-3dca9111914a";
 // Image 5 and Image 11 for decorative bubbles with specific colors from Figma
-const imgImage5 = "https://www.figma.com/api/mcp/asset/7b7935ae-703c-43dc-a360-739aa1ec8d91";
-const imgImage11 = "https://www.figma.com/api/mcp/asset/d72de48b-9390-4c6d-9bf5-10f0ad7b4699";
+const imgImage5 = "https://www.figma.com/api/mcp/asset/7de49827-29c4-470d-a625-3f8a0d6a1a61";
+const imgImage11 = "https://www.figma.com/api/mcp/asset/ea475088-694e-4438-9b36-cd352182705b";
 
 // Product interface for featured products
 interface Product {
@@ -443,6 +444,19 @@ export default function HomePage() {
       <div className="absolute inset-[3.74%_14.27%_90%_14.64%]">
         <img alt="Decorative Group" className="block max-w-none size-full figma-fade-in" src={imgGroup2105} />
   
+      </div>
+
+      {/* Image 13 - Decorative Element */}
+      <div className="absolute flex items-center justify-center left-[1372px] top-[470px] size-[806px]">
+        <div className="relative rounded-[320px] size-full">
+          <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+          <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
+              <img alt="Image 13" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img13Decorative} />
+            </div>
+          </div>
+          <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
+        </div>
       </div>
 
       {/* Hero Section - Main Content */}
@@ -1372,116 +1386,110 @@ export default function HomePage() {
       {/* Additional Decorative Elements - Hero Section Bubbles */}
       <div className="absolute flex inset-[44.44%_66.93%_43.57%_-8.49%] items-center justify-center">
         <div className="flex-none rotate-[47.15deg] size-[564.622px] figma-float">
-          <div className="relative size-full">
-            <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[270px]" />
-            <div className="absolute inset-0 mix-blend-lighten">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="relative rounded-[320px] size-full">
+            <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+            <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+              <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
                 <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
               </div>
             </div>
-            <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[250px]" />
+            <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
           </div>
         </div>
       </div>
       
-      <div className="absolute flex inset-[19.53%_72.19%_78.02%_19.32%] items-center justify-center">
-        {/* Black Diamond Frame - rotated 45 degrees with transparency to show background */}
-        <div className="absolute bg-black rotate-45 size-[163.015px] z-0 mix-blend-darken" />
-        <div className="flex-none rotate-[129.49deg] size-[115.804px] relative z-10 figma-float-slow">
-          <div className="relative size-full">
-            <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[270px]" />
-            <div className="absolute inset-0 mix-blend-lighten">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={imgImage5} />
-              </div>
+      {/* Image 5 - Decorative Element */}
+      <div className="absolute flex items-center justify-center left-[534px] top-[1374px] size-[163px]">
+        <div className="relative rounded-[320px] size-full">
+          <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+          <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
+              <img alt="Image 5" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={imgImage5} />
             </div>
-            <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[250px]" />
           </div>
+          <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
         </div>
       </div>
       
-      <div className="absolute flex inset-[17.94%_16.51%_78.39%_70.78%] items-center justify-center">
-        {/* Black Diamond Frame - rotated 45 degrees with transparency to show background */}
-        <div className="absolute bg-black rotate-45 size-[294.675px] z-0 mix-blend-darken" />
-        <div className="flex-none rotate-[100.79deg] size-[208.675px] relative z-10 figma-float">
-          <div className="relative size-full">
-            <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[270px]" />
-            <div className="absolute inset-0 mix-blend-lighten">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={imgImage11} />
-              </div>
+      {/* Image 11 - Decorative Element */}
+      <div className="absolute flex items-center justify-center left-[1603px] top-[1233px] size-[244px]">
+        <div className="relative rounded-[320px] size-full">
+          <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+          <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
+              <img alt="Image 11" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={imgImage11} />
             </div>
-            <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[250px]" />
           </div>
+          <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
         </div>
       </div>
       
       <div className="absolute flex inset-[20.54%_16.59%_77.5%_76.61%] items-center justify-center">
         <div className="flex-none rotate-[47.15deg] size-[92.381px] figma-float-slow">
-          <div className="relative size-full">
-            <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[270px]" />
-            <div className="absolute inset-0 mix-blend-lighten">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="relative rounded-[320px] size-full">
+            <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+            <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+              <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
                 <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
               </div>
             </div>
-            <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[250px]" />
+            <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
           </div>
         </div>
       </div>
       
       <div className="absolute flex inset-[39.38%_-3.52%_50.88%_69.74%] items-center justify-center">
         <div className="flex-none rotate-[47.15deg] size-[459px] figma-float">
-          <div className="relative size-full">
-            <div className="absolute backdrop-blur-[4px] bg-[rgba(255,255,255,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[270px]" />
-            <div className="absolute inset-0 mix-blend-lighten">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="relative rounded-[320px] size-full">
+            <div className="absolute backdrop-blur-[4px] bg-[rgba(255,255,255,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+            <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+              <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
                 <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
               </div>
             </div>
-            <div className="absolute bg-[rgba(0,132,255,0)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[250px]" />
+            <div className="absolute bg-[rgba(0,132,255,0)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
           </div>
         </div>
       </div>
       
       <div className="absolute flex inset-[43.7%_-7.39%_49.82%_84.95%] items-center justify-center">
         <div className="flex-none rotate-[47.15deg] size-[304.957px] figma-float-slow">
-          <div className="relative size-full">
-            <div className="absolute backdrop-blur-[4px] bg-[rgba(255,255,255,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[270px]" />
-            <div className="absolute inset-0 mix-blend-lighten">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="relative rounded-[320px] size-full">
+            <div className="absolute backdrop-blur-[4px] bg-[rgba(255,255,255,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+            <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+              <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
                 <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
               </div>
             </div>
-            <div className="absolute bg-[rgba(0,132,255,0)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[250px]" />
+            <div className="absolute bg-[rgba(0,132,255,0)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
           </div>
         </div>
       </div>
       
       <div className="absolute flex inset-[50.45%_-11.49%_39.8%_77.71%] items-center justify-center">
         <div className="flex-none rotate-[47.15deg] size-[459px] figma-float">
-          <div className="relative size-full">
-            <div className="absolute backdrop-blur-[4px] bg-[rgba(255,255,255,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[270px]" />
-            <div className="absolute inset-0 mix-blend-lighten">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="relative rounded-[320px] size-full">
+            <div className="absolute backdrop-blur-[4px] bg-[rgba(255,255,255,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+            <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+              <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
                 <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
               </div>
             </div>
-            <div className="absolute bg-[rgba(255,255,255,0.23)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[250px]" />
+            <div className="absolute bg-[rgba(255,255,255,0.23)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
           </div>
         </div>
       </div>
       
       <div className="absolute flex inset-[55.45%_-1.7%_38.23%_79.79%] items-center justify-center">
         <div className="flex-none rotate-[47.15deg] size-[297.625px] figma-float-slow">
-          <div className="relative size-full">
-            <div className="absolute backdrop-blur-[4px] bg-[rgba(255,255,255,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[270px]" />
-            <div className="absolute inset-0 mix-blend-lighten">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="relative rounded-[320px] size-full">
+            <div className="absolute backdrop-blur-[4px] bg-[rgba(255,255,255,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+            <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+              <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
                 <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
               </div>
             </div>
-            <div className="absolute bg-[rgba(255,255,255,0.23)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[250px]" />
+            <div className="absolute bg-[rgba(255,255,255,0.23)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
           </div>
         </div>
       </div>
@@ -1489,28 +1497,28 @@ export default function HomePage() {
       {/* Featured Products Section Decorative Elements */}
       <div className="absolute flex inset-[-1.19%_72.03%_66.22%_6.56%] items-center justify-center">
         <div className="flex-none rotate-[47.15deg] size-[290.785px] figma-float">
-          <div className="relative size-full">
-            <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[270px]" />
-            <div className="absolute inset-0 mix-blend-lighten">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="relative rounded-[320px] size-full">
+            <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+            <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+              <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
                 <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
               </div>
             </div>
-            <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[250px]" />
+            <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
           </div>
         </div>
       </div>
       
       <div className="absolute flex inset-[-10.09%_-8.49%_55.65%_75.18%] items-center justify-center">
         <div className="flex-none rotate-[142.39deg] size-[456.082px] figma-float-slow">
-          <div className="relative size-full">
-            <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[270px]" />
-            <div className="absolute inset-0 mix-blend-lighten">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="relative rounded-[320px] size-full">
+            <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+            <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+              <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
                 <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
               </div>
             </div>
-            <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[250px]" />
+            <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
           </div>
         </div>
       </div>
