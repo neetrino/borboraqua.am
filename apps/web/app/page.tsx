@@ -133,11 +133,7 @@ export default function HomePage() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
-  // Debug: Log carousel index changes
-  useEffect(() => {
-    console.log('🔄 [CAROUSEL] Index changed to:', carouselIndex, 'Total products:', featuredProducts.length);
-    console.log('🔄 [CAROUSEL] Showing products:', featuredProducts.slice(carouselIndex, carouselIndex + 3).map(p => p.title));
-  }, [carouselIndex, featuredProducts]);
+  // Carousel index tracking (removed debug logs for production)
 
   // State for header navigation
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -277,23 +273,19 @@ export default function HomePage() {
   };
 
   /**
-   * Handle carousel navigation
+   * Handle carousel navigation - 3 modes: 0 (products 0-2), 3 (products 3-5), 6 (products 6-8)
    */
   const handlePreviousProducts = (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
-    console.log('🔄 [CAROUSEL] Previous clicked, current index:', carouselIndex);
     setCarouselIndex((prevIndex) => {
+      // Move to previous mode (3 products back)
       const newIndex = prevIndex - 3;
-      const totalProducts = featuredProducts.length;
-      console.log('🔄 [CAROUSEL] Previous - prevIndex:', prevIndex, 'newIndex:', newIndex, 'totalProducts:', totalProducts);
-      // If we go below 0, loop to the end
+      // If we go below 0, loop to the last mode (6 for products 6-8)
       if (newIndex < 0) {
-        const lastGroupStart = Math.floor((totalProducts - 1) / 3) * 3;
-        console.log('🔄 [CAROUSEL] Looping to end, lastGroupStart:', lastGroupStart);
-        return lastGroupStart;
+        return 6; // Last mode
       }
       return newIndex;
     });
@@ -304,15 +296,12 @@ export default function HomePage() {
       e.preventDefault();
       e.stopPropagation();
     }
-    console.log('🔄 [CAROUSEL] Next clicked, current index:', carouselIndex);
     setCarouselIndex((prevIndex) => {
+      // Move to next mode (3 products forward)
       const newIndex = prevIndex + 3;
-      const totalProducts = featuredProducts.length;
-      console.log('🔄 [CAROUSEL] Next - prevIndex:', prevIndex, 'newIndex:', newIndex, 'totalProducts:', totalProducts);
-      // If we exceed the total, loop back to start
-      if (newIndex >= totalProducts) {
-        console.log('🔄 [CAROUSEL] Looping to start');
-        return 0;
+      // If we exceed 6 (last mode), loop back to start (0)
+      if (newIndex > 6) {
+        return 0; // First mode
       }
       return newIndex;
     });
@@ -716,7 +705,6 @@ export default function HomePage() {
               // Render actual products - show 3 at a time based on carouselIndex
               (() => {
                 const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 3);
-                console.log('🔄 [CAROUSEL] Rendering products - carouselIndex:', carouselIndex, 'visibleProducts:', visibleProducts.length, 'total:', featuredProducts.length);
                 return visibleProducts.map((product, relativeIndex) => {
                   const index = carouselIndex + relativeIndex;
                   const currency = getStoredCurrency();
@@ -919,65 +907,104 @@ export default function HomePage() {
 
             {/* Navigation Arrows - Only show if we have more than 3 products */}
             {featuredProducts.length > 3 && (
-              <div className="absolute content-stretch flex h-[41px] items-center justify-between left-[calc(50%-0.5px)] top-[295px] translate-x-[-50%] w-[1621px]">
-                {/* Debug indicator - remove in production */}
-                <div className="absolute left-1/2 top-[-30px] translate-x-[-50%] text-white text-xs bg-black/50 px-2 py-1 rounded z-20">
-                  Index: {carouselIndex} / Total: {featuredProducts.length}
-                </div>
-                <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
-                  <div
-                    onClick={(e) => {
-                      console.log('🔄 [CAROUSEL] Previous button clicked!');
-                      handlePreviousProducts(e);
-                    }}
-                    className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid col-1 content-stretch flex flex-col items-center justify-center ml-0 mt-0 px-[8.5px] py-[6.5px] relative rounded-[9999px] row-1 size-[56px] cursor-pointer hover:bg-white/10 transition-colors z-10"
+              <div className="absolute content-stretch flex h-[41px] items-center justify-between left-[calc(50%-0.5px)] top-[295px] translate-x-[-50%] w-[1621px] z-20">
+                {/* Previous Button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handlePreviousProducts(e);
+                  }}
+                  className="bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] cursor-pointer hover:bg-white/20 hover:border-white/80 active:bg-white/30 active:scale-95 transition-all duration-200 z-10 group"
+                  aria-label="Previous products"
+                >
+                  <svg
+                    preserveAspectRatio="none"
+                    width="24.02"
+                    height="28"
+                    viewBox="0 0 24.02 28"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-[28px] w-[24.02px] transform scale-y-[-1] group-hover:scale-y-[-1.1] transition-transform duration-200"
                   >
-                    <div className="relative shrink-0 pointer-events-none">
-                      <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
-                        <div className="flex items-center justify-center relative shrink-0">
-                          <div className="flex-none scale-y-[-100%]">
-                            <div className="h-[28px] relative w-[24.02px]">
-                              <img alt="Arrow" className="block max-w-none size-full" src={imgIcon} />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-center relative shrink-0">
-                  <div className="flex-none rotate-[180deg] scale-y-[-100%]">
-                    <div
-                      onClick={(e) => {
-                        console.log('🔄 [CAROUSEL] Next button clicked!');
-                        handleNextProducts(e);
-                      }}
-                      className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch flex flex-col items-center justify-center px-[8.5px] py-[6.5px] relative rounded-[9999px] size-[56px] cursor-pointer hover:bg-white/10 transition-colors z-10"
-                    >
-                      <div className="relative shrink-0 pointer-events-none">
-                        <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
-                          <div className="flex items-center justify-center relative shrink-0">
-                            <div className="flex-none scale-y-[-100%]">
-                              <div className="h-[28px] relative w-[24.02px]">
-                                <img alt="Arrow" className="block max-w-none size-full" src={imgIcon} />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                    <path
+                      d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
+                      fill="white"
+                      className="group-hover:fill-[#00d1ff] transition-colors duration-200"
+                    />
+                  </svg>
+                </button>
+
+                {/* Next Button */}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleNextProducts(e);
+                  }}
+                  className="bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] cursor-pointer hover:bg-white/20 hover:border-white/80 active:bg-white/30 active:scale-95 transition-all duration-200 z-10 group"
+                  aria-label="Next products"
+                >
+                  <svg
+                    preserveAspectRatio="none"
+                    width="24.02"
+                    height="28"
+                    viewBox="0 0 24.02 28"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-[28px] w-[24.02px] transform rotate-180 scale-y-[-1] group-hover:scale-y-[-1.1] transition-transform duration-200"
+                  >
+                    <path
+                      d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
+                      fill="white"
+                      className="group-hover:fill-[#00d1ff] transition-colors duration-200"
+                    />
+                  </svg>
+                </button>
               </div>
             )}
           </div>
 
-          {/* Pagination Dots */}
-          <div className="absolute contents left-1/2 top-[920px] translate-x-[-50%]">
-            <div className="absolute bg-[#e2e8f0] left-[calc(50%-17px)] rounded-[9999px] size-[6px] top-[920px] translate-x-[-50%]" />
-            <div className="absolute bg-[#00d1ff] h-[6px] left-1/2 rounded-[9999px] top-[920px] translate-x-[-50%] w-[16px]" />
-            <div className="absolute bg-[#e2e8f0] left-[calc(50%+17px)] rounded-[9999px] size-[6px] top-[920px] translate-x-[-50%]" />
-          </div>
+          {/* Pagination Dots - Show 3 dots for 3 carousel modes */}
+          {featuredProducts.length > 3 && (
+            <div className="absolute contents left-1/2 top-[920px] translate-x-[-50%]">
+              {/* Dot 1 - First mode (products 0-2) */}
+              <button
+                type="button"
+                onClick={() => setCarouselIndex(0)}
+                className={`absolute rounded-full top-[920px] translate-x-[-50%] transition-all duration-300 ${
+                  carouselIndex === 0
+                    ? 'bg-[#00d1ff] h-[6px] w-[16px] left-[calc(50%-17px)]'
+                    : 'bg-[#e2e8f0] size-[6px] left-[calc(50%-17px)] hover:bg-[#00d1ff]/50'
+                }`}
+                aria-label="Show first 3 products"
+              />
+              {/* Dot 2 - Second mode (products 3-5) */}
+              <button
+                type="button"
+                onClick={() => setCarouselIndex(3)}
+                className={`absolute rounded-full top-[920px] translate-x-[-50%] transition-all duration-300 ${
+                  carouselIndex === 3
+                    ? 'bg-[#00d1ff] h-[6px] w-[16px] left-1/2'
+                    : 'bg-[#e2e8f0] size-[6px] left-1/2 hover:bg-[#00d1ff]/50'
+                }`}
+                aria-label="Show second 3 products"
+              />
+              {/* Dot 3 - Third mode (products 6-8) */}
+              <button
+                type="button"
+                onClick={() => setCarouselIndex(6)}
+                className={`absolute rounded-full top-[920px] translate-x-[-50%] transition-all duration-300 ${
+                  carouselIndex === 6
+                    ? 'bg-[#00d1ff] h-[6px] w-[16px] left-[calc(50%+17px)]'
+                    : 'bg-[#e2e8f0] size-[6px] left-[calc(50%+17px)] hover:bg-[#00d1ff]/50'
+                }`}
+                aria-label="Show third 3 products"
+              />
+            </div>
+          )}
 
           {/* View All Products Button */}
           <div className="absolute content-stretch flex flex-col items-center left-[24px] right-[24px] top-[976px]">
