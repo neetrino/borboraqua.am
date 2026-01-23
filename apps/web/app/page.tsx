@@ -15,62 +15,62 @@ import { HeaderCartIcon } from '../components/icons/HeaderCartIcon';
 import { LanguageIcon } from '../components/icons/LanguageIcon';
 import { ExitIcon } from '../components/icons/ExitIcon';
 
-// Figma MCP Image URLs - Updated from latest Figma design (2025-01-16)
-const imgBorborAguaLogoColorB2024Colored1 = "https://www.figma.com/api/mcp/asset/b106fddf-ddb7-4708-ad7a-7cb2873cb7c9";
-const imgDanielSinocaAancLsb0SU0Unsplash1 = "https://www.figma.com/api/mcp/asset/4871f446-450c-4331-8d45-fc09cffddcdf";
-const imgDanielSinocaAancLsb0SU0Unsplash2 = "https://www.figma.com/api/mcp/asset/bc03b396-c7f6-4c82-8e98-d5787b0a9f5f";
-const img = "https://www.figma.com/api/mcp/asset/9bb170f3-78f7-41dc-a30d-f7aba37fbea1";
-const img1 = "https://www.figma.com/api/mcp/asset/3505a6b7-91e7-402f-a08d-2db92f4d6d86";
-const img2 = "https://www.figma.com/api/mcp/asset/d2d605c5-1270-4604-96ed-7891bee71207";
-const img3 = "https://www.figma.com/api/mcp/asset/2d6b9be1-5538-4773-b058-136917510437";
-const img6Eb12990A37F43358E368Af827A9C8A5Png1 = "https://www.figma.com/api/mcp/asset/997a7a91-9b2c-4abb-b622-b9cea1e370cc";
-const imgLogo1 = "https://www.figma.com/api/mcp/asset/f944f29e-d08d-48db-92a2-188ad56f05bd";
-const imgSas20Logo1 = "https://www.figma.com/api/mcp/asset/c1185ab0-5e7b-4b0b-9deb-a9198c674de5";
-const img5 = "https://www.figma.com/api/mcp/asset/b2aad9d2-8b80-4e27-a38f-82458f66f9fd";
-const img6 = "https://www.figma.com/api/mcp/asset/512a12fb-f4a9-4cf0-9336-14e07b49ce82";
-const img17 = "https://www.figma.com/api/mcp/asset/15c9e520-a101-4e13-804c-6fe7185257de";
-const imgFrame3292 = "https://www.figma.com/api/mcp/asset/f7896520-8d84-451d-b191-3918fc96568c";
-const imgEllipse41 = "https://www.figma.com/api/mcp/asset/43ab67eb-2375-4a42-aa17-a9e5a1949fb1";
-const imgShape = "https://www.figma.com/api/mcp/asset/8b35da42-18d0-4050-bbe7-5222c75f464b";
-const imgEllipse44 = "https://www.figma.com/api/mcp/asset/d8dfe400-7d4b-4c94-bd51-617fe492e640";
-const imgShape1 = "https://www.figma.com/api/mcp/asset/ac78c9b1-acff-459c-be01-77e84c3c1b7e";
-const imgShape2 = "https://www.figma.com/api/mcp/asset/90f42685-0444-4f5f-8e9d-37eac5a9e2f2";
-const imgEllipse42 = "https://www.figma.com/api/mcp/asset/5e6292ef-d0f8-47e3-828f-4727614e7e4d";
-const imgShape3 = "https://www.figma.com/api/mcp/asset/379c6514-3b13-4734-a155-88259968a700";
-const imgEllipse43 = "https://www.figma.com/api/mcp/asset/0259f224-0c94-469b-af5c-b1f43dcfe496";
-const imgGroup2105 = "https://www.figma.com/api/mcp/asset/41b6e81d-4948-41fd-8e45-f0771ba49400";
-const imgIcon = "https://www.figma.com/api/mcp/asset/1f3f805e-d342-492d-b62f-0ee10262d176";
-const img4 = "https://www.figma.com/api/mcp/asset/3790c683-0678-49d5-9066-e1597763c958";
-const imgIcon1 = "https://www.figma.com/api/mcp/asset/308e9fce-055c-4fe7-b4ec-d6e5ac91d1ef";
-const imgVector4 = "https://www.figma.com/api/mcp/asset/da0e029f-e6ab-4c9a-ad7c-202c72ab4c82";
-const imgVector5 = "https://www.figma.com/api/mcp/asset/4bd887f5-a117-4a36-8165-ec4d5e48d691";
-const imgVector6 = "https://www.figma.com/api/mcp/asset/b3518300-1756-4faa-a6f1-ce08fa895783";
-const imgVector7 = "https://www.figma.com/api/mcp/asset/28faa81b-c5cd-4902-b1a9-c4ad891ee203";
-const imgVector = "https://www.figma.com/api/mcp/asset/bf9313e8-ec3b-4ca9-a524-37d8485d4e9d";
-const imgIcon2 = "https://www.figma.com/api/mcp/asset/2cd7e92d-245f-4279-92e8-d685f93b2aa4";
-const imgSvg = "https://www.figma.com/api/mcp/asset/4d0d1287-b954-451a-a592-5eba28116160";
-const imgSvg1 = "https://www.figma.com/api/mcp/asset/fe4a6a3b-4ef9-43e8-8693-c1e538283c41";
-const imgGroup = "https://www.figma.com/api/mcp/asset/86098cb5-762b-47ef-8350-9c44d61ae29f";
-const imgLink = "https://www.figma.com/api/mcp/asset/c0e72a8f-d8d8-4b2d-ac1f-645001a4b42d";
-const imgGroup2122 = "https://www.figma.com/api/mcp/asset/6d343979-117f-4f25-9dba-148f9b14abd4";
-const imgGroup2121 = "https://www.figma.com/api/mcp/asset/2e931b4d-2931-4235-8c2b-a2d5f1806711";
-const imgGroup2124 = "https://www.figma.com/api/mcp/asset/84ea6876-17b8-4b9b-9851-59f2422494d4";
-const imgGroup2123 = "https://www.figma.com/api/mcp/asset/072e9c63-2457-4c22-94fc-276add2dff2b";
-const img7 = "https://www.figma.com/api/mcp/asset/5e5a01ec-d5cb-498f-8a9d-82c50311da10";
-const img8 = "https://www.figma.com/api/mcp/asset/f32df2b9-d44d-4b51-b3d8-85425e86c34b";
-const img9 = "https://www.figma.com/api/mcp/asset/b9cead35-a280-40ac-a001-1dad7373d7b4";
-const img10 = "https://www.figma.com/api/mcp/asset/7baa3994-4292-4f4e-90e4-fe1cc5af96aa";
-const img11 = "https://www.figma.com/api/mcp/asset/633f76bb-f52a-4959-b35b-401335056328";
-const img12 = "https://www.figma.com/api/mcp/asset/27e6bac6-d566-4b22-b028-292442439ef7";
-const img13 = "https://www.figma.com/api/mcp/asset/45f9a2ad-6701-4905-a022-65619c9caa48";
-const img13Decorative = "https://www.figma.com/api/mcp/asset/cc815d32-3501-4133-9848-3d322d6a7db8";
-const img14 = "https://www.figma.com/api/mcp/asset/74737aa6-9360-47e1-979e-42223e542b5e";
-const img15 = "https://www.figma.com/api/mcp/asset/babaf6e8-f74e-4a66-ab54-0fb95309f75b";
-const img16 = "https://www.figma.com/api/mcp/asset/1ef0b957-39c5-4b9d-9afd-b90d72ff4570";
-const img18 = "https://www.figma.com/api/mcp/asset/65825bce-8684-4e63-8d01-3dca9111914a";
+// Local image paths - Images stored in public/assets/home/
+const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
+const imgDanielSinocaAancLsb0SU0Unsplash1 = "/assets/home/imgDanielSinocaAancLsb0SU0Unsplash1.jpg";
+const imgDanielSinocaAancLsb0SU0Unsplash2 = "/assets/home/imgDanielSinocaAancLsb0SU0Unsplash2.jpg";
+const img = "/assets/home/img.png";
+const img1 = "/assets/home/img1.png";
+const img2 = "/assets/home/img2.png";
+const img3 = "/assets/home/img3.png";
+const img6Eb12990A37F43358E368Af827A9C8A5Png1 = "/assets/home/img6Eb12990A37F43358E368Af827A9C8A5Png1.png";
+const imgLogo1 = "/assets/home/imgLogo1.png";
+const imgSas20Logo1 = "/assets/home/imgSas20Logo1.png";
+const img5 = "/assets/home/img5.png";
+const img6 = "/assets/home/img6.png";
+const img17 = "/assets/home/img17.png";
+const imgFrame3292 = "/assets/home/imgFrame3292.svg";
+const imgEllipse41 = "/assets/home/imgEllipse41.svg";
+const imgShape = "/assets/home/imgShape.svg";
+const imgEllipse44 = "/assets/home/imgEllipse44.svg";
+const imgShape1 = "/assets/home/imgShape1.svg";
+const imgShape2 = "/assets/home/imgShape2.svg";
+const imgEllipse42 = "/assets/home/imgEllipse42.svg";
+const imgShape3 = "/assets/home/imgShape3.svg";
+const imgEllipse43 = "/assets/home/imgEllipse43.svg";
+const imgGroup2105 = "/assets/home/imgGroup2105.svg";
+const imgIcon = "/assets/home/imgIcon.svg";
+const img4 = "/assets/home/img4.svg";
+const imgIcon1 = "/assets/home/imgIcon1.svg";
+const imgVector4 = "/assets/home/imgVector4.svg";
+const imgVector5 = "/assets/home/imgVector5.svg";
+const imgVector6 = "/assets/home/imgVector6.svg";
+const imgVector7 = "/assets/home/imgVector7.svg";
+const imgVector = "/assets/home/imgVector.svg";
+const imgIcon2 = "/assets/home/imgIcon2.svg";
+const imgSvg = "/assets/home/imgSvg.svg";
+const imgSvg1 = "/assets/home/imgSvg1.svg";
+const imgGroup = "/assets/home/imgGroup.svg";
+const imgLink = "/assets/home/imgLink.svg";
+const imgGroup2122 = "/assets/home/imgGroup2122.svg";
+const imgGroup2121 = "/assets/home/imgGroup2121.svg";
+const imgGroup2124 = "/assets/home/imgGroup2124.svg";
+const imgGroup2123 = "/assets/home/imgGroup2123.svg";
+const img7 = "/assets/home/img7.svg";
+const img8 = "/assets/home/img8.svg";
+const img9 = "/assets/home/img9.svg";
+const img10 = "/assets/home/img10.svg";
+const img11 = "/assets/home/img11.svg";
+const img12 = "/assets/home/img12.svg";
+const img13 = "/assets/home/img13.svg";
+const img13Decorative = "/assets/home/img13Decorative.png";
+const img14 = "/assets/home/img14.svg";
+const img15 = "/assets/home/img15.svg";
+const img16 = "/assets/home/img16.svg";
+const img18 = "/assets/home/img18.svg";
 // Image 5 and Image 11 for decorative bubbles with specific colors from Figma
-const imgImage5 = "https://www.figma.com/api/mcp/asset/7de49827-29c4-470d-a625-3f8a0d6a1a61";
-const imgImage11 = "https://www.figma.com/api/mcp/asset/ea475088-694e-4438-9b36-cd352182705b";
+const imgImage5 = "/assets/home/imgImage5.png";
+const imgImage11 = "/assets/home/imgImage11.png";
 
 // Product interface for featured products
 interface Product {
@@ -1240,10 +1240,8 @@ export default function HomePage() {
       {/* Footer */}
       <div className="absolute h-[576px] left-1/2 top-[6061px] translate-x-[-50%] w-[1920px] relative overflow-hidden">
         {/* Footer Background Image - daniel sinoca */}
-        <div className="absolute blur-[0px] h-[819px] left-[calc(50%-14px)] top-[-224px] translate-x-[-50%] w-[1949px]">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <img alt="Footer Background" className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash2} />
-          </div>
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <img alt="Footer Background" className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash1} />
         </div>
         {/* Dark overlay for better text readability */}
         <div className="absolute bg-[#0f172a]/90 inset-0" />
@@ -1477,7 +1475,18 @@ export default function HomePage() {
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
-              <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+              <img 
+                alt="Decorative" 
+                className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" 
+                src={img}
+                onError={(e) => {
+                  console.error('❌ [IMAGE] Failed to load decorative image:', img);
+                  console.error('Error target:', e.target);
+                }}
+                onLoad={() => {
+                  console.log('✅ [IMAGE] Decorative image loaded:', img);
+                }}
+              />
             </div>
           </div>
           <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
@@ -1515,7 +1524,18 @@ export default function HomePage() {
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
-              <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+              <img 
+                alt="Decorative" 
+                className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" 
+                src={img}
+                onError={(e) => {
+                  console.error('❌ [IMAGE] Failed to load decorative image:', img);
+                  console.error('Error target:', e.target);
+                }}
+                onLoad={() => {
+                  console.log('✅ [IMAGE] Decorative image loaded:', img);
+                }}
+              />
             </div>
           </div>
           <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
@@ -1527,7 +1547,18 @@ export default function HomePage() {
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
-              <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+              <img 
+                alt="Decorative" 
+                className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" 
+                src={img}
+                onError={(e) => {
+                  console.error('❌ [IMAGE] Failed to load decorative image:', img);
+                  console.error('Error target:', e.target);
+                }}
+                onLoad={() => {
+                  console.log('✅ [IMAGE] Decorative image loaded:', img);
+                }}
+              />
             </div>
           </div>
           <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
@@ -1539,7 +1570,18 @@ export default function HomePage() {
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
-              <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+              <img 
+                alt="Decorative" 
+                className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" 
+                src={img}
+                onError={(e) => {
+                  console.error('❌ [IMAGE] Failed to load decorative image:', img);
+                  console.error('Error target:', e.target);
+                }}
+                onLoad={() => {
+                  console.log('✅ [IMAGE] Decorative image loaded:', img);
+                }}
+              />
             </div>
           </div>
           <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
@@ -1551,7 +1593,18 @@ export default function HomePage() {
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
-              <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+              <img 
+                alt="Decorative" 
+                className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" 
+                src={img}
+                onError={(e) => {
+                  console.error('❌ [IMAGE] Failed to load decorative image:', img);
+                  console.error('Error target:', e.target);
+                }}
+                onLoad={() => {
+                  console.log('✅ [IMAGE] Decorative image loaded:', img);
+                }}
+              />
             </div>
           </div>
           <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
@@ -1563,7 +1616,18 @@ export default function HomePage() {
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
-              <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+              <img 
+                alt="Decorative" 
+                className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" 
+                src={img}
+                onError={(e) => {
+                  console.error('❌ [IMAGE] Failed to load decorative image:', img);
+                  console.error('Error target:', e.target);
+                }}
+                onLoad={() => {
+                  console.log('✅ [IMAGE] Decorative image loaded:', img);
+                }}
+              />
             </div>
           </div>
           <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
@@ -1576,7 +1640,18 @@ export default function HomePage() {
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
-              <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+              <img 
+                alt="Decorative" 
+                className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" 
+                src={img}
+                onError={(e) => {
+                  console.error('❌ [IMAGE] Failed to load decorative image:', img);
+                  console.error('Error target:', e.target);
+                }}
+                onLoad={() => {
+                  console.log('✅ [IMAGE] Decorative image loaded:', img);
+                }}
+              />
             </div>
           </div>
           <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
@@ -1588,7 +1663,18 @@ export default function HomePage() {
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
-              <img alt="Decorative" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+              <img 
+                alt="Decorative" 
+                className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" 
+                src={img}
+                onError={(e) => {
+                  console.error('❌ [IMAGE] Failed to load decorative image:', img);
+                  console.error('Error target:', e.target);
+                }}
+                onLoad={() => {
+                  console.log('✅ [IMAGE] Decorative image loaded:', img);
+                }}
+              />
             </div>
           </div>
           <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[900px]" />
