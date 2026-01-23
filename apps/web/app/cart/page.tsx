@@ -510,14 +510,14 @@ export default function CartPage() {
               <div className="md:col-span-6 flex items-start gap-4">
                 <Link
                   href={`/products/${item.variant.product.slug}`}
-                  className="w-24 h-24 sm:w-28 sm:h-28 bg-gray-100 rounded-lg flex-shrink-0 relative overflow-hidden"
+                  className="w-24 h-24 sm:w-28 sm:h-28 bg-transparent rounded-lg flex-shrink-0 relative overflow-hidden"
                 >
                   {item.variant.product.image ? (
                     <Image
                       src={item.variant.product.image}
                       alt={item.variant.product.title}
                       fill
-                      className="object-cover"
+                      className="object-contain"
                       sizes="80px"
                       unoptimized
                     />

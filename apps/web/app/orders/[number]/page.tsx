@@ -257,11 +257,11 @@ export default function OrderPage() {
                 return (
                   <div key={index} className="flex gap-4 pb-4 border-b border-gray-200 last:border-0">
                     {item.imageUrl && (
-                      <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                      <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-transparent">
                         <img 
                           src={item.imageUrl} 
                           alt={item.productTitle}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                         />
                       </div>
                     )}
