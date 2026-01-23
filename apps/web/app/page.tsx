@@ -106,6 +106,9 @@ export default function HomePage() {
   const [productsLoading, setProductsLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set());
   const [carouselIndex, setCarouselIndex] = useState(0);
+  
+  // State for Trusted By section pagination
+  const [trustedByIndex, setTrustedByIndex] = useState(0);
 
   // Apply scaling based on viewport width
   useEffect(() => {
@@ -288,6 +291,31 @@ export default function HomePage() {
         return 6; // Last mode
       }
       return newIndex;
+    });
+  };
+
+  /**
+   * Handle Trusted By section navigation
+   */
+  const handlePreviousTrustedBy = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setTrustedByIndex((prevIndex) => {
+      // Move to previous logo (0 -> 2, 1 -> 0, 2 -> 1)
+      return prevIndex === 0 ? 2 : prevIndex - 1;
+    });
+  };
+
+  const handleNextTrustedBy = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setTrustedByIndex((prevIndex) => {
+      // Move to next logo (0 -> 1, 1 -> 2, 2 -> 0)
+      return prevIndex === 2 ? 0 : prevIndex + 1;
     });
   };
 
@@ -683,7 +711,7 @@ export default function HomePage() {
           </div>
 
           {/* Products Grid */}
-          <div className="absolute h-[736.83px] left-[24px] right-[24px] top-[166px]">
+          <div className="absolute h-[736.83px] left-[24px] right-[24px] top-[166px] z-[1]">
             {productsLoading ? (
               // Loading state - show placeholder
               <>
@@ -907,16 +935,17 @@ export default function HomePage() {
 
             {/* Navigation Arrows - Only show if we have more than 3 products */}
             {featuredProducts.length > 3 && (
-              <div className="absolute content-stretch flex h-[41px] items-center justify-between left-[calc(50%-0.5px)] top-[295px] translate-x-[-50%] w-[1621px] z-20">
+              <div className="absolute content-stretch flex h-[41px] items-center justify-between left-[calc(50%-0.5px)] top-[295px] translate-x-[-50%] w-[1621px] z-[10000]">
                 {/* Next Button - Moved to left side */}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('🖱️ [CAROUSEL] Next button clicked');
                     handleNextProducts(e);
                   }}
-                  className="bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 z-10 group"
+                  className="bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 relative z-[10001] group"
                   aria-label="Next products"
                 >
                   <svg
@@ -926,12 +955,12 @@ export default function HomePage() {
                     viewBox="0 0 24.02 28"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-[28px] w-[24.02px] transform rotate-180 scale-y-[-1] group-hover:scale-y-[-1.1] transition-transform duration-200"
+                    className="h-[28px] w-[24.02px] transform rotate-180 scale-y-[-1] group-hover:scale-y-[-1.1] transition-transform duration-200 pointer-events-none"
                   >
                     <path
                       d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
                       fill="white"
-                      className="group-hover:fill-[#00d1ff] transition-colors duration-200"
+                      className="group-hover:fill-[#00d1ff] transition-colors duration-200 pointer-events-none"
                     />
                   </svg>
                 </button>
@@ -942,9 +971,10 @@ export default function HomePage() {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('🖱️ [CAROUSEL] Previous button clicked');
                     handlePreviousProducts(e);
                   }}
-                  className="bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 z-10 group"
+                  className="bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 relative z-[10001] group"
                   aria-label="Previous products"
                 >
                   <svg
@@ -954,12 +984,12 @@ export default function HomePage() {
                     viewBox="0 0 24.02 28"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-[28px] w-[24.02px] transform scale-y-[-1] group-hover:scale-y-[-1.1] transition-transform duration-200"
+                    className="h-[28px] w-[24.02px] transform scale-y-[-1] group-hover:scale-y-[-1.1] transition-transform duration-200 pointer-events-none"
                   >
                     <path
                       d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
                       fill="white"
-                      className="group-hover:fill-[#00d1ff] transition-colors duration-200"
+                      className="group-hover:fill-[#00d1ff] transition-colors duration-200 pointer-events-none"
                     />
                   </svg>
                 </button>
@@ -1206,59 +1236,122 @@ export default function HomePage() {
               <p className="leading-[16px]">Industry leading partners</p>
             </div>
           </div>
-          <div className="absolute content-stretch flex gap-[184px] items-center left-[calc(50%+0.5px)] top-[96px] translate-x-[-50%]">
-            <div className="h-[144px] relative shrink-0 w-[221px]">
-              <img alt="Partner Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={img6Eb12990A37F43358E368Af827A9C8A5Png1} />
-            </div>
-            <div className="h-[68.253px] relative shrink-0 w-[246px]">
-              <img alt="Partner Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={imgLogo1} />
-            </div>
-            <div className="h-[85px] relative shrink-0 w-[178px]">
-              <img alt="Partner Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={imgSas20Logo1} />
-            </div>
+          {/* Partner Logos - Show one at a time based on trustedByIndex */}
+          <div className="absolute content-stretch flex items-center justify-center left-[calc(50%+0.5px)] top-[96px] translate-x-[-50%] w-[1441px] h-[144px]">
+            {/* Logo 0 */}
+            {trustedByIndex === 0 && (
+              <div className="h-[144px] relative shrink-0 w-[221px] transition-opacity duration-300">
+                <img alt="Partner Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={img6Eb12990A37F43358E368Af827A9C8A5Png1} />
+              </div>
+            )}
+            {/* Logo 1 */}
+            {trustedByIndex === 1 && (
+              <div className="h-[68.253px] relative shrink-0 w-[246px] transition-opacity duration-300">
+                <img alt="Partner Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={imgLogo1} />
+              </div>
+            )}
+            {/* Logo 2 */}
+            {trustedByIndex === 2 && (
+              <div className="h-[85px] relative shrink-0 w-[178px] transition-opacity duration-300">
+                <img alt="Partner Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={imgSas20Logo1} />
+              </div>
+            )}
           </div>
-          <div className="absolute content-stretch flex h-[49px] items-end justify-center left-[24px] pt-[32px] right-[24px] top-[202px]">
-            <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
-              <div className="bg-white col-1 ml-0 mt-0 rounded-[9999px] row-1 size-[6px]" />
-              <div className="bg-[#00d1ff] col-1 h-[6px] ml-[12px] mt-0 rounded-[9999px] row-1 w-[16px]" />
-              <div className="bg-white col-1 ml-[34px] mt-0 rounded-[9999px] row-1 size-[6px]" />
+          {/* Pagination Dots */}
+          <div className="absolute content-stretch flex h-[49px] items-center justify-center left-[24px] pt-[32px] right-[24px] top-[202px] z-[100]">
+            <div className="flex items-center gap-[12px] relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setTrustedByIndex(0)}
+                className={`rounded-[9999px] transition-all duration-300 ${
+                  trustedByIndex === 0
+                    ? 'bg-[#00d1ff] h-[10px] w-[24px]'
+                    : 'bg-white size-[10px] hover:bg-[#00d1ff]/50 cursor-pointer'
+                }`}
+                aria-label="Show first partner"
+              />
+              <button
+                type="button"
+                onClick={() => setTrustedByIndex(1)}
+                className={`rounded-[9999px] transition-all duration-300 ${
+                  trustedByIndex === 1
+                    ? 'bg-[#00d1ff] h-[10px] w-[24px]'
+                    : 'bg-white size-[10px] hover:bg-[#00d1ff]/50 cursor-pointer'
+                }`}
+                aria-label="Show second partner"
+              />
+              <button
+                type="button"
+                onClick={() => setTrustedByIndex(2)}
+                className={`rounded-[9999px] transition-all duration-300 ${
+                  trustedByIndex === 2
+                    ? 'bg-[#00d1ff] h-[10px] w-[24px]'
+                    : 'bg-white size-[10px] hover:bg-[#00d1ff]/50 cursor-pointer'
+                }`}
+                aria-label="Show third partner"
+              />
             </div>
           </div>
 
           {/* Navigation Arrows */}
-          <div className="absolute contents left-[134px] top-[calc(50%+50.25px)] translate-y-[-50%]">
-            <div className="absolute contents left-[134px] top-[calc(50%+50.5px)] translate-y-[-50%]">
-              <div className="absolute bg-[rgba(0,0,0,0)] border-[#eee] border-[0.5px] border-solid content-stretch flex flex-col items-center justify-center left-[134px] px-[8.5px] py-[6.5px] rounded-[9999px] top-[calc(50%+50.5px)] translate-y-[-50%]">
-                <div className="relative shrink-0">
-                  <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
-                    <div className="flex items-center justify-center relative shrink-0">
-                      <div className="flex-none scale-y-[-100%]">
-                        <div className="h-[28px] relative w-[24.02px]">
-                          <img alt="Arrow" className="block max-w-none size-full" src={imgIcon1} />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="absolute flex items-center justify-center left-[1361px] top-[calc(50%+50px)] translate-y-[-50%]">
-              <div className="flex-none rotate-[180deg] scale-y-[-100%]">
-                <div className="bg-[rgba(0,0,0,0)] border-[#eee] border-[0.5px] border-solid content-stretch flex flex-col items-center justify-center px-[8.5px] py-[6.5px] relative rounded-[9999px]">
-                  <div className="relative shrink-0">
-                    <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
-                      <div className="flex items-center justify-center relative shrink-0">
-                        <div className="flex-none scale-y-[-100%]">
-                          <div className="h-[28px] relative w-[24.02px]">
-                            <img alt="Arrow" className="block max-w-none size-full" src={imgIcon1} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="absolute content-stretch flex items-center justify-between left-[134px] right-[134px] top-[calc(50%+50.25px)] translate-y-[-50%] z-[100]">
+            {/* Previous Button - Left side */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🖱️ [TRUSTED BY] Previous button clicked');
+                handlePreviousTrustedBy(e);
+              }}
+              className="bg-gray-300 border-[#eee] border-[0.5px] border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] cursor-pointer hover:bg-black/80 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-black/70 active:scale-95 transition-all duration-200 relative z-[101] group"
+              aria-label="Previous partner"
+            >
+              <svg
+                preserveAspectRatio="none"
+                width="24.02"
+                height="28"
+                viewBox="0 0 24.02 28"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-[36px] w-[30px] transform rotate-180 group-hover:scale-110 transition-transform duration-200 pointer-events-none"
+              >
+                <path
+                  d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
+                  fill="white"
+                  className="group-hover:fill-[#00d1ff] transition-colors duration-200 pointer-events-none"
+                />
+              </svg>
+            </button>
+
+            {/* Next Button - Right side */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🖱️ [TRUSTED BY] Next button clicked');
+                handleNextTrustedBy(e);
+              }}
+              className="bg-gray-300 border-[#eee] border-[0.5px] border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] cursor-pointer hover:bg-black/80 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-black/70 active:scale-95 transition-all duration-200 relative z-[101] group"
+              aria-label="Next partner"
+            >
+              <svg
+                preserveAspectRatio="none"
+                width="24.02"
+                height="28"
+                viewBox="0 0 24.02 28"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-[36px] w-[30px] transform group-hover:scale-110 transition-transform duration-200 pointer-events-none"
+              >
+                <path
+                  d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
+                  fill="white"
+                  className="group-hover:fill-[#00d1ff] transition-colors duration-200 pointer-events-none"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
