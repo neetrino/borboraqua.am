@@ -447,7 +447,7 @@ export default function HomePage() {
       </div>
 
       {/* Image 13 - Decorative Element */}
-      <div className="absolute flex items-center justify-center left-[1372px] top-[470px] size-[806px]">
+      <div className="absolute flex items-center justify-center left-[600px] top-[300px] size-[806px]">
         <div className="relative rounded-[320px] size-full">
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
