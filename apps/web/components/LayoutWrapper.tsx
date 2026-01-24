@@ -17,7 +17,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       const updateHeight = () => {
         const viewportWidth = window.innerWidth;
         const scale = Math.min(viewportWidth / 1920, 1);
-        const scaledHeight = 6637 * scale;
+        const scaledHeight = 6901 * scale;
         wrapperRef.current!.style.minHeight = `${scaledHeight}px`;
         wrapperRef.current!.style.height = `${scaledHeight}px`;
       };

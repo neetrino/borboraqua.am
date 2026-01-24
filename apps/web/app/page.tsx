@@ -397,12 +397,12 @@ export default function HomePage() {
     }
   };
 
-  // Footer is at top-[6061px] with h-[576px], so total height = 6061 + 576 = 6637px
+  // Footer is at top-[6201px] with h-[700px], so total height = 6201 + 700 = 6901px
   // Using exact pixel height from Figma with responsive scaling
   return (
     <div
       ref={containerRef}
-      className="bg-white relative w-full max-w-[1440px] mx-auto h-[6637px] lg:h-[6637px] md:h-[5200px] sm:h-[4200px] home-page-container"
+      className="bg-white relative w-full max-w-[1440px] mx-auto h-[6901px] lg:h-[6901px] md:h-[5600px] sm:h-[4700px] home-page-container"
     >
       {/* Header Section - Navigation Bar */}
       <div className="fixed bg-[rgba(255,255,255,0.04)] backdrop-blur-[10px] content-stretch flex flex-col h-[73px] md:h-[60px] sm:h-[50px] items-center justify-center left-1/2 px-[38px] md:px-[24px] sm:px-[16px] py-[16px] md:py-[12px] sm:py-[8px] rounded-[70px] md:rounded-[50px] sm:rounded-[40px] top-[64px] md:top-[32px] sm:top-[16px] translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] z-50">
@@ -684,7 +684,7 @@ export default function HomePage() {
           </div>
 
           {/* Products Grid */}
-          <div className="absolute h-[736.83px] lg:h-[736.83px] md:h-[550px] sm:h-[450px] left-[24px] lg:left-[24px] md:left-[16px] sm:left-[12px] right-[24px] lg:right-[24px] md:right-[16px] sm:right-[12px] top-[166px] lg:top-[166px] md:top-[120px] sm:top-[100px] z-[1] overflow-hidden">
+          <div className="absolute h-[736.83px] lg:h-[736.83px] md:h-[550px] sm:h-[450px] left-[24px] lg:left-[24px] md:left-[16px] sm:left-[12px] right-[24px] lg:right-[24px] md:right-[16px] sm:right-[12px] top-[166px] lg:top-[166px] md:top-[120px] sm:top-[100px] z-[10] overflow-hidden">
             {productsLoading ? (
               // Loading state - show placeholder
               <>
@@ -714,7 +714,7 @@ export default function HomePage() {
                   // Product positioning based on relativeIndex (matching original layout)
                   // Always use relativeIndex (0, 1, 2) for the 3 visible products
                   const positions = [
-                    { className: "left-0 top-[-12px] bottom-[12px] right-[11.66px]", imageClass: "h-[563px] left-[98.83px] top-[12.91px] w-[277px]", imageStyle: "h-[111.44%] left-[-62.35%] max-w-none top-0 w-[226.62%]", contentClass: "left-[9px] pb-[16px] px-[16px] right-[9px] top-[599.91px]" },
+                    { className: "left-0 top-[-12px] bottom-[12px] right-[11.66px]", imageClass: "h-[563px] left-[98.83px] top-[12.91px] w-[277px]", imageStyle: "h-[111.44%] left-[-62.35%] max-w-none top-0 w-[226.62%]", contentClass: "left-[9px] pb-[16px] px-[16px] top-[599.91px] w-[424.66px]" },
                     { className: "left-[513px] right-[500.33px] top-[-12px] bottom-[12px]", imageClass: "h-[564px] w-[205px]", imageStyle: "h-[100.18%] left-[-87.8%] max-w-none top-[-0.09%] w-[275.61%]", contentClass: "pb-[16px] px-[16px]" },
                     { className: "left-[1013.34px] right-0 top-[-12px] bottom-[12px]", imageClass: "h-[508px] left-[137px] top-[53px] w-[182px]", imageStyle: "h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%]", contentClass: "left-[16px] top-[600px] w-[424.66px]" }
                   ];
@@ -727,7 +727,7 @@ export default function HomePage() {
                     <div
                       key={product.id}
                       onClick={() => router.push(`/products/${product.slug}`)}
-                      className={`absolute bg-transparent ${pos.className} ${isSecondProduct ? 'content-stretch flex flex-col gap-[24px] items-center justify-center p-[8px]' : ''} cursor-pointer product-card-hover`}
+                      className={`absolute bg-transparent ${pos.className} ${isSecondProduct ? 'content-stretch flex flex-col gap-[24px] items-center justify-center p-[8px]' : ''} cursor-pointer product-card-hover z-[11]`}
                     >
                       {isThirdProduct ? (
                         <div className="absolute h-[714px] left-[9px] right-[9px] top-0">
@@ -746,7 +746,7 @@ export default function HomePage() {
                           </div>
                           <div className={`absolute content-stretch flex h-[44px] items-end justify-between ${pos.contentClass}`}>
                             <div className="content-stretch flex flex-col items-start relative shrink-0">
-                              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                              <div className="content-stretch flex flex-col items-start relative shrink-0">
                                 <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] lg:text-[18px] md:text-[16px] sm:text-[14px] text-white">
                                   <p className="leading-[28px] lg:leading-[28px] md:leading-[24px] sm:leading-[20px]">{product.title}</p>
                                 </div>
@@ -792,7 +792,7 @@ export default function HomePage() {
                             <div className="content-stretch flex flex-col gap-[16px] items-start pb-[16px] px-[16px] relative w-full">
                               <div className="content-stretch flex items-end justify-between relative shrink-0 w-full">
                                 <div className="content-stretch flex flex-col items-start relative shrink-0">
-                                  <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                                  <div className="content-stretch flex flex-col items-start relative shrink-0">
                                     <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white">
                                       <p className="leading-[28px]">{product.title}</p>
                                     </div>
@@ -810,7 +810,7 @@ export default function HomePage() {
                                   handleAddToCart(product);
                                 }}
                                 disabled={!product.inStock || addingToCart.has(product.id)}
-                                className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                                className="bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
                               >
                                 <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
                                   <p className="leading-[24px]">
@@ -839,7 +839,7 @@ export default function HomePage() {
                           <div className={`absolute content-stretch flex flex-col gap-[16px] items-start ${pos.contentClass}`}>
                             <div className="content-stretch flex items-end justify-between pr-[0.01px] relative shrink-0 w-full">
                               <div className="content-stretch flex flex-col items-start relative shrink-0">
-                                <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                                <div className="content-stretch flex flex-col items-start relative shrink-0">
                                   <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white">
                                     <p className="leading-[28px]">{product.title}</p>
                                   </div>
@@ -857,7 +857,7 @@ export default function HomePage() {
                                 handleAddToCart(product);
                               }}
                               disabled={!product.inStock || addingToCart.has(product.id)}
-                              className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                              className="bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full max-w-[424.66px] hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
                             >
                               <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
                                 <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px]">
@@ -908,8 +908,8 @@ export default function HomePage() {
 
             {/* Navigation Arrows - Only show if we have more than 3 products */}
             {featuredProducts.length > 3 && (
-              <div className="absolute content-stretch flex h-[41px] lg:h-[41px] md:h-[36px] sm:h-[32px] items-center justify-between left-[calc(50%-0.5px)] top-[295px] lg:top-[295px] md:top-[220px] sm:top-[180px] translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] z-[10000]">
-                {/* Next Button - Moved to left side */}
+              <>
+                {/* Next Button - Left side, outside container */}
                 <button
                   type="button"
                   onClick={(e) => {
@@ -918,7 +918,7 @@ export default function HomePage() {
                     console.log('🖱️ [CAROUSEL] Next button clicked');
                     handleNextProducts(e);
                   }}
-                  className="bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] lg:size-[56px] md:size-[48px] sm:size-[40px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 relative z-[10001] group"
+                  className="absolute bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] lg:size-[56px] md:size-[48px] sm:size-[40px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 z-[10001] group left-[calc(50%-650px)] lg:left-[calc(50%-650px)] md:left-[calc(50%-500px)] sm:left-[calc(50%-400px)] top-[295px] lg:top-[295px] md:top-[220px] sm:top-[180px]"
                   aria-label="Next products"
                 >
                   <svg
@@ -938,7 +938,7 @@ export default function HomePage() {
                   </svg>
                 </button>
 
-                {/* Previous Button - Moved to right side */}
+                {/* Previous Button - Right side, outside container */}
                 <button
                   type="button"
                   onClick={(e) => {
@@ -947,7 +947,7 @@ export default function HomePage() {
                     console.log('🖱️ [CAROUSEL] Previous button clicked');
                     handlePreviousProducts(e);
                   }}
-                  className="bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] lg:size-[56px] md:size-[48px] sm:size-[40px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 relative z-[10001] group"
+                  className="absolute bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] lg:size-[56px] md:size-[48px] sm:size-[40px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 z-[10001] group right-[calc(50%-650px)] lg:right-[calc(50%-650px)] md:right-[calc(50%-500px)] sm:right-[calc(50%-400px)] top-[295px] lg:top-[295px] md:top-[220px] sm:top-[180px]"
                   aria-label="Previous products"
                 >
                   <svg
@@ -966,7 +966,7 @@ export default function HomePage() {
                     />
                   </svg>
                 </button>
-              </div>
+              </>
             )}
           </div>
 
