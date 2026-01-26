@@ -1555,11 +1555,12 @@ function AddProductPageContent() {
           console.log(`📸 [UPLOAD] Processing file ${index + 1}/${files.length}:`, file.name, `(${Math.round(file.size / 1024)}KB)`);
           
           // Process image with compression, EXIF orientation correction, and resize
+          // Preserve PNG format and transparency - don't force JPEG conversion
           const base64 = await processImageFile(file, {
             maxSizeMB: 2,
             maxWidthOrHeight: 1920,
             useWebWorker: true,
-            fileType: 'image/jpeg',
+            // fileType is not specified - will preserve original format (PNG stays PNG, others become JPEG)
             initialQuality: 0.8
           });
           
@@ -1658,11 +1659,12 @@ function AddProductPageContent() {
       });
 
       // Process image with compression, EXIF orientation correction, and resize
+      // Preserve PNG format and transparency - don't force JPEG conversion
       const base64 = await processImageFile(file, {
         maxSizeMB: 2,
         maxWidthOrHeight: 1920,
         useWebWorker: true,
-        fileType: 'image/jpeg',
+        // fileType is not specified - will preserve original format (PNG stays PNG, others become JPEG)
         initialQuality: 0.8
       });
 
@@ -1712,11 +1714,12 @@ function AddProductPageContent() {
           });
 
           // Process image with compression, EXIF orientation correction, and resize
+          // Preserve PNG format and transparency - don't force JPEG conversion
           const base64 = await processImageFile(file, {
             maxSizeMB: 2,
             maxWidthOrHeight: 1920,
             useWebWorker: true,
-            fileType: 'image/jpeg',
+            // fileType is not specified - will preserve original format (PNG stays PNG, others become JPEG)
             initialQuality: 0.8
           });
 
@@ -3376,7 +3379,7 @@ function AddProductPageContent() {
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                       {formData.imageUrls.map((imageUrl, index) => (
                         <div key={index} className="relative group">
-                          <div className={`relative border-2 rounded-md overflow-hidden ${
+                          <div className={`relative border-2 rounded-md overflow-hidden bg-transparent ${
                             formData.featuredImageIndex === index 
                               ? 'border-blue-500 ring-2 ring-blue-300' 
                               : 'border-gray-300'
@@ -3384,7 +3387,8 @@ function AddProductPageContent() {
                             <img
                               src={imageUrl}
                               alt={`Product image ${index + 1}`}
-                              className="w-full h-48 object-cover"
+                              className="w-full h-48 object-contain bg-transparent"
+                              style={{ backgroundColor: 'transparent' }}
                             />
                             
                             {/* Main Checkbox */}
@@ -4373,11 +4377,12 @@ function AddProductPageContent() {
                                 <td className="px-2 py-2 whitespace-nowrap">
                                   <div className="flex items-center gap-2">
                                     {variant.image ? (
-                                      <div className="relative inline-block">
+                                      <div className="relative inline-block bg-transparent">
                                         <img
                                           src={variant.image}
                                           alt="Variant image"
-                                          className="w-12 h-12 object-cover border border-gray-300 rounded-md"
+                                          className="w-12 h-12 object-contain border border-gray-300 rounded-md bg-transparent"
+                                          style={{ backgroundColor: 'transparent' }}
                                         />
                                         <button
                                           type="button"
@@ -4708,11 +4713,14 @@ function AddProductPageContent() {
                         />
                         {/* Display image, color, or nothing */}
                         {value.imageUrl ? (
-                          <img
-                            src={value.imageUrl}
-                            alt={value.label}
-                            className="w-8 h-8 object-cover rounded border border-gray-300 flex-shrink-0"
-                          />
+                          <div className="w-8 h-8 bg-transparent flex items-center justify-center">
+                            <img
+                              src={value.imageUrl}
+                              alt={value.label}
+                              className="max-w-full max-h-full object-contain rounded border border-gray-300 flex-shrink-0 bg-transparent"
+                              style={{ backgroundColor: 'transparent' }}
+                            />
+                          </div>
                         ) : isColor && valueColorHex ? (
                           <span
                             className="inline-block w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm flex-shrink-0"

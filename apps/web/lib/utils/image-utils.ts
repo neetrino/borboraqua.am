@@ -321,7 +321,7 @@ export async function processImageFile(
     maxSizeMB?: number; // Maximum file size in MB (default: 2)
     maxWidthOrHeight?: number; // Maximum width or height in pixels (default: 1920)
     useWebWorker?: boolean; // Use web worker for processing (default: true)
-    fileType?: string; // Output file type (default: 'image/jpeg')
+    fileType?: string; // Output file type (default: preserves original format, or 'image/jpeg' if not specified)
     initialQuality?: number; // Initial quality 0-1 (default: 0.8)
   }
 ): Promise<string> {
@@ -336,17 +336,22 @@ export async function processImageFile(
       maxSizeMB = 2,
       maxWidthOrHeight = 1920,
       useWebWorker = true,
-      fileType = 'image/jpeg',
+      fileType,
       initialQuality = 0.8
     } = options || {};
 
+    // Preserve PNG format and transparency - if original is PNG, keep it as PNG
+    // If fileType is explicitly provided, use it; otherwise preserve original format
+    const outputFileType = fileType || (file.type === 'image/png' ? 'image/png' : 'image/jpeg');
+
     // Process image with compression and EXIF orientation correction
     // browser-image-compression automatically handles EXIF orientation
+    // When using PNG format, transparency is preserved
     const compressedFile = await imageCompression(file, {
       maxSizeMB,
       maxWidthOrHeight,
       useWebWorker,
-      fileType,
+      fileType: outputFileType,
       initialQuality,
       // EXIF orientation is automatically handled by browser-image-compression
     });
