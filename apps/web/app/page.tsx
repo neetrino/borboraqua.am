@@ -781,35 +781,7 @@ export default function HomePage() {
                   });
                 })()}
               </div>
-            ) : (
-              // Fallback to original hardcoded products if no products loaded - uniform layout
-              <div className="flex gap-[40px] lg:gap-[40px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
-                <div className="flex flex-col items-center gap-[24px] w-[320px] lg:w-[320px] md:w-[280px] sm:w-[240px] bg-transparent">
-                  <div className="h-[320px] lg:h-[320px] md:h-[280px] sm:h-[240px] w-full relative overflow-hidden flex items-center justify-center bg-transparent">
-                    <img alt="Product 19L" className="h-full w-full object-contain" src={img1} style={{ backgroundColor: 'transparent' }} />
-                  </div>
-                  <div className="w-full flex flex-col gap-[16px] px-[16px] pb-[16px]">
-                    <div className="flex items-end justify-between w-full">
-                      <div className="flex flex-col items-start">
-                        <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white whitespace-nowrap">
-                          <p className="leading-[28px]">{t('home.fallback.productTitle')}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-start">
-                        <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
-                          <p className="leading-[28px]">{t('home.fallback.productPrice')}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-[#00d1ff] content-stretch flex items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full">
-                      <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
-                        <p className="leading-[24px]">{t('home.featuredProducts.addToCart')}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            ) : null}
 
             {/* Navigation Arrows - Only show if we have more than 3 products */}
             {featuredProducts.length > 3 && (
