@@ -667,8 +667,25 @@ export default function HomePage() {
       </div>
 
       {/* Featured Products Section */}
-      <div className="absolute h-[1175px] lg:h-[1175px] md:h-[900px] sm:h-[700px] left-1/2 top-[1278px] lg:top-[1278px] md:top-[1000px] sm:top-[800px] translate-x-[-50%] w-full max-w-[1920px]">
-        <div className="absolute h-[976px] lg:h-[976px] md:h-[750px] sm:h-[600px] left-[192px] lg:left-[192px] md:left-[5%] sm:left-[2.5%] right-[192px] lg:right-[192px] md:right-[5%] sm:right-[2.5%] top-[139px] lg:top-[139px] md:top-[100px] sm:top-[80px]">
+      <div className="absolute h-[1175px] lg:h-[1175px] md:h-[900px] sm:h-[700px] left-1/2 top-[1278px] lg:top-[1278px] md:top-[1000px] sm:top-[800px] translate-x-[-50%] w-full max-w-[1920px] overflow-hidden">
+        {/* Background Image - Daniel Sianca Flipped */}
+        <div
+          className="absolute w-full h-full"
+          style={{
+            top: "50%",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `url(${imgDanielSinocaAancLsb0SU0Unsplash1})`,
+            backgroundSize: "100%",
+            backgroundPosition: "center bottom",
+            backgroundRepeat: "no-repeat",
+            transform: "scaleY(-1)", // նույն flip-ը
+          }}
+        />
+        {/* Gradient fade overlay for smooth transition */}
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/10 to-transparent pointer-events-none" />
+        <div className="absolute h-[976px] lg:h-[976px] md:h-[750px] sm:h-[600px] left-[192px] lg:left-[192px] md:left-[5%] sm:left-[2.5%] right-[192px] lg:right-[192px] md:right-[5%] sm:right-[2.5%] top-[139px] lg:top-[139px] md:top-[100px] sm:top-[80px] relative z-10">
           {/* Section Header */}
           <div className="absolute content-stretch flex flex-col gap-[16px] lg:gap-[16px] md:gap-[12px] sm:gap-[10px] items-start left-[24px] lg:left-[24px] md:left-[16px] sm:left-[12px] right-[24px] lg:right-[24px] md:right-[16px] sm:right-[12px] top-[-37px] lg:top-[-37px] md:top-[-30px] sm:top-[-24px]">
             <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
@@ -682,6 +699,9 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+
+
+          
 
           {/* Products Grid */}
           <div className="absolute h-[736.83px] lg:h-[736.83px] md:h-[550px] sm:h-[450px] left-[24px] lg:left-[24px] md:left-[16px] sm:left-[12px] right-[24px] lg:right-[24px] md:right-[16px] sm:right-[12px] top-[166px] lg:top-[166px] md:top-[120px] sm:top-[100px] z-[10] overflow-hidden">
@@ -1038,6 +1058,8 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+
 
       {/* Water Energy Section */}
       <div className="absolute content-stretch flex flex-col gap-[35px] lg:gap-[35px] md:gap-[28px] sm:gap-[20px] items-start left-1/2 top-[2606px] lg:top-[2606px] md:top-[2000px] sm:top-[1600px] translate-x-[-50%] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%]">
