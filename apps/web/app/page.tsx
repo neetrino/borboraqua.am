@@ -39,6 +39,7 @@ const imgVector5 = "/assets/home/imgVector5.svg";
 const imgVector6 = "/assets/home/imgVector6.svg";
 const imgVector7 = "/assets/home/imgVector7.svg";
 const imgVector = "/assets/home/imgVector.svg";
+const imgVector1 = "/assets/home/imgVector1.svg";
 const imgIcon2 = "/assets/home/imgIcon2.svg";
 const imgSvg = "/assets/home/imgSvg.svg";
 const imgSvg1 = "/assets/home/imgSvg1.svg";
@@ -63,6 +64,30 @@ const img18 = "/assets/home/img18.svg";
 // Image 5 and Image 11 for decorative bubbles with specific colors from Figma
 const imgImage5 = "/assets/home/imgImage5.png";
 const imgImage11 = "/assets/home/imgImage11.png";
+
+// Mobile-specific images from Figma
+const imgBorborAquaProductKids033L2 = "/assets/home/imgBorborAquaProductKids033L2.png";
+const imgSqawdef1 = "/assets/home/imgSqawdef1.png";
+const imgScreenshot20260114At0835551 = "/assets/home/imgScreenshot20260114At0835551.png";
+const imgScreenshot20260112At1535403 = "/assets/home/imgScreenshot20260112At1535403.png";
+const imgEllipse2 = "/assets/home/imgEllipse2.svg";
+const imgVector2 = "/assets/home/imgVector2.svg";
+const imgVector3 = "/assets/home/imgVector3.svg";
+const imgGroup2148 = "/assets/home/imgGroup2148.svg";
+const imgGroup2149 = "/assets/home/imgGroup2149.svg";
+const imgVector8 = "/assets/home/imgVector8.svg";
+const imgGlass3 = "/assets/home/imgGlass3.svg";
+const imgGlass4 = "/assets/home/imgGlass4.svg";
+const imgBg = "/assets/home/imgBg.svg";
+const imgGlass = "/assets/home/imgGlass.svg";
+const imgTop = "/assets/home/imgTop.svg";
+const imgTop1 = "/assets/home/imgTop1.svg";
+const imgGlass1 = "/assets/home/imgGlass1.svg";
+const imgGlass2 = "/assets/home/imgGlass2.svg";
+const imgIcon = "/assets/home/imgIcon.svg";
+const imgIcon1 = "/assets/home/imgIcon1.svg";
+const imgDanielSinocaAancLsb0SU0Unsplash3 = "/assets/home/imgDanielSinocaAancLsb0SU0Unsplash3.jpg";
+const imgEllipse45 = "/assets/home/imgEllipse45.svg";
 
 // Product interface for featured products
 interface Product {
@@ -398,10 +423,897 @@ export default function HomePage() {
   // Footer is at top-[6201px] with h-[700px], so total height = 6201 + 700 = 6901px
   // Using exact pixel height from Figma with responsive scaling
   return (
-    <div
-      ref={containerRef}
-      className="bg-white relative w-full max-w-[1440px] mx-auto h-[6901px] lg:h-[6901px] md:h-[5600px] sm:h-[4700px] home-page-container"
-    >
+    <>
+      {/* Mobile Version - Only visible on small screens (matches Figma design exactly) */}
+      <div className="md:hidden bg-white relative w-full max-w-[430px] mx-auto min-h-screen overflow-x-hidden">
+        {/* Mobile Header */}
+        <div className="absolute content-stretch flex items-center justify-between left-[17px] top-[35px] w-[398px] z-50">
+          <div className="content-stretch flex gap-[6px] items-center relative shrink-0">
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch cursor-pointer flex flex-col items-start px-[15.5px] py-[18.5px] relative rounded-[9999px] w-[49px]"
+            >
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="-scale-y-100 flex-none rotate-180">
+                  <div className="h-[12px] relative w-[18px]">
+                    <img className="block max-w-none size-full" alt="" src={imgVector3} />
+                  </div>
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => setShowSearchModal(true)}
+              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch cursor-pointer flex items-center p-[14.5px] relative rounded-[9999px]"
+            >
+              <div className="flex items-center justify-center relative shrink-0">
+                <div className="-scale-y-100 flex-none rotate-180">
+                  <div className="relative size-[20px]">
+                    <img className="block max-w-none size-full" alt="" src={imgVector2} />
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+          <div className="h-[31px] relative shrink-0 w-[101px] cursor-pointer" onClick={() => router.push('/')}>
+            <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgBorborAguaLogoColorB2024Colored1} />
+          </div>
+        </div>
+
+        {/* Mobile Background Gradient */}
+        <div className="absolute bg-gradient-to-b blur-[50px] from-[#62b3e8] h-[850px] left-0 to-[rgba(221,216,216,0.75)] top-0 w-[430px]" />
+
+        {/* Mobile Decorative Background Images */}
+        <div className="absolute h-[312px] left-[-204px] top-[789px] w-[741px]">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <img alt="" className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash3} />
+          </div>
+        </div>
+        <div className="absolute flex h-[312px] items-center justify-center left-[-203px] top-[1098px] w-[741px]">
+          <div className="-scale-y-100 flex-none">
+            <div className="h-[312px] relative w-[741px]">
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <img alt="" className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash3} />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="absolute blur-[2px] h-[480px] left-[-355px] top-[4600px] w-[1143px]">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <img alt="" className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash3} />
+          </div>
+        </div>
+        <div className="absolute flex h-[873px] items-center justify-center left-[-783px] top-[5075px] w-[2078px]">
+          <div className="-scale-y-100 flex-none">
+            <div className="blur-[2px] h-[873px] relative w-[2078px]">
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <img alt="" className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash3} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Decorative Ellipses and Shapes */}
+        <div className="-translate-x-1/2 absolute h-[311px] left-[calc(50%+303.5px)] top-[2839px] w-[329px]">
+          <div className="absolute inset-[-91.64%_-86.63%]">
+            <img alt="" className="block max-w-none size-full" src={imgEllipse45} />
+          </div>
+        </div>
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(50%+296.32px)] mix-blend-luminosity size-[537.421px] top-[2691px]">
+          <div className="flex-none rotate-[55.86deg]">
+            <div className="relative size-[386.94px]">
+              <img alt="" className="block max-w-none size-full" src={imgShape} />
+            </div>
+          </div>
+        </div>
+        <div className="-translate-x-1/2 absolute h-[1001px] left-[calc(50%+3px)] top-[3427px] w-[460px]">
+          <div className="absolute inset-[-36.46%_-79.35%]">
+            <img alt="" className="block max-w-none size-full" src={imgEllipse44} />
+          </div>
+        </div>
+        <div className="absolute flex h-[325px] items-center justify-center left-[164px] mix-blend-lighten top-[3409px] w-[211.999px]">
+          <div className="flex-none rotate-180">
+            <div className="h-[325px] relative w-[211.999px]">
+              <img alt="" className="block max-w-none size-full" src={imgVector5} />
+            </div>
+          </div>
+        </div>
+        <div className="absolute flex h-[325px] items-center justify-center left-[102px] mix-blend-lighten top-[3684px] w-[178.352px]">
+          <div className="-scale-y-100 flex-none rotate-180">
+            <div className="h-[325px] relative w-[178.352px]">
+              <img alt="" className="block max-w-none size-full" src={imgVector6} />
+            </div>
+          </div>
+        </div>
+        <div className="-translate-x-1/2 absolute h-[703px] left-[calc(50%-551.5px)] top-[2900px] w-[745px]">
+          <div className="absolute inset-[-66.15%_-62.42%]">
+            <img alt="" className="block max-w-none size-full" src={imgEllipse43} />
+          </div>
+        </div>
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(50%-341.38px)] mix-blend-luminosity size-[748.757px] top-[2846.24px]">
+          <div className="flex-none rotate-[-145.33deg]">
+            <div className="relative size-[538.18px]">
+              <img alt="" className="block max-w-none size-full" src={imgShape2} />
+            </div>
+          </div>
+        </div>
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(50%-257.56px)] mix-blend-luminosity size-[336.875px] top-[2207px]">
+          <div className="flex-none rotate-[75.86deg]">
+            <div className="relative size-[277.505px]">
+              <img alt="" className="block max-w-none size-full" src={imgShape3} />
+            </div>
+          </div>
+        </div>
+        <div className="-translate-x-1/2 absolute h-[777px] left-[calc(50%+397.5px)] top-[1819px] w-[823px]">
+          <div className="absolute inset-[-59.85%_-56.5%]">
+            <img alt="" className="block max-w-none size-full" src={imgEllipse42} />
+          </div>
+        </div>
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(50%+290.32px)] mix-blend-luminosity size-[537.421px] top-[2031.61px]">
+          <div className="flex-none rotate-[55.86deg]">
+            <div className="relative size-[386.94px]">
+              <img alt="" className="block max-w-none size-full" src={imgShape} />
+            </div>
+          </div>
+        </div>
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(50%+28.66px)] mix-blend-luminosity size-[597.326px] top-[4287px]">
+          <div className="-scale-y-100 flex-none rotate-[-17.72deg]">
+            <div className="relative size-[475.23px]">
+              <img alt="" className="block max-w-none size-full" src={imgShape1} />
+            </div>
+          </div>
+        </div>
+        <div className="-translate-x-1/2 absolute h-[438px] left-[calc(50%-302px)] top-[1251px] w-[464px]">
+          <div className="absolute inset-[-83.33%_-78.66%]">
+            <img alt="" className="block max-w-none size-full" src={imgEllipse41} />
+          </div>
+        </div>
+
+        {/* Mobile Additional Decorative Images */}
+        <div className="absolute flex inset-[49.83%_-22.33%_44.36%_44.88%] items-center justify-center">
+          <div className="flex-none rotate-[47.15deg] size-[240px]">
+            <div className="relative size-full">
+              <div className="absolute backdrop-blur-[4px] bg-[rgba(141,44,221,0.3)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[120px]" />
+              <div className="absolute inset-0 mix-blend-lighten">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <img alt="" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+                </div>
+              </div>
+              <div className="absolute bg-[rgba(141,44,221,0.6)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[120px]" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute flex inset-[13.09%_-23.97%_82.65%_67.21%] items-center justify-center">
+          <div className="flex-none rotate-[100.79deg] size-[240px]">
+            <div className="relative size-full">
+              <div className="absolute backdrop-blur-[4px] bg-[rgba(141,44,221,0.3)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[120px]" />
+              <div className="absolute inset-0 mix-blend-lighten">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <img alt="" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+                </div>
+              </div>
+              <div className="absolute bg-[rgba(141,44,221,0.6)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[120px]" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute flex inset-[16.72%_4.12%_81.17%_67.67%] items-center justify-center">
+          <div className="flex-none rotate-[100.79deg] size-[240px]">
+            <div className="relative size-full">
+              <div className="absolute backdrop-blur-[4px] bg-[rgba(141,44,221,0.3)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[120px]" />
+              <div className="absolute inset-0 mix-blend-lighten">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <img alt="" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+                </div>
+              </div>
+              <div className="absolute bg-[rgba(141,44,221,0.6)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[120px]" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute flex inset-[17.4%_67.75%_79%_-15.81%] items-center justify-center">
+          <div className="flex-none rotate-[100.79deg] size-[240px]">
+            <div className="relative size-full">
+              <div className="absolute backdrop-blur-[4px] bg-[rgba(141,44,221,0.3)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[120px]" />
+              <div className="absolute inset-0 mix-blend-lighten">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <img alt="" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+                </div>
+              </div>
+              <div className="absolute bg-[rgba(141,44,221,0.6)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[120px]" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute flex inset-[15.76%_84.42%_80.47%_-34.65%] items-center justify-center">
+          <div className="flex-none rotate-[100.79deg] size-[240px]">
+            <div className="relative size-full">
+              <div className="absolute backdrop-blur-[4px] bg-[rgba(141,44,221,0.3)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[120px]" />
+              <div className="absolute inset-0 mix-blend-lighten">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <img alt="" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+                </div>
+              </div>
+              <div className="absolute bg-[rgba(141,44,221,0.6)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[120px]" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute flex inset-[40.45%_75.71%_55.94%_-23.95%] items-center justify-center">
+          <div className="flex-none rotate-[47.15deg] size-[240px]">
+            <div className="relative size-full">
+              <div className="absolute backdrop-blur-[4px] bg-[rgba(141,44,221,0.3)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[120px]" />
+              <div className="absolute inset-0 mix-blend-lighten">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <img alt="" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+                </div>
+              </div>
+              <div className="absolute bg-[rgba(141,44,221,0.6)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[120px]" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute flex inset-[38.34%_-20.93%_55.86%_43.49%] items-center justify-center">
+          <div className="flex-none rotate-[47.15deg] size-[240px]">
+            <div className="relative size-full">
+              <div className="absolute backdrop-blur-[4px] bg-[rgba(141,44,221,0.3)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[120px]" />
+              <div className="absolute inset-0 mix-blend-lighten">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <img alt="" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+                </div>
+              </div>
+              <div className="absolute bg-[rgba(141,44,221,0.6)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[120px]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Decorative Elements */}
+        <div className="absolute inset-[3.23%_6.74%_94.81%_7.44%]">
+          <img alt="Decorative Group" className="block max-w-none size-full" src={imgGroup2105} />
+        </div>
+
+        {/* Mobile Hero Image */}
+        <div className="-translate-x-1/2 absolute bottom-[88.94%] flex items-center justify-center left-[calc(50%-3.88px)] top-[3.55%] w-[286.773px]">
+          <div className="flex-none rotate-[102.66deg] size-[240px]">
+            <div className="relative size-full">
+              <div className="absolute backdrop-blur-[4px] bg-[rgba(141,44,221,0.3)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[120px]" />
+              <div className="absolute inset-0 mix-blend-lighten">
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <img alt="" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+                </div>
+              </div>
+              <div className="absolute bg-[rgba(141,44,221,0.6)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[120px]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Hero Text */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-[calc(50%-2.5px)] top-[340px] w-[361px]">
+          <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[56px] relative shrink-0 text-[56px] text-white w-full whitespace-pre-wrap">
+            <p className="mb-0">YOUR</p>
+            <p className="font-['Montserrat:Light',sans-serif] font-light mb-0">DAILY DOSE</p>
+            <p className="font-['Montserrat:Light',sans-serif] font-light mb-0">OF</p>
+            <p>FRESHNESS</p>
+          </div>
+        </div>
+
+        {/* Mobile Experience Purity Label */}
+        <div className="absolute content-stretch flex gap-[12px] items-center left-[32px] right-[-32px] top-[311px]">
+          <div className="bg-white h-[2px] shrink-0 w-[48px]" />
+          <div className="content-stretch flex flex-col items-start relative shrink-0">
+            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase whitespace-nowrap">
+              <p className="leading-[20px]">Experience Purity</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Subtitle */}
+        <div className="absolute content-stretch flex flex-col items-center justify-center left-[32px] max-w-[512px] right-[207px] top-[564px]">
+          <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[20px] text-white whitespace-nowrap">
+            <p className="leading-[32.5px]">Natural spring water</p>
+          </div>
+        </div>
+
+        {/* Mobile CTA Buttons */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[8px] h-[136px] items-center justify-end left-1/2 pt-[16px] top-[675px] w-[430px]">
+          <button
+            onClick={() => router.push('/products')}
+            className="bg-[#31daff] content-stretch flex flex-col h-[60px] items-center justify-center pl-[63px] pr-[61px] py-[16px] relative rounded-[9999px] shrink-0 w-[185px] cursor-pointer"
+          >
+            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white whitespace-nowrap">
+              <p className="leading-[24px]">Shop Now</p>
+            </div>
+          </button>
+          <button
+            onClick={() => router.push('/about')}
+            className="bg-[rgba(0,0,0,0)] content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] py-[16px] relative rounded-[9999px] shrink-0 w-[368px] cursor-pointer"
+          >
+            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold h-[19px] justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-[89px]">
+              <p className="leading-[24px] whitespace-pre-wrap">Learn More</p>
+            </div>
+          </button>
+        </div>
+
+        {/* Mobile Bottom Navigation Frame */}
+        <div className="-translate-x-1/2 absolute bg-[rgba(255,255,255,0.1)] h-[80px] left-1/2 overflow-clip rounded-[90px] top-[829px] w-[394px] z-50">
+          <div className="-translate-y-1/2 absolute left-[6px] size-[56px] top-1/2">
+            <img className="block max-w-none size-full" alt="" src={imgEllipse2} />
+          </div>
+          <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-1/2 w-[348px]">
+            <div className="content-stretch flex gap-[87px] items-center justify-center relative shrink-0 w-[252px]">
+              <button onClick={() => router.push('/')} className="h-[21px] relative shrink-0 w-[19px]">
+                <img className="block max-w-none size-full" alt="" src={imgVector} />
+              </button>
+              <button onClick={() => router.push('/cart')} className="block cursor-pointer h-[28px] relative shrink-0 w-[20px]">
+                <img className="block max-w-none size-full" alt="" src={imgVector1} />
+              </button>
+              <button onClick={() => router.push('/profile')} className="block cursor-pointer h-[22.312px] relative shrink-0 w-[25px]">
+                <img className="block max-w-none size-full" alt="" src={imgGroup2148} />
+              </button>
+              <button onClick={() => router.push('/contact')} className="block cursor-pointer h-[22px] relative shrink-0 w-[18.526px]">
+                <img className="block max-w-none size-full" alt="" src={imgGroup2149} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Featured Products Section */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[7px] h-[123px] items-center justify-center left-[calc(50%+0.5px)] top-[958px] w-full max-w-[429px]">
+          <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
+            <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[40px] relative shrink-0 text-[40px] text-center text-white tracking-[-0.9px] uppercase whitespace-nowrap">
+              <p className="mb-0">FEATURED</p>
+              <p>PRODUCTS</p>
+            </div>
+          </div>
+          <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
+            <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
+              <p className="leading-[24px]">Premium water designed for modern living</p>
+            </div>
+          </div>
+          <div className="bg-[#00d1ff] h-[5px] rounded-[30px] shrink-0 w-[90px]" />
+        </div>
+
+        {/* Mobile Featured Product Card */}
+        {featuredProducts.length > 0 && (
+          <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[40px] items-center left-[calc(50%+0.5px)] px-[16px] top-[1088px] w-[371px]">
+            <div className="h-[435px] relative shrink-0 w-[155px]">
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <img
+                  alt={featuredProducts[0].title}
+                  className="absolute h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%]"
+                  src={featuredProducts[0].image || imgBorborAquaProductKids033L2}
+                />
+              </div>
+            </div>
+            <div className="content-stretch flex flex-col gap-[6px] items-start py-px relative shrink-0 w-full">
+              <div className="content-stretch flex h-[24px] items-end justify-between relative shrink-0 w-full">
+                <div className="content-stretch flex flex-col items-start relative shrink-0">
+                  <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                    <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[28px] relative shrink-0 text-[18px] text-white whitespace-nowrap">
+                      <p className="mb-0">{featuredProducts[0].title}</p>
+                    </div>
+                  </div>
+                  <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                    <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[12px] tracking-[1.2px] uppercase whitespace-nowrap">
+                      <p className="leading-[16px]">0.5L</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="content-stretch flex flex-col items-start relative shrink-0">
+                  <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
+                    <p className="leading-[28px]">{formatPrice(featuredProducts[0].price)}</p>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => handleAddToCart(featuredProducts[0])}
+                disabled={addingToCart.has(featuredProducts[0].id) || !featuredProducts[0].inStock}
+                className="bg-[#00d1ff] content-stretch cursor-pointer flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-[339px] disabled:opacity-50"
+              >
+                <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
+                  <p className="leading-[24px]">Add to Cart</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Carousel Navigation */}
+        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-between left-[calc(50%+0.5px)] top-[1285px] w-[339px]">
+          <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
+            <button
+              onClick={handlePreviousProducts}
+              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid col-1 content-stretch flex flex-col items-center justify-center ml-0 mt-0 px-[8.5px] py-[6.5px] relative rounded-[9999px] row-1"
+            >
+              <div className="relative shrink-0">
+                <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
+                  <div className="flex items-center justify-center relative shrink-0">
+                    <div className="-scale-y-100 flex-none">
+                      <div className="h-[28px] relative w-[24.02px]">
+                        <img alt="" className="block max-w-none size-full" src={imgIcon} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+          <div className="flex items-center justify-center relative shrink-0">
+            <div className="-scale-y-100 flex-none rotate-180">
+              <button
+                onClick={handleNextProducts}
+                className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch flex flex-col items-center justify-center px-[8.5px] py-[6.5px] relative rounded-[9999px]"
+              >
+                <div className="relative shrink-0">
+                  <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
+                    <div className="flex items-center justify-center relative shrink-0">
+                      <div className="-scale-y-100 flex-none">
+                        <div className="h-[28px] relative w-[24.02px]">
+                          <img alt="" className="block max-w-none size-full" src={imgIcon} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Pagination Dots */}
+        <div className="-translate-x-1/2 absolute contents left-1/2 top-[1666px]">
+          <div className="-translate-x-1/2 absolute bg-white left-[calc(50%-17px)] rounded-[9999px] size-[6px] top-[1666px]" />
+          <div className="-translate-x-1/2 absolute bg-[#00d1ff] h-[6px] left-1/2 rounded-[9999px] top-[1666px] w-[16px]" />
+          <div className="-translate-x-1/2 absolute bg-white left-[calc(50%+17px)] rounded-[9999px] size-[6px] top-[1666px]" />
+        </div>
+
+        {/* Mobile View All Products Button */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1708px] w-[241px]">
+          <button
+            onClick={() => router.push('/products')}
+            className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] items-center px-[34px] py-[12px] relative rounded-[9999px] shrink-0"
+          >
+            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#0f172a] text-[16px] text-center whitespace-nowrap">
+              <p className="leading-[24px]">View All Products</p>
+            </div>
+            <div className="relative shrink-0">
+              <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start relative">
+                <div className="flex items-center justify-center relative shrink-0">
+                  <div className="-scale-y-100 flex-none">
+                    <div className="h-[28px] relative w-[24.02px]">
+                      <img alt="" className="block max-w-none size-full" src={img1} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* Mobile Water Energy Section */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-start left-[calc(50%+1.5px)] top-[1843px] w-full max-w-[429px]">
+          <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+            <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
+              <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[40px] text-center tracking-[-0.9px] uppercase w-[641px]">
+                <p className="leading-[40px] whitespace-pre-wrap">WATER ENERGY</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-center relative shrink-0 w-full">
+            <div className="-scale-y-100 flex-none w-full">
+              <div className="content-stretch flex h-[9px] items-start justify-center relative w-full">
+                <div className="bg-[#00d1ff] h-[5px] rounded-[30px] shrink-0 w-[90px]" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Water Energy Content */}
+        <div className="-translate-x-1/2 absolute h-[465px] left-[calc(50%-10.5px)] top-[1903px] w-[403px]">
+          <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[54.84%_0.99%_16.56%_68.49%] justify-center leading-[0] text-[#0f172a] text-[0px] tracking-[-0.9px] uppercase whitespace-nowrap">
+            <p className="leading-[25px] mb-0 text-[29px]">Pure</p>
+            <p className="leading-[25px] mb-0 text-[29px]">energy</p>
+            <p className="font-['Montserrat:Regular',sans-serif] font-normal leading-[20px] mb-0 text-[14px]">drawn from</p>
+            <p className="font-['Montserrat:Regular',sans-serif] font-normal leading-[20px] mb-0 text-[14px]">nature,</p>
+            <p className="font-['Montserrat:Regular',sans-serif] font-normal leading-[20px] mb-0 text-[14px]">captured in</p>
+            <p className="font-['Montserrat:Regular',sans-serif] font-normal leading-[20px] text-[14px]">every drop.</p>
+          </div>
+          <div className="absolute flex flex-col font-['Montserrat:Regular',sans-serif] font-normal inset-[22.8%_59.55%_60%_13.65%] justify-center leading-[16px] text-[#0f172a] text-[14px] text-right tracking-[-0.9px] uppercase whitespace-nowrap">
+            <p className="mb-0">Crystal</p>
+            <p className="mb-0">clarity that</p>
+            <p className="mb-0">refreshes the</p>
+            <p className="mb-0">body and</p>
+            <p>restores</p>
+          </div>
+          <div className="absolute flex inset-[43.01%_56.32%_-14.63%_-38.96%] items-center justify-center">
+            <div className="flex-none rotate-[47.15deg] size-[240px]">
+              <div className="relative size-full">
+                <div className="absolute backdrop-blur-[4px] bg-[rgba(141,44,221,0.3)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[120px]" />
+                <div className="absolute inset-0 mix-blend-lighten">
+                  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                    <img alt="" className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]" src={img} />
+                  </div>
+                </div>
+                <div className="absolute bg-[rgba(141,44,221,0.6)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-overlay rounded-[120px]" />
+              </div>
+            </div>
+          </div>
+          <div className="absolute contents inset-[5.91%_9.77%_0.02%_3.97%]">
+            <div className="absolute contents inset-[5.91%_9.77%_0.02%_16.13%]">
+              <div className="absolute contents inset-[5.91%_9.77%_0.02%_16.13%]">
+                <div className="absolute inset-[9.43%_9.77%_67.89%_72.21%]">
+                  <div className="absolute inset-[0_3.7%_4.59%_0.78%]">
+                    <img alt="" className="block max-w-none size-full" src={imgVector7} />
+                  </div>
+                </div>
+                <div className="absolute inset-[48.32%_67.73%_31.94%_16.13%]">
+                  <img alt="" className="block max-w-none size-full" src={imgVector8} />
+                </div>
+                <div className="absolute aspect-[157.45058065837884/437.4313836472372] flex items-center justify-center left-[34.21%] right-[26.72%] top-[27.48px]">
+                  <div className="flex-none h-[436.107px] rotate-[-0.5deg] w-[153.651px]">
+                    <div className="relative size-full">
+                      <div className="absolute inset-0 opacity-88 overflow-hidden pointer-events-none">
+                        <img alt="" className="absolute h-full left-[-91.91%] max-w-none top-0 w-[283.83%]" src={imgSqawdef1} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute inset-[15.61%_15.04%_66.56%_63.72%]">
+                  <div className="absolute inset-[-3.62%_-4.67%_-6.03%_-4.67%]">
+                    <img alt="" className="block max-w-none size-full" src={imgGlass3} />
+                  </div>
+                </div>
+                <div className="absolute inset-[54.8%_56.51%_27.38%_22.25%]">
+                  <div className="absolute inset-[-3.62%_-4.67%_-6.03%_-4.67%]">
+                    <img alt="" className="block max-w-none size-full" src={imgGlass4} />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[37.63%_59.55%_51.61%_3.97%] justify-center leading-[0] text-[#09c1ff] text-[29px] text-right tracking-[-0.9px] uppercase whitespace-nowrap">
+              <p className="leading-[50px]">balance</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Stats Cards */}
+        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-[calc(50%+3px)] top-[2462px]">
+          <div className="h-[227px] relative rounded-[30px] shrink-0 w-[180px] overflow-hidden">
+            <img
+              alt=""
+              className="absolute h-[149.05%] left-[-49.49%] max-w-none top-[-32.36%] w-[149.49%]"
+              src={imgScreenshot20260114At0835551}
+            />
+          </div>
+          <div className="h-[227px] relative shrink-0 w-[208px]">
+            <div className="absolute bg-[#1ac0fd] inset-0 rounded-[30px]" />
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[69.6%_4.09%_15.58%_36.3%] justify-center leading-[0] text-[48px] text-center text-white tracking-[-0.9px] uppercase">
+              <p className="leading-[40px] whitespace-pre-wrap">98%</p>
+            </div>
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[4.41%_28.61%_36.12%_7.93%] justify-center leading-[24px] text-[0px] text-[24px] text-white tracking-[-0.9px] uppercase whitespace-pre-wrap">
+              <p className="mb-0">Pure</p>
+              <p className="mb-0">spring</p>
+              <p className="mb-0">water</p>
+              <p className="font-['Montserrat:Light',sans-serif] font-light mb-0">from</p>
+              <p className="font-['Montserrat:Light',sans-serif] font-light">Armenia</p>
+            </div>
+            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[84.65%_8.65%_6.46%_44.71%] italic justify-center leading-[0] text-[14px] text-right text-white">
+              <p className="leading-[24px] whitespace-pre-wrap">Natura Source</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-[calc(50%+3px)] top-[2708px]">
+          <div className="h-[227px] relative shrink-0 w-[208px]">
+            <div className="absolute bg-white inset-0 rounded-[30px]" />
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[69.6%_3.85%_15.42%_31.25%] justify-center leading-[0] text-[#0f172a] text-[48px] text-center tracking-[-0.9px] uppercase">
+              <p className="leading-[40px] whitespace-pre-wrap">100%</p>
+            </div>
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[4.41%_16.83%_36.12%_7.69%] justify-center leading-[24px] text-[#1ac0fd] text-[0px] text-[24px] tracking-[-0.9px] uppercase whitespace-pre-wrap">
+              <p className="mb-0">BALNCED</p>
+              <p className="mb-0">HYDRATION</p>
+              <p className="font-['Montserrat:Light',sans-serif] font-light mb-0">EVERY</p>
+              <p className="font-['Montserrat:Light',sans-serif] font-light">DAY</p>
+            </div>
+            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[84.65%_8.65%_6.46%_44.71%] italic justify-center leading-[0] text-[#1ac0fd] text-[14px] text-right">
+              <p className="leading-[24px] whitespace-pre-wrap">Clean Minrals</p>
+            </div>
+          </div>
+          <div className="h-[227px] relative rounded-[30px] shrink-0 w-[180px] overflow-hidden">
+            <img
+              alt=""
+              className="absolute h-[101.64%] left-[-13.07%] max-w-none top-[-1.52%] w-[126.15%]"
+              src={imgScreenshot20260112At1535403}
+            />
+          </div>
+        </div>
+
+        {/* Mobile Why Choose Us Section */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-start left-[calc(50%+0.5px)] top-[3113px] w-full max-w-[429px]">
+          <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+            <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
+              <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[40px] text-center tracking-[-0.9px] uppercase w-full">
+                <p className="leading-[40px] whitespace-pre-wrap">WHY CHOOSE US</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-center relative shrink-0 w-full">
+            <div className="-scale-y-100 flex-none w-full">
+              <div className="content-stretch flex h-[9px] items-start justify-center relative w-full">
+                <div className="bg-[#00d1ff] h-[5px] rounded-[30px] shrink-0 w-[90px]" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Why Choose Us Cards */}
+        <div className="absolute content-stretch flex flex-col gap-[50px] items-end left-[35px] top-[3210px] w-[361px]">
+          <div className="h-[286px] relative shrink-0 w-full">
+            <div className="absolute bg-white inset-[18.18%_0_0_0] rounded-[37px]" />
+            <div className="absolute aspect-[100/100] left-[33.98%] right-[33.7%] top-0">
+              <div className="relative size-full">
+                <div className="absolute inset-[9.48%_-14.22%_18.97%_34.91%]">
+                  <img alt="" className="block max-w-none size-full" src={imgVector4} />
+                </div>
+                <div className="absolute inset-[29.31%_16.81%_0_9.91%]">
+                  <div className="absolute inset-[-3.66%_-4.71%_-6.1%_-4.71%]">
+                    <img alt="" className="block max-w-none size-full" src={imgGlass2} />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal inset-[61.19%_11.7%_22.03%_11.98%] justify-center leading-[24px] not-italic text-[#64748b] text-[16px] text-center whitespace-pre-wrap">
+              <p className="mb-0">Rich in Natural Minerals that provide</p>
+              <p>valuable health benefits.</p>
+            </div>
+            <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[49.3%_22.56%_40.91%_22.84%] justify-center leading-[0] text-[#0f172a] text-[20px] text-center uppercase">
+              <p className="leading-[28px] whitespace-pre-wrap">RICH IN MINERALS</p>
+            </div>
+          </div>
+          <div className="h-[278px] relative shrink-0 w-full">
+            <div className="absolute bg-white inset-[15.83%_0_0_0] rounded-[37px]" />
+            <div className="absolute aspect-[100/100] left-[33.52%] right-[34.08%] top-0">
+              <div className="relative size-full">
+                <div className="absolute inset-[5.88%_-4.86%_26.15%_50.33%]">
+                  <img alt="" className="block max-w-none size-full" src={imgGroup} />
+                </div>
+                <div className="absolute inset-[13.93%_8.94%_9.09%_8.94%]">
+                  <div className="absolute inset-[-3.36%_-4.2%_-5.6%_-4.2%]">
+                    <img alt="" className="block max-w-none size-full" src={imgGlass1} />
+                  </div>
+                </div>
+                <div className="absolute inset-[39.77%_45.45%_20.45%_45.45%]">
+                  <img alt="" className="block max-w-none size-full" src={imgTop1} />
+                </div>
+              </div>
+            </div>
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal inset-[60.07%_8.94%_22.66%_8.38%] justify-center leading-[24px] not-italic text-[#64748b] text-[16px] text-center whitespace-pre-wrap">
+              <p className="mb-0">Borbor Aqua does not include any</p>
+              <p>artificial ingredients in its bottled water</p>
+            </div>
+            <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[47.84%_9.5%_42.09%_8.94%] justify-center leading-[0] text-[#0f172a] text-[20px] text-center uppercase">
+              <p className="leading-[28px] whitespace-pre-wrap">no artifical ingridients</p>
+            </div>
+          </div>
+          <div className="h-[272px] relative shrink-0 w-full">
+            <div className="absolute bg-white inset-[13.97%_-0.55%_0_0] rounded-[37px]" />
+            <div className="absolute aspect-[100/100] left-[34.07%] overflow-clip right-[33.8%] top-0">
+              <div className="relative size-full">
+                <div className="absolute inset-[10.22%_10.23%_61.04%_62.5%]">
+                  <img alt="" className="block max-w-none size-full" src={imgBg} />
+                </div>
+                <div className="absolute inset-[16.22%_15.91%_6.5%_4.41%]">
+                  <div className="absolute inset-[-3.35%_-4.33%_-5.58%_-4.33%]">
+                    <img alt="" className="block max-w-none size-full" src={imgGlass} />
+                  </div>
+                </div>
+                <div className="absolute inset-[32.96%_31.82%_25.5%_35.23%]">
+                  <img alt="" className="block max-w-none size-full" src={imgTop} />
+                </div>
+              </div>
+            </div>
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal inset-[60.66%_11.91%_24.63%_12.19%] justify-center leading-[20px] not-italic text-[#64748b] text-[16px] text-center whitespace-nowrap">
+              <p className="mb-0">Borbor Aqua does not infuse carbon</p>
+              <p>dioxide in any of its bottled water.</p>
+            </div>
+            <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[46.69%_21.05%_43.01%_21.61%] justify-center leading-[0] text-[#0f172a] text-[20px] text-center uppercase whitespace-nowrap">
+              <p className="leading-[28px]">NON-CARBONATED</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Trusted By Section */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-center justify-center left-[calc(50%+0.5px)] top-[4227px] w-full max-w-[429px]">
+          <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+            <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
+              <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[40px] text-center tracking-[-0.9px] uppercase w-full">
+                <p className="leading-[40px] whitespace-pre-wrap">TRUSTED BY</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[14px] text-center uppercase whitespace-nowrap">
+            <p className="leading-[16px]">Industry leading partners</p>
+          </div>
+          <div className="flex items-center justify-center relative shrink-0 w-full">
+            <div className="-scale-y-100 flex-none w-full">
+              <div className="content-stretch flex h-[9px] items-start justify-center relative w-full">
+                <div className="bg-[#00d1ff] h-[5px] rounded-[30px] shrink-0 w-[90px]" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Trusted By Logo */}
+        <div className="-translate-x-1/2 absolute content-stretch flex items-center left-[calc(50%+9px)] top-[4360px]">
+          <div className="h-[68.253px] relative shrink-0 w-[246px]">
+            <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgLogo1} />
+          </div>
+        </div>
+
+        {/* Mobile Trusted By Navigation */}
+        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-[calc(50%+8.5px)] top-[4374px] w-[377px]">
+          <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
+            <button
+              onClick={handlePreviousTrustedBy}
+              className="bg-[rgba(0,0,0,0)] border-[#eee] border-[0.5px] border-solid col-1 content-stretch flex flex-col items-center justify-center ml-0 mt-0 px-[8.5px] py-[6.5px] relative rounded-[9999px] row-1"
+            >
+              <div className="relative shrink-0">
+                <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
+                  <div className="flex items-center justify-center relative shrink-0">
+                    <div className="-scale-y-100 flex-none">
+                      <div className="h-[28px] relative w-[24.02px]">
+                        <img alt="" className="block max-w-none size-full" src={imgIcon1} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </button>
+          </div>
+          <div className="flex items-center justify-center relative shrink-0">
+            <div className="-scale-y-100 flex-none rotate-180">
+              <button
+                onClick={handleNextTrustedBy}
+                className="bg-[rgba(0,0,0,0)] border-[#eee] border-[0.5px] border-solid content-stretch flex flex-col items-center justify-center px-[8.5px] py-[6.5px] relative rounded-[9999px]"
+              >
+                <div className="relative shrink-0">
+                  <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
+                    <div className="flex items-center justify-center relative shrink-0">
+                      <div className="-scale-y-100 flex-none">
+                        <div className="h-[28px] relative w-[24.02px]">
+                          <img alt="" className="block max-w-none size-full" src={imgIcon1} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Footer */}
+        <div className="absolute content-stretch flex flex-col gap-[30px] items-start justify-center left-[35px] top-[4669px] w-[339px] pb-[0px]">
+          <div className="h-[312px] relative shrink-0 w-full">
+            <div className="absolute content-stretch flex h-[34px] items-center left-0 top-0 w-[336px]">
+              <div className="h-[34px] relative shrink-0 w-[112px]">
+                <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgBorborAguaLogoColorB2024Colored1} />
+              </div>
+            </div>
+            <div className="absolute content-stretch flex flex-col items-start left-0 top-[58px] w-[336px]">
+              <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-full">
+                <p className="leading-[26px] whitespace-pre-wrap">New Aqua LLC introduces its Natural Spring Bottled Water – Borbor Aqua. Our range of products consists of 0.25L, 0.33L, 0.5L, 1L, 5L & 19L water bottles. Our Natural spring bottled water is non-carbonated. It is Rich in Natural Minerals that provides valuable health benefits to everyone.</p>
+              </div>
+            </div>
+          </div>
+          <div className="content-stretch flex flex-col gap-[4px] h-[165px] items-start relative shrink-0 w-full">
+            <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase w-full">
+                <p className="leading-[20px] whitespace-pre-wrap">CONTACT</p>
+              </div>
+            </div>
+            <div className="content-stretch flex flex-col gap-[6px] items-start relative shrink-0 w-[249px]">
+              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white whitespace-pre-wrap">
+                  <p className="mb-0 leading-[24px]">Office: <a href="tel:0037433000401" className="underline">+374 33 000401</a></p>
+                </div>
+              </div>
+              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
+                  <p className="leading-[24px] whitespace-pre-wrap">Delivery: <a href="tel:0037441012004" className="underline">+374 41 012004</a></p>
+                </div>
+              </div>
+              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
+                  <p className="leading-[24px] whitespace-pre-wrap">Email: <a href="mailto:borboraqua.am@gmail.com" className="underline">info@borboraqua.am</a></p>
+                </div>
+              </div>
+              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[24px] not-italic relative shrink-0 text-[16px] text-white w-[228px] whitespace-pre-wrap">
+                  <p className="mb-0">Location: 1412, Gegharkunik,</p>
+                  <p className="mb-0">v. Dzoragyugh, Armenia</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="content-stretch flex flex-col gap-[6px] h-[140px] items-start relative shrink-0 w-full">
+            <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase w-full">
+                <p className="leading-[20px] whitespace-pre-wrap">POLICIES</p>
+              </div>
+            </div>
+            <div className="content-stretch flex flex-col gap-[6px] items-start relative shrink-0 w-full">
+              <button onClick={() => router.push('/privacy')} className="text-left">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
+                  <p className="leading-[24px] whitespace-pre-wrap">Privacy Policy</p>
+                </div>
+              </button>
+              <button onClick={() => router.push('/terms')} className="text-left">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
+                  <p className="leading-[24px] whitespace-pre-wrap">Terms & Conditions</p>
+                </div>
+              </button>
+              <button onClick={() => router.push('/delivery-terms')} className="text-left">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
+                  <p className="leading-[24px] whitespace-pre-wrap">Delivery Terms</p>
+                </div>
+              </button>
+              <button onClick={() => router.push('/refund-policy')} className="text-left">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-full">
+                  <p className="leading-[24px] whitespace-pre-wrap">Refund Policy</p>
+                </div>
+              </button>
+            </div>
+          </div>
+          <div className="content-stretch flex flex-col gap-[6px] h-[312px] items-start relative shrink-0 w-[94px]">
+            <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase w-full">
+                <p className="leading-[20px] whitespace-pre-wrap">SITE MAP</p>
+              </div>
+            </div>
+            <div className="content-stretch flex flex-col gap-[6px] items-start relative shrink-0 w-full">
+              <button onClick={() => router.push('/about')} className="text-left w-full">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
+                  <p className="leading-[24px] whitespace-pre-wrap">About Us</p>
+                </div>
+              </button>
+              <button onClick={() => router.push('/contact')} className="text-left w-full">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
+                  <p className="leading-[24px] whitespace-pre-wrap">Contact</p>
+                </div>
+              </button>
+              <button onClick={() => router.push('/products')} className="text-left w-full">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
+                  <p className="leading-[24px] whitespace-pre-wrap">Shop</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Footer Copyright */}
+        <div className="-translate-x-1/2 absolute border-[#e2e8f0] border-solid border-t content-stretch flex flex-col gap-[21px] items-center justify-center left-1/2 pt-[29px] top-[5650px] w-[386px] z-10">
+          <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-white whitespace-nowrap">
+            <p className="leading-[16px]">Copyright © 2024 | New Aqua LLC | All Rights Reserved</p>
+          </div>
+          <div className="relative shrink-0">
+            <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[13px] items-center justify-end relative">
+              <div className="h-[24.998px] relative shrink-0 w-[77.198px]">
+                <img alt="" className="block max-w-none size-full" src={imgGroup2122} />
+              </div>
+              <div className="h-[29.209px] relative shrink-0 w-[48.946px]">
+                <img alt="" className="block max-w-none size-full" src={imgGroup2121} />
+              </div>
+              <div className="h-[25.209px] relative shrink-0 w-[98.706px]">
+                <img alt="" className="block max-w-none size-full" src={imgGroup2124} />
+              </div>
+              <div className="h-[25px] relative shrink-0 w-[87.735px]">
+                <img alt="" className="block max-w-none size-full" src={imgGroup2123} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Version - Hidden on mobile */}
+      <div
+        ref={containerRef}
+        className="hidden md:block bg-white relative w-full max-w-[1440px] mx-auto h-[6901px] lg:h-[6901px] md:h-[5600px] home-page-container"
+      >
       {/* Header Section - Navigation Bar */}
       <div className="fixed bg-[rgba(255,255,255,0.08)] backdrop-blur-[15px] content-stretch flex flex-col h-[73px] md:h-[60px] sm:h-[50px] items-center justify-center left-1/2 px-[38px] md:px-[24px] sm:px-[16px] py-[16px] md:py-[12px] sm:py-[8px] rounded-[70px] md:rounded-[50px] sm:rounded-[40px] top-[64px] md:top-[32px] sm:top-[16px] translate-x-[-50%] w-[1400px] lg:w-[1400px] md:w-[90%] sm:w-[95%] z-50 border border-[rgba(255,255,255,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_60px_rgba(98,179,232,0.15)]">
         <div className="content-stretch flex gap-[200px] lg:gap-[200px] md:gap-[120px] sm:gap-[16px] h-[56px] md:h-[44px] sm:h-[36px] items-center justify-center relative shrink-0">
@@ -1805,6 +2717,7 @@ export default function HomePage() {
         </div>
       )}
 
-    </div>
+      </div>
+    </>
   );
 }
