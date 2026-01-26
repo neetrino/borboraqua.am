@@ -708,218 +708,97 @@ export default function HomePage() {
 
           
 
-          {/* Products Grid */}
-          <div className="absolute h-[736.83px] lg:h-[736.83px] md:h-[550px] sm:h-[450px] left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[166px] lg:top-[166px] md:top-[120px] sm:top-[100px] z-[10] overflow-hidden">
+          {/* Products Grid - Uniform Layout */}
+          <div className="absolute h-[442px] lg:h-[442px] md:h-[330px] sm:h-[270px] left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[166px] lg:top-[166px] md:top-[120px] sm:top-[100px] z-[10]">
             {productsLoading ? (
-              // Loading state - show placeholder
-              <>
-                <div className="absolute bg-transparent left-0 top-[-12px] bottom-[12px] right-[11.66px]">
-                  <div className="absolute h-[563px] left-[98.83px] top-[12.91px] w-[277px] bg-gray-300 animate-pulse rounded" />
-                  <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[16px] pb-[16px] px-[16px] right-[9px] top-[599.91px]">
-                    <div className="h-4 bg-gray-300 animate-pulse rounded w-3/4" />
-                    <div className="h-6 bg-gray-300 animate-pulse rounded w-1/3" />
+              // Loading state - show placeholder with uniform grid
+              <div className="flex gap-[40px] lg:gap-[40px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="flex flex-col items-center gap-[24px] w-[320px] lg:w-[320px] md:w-[280px] sm:w-[240px]">
+                    <div className="h-[320px] lg:h-[320px] md:h-[280px] sm:h-[240px] w-full bg-gray-300 animate-pulse rounded-lg overflow-hidden" />
+                    <div className="w-full flex flex-col gap-[16px] px-[16px]">
+                      <div className="h-4 bg-gray-300 animate-pulse rounded w-3/4" />
+                      <div className="h-6 bg-gray-300 animate-pulse rounded w-1/3" />
+                    </div>
                   </div>
-                </div>
-                <div className="absolute bg-transparent content-stretch flex flex-col gap-[24px] left-[513px] right-[500.33px] top-[-12px] bottom-[12px] items-center justify-center p-[8px]">
-                  <div className="h-[564px] w-[205px] bg-gray-300 animate-pulse rounded" />
-                </div>
-                <div className="absolute bg-transparent left-[1013.34px] right-0 top-[-12px] bottom-[12px]">
-                  <div className="absolute h-[508px] left-[137px] top-[53px] w-[182px] bg-gray-300 animate-pulse rounded" />
-                </div>
-              </>
+                ))}
+              </div>
             ) : featuredProducts.length > 0 ? (
-              // Render actual products - show 3 at a time based on carouselIndex
-              (() => {
-                const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 3);
-                return visibleProducts.map((product, relativeIndex) => {
-                  const index = carouselIndex + relativeIndex;
-                  const currency = getStoredCurrency();
-                  const formattedPrice = formatPrice(product.price, currency);
+              // Render actual products - show 3 at a time based on carouselIndex with uniform grid
+              <div className="flex gap-[40px] lg:gap-[40px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
+                {(() => {
+                  const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 3);
+                  return visibleProducts.map((product) => {
+                    const currency = getStoredCurrency();
+                    const formattedPrice = formatPrice(product.price, currency);
 
-                  // Product positioning based on relativeIndex (matching original layout)
-                  // Always use relativeIndex (0, 1, 2) for the 3 visible products
-                  // Fixed alignment: all content sections use consistent positioning for proper alignment
-                  // Recalculated for 1100px container width with proper spacing to avoid overlap
-                  const positions = [
-                    { className: "left-0 top-[-12px] bottom-[12px] right-[calc(50%+200px)]", imageClass: "h-[563px] left-[98.83px] top-[12.91px] w-[277px]", imageStyle: "h-[111.44%] left-[-62.35%] max-w-none top-0 w-[226.62%]", contentClass: "left-0 pb-[16px] px-[16px] top-[599.91px] w-full max-w-[424.66px]" },
-                    { className: "left-1/2 translate-x-[-50%] top-[-12px] bottom-[12px] w-[375px]", imageClass: "h-[564px] w-[205px]", imageStyle: "h-[100.18%] left-[-87.8%] max-w-none top-[-0.09%] w-[275.61%]", contentClass: "pb-[16px] px-[16px] w-full max-w-[424.66px]" },
-                    { className: "left-[calc(50%+200px)] right-0 top-[-12px] bottom-[12px]", imageClass: "h-[508px] left-[137px] top-[53px] w-[182px]", imageStyle: "h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%]", contentClass: "left-0 top-[600px] w-full max-w-[424.66px] px-[16px] pb-[16px]" }
-                  ];
-
-                  const pos = positions[relativeIndex] || positions[0];
-                  const isSecondProduct = relativeIndex === 1;
-                  const isThirdProduct = relativeIndex === 2;
-
-                  return (
-                    <div
-                      key={product.id}
-                      onClick={() => router.push(`/products/${product.slug}`)}
-                      className={`absolute bg-transparent ${pos.className} ${isSecondProduct ? 'flex flex-col gap-[24px] items-center justify-center' : ''} cursor-pointer product-card-hover z-[11]`}
-                    >
-                      {isThirdProduct ? (
-                        <div className="absolute h-[714px] left-[16px] right-[16px] top-0">
-                          <div className={`absolute ${pos.imageClass}`}>
-                            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                              {product.image ? (
-                                <img
-                                  alt={product.title}
-                                  className={`absolute ${pos.imageStyle} object-contain product-image-hover`}
-                                  src={product.image}
-                                />
-                              ) : (
-                                <div className={`absolute ${pos.imageStyle} bg-gray-300`} />
-                              )}
-                            </div>
-                          </div>
-                          <div className={`absolute content-stretch flex flex-col gap-[16px] items-start ${pos.contentClass}`}>
-                            <div className="content-stretch flex items-end justify-between relative shrink-0 w-full">
-                              <div className="content-stretch flex flex-col items-start relative shrink-0">
-                                <div className="content-stretch flex flex-col items-start relative shrink-0">
-                                  <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] lg:text-[18px] md:text-[16px] sm:text-[14px] text-white">
-                                    <p className="leading-[28px] lg:leading-[28px] md:leading-[24px] sm:leading-[20px]">{product.title}</p>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="content-stretch flex flex-col items-start relative shrink-0">
-                                <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] lg:text-[20px] md:text-[18px] sm:text-[16px] whitespace-nowrap">
-                                  <p className="leading-[28px] lg:leading-[28px] md:leading-[24px] sm:leading-[20px]">{formattedPrice}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAddToCart(product);
-                              }}
-                              disabled={!product.inStock || addingToCart.has(product.id)}
-                              className="bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full max-w-[424.66px] hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                            >
-                              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
-                                <p className="leading-[24px]">
-                                  {addingToCart.has(product.id) ? 'Adding...' : 'Add to Cart'}
-                                </p>
-                              </div>
-                            </button>
-                          </div>
+                    return (
+                      <div
+                        key={product.id}
+                        onClick={() => router.push(`/products/${product.slug}`)}
+                        className="flex flex-col items-center gap-[24px] w-[320px] lg:w-[320px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate"
+                      >
+                        {/* Image Container - Uniform size with overflow hidden */}
+                        <div className="h-[320px] lg:h-[320px] md:h-[280px] sm:h-[240px] w-full relative overflow-hidden flex items-center justify-center bg-transparent">
+                          {product.image ? (
+                            <img
+                              alt={product.title}
+                              className="h-full w-full object-contain product-image-hover"
+                              src={product.image}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-300 rounded-lg" />
+                          )}
                         </div>
-                      ) : isSecondProduct ? (
-                        <>
-                          <div className={`h-[564px] relative shrink-0 w-[205px]`}>
-                            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                              {product.image ? (
-                                <img
-                                  alt={product.title}
-                                  className={`absolute ${pos.imageStyle} object-contain product-image-hover`}
-                                  src={product.image}
-                                />
-                              ) : (
-                                <div className={`absolute ${pos.imageStyle} bg-gray-300`} />
-                              )}
-                            </div>
-                          </div>
-                          <div className="relative shrink-0 w-full max-w-[424.66px]">
-                            <div className="content-stretch flex flex-col gap-[16px] items-start pb-[16px] px-[16px] relative w-full">
-                              <div className="content-stretch flex items-end justify-between relative shrink-0 w-full">
-                                <div className="content-stretch flex flex-col items-start relative shrink-0">
-                                  <div className="content-stretch flex flex-col items-start relative shrink-0">
-                                    <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white">
-                                      <p className="leading-[28px]">{product.title}</p>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="content-stretch flex flex-col items-start relative shrink-0">
-                                  <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
-                                    <p className="leading-[28px]">{formattedPrice}</p>
-                                  </div>
-                                </div>
-                              </div>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleAddToCart(product);
-                                }}
-                                disabled={!product.inStock || addingToCart.has(product.id)}
-                                className="bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                              >
-                                <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
-                                  <p className="leading-[24px]">
-                                    {addingToCart.has(product.id) ? 'Adding...' : 'Add to Cart'}
-                                  </p>
-                                </div>
-                              </button>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className={`absolute ${pos.imageClass}`}>
-                            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                              {product.image ? (
-                                <img
-                                  alt={product.title}
-                                  className={`absolute ${pos.imageStyle} object-contain product-image-hover`}
-                                  src={product.image}
-                                />
-                              ) : (
-                                <div className={`absolute ${pos.imageStyle} bg-gray-300`} />
-                              )}
-                            </div>
-                          </div>
-                          <div className={`absolute content-stretch flex flex-col gap-[16px] items-start ${pos.contentClass}`}>
-                            <div className="content-stretch flex items-end justify-between relative shrink-0 w-full">
-                              <div className="content-stretch flex flex-col items-start relative shrink-0">
-                                <div className="content-stretch flex flex-col items-start relative shrink-0">
-                                  <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white">
-                                    <p className="leading-[28px]">{product.title}</p>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="content-stretch flex flex-col items-start relative shrink-0">
-                                <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
-                                  <p className="leading-[28px]">{formattedPrice}</p>
-                                </div>
+                        {/* Content Section - Uniform layout */}
+                        <div className="w-full flex flex-col gap-[16px] px-[16px] pb-[16px]">
+                          <div className="flex items-end justify-between w-full">
+                            <div className="flex flex-col items-start">
+                              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] lg:text-[18px] md:text-[16px] sm:text-[14px] text-white">
+                                <p className="leading-[28px] lg:leading-[28px] md:leading-[24px] sm:leading-[20px]">{product.title}</p>
                               </div>
                             </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleAddToCart(product);
-                              }}
-                              disabled={!product.inStock || addingToCart.has(product.id)}
-                              className="bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full max-w-[424.66px] hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                            >
-                              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
-                                <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px]">
-                                  {addingToCart.has(product.id) ? 'Adding...' : 'Add to Cart'}
-                                </p>
+                            <div className="flex flex-col items-start">
+                              <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] lg:text-[20px] md:text-[18px] sm:text-[16px] whitespace-nowrap">
+                                <p className="leading-[28px] lg:leading-[28px] md:leading-[24px] sm:leading-[20px]">{formattedPrice}</p>
                               </div>
-                            </button>
+                            </div>
                           </div>
-                        </>
-                      )}
-                    </div>
-                  );
-                });
-              })()
-            ) : (
-              // Fallback to original hardcoded products if no products loaded
-              <>
-                <div className="absolute bg-transparent left-0 top-[-12px] bottom-[12px] right-[11.66px]">
-                  <div className="absolute h-[563px] left-[98.83px] top-[12.91px] w-[277px]">
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                      <img alt="Product 19L" className="absolute h-[111.44%] left-[-62.35%] max-w-none top-0 w-[226.62%]" src={img1} />
-                    </div>
-                  </div>
-                  <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[16px] pb-[16px] px-[16px] right-[9px] top-[599.91px]">
-                    <div className="content-stretch flex items-end justify-between pr-[0.01px] relative shrink-0 w-full">
-                      <div className="content-stretch flex flex-col items-start relative shrink-0">
-                        <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white whitespace-nowrap">
-                            <p className="leading-[28px]">Natural spring water</p>
-                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddToCart(product);
+                            }}
+                            disabled={!product.inStock || addingToCart.has(product.id)}
+                            className="bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                          >
+                            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
+                              <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px]">
+                                {addingToCart.has(product.id) ? 'Adding...' : 'Add to Cart'}
+                              </p>
+                            </div>
+                          </button>
                         </div>
                       </div>
-                      <div className="content-stretch flex flex-col items-start relative shrink-0">
+                    );
+                  });
+                })()}
+              </div>
+            ) : (
+              // Fallback to original hardcoded products if no products loaded - uniform layout
+              <div className="flex gap-[40px] lg:gap-[40px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
+                <div className="flex flex-col items-center gap-[24px] w-[320px] lg:w-[320px] md:w-[280px] sm:w-[240px]">
+                  <div className="h-[320px] lg:h-[320px] md:h-[280px] sm:h-[240px] w-full relative overflow-hidden flex items-center justify-center bg-transparent">
+                    <img alt="Product 19L" className="h-full w-full object-contain" src={img1} />
+                  </div>
+                  <div className="w-full flex flex-col gap-[16px] px-[16px] pb-[16px]">
+                    <div className="flex items-end justify-between w-full">
+                      <div className="flex flex-col items-start">
+                        <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] text-white whitespace-nowrap">
+                          <p className="leading-[28px]">Natural spring water</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-start">
                         <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
                           <p className="leading-[28px]">1800 AMD</p>
                         </div>
@@ -932,7 +811,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-              </>
+              </div>
             )}
 
             {/* Navigation Arrows - Only show if we have more than 3 products */}
