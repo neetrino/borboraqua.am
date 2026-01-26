@@ -690,9 +690,9 @@ export default function HomePage() {
             background: "linear-gradient(to bottom, transparent 0%, transparent 15%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.3) 85%, white 100%)"
           }}
         />
-        <div className="absolute h-[976px] lg:h-[976px] md:h-[750px] sm:h-[600px] left-[192px] lg:left-[192px] md:left-[5%] sm:left-[2.5%] right-[192px] lg:right-[192px] md:right-[5%] sm:right-[2.5%] top-[139px] lg:top-[139px] md:top-[100px] sm:top-[80px] relative z-10">
+        <div className="absolute h-[976px] lg:h-[976px] md:h-[750px] sm:h-[600px] left-1/2 translate-x-[-50%] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%] top-[139px] lg:top-[139px] md:top-[100px] sm:top-[80px] relative z-10">
           {/* Section Header */}
-          <div className="absolute content-stretch flex flex-col gap-[16px] lg:gap-[16px] md:gap-[12px] sm:gap-[10px] items-start left-[24px] lg:left-[24px] md:left-[16px] sm:left-[12px] right-[24px] lg:right-[24px] md:right-[16px] sm:right-[12px] top-[-37px] lg:top-[-37px] md:top-[-30px] sm:top-[-24px]">
+          <div className="absolute content-stretch flex flex-col gap-[16px] lg:gap-[16px] md:gap-[12px] sm:gap-[10px] items-start left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[-37px] lg:top-[-37px] md:top-[-30px] sm:top-[-24px]">
             <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
               <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[70px] lg:text-[70px] md:text-[48px] sm:text-[32px] text-center text-white tracking-[-0.9px] lg:tracking-[-0.9px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
                 <p className="leading-[40px] lg:leading-[40px] md:leading-[32px] sm:leading-[28px]">FEATURED PRODUCTS</p>
@@ -709,13 +709,13 @@ export default function HomePage() {
           
 
           {/* Products Grid */}
-          <div className="absolute h-[736.83px] lg:h-[736.83px] md:h-[550px] sm:h-[450px] left-[24px] lg:left-[24px] md:left-[16px] sm:left-[12px] right-[24px] lg:right-[24px] md:right-[16px] sm:right-[12px] top-[166px] lg:top-[166px] md:top-[120px] sm:top-[100px] z-[10] overflow-hidden">
+          <div className="absolute h-[736.83px] lg:h-[736.83px] md:h-[550px] sm:h-[450px] left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[166px] lg:top-[166px] md:top-[120px] sm:top-[100px] z-[10] overflow-hidden">
             {productsLoading ? (
               // Loading state - show placeholder
               <>
                 <div className="absolute bg-transparent left-0 top-[-12px] bottom-[12px] right-[11.66px]">
                   <div className="absolute h-[563px] left-[98.83px] top-[12.91px] w-[277px] bg-gray-300 animate-pulse rounded" />
-                  <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[9px] pb-[16px] px-[16px] right-[9px] top-[599.91px]">
+                  <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[16px] pb-[16px] px-[16px] right-[9px] top-[599.91px]">
                     <div className="h-4 bg-gray-300 animate-pulse rounded w-3/4" />
                     <div className="h-6 bg-gray-300 animate-pulse rounded w-1/3" />
                   </div>
@@ -738,8 +738,9 @@ export default function HomePage() {
 
                   // Product positioning based on relativeIndex (matching original layout)
                   // Always use relativeIndex (0, 1, 2) for the 3 visible products
+                  // Fixed alignment: all content sections use consistent left positioning
                   const positions = [
-                    { className: "left-0 top-[-12px] bottom-[12px] right-[11.66px]", imageClass: "h-[563px] left-[98.83px] top-[12.91px] w-[277px]", imageStyle: "h-[111.44%] left-[-62.35%] max-w-none top-0 w-[226.62%]", contentClass: "left-[9px] pb-[16px] px-[16px] top-[599.91px] w-[424.66px]" },
+                    { className: "left-0 top-[-12px] bottom-[12px] right-[11.66px]", imageClass: "h-[563px] left-[98.83px] top-[12.91px] w-[277px]", imageStyle: "h-[111.44%] left-[-62.35%] max-w-none top-0 w-[226.62%]", contentClass: "left-[16px] pb-[16px] px-[16px] top-[599.91px] w-[424.66px]" },
                     { className: "left-[513px] right-[500.33px] top-[-12px] bottom-[12px]", imageClass: "h-[564px] w-[205px]", imageStyle: "h-[100.18%] left-[-87.8%] max-w-none top-[-0.09%] w-[275.61%]", contentClass: "pb-[16px] px-[16px]" },
                     { className: "left-[1013.34px] right-0 top-[-12px] bottom-[12px]", imageClass: "h-[508px] left-[137px] top-[53px] w-[182px]", imageStyle: "h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%]", contentClass: "left-[16px] top-[600px] w-[424.66px]" }
                   ];
@@ -755,7 +756,7 @@ export default function HomePage() {
                       className={`absolute bg-transparent ${pos.className} ${isSecondProduct ? 'content-stretch flex flex-col gap-[24px] items-center justify-center p-[8px]' : ''} cursor-pointer product-card-hover z-[11]`}
                     >
                       {isThirdProduct ? (
-                        <div className="absolute h-[714px] left-[9px] right-[9px] top-0">
+                        <div className="absolute h-[714px] left-[16px] right-[16px] top-0">
                           <div className={`absolute ${pos.imageClass}`}>
                             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                               {product.image ? (
@@ -789,7 +790,7 @@ export default function HomePage() {
                               handleAddToCart(product);
                             }}
                             disabled={!product.inStock || addingToCart.has(product.id)}
-                            className="absolute bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center left-[16px] py-[12px] rounded-[34px] top-[660px] w-[424.66px] hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            className="absolute bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center left-0 py-[12px] rounded-[34px] top-[660px] w-[424.66px] hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
                           >
                             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
                               <p className="leading-[24px]">
@@ -906,7 +907,7 @@ export default function HomePage() {
                       <img alt="Product 19L" className="absolute h-[111.44%] left-[-62.35%] max-w-none top-0 w-[226.62%]" src={img1} />
                     </div>
                   </div>
-                  <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[9px] pb-[16px] px-[16px] right-[9px] top-[599.91px]">
+                  <div className="absolute content-stretch flex flex-col gap-[16px] items-start left-[16px] pb-[16px] px-[16px] right-[9px] top-[599.91px]">
                     <div className="content-stretch flex items-end justify-between pr-[0.01px] relative shrink-0 w-full">
                       <div className="content-stretch flex flex-col items-start relative shrink-0">
                         <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
@@ -1133,7 +1134,7 @@ export default function HomePage() {
       </div>
 
       {/* Why Choose Us Section */}
-      <div className="absolute content-stretch flex flex-col gap-[32px] lg:gap-[32px] md:gap-[24px] sm:gap-[20px] items-start left-[205px] lg:left-[205px] md:left-[5%] sm:left-[2.5%] top-[4422px] lg:top-[4422px] md:top-[3500px] sm:top-[2800px] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%]">
+      <div className="absolute content-stretch flex flex-col gap-[32px] lg:gap-[32px] md:gap-[24px] sm:gap-[20px] items-start left-1/2 translate-x-[-50%] top-[4422px] lg:top-[4422px] md:top-[3500px] sm:top-[2800px] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%]">
         <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
           <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
             <div className="flex flex-col font-['Montserrat',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[70px] lg:text-[70px] md:text-[48px] sm:text-[32px] text-center tracking-[-0.9px] lg:tracking-[-0.9px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
