@@ -113,14 +113,6 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/cookies"
-                  className="text-sm text-gray-300 hover:text-white transition-colors"
-                >
-                  {t('common.footer.cookiePolicy')}
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/refund-policy"
                   className="text-sm text-gray-300 hover:text-white transition-colors"
                 >

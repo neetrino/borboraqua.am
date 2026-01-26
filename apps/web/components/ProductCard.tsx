@@ -9,7 +9,6 @@ import { formatPrice, getStoredCurrency } from '../lib/currency';
 import { apiClient } from '../lib/api-client';
 import { useAuth } from '../lib/auth/AuthContext';
 import { useTranslation } from '../lib/i18n-client';
-import { CompareIcon } from './icons/CompareIcon';
 import { CartIcon as CartPngIcon } from './icons/CartIcon';
 import { ProductLabels } from './ProductLabels';
 
@@ -39,8 +38,6 @@ interface ProductCardProps {
   viewMode?: ViewMode;
 }
 
-const WISHLIST_KEY = 'shop_wishlist';
-const COMPARE_KEY = 'shop_compare';
 
 // Color mapping for common color names
 const colorMap: Record<string, string> = {
@@ -86,22 +83,9 @@ const getColorHex = (colorName: string): string => {
   return colorMap[normalized] || '#CCCCCC';
 };
 
-// Иконки
-const WishlistIcon = ({ filled = false }: { filled?: boolean }) => (
-  <svg width="24" height="24" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path 
-      d="M10 17L8.55 15.7C4.4 12.2 2 10.1 2 7.5C2 5.4 3.4 4 5.5 4C6.8 4 8.1 4.6 9 5.5C9.9 4.6 11.2 4 12.5 4C14.6 4 16 5.4 16 7.5C16 10.1 13.6 12.2 9.45 15.7L10 17Z" 
-      stroke="currentColor" 
-      strokeWidth="1.8" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      fill={filled ? "currentColor" : "none"} 
-    />
-  </svg>
-);
 
 /**
- * Product card component with Compare, Wishlist and Cart icons
+ * Product card component with Cart icon
  * Displays product image, title, category, price and action buttons
  */
 export function ProductCard({ product, viewMode = 'grid-3' }: ProductCardProps) {
@@ -110,50 +94,9 @@ export function ProductCard({ product, viewMode = 'grid-3' }: ProductCardProps) 
   const { isLoggedIn } = useAuth();
   const { t } = useTranslation();
   const [currency, setCurrency] = useState(getStoredCurrency());
-  const [isInWishlist, setIsInWishlist] = useState(false);
-  const [isInCompare, setIsInCompare] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Проверка состояния wishlist и compare
-  useEffect(() => {
-    const checkWishlist = () => {
-      if (typeof window === 'undefined') return;
-      try {
-        const stored = localStorage.getItem(WISHLIST_KEY);
-        const wishlist = stored ? JSON.parse(stored) : [];
-        setIsInWishlist(wishlist.includes(product.id));
-      } catch {
-        setIsInWishlist(false);
-      }
-    };
-
-    const checkCompare = () => {
-      if (typeof window === 'undefined') return;
-      try {
-        const stored = localStorage.getItem(COMPARE_KEY);
-        const compare = stored ? JSON.parse(stored) : [];
-        setIsInCompare(compare.includes(product.id));
-      } catch {
-        setIsInCompare(false);
-      }
-    };
-
-    checkWishlist();
-    checkCompare();
-
-    // Слушаем обновления
-    const handleWishlistUpdate = () => checkWishlist();
-    const handleCompareUpdate = () => checkCompare();
-
-    window.addEventListener('wishlist-updated', handleWishlistUpdate);
-    window.addEventListener('compare-updated', handleCompareUpdate);
-
-    return () => {
-      window.removeEventListener('wishlist-updated', handleWishlistUpdate);
-      window.removeEventListener('compare-updated', handleCompareUpdate);
-    };
-  }, [product.id]);
 
   // Listen for currency updates
   useEffect(() => {
@@ -173,74 +116,6 @@ export function ProductCard({ product, viewMode = 'grid-3' }: ProductCardProps) 
     };
   }, []);
 
-  // Добавление/удаление из wishlist
-  const handleWishlistToggle = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Проверка авторизации - если не залогинен, перенаправляем на страницу входа
-    if (!isLoggedIn) {
-      router.push(`/login?redirect=/products`);
-      return;
-    }
-    
-    if (typeof window === 'undefined') return;
-    
-    try {
-      const stored = localStorage.getItem(WISHLIST_KEY);
-      const wishlist: string[] = stored ? JSON.parse(stored) : [];
-      
-      if (isInWishlist) {
-        const updated = wishlist.filter((id) => id !== product.id);
-        localStorage.setItem(WISHLIST_KEY, JSON.stringify(updated));
-        setIsInWishlist(false);
-      } else {
-        wishlist.push(product.id);
-        localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
-        setIsInWishlist(true);
-      }
-      
-      window.dispatchEvent(new Event('wishlist-updated'));
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-    }
-  };
-
-  // Добавление/удаление из compare
-  const handleCompareToggle = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (typeof window === 'undefined') return;
-    
-    try {
-      const stored = localStorage.getItem(COMPARE_KEY);
-      const compare: string[] = stored ? JSON.parse(stored) : [];
-      
-      // Максимум 4 продукта для сравнения
-      console.info('[Compare] Toggling compare from ProductCard', {
-        productId: product.id,
-        action: isInCompare ? 'remove' : 'add',
-      });
-      if (isInCompare) {
-        const updated = compare.filter((id) => id !== product.id);
-        localStorage.setItem(COMPARE_KEY, JSON.stringify(updated));
-        setIsInCompare(false);
-      } else {
-        if (compare.length >= 4) {
-          alert(t('common.alerts.compareMaxReached'));
-          return;
-        }
-        compare.push(product.id);
-        localStorage.setItem(COMPARE_KEY, JSON.stringify(compare));
-        setIsInCompare(true);
-      }
-      
-      window.dispatchEvent(new Event('compare-updated'));
-    } catch (error) {
-      console.error('Error updating compare:', error);
-    }
-  };
 
   // Добавление в корзину
   const handleAddToCart = async (e: MouseEvent) => {
@@ -528,34 +403,6 @@ export function ProductCard({ product, viewMode = 'grid-3' }: ProductCardProps) 
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2 self-start sm:self-center">
-              {/* Compare Icon */}
-              <button
-                onClick={handleCompareToggle}
-                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                  isInCompare
-                    ? 'border-gray-900 text-gray-900 bg-white shadow-sm'
-                    : 'border-gray-200 text-gray-700 bg-white hover:border-gray-300 hover:bg-gray-50'
-                }`}
-                title={isInCompare ? t('common.messages.removedFromCompare') : t('common.messages.addedToCompare')}
-                aria-label={isInCompare ? t('common.messages.removedFromCompare') : t('common.messages.addedToCompare')}
-              >
-                <CompareIcon isActive={isInCompare} />
-              </button>
-
-              {/* Wishlist Icon */}
-              <button
-                onClick={handleWishlistToggle}
-                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
-                  isInWishlist
-                    ? 'bg-red-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                title={isInWishlist ? t('common.messages.removedFromWishlist') : t('common.messages.addedToWishlist')}
-                aria-label={isInWishlist ? t('common.messages.removedFromWishlist') : t('common.messages.addedToWishlist')}
-              >
-                <WishlistIcon filled={isInWishlist} />
-              </button>
-
               {/* Cart Icon */}
               <button
                 onClick={handleAddToCart}
@@ -610,49 +457,6 @@ export function ProductCard({ product, viewMode = 'grid-3' }: ProductCardProps) 
         {/* Product Labels - stacked per corner */}
         {product.labels && product.labels.length > 0 && <ProductLabels labels={product.labels} />}
         
-        {/* Action Icons - появляются при наведении */}
-        <div className={`absolute ${isCompact ? 'top-1.5 right-1.5' : 'top-3 right-3'} flex flex-col ${isCompact ? 'gap-1.5' : 'gap-2'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10`}>
-          {/* Compare Icon */}
-          <button
-            onClick={handleCompareToggle}
-            className={`${isCompact ? 'w-10 h-10' : 'w-12 h-12'} rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-              isInCompare
-                ? 'border-gray-900 text-gray-900 bg-white shadow-sm'
-                : 'border-gray-200 text-gray-700 bg-white hover:border-gray-300 hover:bg-gray-50'
-            }`}
-            title={isInCompare ? t('common.messages.removedFromCompare') : t('common.messages.addedToCompare')}
-            aria-label={isInCompare ? t('common.ariaLabels.removeFromCompare') : t('common.ariaLabels.addToCompare')}
-          >
-            <CompareIcon isActive={isInCompare} size={isCompact ? 16 : 18} />
-          </button>
-
-          {/* Wishlist Icon */}
-          <button
-            onClick={handleWishlistToggle}
-            className={`${isCompact ? 'w-10 h-10' : 'w-12 h-12'} rounded-full flex items-center justify-center transition-all duration-200 ${
-              isInWishlist
-                ? 'bg-red-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md hover:shadow-lg'
-            }`}
-            title={isInWishlist ? t('common.messages.removedFromWishlist') : t('common.messages.addedToWishlist')}
-            aria-label={isInWishlist ? t('common.ariaLabels.removeFromWishlist') : t('common.ariaLabels.addToWishlist')}
-          >
-            {isCompact ? (
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path 
-                  d="M10 17L8.55 15.7C4.4 12.2 2 10.1 2 7.5C2 5.4 3.4 4 5.5 4C6.8 4 8.1 4.6 9 5.5C9.9 4.6 11.2 4 12.5 4C14.6 4 16 5.4 16 7.5C16 10.1 13.6 12.2 9.45 15.7L10 17Z" 
-                  stroke="currentColor" 
-                  strokeWidth="1.8" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  fill={isInWishlist ? "currentColor" : "none"} 
-                />
-              </svg>
-            ) : (
-              <WishlistIcon filled={isInWishlist} />
-            )}
-          </button>
-        </div>
       </div>
       
       {/* Product Info */}

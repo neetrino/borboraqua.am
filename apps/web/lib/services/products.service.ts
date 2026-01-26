@@ -1,7 +1,7 @@
 import { db } from "@white-shop/db";
 import { Prisma } from "@prisma/client";
 import { adminService } from "./admin.service";
-import { translations } from "../translations";
+import { t } from "../i18n";
 import { ensureProductVariantAttributesColumn } from "../utils/db-ensure";
 import {
   processImageUrl,
@@ -74,9 +74,7 @@ const normalizeFilterList = (
  * Get "Out of Stock" translation for a given language
  */
 const getOutOfStockLabel = (lang: string = "en"): string => {
-  const langKey = lang as keyof typeof translations;
-  const translation = translations[langKey] || translations.en;
-  return translation.stock.outOfStock;
+  return t(lang as any, "common.stock.outOfStock");
 };
 
 class ProductsService {

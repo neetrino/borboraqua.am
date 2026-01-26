@@ -51,8 +51,6 @@ export function Breadcrumb() {
         'products': 'common.navigation.products',
         'categories': 'common.navigation.categories',
         'cart': 'common.navigation.cart',
-        'wishlist': 'common.navigation.wishlist',
-        'compare': 'common.navigation.compare',
         'checkout': 'common.navigation.checkout',
         'profile': 'common.navigation.profile',
         'orders': 'common.navigation.orders',
@@ -67,7 +65,6 @@ export function Breadcrumb() {
         'support': 'common.navigation.support',
         'privacy': 'common.navigation.privacy',
         'terms': 'common.navigation.terms',
-        'cookies': 'common.navigation.cookies',
         'delivery': 'common.navigation.delivery',
         'stores': 'common.navigation.stores',
       };

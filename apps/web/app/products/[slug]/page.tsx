@@ -11,8 +11,7 @@ import { t, getProductText, getAttributeLabel } from '../../../lib/i18n';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { RelatedProducts } from '../../../components/RelatedProducts';
 import { ProductReviews } from '../../../components/ProductReviews';
-import { Heart, Minus, Plus, Maximize2 } from 'lucide-react';
-import { CompareIcon } from '../../../components/icons/CompareIcon';
+import { Minus, Plus, Maximize2 } from 'lucide-react';
 import { ProductLabels } from '../../../components/ProductLabels';
 import {
   processImageUrl,
@@ -102,10 +101,8 @@ interface Product {
 
 
 // Reserved routes that should not be treated as product slugs
-const RESERVED_ROUTES = ['admin', 'login', 'register', 'cart', 'checkout', 'profile', 'orders', 'wishlist', 'compare', 'categories', 'products', 'about', 'contact', 'delivery', 'shipping', 'returns', 'faq', 'support', 'stores', 'privacy', 'terms', 'cookies'];
+const RESERVED_ROUTES = ['admin', 'login', 'register', 'cart', 'checkout', 'profile', 'orders', 'categories', 'products', 'about', 'contact', 'delivery', 'shipping', 'returns', 'faq', 'support', 'stores', 'privacy', 'terms'];
 
-const WISHLIST_KEY = 'shop_wishlist';
-const COMPARE_KEY = 'shop_compare';
 
 export default function ProductPage({ params }: ProductPageProps) {
   const router = useRouter();
@@ -126,8 +123,6 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [showMessage, setShowMessage] = useState<string | null>(null);
   const [thumbnailStartIndex, setThumbnailStartIndex] = useState(0);
   const [showZoom, setShowZoom] = useState(false);
-  const [isInWishlist, setIsInWishlist] = useState(false);
-  const [isInCompare, setIsInCompare] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState<Array<{ rating: number }>>([]);
   const thumbnailsPerView = 3; // Show 3 thumbnails at a time
@@ -320,35 +315,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     };
   }, [slug, variantIdFromUrl, router, fetchProduct]);
 
-  useEffect(() => {
-    if (!product) return;
-    const checkWishlist = () => {
-      if (typeof window === 'undefined') return;
-      try {
-        const stored = localStorage.getItem(WISHLIST_KEY);
-        const wishlist = stored ? JSON.parse(stored) : [];
-        setIsInWishlist(wishlist.includes(product.id));
-      } catch { setIsInWishlist(false); }
-    };
-    checkWishlist();
-    window.addEventListener('wishlist-updated', checkWishlist);
-    return () => window.removeEventListener('wishlist-updated', checkWishlist);
-  }, [product?.id]);
 
-  useEffect(() => {
-    if (!product) return;
-    const checkCompare = () => {
-      if (typeof window === 'undefined') return;
-      try {
-        const stored = localStorage.getItem(COMPARE_KEY);
-        const compare = stored ? JSON.parse(stored) : [];
-        setIsInCompare(compare.includes(product.id));
-      } catch { setIsInCompare(false); }
-    };
-    checkCompare();
-    window.addEventListener('compare-updated', checkCompare);
-    return () => window.removeEventListener('compare-updated', checkCompare);
-  }, [product?.id]);
 
   // Ensure currentImageIndex is valid
   useEffect(() => {
@@ -1441,50 +1408,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     else setSelectedSize(size);
   };
 
-  const handleAddToWishlist = (e: MouseEvent) => {
-    e.preventDefault(); e.stopPropagation();
-    if (!product || typeof window === 'undefined') return;
-    try {
-      const stored = localStorage.getItem(WISHLIST_KEY);
-      const wishlist: string[] = stored ? JSON.parse(stored) : [];
-      if (isInWishlist) {
-        localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist.filter(id => id !== product.id)));
-        setIsInWishlist(false);
-        setShowMessage(t(language, 'product.removedFromWishlist'));
-      } else {
-        wishlist.push(product.id);
-        localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
-        setIsInWishlist(true);
-        setShowMessage(t(language, 'product.addedToWishlist'));
-      }
-      setTimeout(() => setShowMessage(null), 2000);
-      window.dispatchEvent(new Event('wishlist-updated'));
-    } catch (err) { }
-  };
 
-  const handleCompareToggle = (e: MouseEvent) => {
-    e.preventDefault(); e.stopPropagation();
-    if (!product || typeof window === 'undefined') return;
-    try {
-      const stored = localStorage.getItem(COMPARE_KEY);
-      const compare: string[] = stored ? JSON.parse(stored) : [];
-      if (isInCompare) {
-        localStorage.setItem(COMPARE_KEY, JSON.stringify(compare.filter(id => id !== product.id)));
-        setIsInCompare(false);
-        setShowMessage(t(language, 'product.removedFromCompare'));
-      } else {
-        if (compare.length >= 4) { setShowMessage(t(language, 'product.compareListFull')); }
-        else {
-          compare.push(product.id);
-          localStorage.setItem(COMPARE_KEY, JSON.stringify(compare));
-          setIsInCompare(true);
-          setShowMessage(t(language, 'product.addedToCompare'));
-        }
-      }
-      setTimeout(() => setShowMessage(null), 2000);
-      window.dispatchEvent(new Event('compare-updated'));
-    } catch (err) { }
-  };
 
   if (loading || !product) return <div className="max-w-7xl mx-auto px-4 py-16 text-center">{t(language, 'common.messages.loading')}</div>;
 
@@ -1855,7 +1779,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                           const processedImageUrl = g.imageUrl ? processImageUrl(g.imageUrl) : null;
                           const hasImage = processedImageUrl && processedImageUrl.trim() !== '';
                           const hasColors = g.colors && Array.isArray(g.colors) && g.colors.length > 0;
-                          const colorHex = hasColors 
+                          const colorHex = hasColors && g.colors 
                             ? g.colors[0] 
                             : null;
                           
@@ -2070,12 +1994,6 @@ export default function ProductPage({ params }: ProductPageProps) {
                   finally { setIsAddingToCart(false); setTimeout(() => setShowMessage(null), 2000); }
                 }}>
                 {isAddingToCart ? t(language, 'product.adding') : (isOutOfStock ? t(language, 'product.outOfStock') : (isVariationRequired ? getRequiredAttributesMessage() : (hasUnavailableAttributes ? t(language, 'product.outOfStock') : t(language, 'product.addToCart'))))}
-              </button>
-              <button onClick={handleCompareToggle} className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center transition-all duration-200 ${isInCompare ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                <CompareIcon isActive={isInCompare} />
-              </button>
-              <button onClick={handleAddToWishlist} className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center ${isInWishlist ? 'border-gray-900 bg-gray-50' : 'border-gray-200'}`}>
-                <Heart fill={isInWishlist ? 'currentColor' : 'none'} />
               </button>
             </div>
           </div>

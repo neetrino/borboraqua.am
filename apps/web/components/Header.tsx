@@ -8,11 +8,10 @@ import { getStoredCurrency, setStoredCurrency, type CurrencyCode, CURRENCIES, fo
 import { useTranslation } from '../lib/i18n-client';
 import { useAuth } from '../lib/auth/AuthContext';
 import { apiClient } from '../lib/api-client';
-import { CART_KEY, getCompareCount, getWishlistCount } from '../lib/storageCounts';
+import { CART_KEY } from '../lib/storageCounts';
 import { LanguageSwitcherHeader } from './LanguageSwitcherHeader';
 import contactData from '../../../config/contact.json';
 import { Instagram, Facebook, Linkedin } from 'lucide-react';
-import { CompareIcon } from './icons/CompareIcon';
 import { CartIcon } from './icons/CartIcon';
 
 type SocialLinks = {
@@ -90,11 +89,6 @@ const ProfileIconFilled = () => (
   </div>
 );
 
-const WishlistIcon = () => (
-  <svg width="19" height="19" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M10 17L8.55 15.7C4.4 12.2 2 10.1 2 7.5C2 5.4 3.4 4 5.5 4C6.8 4 8.1 4.6 9 5.5C9.9 4.6 11.2 4 12.5 4C14.6 4 16 5.4 16 7.5C16 10.1 13.6 12.2 9.45 15.7L10 17Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-  </svg>
-);
 
 const SearchIcon = () => (
   <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -350,8 +344,6 @@ export function Header() {
   const router = useRouter();
   const { isLoggedIn, logout, isAdmin } = useAuth();
   const { t } = useTranslation();
-  const [compareCount, setCompareCount] = useState(0);
-  const [wishlistCount, setWishlistCount] = useState(0);
   const [cartCount, setCartCount] = useState(0);
   const [cartTotal, setCartTotal] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -509,28 +501,9 @@ export function Header() {
     }
   };
 
-  // Load wishlist and compare counts from localStorage
+  // Load cart on mount and listen for updates
   useEffect(() => {
-    const updateCounts = () => {
-      setWishlistCount(getWishlistCount());
-      setCompareCount(getCompareCount());
-    };
-
-    // Initial load
-    updateCounts();
-
-    // Listen for updates
-    const handleWishlistUpdate = () => {
-      setWishlistCount(getWishlistCount());
-    };
-
-    const handleCompareUpdate = () => {
-      setCompareCount(getCompareCount());
-    };
-
     const handleAuthUpdate = () => {
-      // Refresh counts when auth state changes
-      updateCounts();
       fetchCart();
     };
 
@@ -538,14 +511,11 @@ export function Header() {
       fetchCart();
     };
 
-    window.addEventListener('wishlist-updated', handleWishlistUpdate);
-    window.addEventListener('compare-updated', handleCompareUpdate);
+    fetchCart();
     window.addEventListener('auth-updated', handleAuthUpdate);
     window.addEventListener('cart-updated', handleCartUpdate);
 
     return () => {
-      window.removeEventListener('wishlist-updated', handleWishlistUpdate);
-      window.removeEventListener('compare-updated', handleCompareUpdate);
       window.removeEventListener('auth-updated', handleAuthUpdate);
       window.removeEventListener('cart-updated', handleCartUpdate);
     };
@@ -1031,16 +1001,6 @@ export function Header() {
                 )}
               </div>
 
-              {/* Compare */}
-              <Link href="/compare" className="w-11 h-11 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors duration-150 relative group">
-                <BadgeIcon icon={<CompareIcon size={18} />} badge={compareCount} />
-              </Link>
-
-              {/* Wishlist */}
-              <Link href="/wishlist" className="w-11 h-11 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors duration-150 relative group">
-                <BadgeIcon icon={<WishlistIcon />} badge={wishlistCount} />
-              </Link>
-
               {/* Shopping Cart */}
               <Link href="/cart" className="flex items-center gap-[0.hpx] group">
                 <div className="w-11 h-11 flex items-center justify-center text-gray-700 hover:text-gray-900 transition-colors duration-150 relative">
@@ -1097,38 +1057,6 @@ export function Header() {
                       </svg>
                     </Link>
                   ))}
-
-                  <Link
-                    href="/wishlist"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"
-                  >
-                    <span className="flex items-center gap-2 normal-case font-medium text-gray-700">
-                      <WishlistIcon />
-                      {t('common.navigation.wishlist')}
-                    </span>
-                    {wishlistCount > 0 && (
-                      <span className="rounded-full bg-gray-900 px-2 py-0.5 text-xs font-semibold text-white">
-                        {wishlistCount > 99 ? '99+' : wishlistCount}
-                      </span>
-                    )}
-                  </Link>
-
-                  <Link
-                    href="/compare"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-between px-4 py-3 hover:bg-gray-50"
-                  >
-                    <span className="flex items-center gap-2 normal-case font-medium text-gray-700">
-                      <CompareIcon size={18} />
-                      Compare
-                    </span>
-                    {compareCount > 0 && (
-                      <span className="rounded-full bg-gray-900 px-2 py-0.5 text-xs font-semibold text-white">
-                        {compareCount > 99 ? '99+' : compareCount}
-                      </span>
-                    )}
-                  </Link>
 
                   <Link
                     href="/cart"
