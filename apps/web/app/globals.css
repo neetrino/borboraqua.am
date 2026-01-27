@@ -131,6 +131,15 @@
     animation: figma-slide-up 0.8s ease-out forwards;
   }
 
+  @keyframes rotate-360 {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   .product-card-hover {
     transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
   }
@@ -249,12 +258,17 @@
 
 img[src*="imgShape"] {
   filter: brightness(0) saturate(100%) invert(88%) sepia(55%) saturate(800%) hue-rotate(165deg) brightness(1.15) contrast(1.05);
+  animation: rotate-360 30s linear infinite;
 }
 img[src*="imgShape1"] {
   filter: brightness(1  ) saturate(100%) invert(81%) sepia(55%) saturate(800%) hue-rotate(165deg) brightness(1.15) contrast(1.05);
+  animation: rotate-360 30s linear infinite;
 }
 img[src*="imgShape2"]  {
-  filter: brightness(1.2) saturate(100%) invert(81%) sepia(85%) saturate(800%) hue-rotate(167deg) brightness(1.28) contrast(1.05);}
+  filter: brightness(1.2) saturate(100%) invert(81%) sepia(85%) saturate(800%) hue-rotate(167deg) brightness(1.28) contrast(1.05);
+  animation: rotate-360 30s linear infinite;
+}
 img[src*="imgShape3"] {
   filter: brightness(0) saturate(100%) invert(91%) sepia(35%) saturate(800%) hue-rotate(165deg) brightness(1.15) contrast(1.15);
+  animation: rotate-360 30s linear infinite;
 }
