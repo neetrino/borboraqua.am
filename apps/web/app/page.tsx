@@ -1134,6 +1134,16 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
+                <div className="absolute inset-[15.61%_15.04%_66.56%_63.72%]" data-name="glass">
+                  <div className="absolute inset-[-3.62%_-4.67%_-6.03%_-4.67%]">
+                    <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/aadbc746-1d0b-416c-8ec8-f41cc8e9d911" />
+                  </div>
+                </div>
+                <div className="absolute inset-[54.8%_56.51%_27.38%_22.25%]" data-name="glass">
+                  <div className="absolute inset-[-3.62%_-4.67%_-6.03%_-4.67%]">
+                    <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/cd530067-d699-40ac-bdbd-e431ca8dce60" />
+                  </div>
+                </div>
               </div>
             </div>
             <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[37.63%_59.55%_51.61%_3.97%] justify-center leading-[0] text-[#09c1ff] text-[29px] text-right tracking-[-0.9px] uppercase whitespace-nowrap">
@@ -2797,6 +2807,16 @@ export default function HomePage() {
                       <img alt="Water Bottle" className="absolute h-full left-[-91.91%] max-w-none top-0 w-[283.83%]" src={img17} />
                     </div>
                   </div>
+                </div>
+              </div>
+              <div className="absolute inset-[15.61%_32.71%_66.56%_53.61%] overflow-hidden">
+                <div className="absolute inset-0">
+                  <img alt="Glass" className="block max-w-none size-full" src={img18} />
+                </div>
+              </div>
+              <div className="absolute inset-[54.8%_59.41%_27.38%_26.91%] overflow-hidden">
+                <div className="absolute inset-0">
+                  <img alt="Glass" className="block max-w-none size-full" src={img18} />
                 </div>
               </div>
             </div>
