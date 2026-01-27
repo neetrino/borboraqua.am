@@ -88,6 +88,7 @@ const imgIcon = "/assets/home/imgIcon.svg";
 const imgIcon1 = "/assets/home/imgIcon1.svg";
 const imgDanielSinocaAancLsb0SU0Unsplash3 = "/assets/home/imgDanielSinocaAancLsb0SU0Unsplash3.jpg";
 const imgEllipse45 = "/assets/home/imgEllipse45.svg";
+const imgHomeVector = "/assets/home/Vector.svg";
 
 // Product interface for featured products
 interface Product {
@@ -127,6 +128,8 @@ export default function HomePage() {
   
   // State for Trusted By section pagination
   const [trustedByIndex, setTrustedByIndex] = useState(0);
+  // State for mobile bottom navigation active icon (null = none selected)
+  const [activeMobileNavIndex, setActiveMobileNavIndex] = useState<number | null>(null);
 
   // Removed scaling logic - using Tailwind responsive classes instead
   // This prevents zoom issues and conflicts with responsive design
@@ -420,12 +423,10 @@ export default function HomePage() {
     }
   };
 
-  // Footer is at top-[6201px] with h-[700px], so total height = 6201 + 700 = 6901px
-  // Using exact pixel height from Figma with responsive scaling
   return (
-    <>
-      {/* Mobile Version - Only visible on small screens (matches Figma design exactly) */}
-      <div className="md:hidden bg-white relative w-full max-w-[430px] mx-auto min-h-screen overflow-x-hidden">
+    <div className="w-full bg-white overflow-x-hidden">
+      {/* Mobile / Tablet Version - Visible up to lg, matches Figma mobile design */}
+      <div className="lg:hidden bg-white relative w-full max-w-[430px] mx-auto min-h-screen overflow-x-hidden">
         {/* Mobile Header */}
         <div className="absolute content-stretch flex items-center justify-between left-[17px] top-[35px] w-[398px] z-50">
           <div className="content-stretch flex gap-[6px] items-center relative shrink-0">
@@ -696,25 +697,68 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Mobile Bottom Navigation Frame */}
-        <div className="-translate-x-1/2 absolute bg-[rgba(255,255,255,0.1)] h-[80px] left-1/2 overflow-clip rounded-[90px] top-[829px] w-[394px] z-50">
-          <div className="-translate-y-1/2 absolute left-[6px] size-[56px] top-1/2">
-            <img className="block max-w-none size-full" alt="" src={imgEllipse2} />
-          </div>
-          <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-1/2 w-[348px]">
-            <div className="content-stretch flex gap-[87px] items-center justify-center relative shrink-0 w-[252px]">
-              <button onClick={() => router.push('/')} className="h-[21px] relative shrink-0 w-[19px]">
-                <img className="block max-w-none size-full" alt="" src={imgVector} />
-              </button>
-              <button onClick={() => router.push('/cart')} className="block cursor-pointer h-[28px] relative shrink-0 w-[20px]">
-                <img className="block max-w-none size-full" alt="" src={imgVector1} />
-              </button>
-              <button onClick={() => router.push('/profile')} className="block cursor-pointer h-[22.312px] relative shrink-0 w-[25px]">
-                <img className="block max-w-none size-full" alt="" src={imgGroup2148} />
-              </button>
-              <button onClick={() => router.push('/contact')} className="block cursor-pointer h-[22px] relative shrink-0 w-[18.526px]">
-                <img className="block max-w-none size-full" alt="" src={imgGroup2149} />
-              </button>
+        {/* Mobile Bottom Navigation Frame - sticky expressive glassmorphism bar */}
+        <div className="-translate-x-1/2 fixed md:hidden left-1/2 bottom-0 w-full max-w-[430px] px-4 pb-5 z-50">
+          <div className="relative bg-white/5 backdrop-blur-3xl h-[72px] rounded-[999px] shadow-[0_20px_55px_rgba(0,0,0,0.25)] border border-white/10 overflow-hidden">
+            {/* Blue highlight that appears only after clicking an icon */}
+            {activeMobileNavIndex !== null && (
+              <div
+                className="absolute top-1/2 -translate-y-1/2 size-[56px] transition-all duration-300 opacity-70"
+                style={{
+                  left: ['14%', '38%', '62%', '86%'][activeMobileNavIndex],
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                <img className="block max-w-none size-full" alt="" src={imgEllipse2} />
+              </div>
+            )}
+            <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-1/2 w-[348px]">
+              <div className="content-stretch flex items-center justify-between relative shrink-0 w-[252px]">
+                {/* Home */}
+                <button
+                  onClick={() => {
+                    setActiveMobileNavIndex(0);
+                    router.push('/');
+                  }}
+                  className="group h-[28px] w-[28px] relative flex items-center justify-center transition-transform duration-200 hover:-translate-y-1 active:scale-95"
+                >
+                  <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
+                  <img className="relative block max-w-none size-[19px]" alt="" src={imgHomeVector} />
+                </button>
+                {/* Cart */}
+                <button
+                  onClick={() => {
+                    setActiveMobileNavIndex(1);
+                    router.push('/products');
+                  }}
+                  className="group block cursor-pointer h-[32px] w-[32px] relative flex items-center justify-center opacity-90 hover:opacity-100 transition-transform duration-200 hover:scale-110 hover:-translate-y-1 active:scale-95"
+                >
+                  <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
+                  <img className="relative block max-w-none size-[20px]" alt="" src={imgVector1} />
+                </button>
+                {/* Profile */}
+                <button
+                  onClick={() => {
+                    setActiveMobileNavIndex(2);
+                    router.push('/cart');
+                  }}
+                  className="group block cursor-pointer h-[32px] w-[32px] relative flex items-center justify-center opacity-90 hover:opacity-100 transition-transform duration-200 hover:scale-110 hover:-translate-y-1 active:scale-95"
+                >
+                  <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
+                  <img className="relative block max-w-none h-[22.312px] w-[25px]" alt="" src={imgGroup2148} />
+                </button>
+                {/* Contact */}
+                <button
+                  onClick={() => {
+                    setActiveMobileNavIndex(3);
+                    router.push('/profile');
+                  }}
+                  className="group block cursor-pointer h-[30px] w-[30px] relative flex items-center justify-center opacity-90 hover:opacity-100 transition-transform duration-200 hover:scale-110 hover:-translate-y-1 active:scale-95"
+                >
+                  <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
+                  <img className="relative block max-w-none h-[22px] w-[18.526px]" alt="" src={imgGroup2149} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1280,10 +1324,10 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Desktop Version - Hidden on mobile */}
+      {/* Desktop Version - Only for large screens */}
       <div
         ref={containerRef}
-        className="hidden md:block bg-white relative w-full max-w-[1440px] mx-auto h-[6901px] lg:h-[6901px] md:h-[5600px] home-page-container"
+        className="hidden lg:block bg-white relative w-full max-w-[1440px] mx-auto h-[7200px] home-page-container overflow-x-hidden"
       >
       {/* Header Section - Navigation Bar */}
       <div className="fixed bg-[rgba(255,255,255,0.08)] backdrop-blur-[15px] content-stretch flex flex-col h-[73px] md:h-[60px] sm:h-[50px] items-center justify-center left-1/2 px-[38px] md:px-[24px] sm:px-[16px] py-[16px] md:py-[12px] sm:py-[8px] rounded-[70px] md:rounded-[50px] sm:rounded-[40px] top-[64px] md:top-[32px] sm:top-[16px] translate-x-[-50%] w-[1400px] lg:w-[1400px] md:w-[90%] sm:w-[95%] z-50 border border-[rgba(255,255,255,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_60px_rgba(98,179,232,0.15)]">
@@ -1842,7 +1886,7 @@ export default function HomePage() {
  {/* <div className="absolute left-0 right-0 top-[2388px] lg:top-[2590px] md:top-[1986px] sm:top-[1586px] h-[6px] bg-white z-[5]" /> */}
 
       {/* Seam fix above Water Energy (covers tiny line between sections) */}
-      <div className="absolute left-0 right-0 top-[2108px] lg:top-[2450px] md:top-[1806px] sm:top-[1396px] h-[6px] bg-white z-[10]" />
+      <div className="absolute left-0 right-0 top-[2108px] lg:top-[2450px] md:top-[1806px] sm:top-[1396px] h-[6px] bg-white z-[100]" />
 
       {/* Water Energy Section */}
       <div className="absolute content-stretch flex flex-col gap-[35px] lg:gap-[35px] md:gap-[28px] sm:gap-[20px] items-start left-1/2 top-[2606px] lg:top-[2606px] md:top-[2000px] sm:top-[1600px] translate-x-[-50%] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%]">
@@ -2677,6 +2721,6 @@ export default function HomePage() {
       )}
 
       </div>
-    </>
+    </div>
   );
 }
