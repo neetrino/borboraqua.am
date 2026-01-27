@@ -90,16 +90,6 @@
     }
   }
 
-  @keyframes figma-rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  @keyframes figma-rotate-slow {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
   @keyframes figma-pulse {
     0%, 100% {
       opacity: 1;
@@ -127,14 +117,6 @@
 
   .figma-float-slow {
     animation: figma-float 12s ease-in-out infinite;
-  }
-
-  .figma-rotate {
-    animation: figma-rotate 20s linear infinite;
-  }
-
-  .figma-rotate-slow {
-    animation: figma-rotate-slow 30s linear infinite;
   }
 
   .figma-pulse {
@@ -263,3 +245,16 @@
   min-height: 6901px;
 }
 
+/* Shape images color change to #75D2EC */
+
+img[src*="imgShape"] {
+  filter: brightness(0) saturate(100%) invert(88%) sepia(55%) saturate(800%) hue-rotate(165deg) brightness(1.15) contrast(1.05);
+}
+img[src*="imgShape1"] {
+  filter: brightness(1  ) saturate(100%) invert(81%) sepia(55%) saturate(800%) hue-rotate(165deg) brightness(1.15) contrast(1.05);
+}
+img[src*="imgShape2"]  {
+  filter: brightness(1.2) saturate(100%) invert(81%) sepia(85%) saturate(800%) hue-rotate(167deg) brightness(1.28) contrast(1.05);}
+img[src*="imgShape3"] {
+  filter: brightness(0) saturate(100%) invert(91%) sepia(35%) saturate(800%) hue-rotate(165deg) brightness(1.15) contrast(1.15);
+}

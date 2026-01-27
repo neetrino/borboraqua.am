@@ -1603,17 +1603,17 @@ export default function HomePage() {
 
       {/* Decorative Shapes */}
       <div className="absolute flex items-center justify-center left-[calc(50%+846.59px)] size-[1045.176px] top-[2628px] translate-x-[-50%]">
-        <div className="flex-none rotate-[-56.31deg] figma-rotate-slow">
+        <div className="flex-none rotate-[-56.31deg]">
           <div className="relative size-[753.698px]">
             <img alt="Shape" className="block max-w-none size-full" src={imgShape} />
           </div>
         </div>
       </div>
 
-      <div className="absolute flex items-center justify-center left-[calc(50%+119.2px)] size-[956.401px] top-[5477px] translate-x-[-50%]">
-        <div className="flex-none rotate-[-16.26deg] scale-y-[-100%] figma-rotate-slow">
-          <div className="relative size-[524.132px]">
-            <img alt="Shape" className="block max-w-none size-full" src={imgShape2} />
+      <div className="absolute flex items-center justify-center left-[calc(50%+119.2px)] size-[956.401px]  top-[5477px] translate-x-[-50%]">
+        <div className="flex-none rotate-[-16.26deg] scale-y-[-100%] ">
+          <div className="relative size-[524.132px] ">
+            <img alt="Shape" className="block max-w-none size-full " src={imgShape3}   />
             {/* White background overlay with gradient for bottom section */}
             <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-white to-transparent pointer-events-none rounded-[40px] overflow-hidden"></div>
 
@@ -1621,8 +1621,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="absolute flex items-center justify-center left-[calc(50%-587.04px)] size-[641.928px] top-[3208px] translate-x-[-50%]">
-        <div className="flex-none rotate-[-165deg] figma-rotate-slow">
+      <div className="absolute flex items-center justify-center left-[calc(50%-587.04px)] size-[541.928px] top-[3100px] translate-x-[-50%]">
+        <div className="flex-none rotate-[-165deg]">
           <div className="relative size-[524.132px]">
             <img alt="Shape" className="block max-w-none size-full" src={imgShape2} />
           </div>
@@ -1630,7 +1630,7 @@ export default function HomePage() {
       </div>
 
       <div className="absolute flex items-center justify-center left-[calc(50%-1082.68px)] size-[944.637px] top-[3493px] translate-x-[-50%]">
-        <div className="flex-none rotate-[-165deg] figma-rotate-slow">
+        <div className="flex-none rotate-[-165deg]">
           <div className="relative size-[771.293px]">
             <img alt="Shape" className="block max-w-none size-full" src={imgShape3} />
           </div>
@@ -2417,7 +2417,7 @@ export default function HomePage() {
       </div>
 
       {/* Main large bubble */}
-      <div className="absolute flex top-[44.44%] right-[56%] bottom-[43.57%] left-0 items-center justify-center overflow-hidden">
+      <div className="absolute flex top-[35.44%] right-[71%] bottom-[43.57%] left-0 items-center justify-center overflow-hidden">
         <div className="relative rounded-[320px] size-[564.622px]">
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
@@ -2504,7 +2504,7 @@ export default function HomePage() {
                   console.error('Error target:', e.target);
                 }}
                 onLoad={() => {
-                  console.log('✅ [IMAGE] Decorative image loaded:', );
+                  console.log('✅ [IMAGE] Decorative image loaded:', img);
                 }}
               />
             </div>
@@ -2513,12 +2513,12 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="absolute flex top-[43.7%] right-[84.95%] bottom-[49.82%] left-0 items-center justify-center overflow-hidden">
-        <div className="relative rounded-[320px] size-[304.957px]">
-          <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
-          <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
-            <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
-              <img
+       {/* <div className="absolute flex top-[49.7%] right-[84.95%] bottom-[49.82%] left-0 items-center justify-center overflow-hidden">
+         <div className="relative rounded-[320px] size-[304.957px]">
+           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
+         <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
+             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
+             <img
                 alt="Decorative"
                 className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]"
                 src={img}
@@ -2534,10 +2534,11 @@ export default function HomePage() {
           </div>
           <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[900px]" />
         </div>
-      </div>
-
-      {/* Lower bubble 2 - move a bit further down */}
-      <div className="absolute flex top-[52%] right-[-10%] bottom-[39.8%] left-auto items-center justify-center overflow-hidden">
+      </div> */}
+      
+      {/* // Lower bubble 2 - move a bit further down */}
+      
+      <div className="absolute flex top-[52%] right-[-10%] bottom-[41.8%] left-auto items-center justify-center overflow-hidden">
         <div className="relative rounded-[320px] size-[459px]">
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
@@ -2560,8 +2561,9 @@ export default function HomePage() {
         </div>
       </div>
 
+
       {/* Lower bubble 3 - move fully to the right side */}
-      <div className="absolute flex top-[52%] right-[1%] bottom-[38.23%] left-auto items-center justify-center overflow-hidden">
+      <div className="absolute flex top-[52%] right-[1%] bottom-[35.23%] left-auto items-center justify-center overflow-hidden">
         <div className="relative rounded-[320px] size-[297.625px]">
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
@@ -2691,10 +2693,12 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+<div className="relative">
+  <div className="absolute left-1/2 top-[4613px] translate-x-[-50%] w-[78px]">
+    <img alt="Vector" className="block max-w-none size-full" src={imgVector} />
+  </div>
+</div>
 
-      <div className="absolute left-1/2 top-[5352px] translate-x-[-50%] w-[78px]">
-        <img alt="Vector" className="block max-w-none size-full" src={imgVector} />
-      </div>
 
       {/* Search Modal */}
       {showSearchModal && (
