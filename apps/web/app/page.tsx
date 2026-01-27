@@ -772,7 +772,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Featured Products Gradient Overlay */}
-        <div className="absolute bg-gradient-to-b blur-[30px] from-[#62b3e8] h-[200px] left-0 opacity-60 to-[rgba(221,216,216,0.4)] top-[850px] w-[430px] z-0" />
+        <div className="absolute bg-gradient-to-b blur-[30px] from-[#62b3e8] h-[300px] left-0 pointer-events-none to-[rgba(255, 255, 255, 0.07)] top-[738px] w-[430px] z-[1]" data-node-id="3:2019" />
 
         {/* Mobile Featured Products Section */}
         <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[7px] h-[123px] items-center justify-center left-[calc(50%+0.5px)] top-[958px] w-full max-w-[429px] z-10">
