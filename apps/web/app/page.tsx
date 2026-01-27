@@ -437,7 +437,7 @@ export default function HomePage() {
             {/* Mobile Menu Button (Hamburger) */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch cursor-pointer flex flex-col items-start px-[15.5px] py-[18.5px] relative rounded-[9999px] w-[49px]"
+              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch cursor-pointer flex flex-col items-start px-[15.5px] py-[18.5px] relative rounded-[9999px] w-[49px] transition-all duration-300 hover:bg-white/10 hover:border-white/80 hover:scale-110 active:scale-95"
             >
               <div className="flex items-center justify-center relative shrink-0">
                 <div className="-scale-y-100 flex-none rotate-180">
@@ -450,7 +450,7 @@ export default function HomePage() {
             {/* Mobile Search Button */}
             <button
               onClick={() => setShowSearchModal(true)}
-              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch cursor-pointer flex items-center p-[14.5px] relative rounded-[9999px]"
+              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch cursor-pointer flex items-center p-[14.5px] relative rounded-[9999px] transition-all duration-300 hover:bg-white/10 hover:border-white/80 hover:scale-110 active:scale-95"
             >
               <div className="flex items-center justify-center relative shrink-0">
                 <div className="-scale-y-100 flex-none rotate-180">
@@ -468,7 +468,7 @@ export default function HomePage() {
           <div className="relative shrink-0" ref={languageMenuRef}>
             <button
               onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch cursor-pointer flex items-center p-[14.5px] relative rounded-[9999px]"
+              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch cursor-pointer flex items-center p-[14.5px] relative rounded-[9999px] transition-all duration-300 hover:bg-white/10 hover:border-white/80 hover:scale-110 active:scale-95"
             >
               <div className="flex items-center justify-center relative shrink-0">
                 <LanguageIcon size={20} />
@@ -835,7 +835,7 @@ export default function HomePage() {
         <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[8px] h-[136px] items-center justify-end left-1/2 pt-[16px] top-[675px] w-[430px] z-10">
           <button
             onClick={() => router.push('/products')}
-            className="bg-[#31daff] content-stretch flex flex-col h-[60px] items-center justify-center pl-[63px] pr-[61px] py-[16px] relative rounded-[9999px] shrink-0 w-[185px] cursor-pointer"
+            className="bg-[#31daff] content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] py-[16px] relative rounded-[9999px] shrink-0 w-[368px] cursor-pointer transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#31daff]/50 hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white whitespace-nowrap">
               <p className="leading-[24px]">Shop Now</p>
@@ -843,7 +843,7 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => router.push('/about')}
-            className="bg-[rgba(0,0,0,0)] content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] py-[16px] relative rounded-[9999px] shrink-0 w-[368px] cursor-pointer"
+            className="bg-[rgba(0,0,0,0)] border-2 border-white/30 content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] py-[16px] relative rounded-[9999px] shrink-0 w-[368px] cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:shadow-lg hover:shadow-white/20 hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold h-[19px] justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-[89px]">
               <p className="leading-[24px] whitespace-pre-wrap">Learn More</p>
@@ -1049,7 +1049,7 @@ export default function HomePage() {
         <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1708px] w-[241px]">
           <button
             onClick={() => router.push('/products')}
-            className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] items-center px-[34px] py-[12px] relative rounded-[9999px] shrink-0"
+            className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] items-center px-[34px] py-[12px] relative rounded-[9999px] shrink-0 transition-all duration-300 hover:border-[#1ac0fd] hover:bg-[#1ac0fd]/5 hover:shadow-md hover:shadow-[#1ac0fd]/20 hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#0f172a] text-[16px] text-center whitespace-nowrap">
               <p className="leading-[24px]">View All Products</p>
@@ -1916,7 +1916,7 @@ export default function HomePage() {
                               handleAddToCart(product);
                             }}
                             disabled={!product.inStock || addingToCart.has(product.id)}
-                            className="bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            className="bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer"
                           >
                             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
                               <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px]">
