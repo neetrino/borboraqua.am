@@ -89,7 +89,8 @@
     "energy": "energy",
     "subtitle": "drawn from nature, captured in every drop.",
     "balance": "balance",
-    "description": "Crystal clarity that refreshes the body and restores"
+    "descriptionLine1": "Crystal clarity that refreshes",
+    "descriptionLine2": "the body and restores"
   },
   "search": {
     "placeholder": "Search products..."
@@ -99,9 +100,5 @@
     "productNotFound": "Product not found",
     "noMoreStockAvailable": "No more stock available",
     "failedToAddToCart": "Failed to add product to cart. Please try again."
-  },
-  "fallback": {
-    "productTitle": "Natural spring water",
-    "productPrice": "1800 AMD"
   }
 }

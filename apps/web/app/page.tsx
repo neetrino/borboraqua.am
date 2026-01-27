@@ -2603,7 +2603,8 @@ export default function HomePage() {
           </div>
         </div>
         <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-normal inset-[22.39%_62.8%_72.01%_7.99%] justify-center leading-[19px] text-[#0f172a] text-[16px] text-right tracking-[-0.9px] uppercase whitespace-nowrap">
-          <p className="mb-0">{t('home.waterEnergySection.description')}</p>
+          <p className="mb-0">{t('home.waterEnergySection.descriptionLine1')}</p>
+          <p className="mb-0">{t('home.waterEnergySection.descriptionLine2')}</p>
         </div>
       </div>
 
