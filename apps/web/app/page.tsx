@@ -2359,7 +2359,13 @@ export default function HomePage() {
       </div>
 
       {/* Additional Decorative Elements - Hero Section Bubbles */}
-      <div className="absolute flex top-[44.44%] right-[66.93%] bottom-[43.57%] left-0 items-center justify-center overflow-hidden">
+      {/* Background ellipse at original left position */}
+      <div className="absolute top-[38.44%] right-[66.93%] bottom-[43.57%] left-[-35] overflow-hidden pointer-events-none">
+        <img alt="Background Ellipse" className="block max-w-none size-full" src={imgEllipse41} />
+      </div>
+
+      {/* Main large bubble */}
+      <div className="absolute flex top-[44.44%] right-[56%] bottom-[43.57%] left-0 items-center justify-center overflow-hidden">
         <div className="relative rounded-[320px] size-[564.622px]">
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
@@ -2431,7 +2437,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="absolute flex top-[39.38%] right-[69.74%] bottom-[50.88%] left-0 items-center justify-center overflow-hidden">
+      {/* Upper bubble - move to the right side a bit higher */}
+      <div className="absolute flex top-[38%] right-[1%] bottom-[50.88%] left-auto items-center justify-center overflow-hidden">
         <div className="relative rounded-[320px] size-[459px]">
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
@@ -2445,7 +2452,7 @@ export default function HomePage() {
                   console.error('Error target:', e.target);
                 }}
                 onLoad={() => {
-                  console.log('✅ [IMAGE] Decorative image loaded:', img);
+                  console.log('✅ [IMAGE] Decorative image loaded:', );
                 }}
               />
             </div>
@@ -2477,7 +2484,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="absolute flex top-[50.45%] right-[77.71%] bottom-[39.8%] left-0 items-center justify-center overflow-hidden">
+      {/* Lower bubble 2 - move a bit further down */}
+      <div className="absolute flex top-[52%] right-[-10%] bottom-[39.8%] left-auto items-center justify-center overflow-hidden">
         <div className="relative rounded-[320px] size-[459px]">
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
@@ -2500,7 +2508,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="absolute flex top-[55.45%] right-[79.79%] bottom-[38.23%] left-0 items-center justify-center overflow-hidden">
+      {/* Lower bubble 3 - move fully to the right side */}
+      <div className="absolute flex top-[52%] right-[1%] bottom-[38.23%] left-auto items-center justify-center overflow-hidden">
         <div className="relative rounded-[320px] size-[297.625px]">
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
