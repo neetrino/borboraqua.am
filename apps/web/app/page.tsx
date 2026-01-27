@@ -1876,7 +1876,7 @@ export default function HomePage() {
 
       {/* White Card (100%) */}
       <div className="absolute h-[343px] lg:h-[343px] md:h-[280px] sm:h-[240px] left-[393px] lg:left-[393px] md:left-[20.5%] sm:left-[5%] top-[3931px] lg:top-[3931px] md:top-[3100px] sm:top-[2500px] w-[795px] lg:w-[795px] md:w-[60%] sm:w-[90%]">
-        <div className="absolute bg-white inset-0 rounded-[37px] lg:rounded-[37px] md:rounded-[30px] sm:rounded-[24px]" />
+        <div className="absolute bg-white inset-0 rounded-[37px] lg:rounded-[37px] md:rounded-[30px] sm:rounded-[24px] shadow-[0_20px_60px_rgba(15,23,42,0.20)]" />
         <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[69.68%_60%_18.66%_7.42%] lg:inset-[69.68%_60%_18.66%_7.42%] md:inset-[69.68%_60%_18.66%_7.42%] sm:inset-[69.68%_60%_18.66%_7.42%] justify-center leading-[0] text-[#0f172a] text-[96px] lg:text-[96px] md:text-[72px] sm:text-[56px] text-center tracking-[-0.9px] lg:tracking-[-0.9px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
           <p className="leading-[40px] lg:leading-[40px] md:leading-[32px] sm:leading-[28px]">{t('home.cards.balancedHydration.percentage')}</p>
         </div>
