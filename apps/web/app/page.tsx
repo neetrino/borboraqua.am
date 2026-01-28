@@ -1585,11 +1585,11 @@ export default function HomePage() {
       {/* Desktop Version - Only for large screens */}
       <div
         ref={containerRef}
-        className="hidden lg:block bg-white relative w-full max-w-[1440px] mx-auto h-[7200px] home-page-container overflow-x-hidden"
+        className="hidden lg:block bg-white relative w-full mx-auto h-[7200px] home-page-container overflow-x-hidden overflow-y-hidden"
       >
       {/* Header Section - Navigation Bar */}
-      <div className="fixed bg-[rgba(255,255,255,0.08)] backdrop-blur-[15px] content-stretch flex flex-col h-[73px] md:h-[60px] sm:h-[50px] items-center justify-center left-1/2 px-[38px] md:px-[24px] sm:px-[16px] py-[16px] md:py-[12px] sm:py-[8px] rounded-[70px] md:rounded-[50px] sm:rounded-[40px] top-[64px] md:top-[32px] sm:top-[16px] translate-x-[-50%] w-[1400px] lg:w-[1400px] md:w-[90%] sm:w-[95%] z-50 border border-[rgba(255,255,255,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_60px_rgba(98,179,232,0.15)]">
-        <div className="content-stretch flex gap-[200px] lg:gap-[200px] md:gap-[120px] sm:gap-[16px] h-[56px] md:h-[44px] sm:h-[36px] items-center justify-center relative shrink-0">
+      <div className="fixed bg-[rgba(255,255,255,0.08)] backdrop-blur-[15px] content-stretch flex flex-col h-[65px] md:h-[60px] sm:h-[50px] items-center justify-center left-1/2 px-[32px] md:px-[24px] sm:px-[16px] py-[14px] md:py-[12px] sm:py-[8px] rounded-[60px] md:rounded-[50px] sm:rounded-[40px] top-[56px] md:top-[32px] sm:top-[16px] translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] z-50 border border-[rgba(255,255,255,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_60px_rgba(98,179,232,0.15)]">
+        <div className="content-stretch flex gap-[160px] lg:gap-[160px] md:gap-[120px] sm:gap-[16px] h-[50px] md:h-[44px] sm:h-[36px] items-center justify-center relative shrink-0">
           {/* Logo */}
           <div
             onClick={() => router.push('/')}
@@ -1599,7 +1599,7 @@ export default function HomePage() {
           </div>
 
           {/* Navigation Menu */}
-          <div className="content-stretch flex font-['Inter:Bold',sans-serif] font-bold gap-[74px] lg:gap-[74px] md:gap-[24px] sm:gap-[12px] items-end justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-white uppercase whitespace-nowrap sm:hidden md:flex">
+          <div className="content-stretch flex font-['Inter:Bold',sans-serif] font-bold gap-[60px] lg:gap-[60px] md:gap-[24px] sm:gap-[12px] items-end justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-white uppercase whitespace-nowrap sm:hidden md:flex">
             <div
               onClick={() => router.push('/')}
               className="flex flex-col justify-center relative shrink-0 cursor-pointer"
@@ -1633,7 +1633,7 @@ export default function HomePage() {
           </div>
 
           {/* Header Icons - Separate Vector Groups */}
-          <div className="content-stretch flex gap-[36px] lg:gap-[36px] md:gap-[20px] sm:gap-[12px] items-center justify-center relative shrink-0">
+          <div className="content-stretch flex gap-[28px] lg:gap-[28px] md:gap-[20px] sm:gap-[12px] items-center justify-center relative shrink-0">
             {/* Search Icon */}
             <div
               onClick={() => setShowSearchModal(true)}
@@ -1756,53 +1756,53 @@ export default function HomePage() {
       </div>
 
       {/* Hero Section - Main Content */}
-      <div className="absolute content-stretch flex items-end justify-center left-[calc(50%+0.5px)] px-[24px] md:px-[16px] sm:px-[12px] top-[528px] lg:top-[528px] md:top-[400px] sm:top-[280px] translate-x-[-50%] w-[900px] lg:w-[900px] md:w-[90%] sm:w-[95%]">
-        <div className="content-stretch flex flex-col gap-[24px] lg:gap-[24px] md:gap-[20px] sm:gap-[16px] items-center justify-center relative shrink-0 w-[900px] lg:w-[900px] md:w-full sm:w-full">
+      <div className="absolute content-stretch flex items-end justify-center left-[calc(50%+0.5px)] px-[20px] md:px-[16px] sm:px-[12px] top-[480px] lg:top-[480px] md:top-[400px] sm:top-[280px] translate-x-[-50%] w-[800px] lg:w-[800px] md:w-[90%] sm:w-[95%]">
+        <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-center justify-center relative shrink-0 w-[800px] lg:w-[800px] md:w-full sm:w-full">
           {/* Experience Purity Label */}
-          <div className="content-stretch flex gap-[12px] lg:gap-[12px] md:gap-[10px] sm:gap-[8px] items-center relative shrink-0 w-full">
-            <div className="bg-white h-[2px] lg:h-[2px] md:h-[1.5px] sm:h-[1.5px] shrink-0 w-[48px] lg:w-[48px] md:w-[40px] sm:w-[32px]" />
+          <div className="content-stretch flex gap-[10px] lg:gap-[10px] md:gap-[10px] sm:gap-[8px] items-center relative shrink-0 w-full">
+            <div className="bg-white h-[2px] lg:h-[2px] md:h-[1.5px] sm:h-[1.5px] shrink-0 w-[40px] lg:w-[40px] md:w-[40px] sm:w-[32px]" />
             <div className="content-stretch flex flex-col items-start relative shrink-0">
-              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[12px] sm:text-[11px] text-white tracking-[1.4px] lg:tracking-[1.4px] md:tracking-[1.2px] sm:tracking-[1px] uppercase whitespace-nowrap">
-                <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px]">{t('home.hero.experiencePurity')}</p>
+              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[12px] lg:text-[12px] md:text-[12px] sm:text-[11px] text-white tracking-[1.2px] lg:tracking-[1.2px] md:tracking-[1.2px] sm:tracking-[1px] uppercase whitespace-nowrap">
+                <p className="leading-[18px] lg:leading-[18px] md:leading-[18px] sm:leading-[16px]">{t('home.hero.experiencePurity')}</p>
               </div>
             </div>
           </div>
 
           {/* Main Heading */}
           <div className="content-stretch flex flex-col items-center justify-center relative shrink-0 w-full">
-            <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[96px] lg:text-[96px] md:text-[64px] sm:text-[36px] text-center text-white w-full">
+            <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[80px] lg:text-[80px] md:text-[64px] sm:text-[36px] text-center text-white w-full">
               <p className="whitespace-pre-wrap">
-                <span className="leading-[96px] lg:leading-[96px] md:leading-[64px] sm:leading-[40px] text-white font-black">{t('home.hero.yourDailyDoseOf')} </span>
-                <span className="font-['Montserrat',sans-serif] font-light leading-[96px] lg:leading-[96px] md:leading-[64px] sm:leading-[40px] text-white"> </span>
-                <span className="leading-[96px] lg:leading-[96px] md:leading-[64px] sm:leading-[40px]"> </span>
-                <span className="leading-[96px] lg:leading-[96px] md:leading-[64px] sm:leading-[40px] text-white font-black">{t('home.hero.freshness')}</span>
+                <span className="leading-[80px] lg:leading-[80px] md:leading-[64px] sm:leading-[40px] text-white font-black">{t('home.hero.yourDailyDoseOf')} </span>
+                <span className="font-['Montserrat',sans-serif] font-light leading-[80px] lg:leading-[80px] md:leading-[64px] sm:leading-[40px] text-white"> </span>
+                <span className="leading-[80px] lg:leading-[80px] md:leading-[64px] sm:leading-[40px]"> </span>
+                <span className="leading-[80px] lg:leading-[80px] md:leading-[64px] sm:leading-[40px] text-white font-black">{t('home.hero.freshness')}</span>
               </p>
             </div>
           </div>
 
           {/* Subtitle */}
-          <div className="content-stretch flex flex-col items-center justify-center max-w-[512px] lg:max-w-[512px] md:max-w-[400px] sm:max-w-[280px] relative shrink-0 w-[512px] lg:w-[512px] md:w-full sm:w-full">
-            <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[20px] lg:text-[20px] md:text-[18px] sm:text-[14px] text-white whitespace-nowrap">
-              <p className="leading-[32.5px] lg:leading-[32.5px] md:leading-[28px] sm:leading-[22px]">{t('home.hero.subtitle')}</p>
+          <div className="content-stretch flex flex-col items-center justify-center max-w-[450px] lg:max-w-[450px] md:max-w-[400px] sm:max-w-[280px] relative shrink-0 w-[450px] lg:w-[450px] md:w-full sm:w-full">
+            <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[18px] lg:text-[18px] md:text-[18px] sm:text-[14px] text-white whitespace-nowrap">
+              <p className="leading-[28px] lg:leading-[28px] md:leading-[28px] sm:leading-[22px]">{t('home.hero.subtitle')}</p>
             </div>
           </div>
 
           {/* Buttons */}
-          <div className="content-center flex flex-wrap gap-[0px_16px] lg:gap-[0px_16px] md:gap-[0px_12px] sm:gap-[0px_8px] h-[76px] lg:h-[76px] md:h-[64px] sm:h-[56px] items-center justify-center pt-[16px] lg:pt-[16px] md:pt-[12px] sm:pt-[8px] relative shrink-0 w-full">
+          <div className="content-center flex flex-wrap gap-[0px_14px] lg:gap-[0px_14px] md:gap-[0px_12px] sm:gap-[0px_8px] h-[68px] lg:h-[68px] md:h-[64px] sm:h-[56px] items-center justify-center pt-[14px] lg:pt-[14px] md:pt-[12px] sm:pt-[8px] relative shrink-0 w-full">
             <div
               onClick={() => router.push('/products')}
-              className="bg-[#1ac0fd] content-stretch flex flex-col h-[60px] lg:h-[60px] md:h-[52px] sm:h-[44px] items-center justify-center pl-[63px] pr-[61px] lg:pl-[63px] lg:pr-[61px] md:pl-[48px] md:pr-[46px] sm:pl-[32px] sm:pr-[30px] py-[16px] lg:py-[16px] md:py-[12px] sm:py-[10px] relative rounded-[9999px] shrink-0 w-[185px] lg:w-[185px] md:w-[160px] sm:w-[140px] cursor-pointer hover:bg-[#00b8e6] transition-colors"
+              className="bg-[#1ac0fd] content-stretch flex flex-col h-[54px] lg:h-[54px] md:h-[52px] sm:h-[44px] items-center justify-center pl-[54px] pr-[52px] lg:pl-[54px] lg:pr-[52px] md:pl-[48px] md:pr-[46px] sm:pl-[32px] sm:pr-[30px] py-[14px] lg:py-[14px] md:py-[12px] sm:py-[10px] relative rounded-[9999px] shrink-0 w-[165px] lg:w-[165px] md:w-[160px] sm:w-[140px] cursor-pointer hover:bg-[#00b8e6] transition-colors"
             >
-              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-white whitespace-nowrap">
-                <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px]">{t('home.hero.shopNow')}</p>
+              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-white whitespace-nowrap">
+                <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{t('home.hero.shopNow')}</p>
               </div>
             </div>
             <div
               onClick={() => router.push('/about')}
-              className="bg-[rgba(0,0,0,0)] content-stretch flex flex-col h-[60px] lg:h-[60px] md:h-[52px] sm:h-[44px] items-center justify-center px-[40px] lg:px-[40px] md:px-[32px] sm:px-[24px] py-[16px] lg:py-[16px] md:py-[12px] sm:py-[10px] relative rounded-[9999px] shrink-0 cursor-pointer hover:bg-white/10 transition-colors"
+              className="bg-[rgba(0,0,0,0)] content-stretch flex flex-col h-[54px] lg:h-[54px] md:h-[52px] sm:h-[44px] items-center justify-center px-[36px] lg:px-[36px] md:px-[32px] sm:px-[24px] py-[14px] lg:py-[14px] md:py-[12px] sm:py-[10px] relative rounded-[9999px] shrink-0 cursor-pointer hover:bg-white/10 transition-colors"
             >
-              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold h-[19px] lg:h-[19px] md:h-[17px] sm:h-[15px] justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-white w-[89px] lg:w-[89px] md:w-[75px] sm:w-[65px]">
-                <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px] whitespace-pre-wrap">{t('home.hero.learnMore')}</p>
+              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold h-[17px] lg:h-[17px] md:h-[17px] sm:h-[15px] justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-white w-[80px] lg:w-[80px] md:w-[75px] sm:w-[65px]">
+                <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px] whitespace-pre-wrap">{t('home.hero.learnMore')}</p>
               </div>
             </div>
           </div>
@@ -1889,7 +1889,7 @@ export default function HomePage() {
       </div>
 
       {/* Featured Products Section */}
-      <div className="absolute h-[1175px] lg:h-[1175px] md:h-[900px] sm:h-[700px] left-1/2 top-[1278px] lg:top-[1278px] md:top-[1000px] sm:top-[800px] translate-x-[-50%] w-full max-w-[1920px] overflow-hidden">
+      <div className="absolute h-[1050px] lg:h-[1050px] md:h-[900px] sm:h-[700px] left-1/2 top-[1150px] lg:top-[1150px] md:top-[1000px] sm:top-[800px] translate-x-[-50%] w-full max-w-[1920px] overflow-hidden">
         {/* Background Image - Daniel Sianca Flipped */}
         <div
           className="absolute w-full h-full"
@@ -1912,17 +1912,17 @@ export default function HomePage() {
             background: "linear-gradient(to bottom, transparent 0%, transparent 15%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.3) 85%, white 100%)"
           }}
         />
-        <div className="absolute h-[976px] lg:h-[976px] md:h-[750px] sm:h-[600px] left-1/2 translate-x-[-50%] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%] top-[179px] lg:top-[179px] md:top-[130px] sm:top-[100px] relative z-10">
+        <div className="absolute h-[870px] lg:h-[870px] md:h-[750px] sm:h-[600px] left-1/2 translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%] top-[160px] lg:top-[160px] md:top-[130px] sm:top-[100px] relative z-10">
           {/* Section Header */}
-          <div className="absolute content-stretch flex flex-col gap-[16px] lg:gap-[16px] md:gap-[12px] sm:gap-[10px] items-start left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[10px] lg:top-[10px] md:top-[0px] sm:top-[0px]">
+          <div className="absolute content-stretch flex flex-col gap-[14px] lg:gap-[14px] md:gap-[12px] sm:gap-[10px] items-start left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[8px] lg:top-[8px] md:top-[0px] sm:top-[0px]">
             <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
-              <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[70px] lg:text-[70px] md:text-[48px] sm:text-[32px] text-center text-white tracking-[-0.9px] lg:tracking-[-0.9px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
-                <p className="leading-[40px] lg:leading-[40px] md:leading-[32px] sm:leading-[28px]">{t('home.featuredProducts.title')}</p>
+              <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[60px] lg:text-[60px] md:text-[48px] sm:text-[32px] text-center text-white tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
+                <p className="leading-[36px] lg:leading-[36px] md:leading-[32px] sm:leading-[28px]">{t('home.featuredProducts.title')}</p>
               </div>
             </div>
-            <div className="content-stretch flex flex-col items-center relative shrink-0 w-full mt-[18px] lg:mt-[18px]">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
-                <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px]">{t('home.featuredProducts.subtitle')}</p>
+            <div className="content-stretch flex flex-col items-center relative shrink-0 w-full mt-[16px] lg:mt-[16px]">
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
+                <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{t('home.featuredProducts.subtitle')}</p>
               </div>
             </div>
           </div>
@@ -1931,13 +1931,13 @@ export default function HomePage() {
           
 
           {/* Products Grid - Uniform Layout */}
-          <div className="absolute h-[442px] lg:h-[442px] md:h-[330px] sm:h-[270px] left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[206px] lg:top-[206px] md:top-[150px] sm:top-[120px] z-[10]">
+          <div className="absolute h-[390px] lg:h-[390px] md:h-[330px] sm:h-[270px] left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[180px] lg:top-[180px] md:top-[150px] sm:top-[120px] z-[10]">
             {productsLoading ? (
               // Loading state - show placeholder with uniform grid
-              <div className="flex gap-[40px] lg:gap-[40px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
+              <div className="flex gap-[32px] lg:gap-[32px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
                 {[0, 1, 2].map((i) => (
-                  <div key={i} className="flex flex-col items-center gap-[24px] w-[320px] lg:w-[320px] md:w-[280px] sm:w-[240px] bg-transparent">
-                    <div className="h-[320px] lg:h-[320px] md:h-[280px] sm:h-[240px] w-full bg-gray-300 animate-pulse rounded-lg overflow-hidden" />
+                  <div key={i} className="flex flex-col items-center gap-[20px] lg:gap-[20px] md:gap-[24px] sm:gap-[24px] w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] bg-transparent">
+                    <div className="h-[280px] lg:h-[280px] md:h-[280px] sm:h-[240px] w-full bg-gray-300 animate-pulse rounded-lg overflow-hidden" />
                     <div className="w-full flex flex-col gap-[16px] px-[16px]">
                       <div className="h-4 bg-gray-300 animate-pulse rounded w-3/4" />
                       <div className="h-6 bg-gray-300 animate-pulse rounded w-1/3" />
@@ -1947,7 +1947,7 @@ export default function HomePage() {
               </div>
             ) : featuredProducts.length > 0 ? (
               // Render actual products - show 3 at a time based on carouselIndex with uniform grid
-              <div className="flex gap-[40px] lg:gap-[40px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
+              <div className="flex gap-[32px] lg:gap-[32px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
                 {(() => {
                   const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 3);
                   return visibleProducts.map((product) => {
@@ -1958,10 +1958,10 @@ export default function HomePage() {
                       <div
                         key={product.id}
                         onClick={() => handleOpenProduct(product)}
-                        className="flex flex-col items-center gap-[24px] w-[320px] lg:w-[320px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate bg-transparent"
+                        className="flex flex-col items-center gap-[20px] lg:gap-[20px] md:gap-[24px] sm:gap-[24px] w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate bg-transparent"
                       >
                         {/* Image Container - Uniform size with overflow hidden */}
-                        <div className="h-[320px] lg:h-[320px] md:h-[280px] sm:h-[240px] w-full relative overflow-hidden flex items-center justify-center bg-transparent">
+                        <div className="h-[280px] lg:h-[280px] md:h-[280px] sm:h-[240px] w-full relative overflow-hidden flex items-center justify-center bg-transparent">
                           {product.image ? (
                             <img
                               alt={product.title}
@@ -1974,16 +1974,16 @@ export default function HomePage() {
                           )}
                         </div>
                         {/* Content Section - Uniform layout */}
-                        <div className="w-full flex flex-col gap-[16px] px-[16px] pb-[16px]">
+                        <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px]">
                           <div className="flex items-end justify-between w-full">
                             <div className="flex flex-col items-start">
-                              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] lg:text-[18px] md:text-[16px] sm:text-[14px] text-white">
-                                <p className="leading-[28px] lg:leading-[28px] md:leading-[24px] sm:leading-[20px]">{product.title}</p>
+                              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white">
+                                <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px]">{product.title}</p>
                               </div>
                             </div>
                             <div className="flex flex-col items-start">
-                              <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] lg:text-[20px] md:text-[18px] sm:text-[16px] whitespace-nowrap">
-                                <p className="leading-[28px] lg:leading-[28px] md:leading-[24px] sm:leading-[20px]">{formattedPrice}</p>
+                              <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] whitespace-nowrap">
+                                <p className="leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px]">{formattedPrice}</p>
                               </div>
                             </div>
                           </div>
@@ -1993,10 +1993,10 @@ export default function HomePage() {
                               handleAddToCart(product);
                             }}
                             disabled={!product.inStock || addingToCart.has(product.id)}
-                            className="bg-[#00d1ff] content-stretch flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer"
+                            className="bg-[#00d1ff] content-stretch flex h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center justify-center py-[10px] lg:py-[10px] md:py-[12px] sm:py-[12px] relative rounded-[30px] lg:rounded-[30px] md:rounded-[34px] sm:rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer"
                           >
-                            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
-                              <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px]">
+                            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
+                              <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">
                                 {addingToCart.has(product.id) ? t('home.featuredProducts.adding') : t('home.featuredProducts.addToCart')}
                               </p>
                             </div>
@@ -2051,13 +2051,13 @@ export default function HomePage() {
           )}
 
           {/* View All Products Button */}
-          <div className="absolute content-stretch flex flex-col items-center left-[24px] lg:left-[24px] md:left-[16px] sm:left-[12px] right-[24px] lg:right-[24px] md:right-[16px] sm:right-[12px] top-[806px] lg:top-[806px] md:top-[580px] sm:top-[430px]">
+          <div className="absolute content-stretch flex flex-col items-center left-[20px] lg:left-[20px] md:left-[16px] sm:left-[12px] right-[20px] lg:right-[20px] md:right-[16px] sm:right-[12px] top-[720px] lg:top-[720px] md:top-[580px] sm:top-[430px]">
             <div
               onClick={() => router.push('/products')}
-              className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] lg:gap-[8px] md:gap-[6px] sm:gap-[4px] items-center px-[34px] lg:px-[34px] md:px-[28px] sm:px-[20px] py-[12px] lg:py-[12px] md:py-[10px] sm:py-[8px] relative rounded-[9999px] shrink-0 cursor-pointer hover:border-[#00d1ff] hover:bg-[#00d1ff]/5 transition-all"
+              className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[7px] lg:gap-[7px] md:gap-[6px] sm:gap-[4px] items-center px-[30px] lg:px-[30px] md:px-[28px] sm:px-[20px] py-[10px] lg:py-[10px] md:py-[10px] sm:py-[8px] relative rounded-[9999px] shrink-0 cursor-pointer hover:border-[#00d1ff] hover:bg-[#00d1ff]/5 transition-all"
             >
-              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#0f172a] text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center whitespace-nowrap">
-                <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px]">{t('home.featuredProducts.viewAllProducts')}</p>
+              <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#0f172a] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center whitespace-nowrap">
+                <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{t('home.featuredProducts.viewAllProducts')}</p>
               </div>
               <div className="relative shrink-0">
                 <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-start relative">
@@ -2074,8 +2074,8 @@ export default function HomePage() {
           </div>
 
           {/* Blue Underline */}
-          <div className="absolute content-stretch flex items-start justify-center left-1/2 top-[110px] translate-x-[-50%] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%]">
-            <div className="bg-[#00d1ff] h-[5px] rounded-[30px] shrink-0 w-[90px]" />
+          <div className="absolute content-stretch flex items-start justify-center left-1/2 top-[100px] lg:top-[100px] md:top-[110px] sm:top-[110px] translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
+            <div className="bg-[#00d1ff] h-[4px] lg:h-[4px] md:h-[5px] sm:h-[5px] rounded-[25px] lg:rounded-[25px] md:rounded-[30px] sm:rounded-[30px] shrink-0 w-[80px] lg:w-[80px] md:w-[90px] sm:w-[90px]" />
           </div>
         </div>
       </div>
@@ -2092,7 +2092,7 @@ export default function HomePage() {
               console.log('🖱️ [CAROUSEL] Next button clicked');
               handleNextProducts(e);
             }}
-            className="absolute bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] lg:size-[56px] md:size-[48px] sm:size-[40px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 z-[10001] group left-[calc(50%-650px)] lg:left-[calc(50%-650px)] md:left-[calc(50%-500px)] sm:left-[calc(50%-400px)] top-[1740px] lg:top-[1740px] md:top-[1350px] sm:top-[1090px]"
+            className="absolute bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[50px] lg:size-[50px] md:size-[48px] sm:size-[40px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 z-[10001] group left-[calc(50%-580px)] lg:left-[calc(50%-580px)] md:left-[calc(50%-500px)] sm:left-[calc(50%-400px)] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1090px]"
             aria-label="Next products"
           >
             <svg
@@ -2102,7 +2102,7 @@ export default function HomePage() {
               viewBox="0 0 24.02 28"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="h-[28px] lg:h-[28px] md:h-[24px] sm:h-[20px] w-[24.02px] lg:w-[24.02px] md:w-[20px] sm:w-[18px] transform rotate-180 scale-y-[-1] group-hover:scale-y-[-1.1] transition-transform duration-200 pointer-events-none"
+              className="h-[25px] lg:h-[25px] md:h-[24px] sm:h-[20px] w-[21px] lg:w-[21px] md:w-[20px] sm:w-[18px] transform rotate-180 scale-y-[-1] group-hover:scale-y-[-1.1] transition-transform duration-200 pointer-events-none"
             >
               <path
                 d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
@@ -2121,7 +2121,7 @@ export default function HomePage() {
               console.log('🖱️ [CAROUSEL] Previous button clicked');
               handlePreviousProducts(e);
             }}
-            className="absolute bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[56px] lg:size-[56px] md:size-[48px] sm:size-[40px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 z-[10001] group right-[calc(50%-650px)] lg:right-[calc(50%-650px)] md:right-[calc(50%-500px)] sm:right-[calc(50%-400px)] top-[1740px] lg:top-[1740px] md:top-[1350px] sm:top-[1110px]"
+            className="absolute bg-transparent border-[0.5px] border-white/49 border-solid flex items-center justify-center px-[8.5px] py-[6.5px] rounded-full size-[50px] lg:size-[50px] md:size-[48px] sm:size-[40px] cursor-pointer hover:bg-white/20 hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:bg-white/30 active:scale-95 transition-all duration-200 z-[10001] group right-[calc(50%-580px)] lg:right-[calc(50%-580px)] md:right-[calc(50%-500px)] sm:right-[calc(50%-400px)] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1110px]"
             aria-label="Previous products"
           >
             <svg
@@ -2131,7 +2131,7 @@ export default function HomePage() {
               viewBox="0 0 24.02 28"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
-              className="h-[28px] lg:h-[28px] md:h-[24px] sm:h-[20px] w-[24.02px] lg:w-[24.02px] md:w-[20px] sm:w-[18px] transform scale-y-[-1] group-hover:scale-y-[-1.1] transition-transform duration-200 pointer-events-none"
+              className="h-[25px] lg:h-[25px] md:h-[24px] sm:h-[20px] w-[21px] lg:w-[21px] md:w-[20px] sm:w-[18px] transform scale-y-[-1] group-hover:scale-y-[-1.1] transition-transform duration-200 pointer-events-none"
             >
               <path
                 d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
@@ -2145,87 +2145,87 @@ export default function HomePage() {
  {/* <div className="absolute left-0 right-0 top-[2388px] lg:top-[2590px] md:top-[1986px] sm:top-[1586px] h-[6px] bg-white z-[5]" /> */}
 
       {/* Seam fix above Water Energy (covers tiny line between sections) */}
-      <div className="absolute left-0 right-0 top-[2108px] lg:top-[2450px] md:top-[1806px] sm:top-[1396px] h-[6px] bg-white z-[100]" />
+      <div className="absolute left-0 right-0 top-[2108px] lg:top-[2200px] md:top-[1806px] sm:top-[1396px] h-[6px] bg-white z-[100]" />
 
       {/* Water Energy Section */}
-      <div className="absolute content-stretch flex flex-col gap-[35px] lg:gap-[35px] md:gap-[28px] sm:gap-[20px] items-start left-1/2 top-[2606px] lg:top-[2606px] md:top-[2000px] sm:top-[1600px] translate-x-[-50%] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%]">
+      <div className="absolute content-stretch flex flex-col gap-[30px] lg:gap-[30px] md:gap-[28px] sm:gap-[20px] items-start left-1/2 top-[2350px] lg:top-[2350px] md:top-[2000px] sm:top-[1600px] translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
         <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
           <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
-            <div className="flex flex-col font-['Montserrat',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[70px] lg:text-[70px] md:text-[48px] sm:text-[32px] text-center tracking-[-0.9px] lg:tracking-[-0.9px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase w-[641px] lg:w-[641px] md:w-[500px] sm:w-full">
-              <p className="leading-[40px] lg:leading-[40px] md:leading-[32px] sm:leading-[28px] whitespace-pre-wrap">{t('home.waterEnergy.title')}</p>
+            <div className="flex flex-col font-['Montserrat',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[60px] lg:text-[60px] md:text-[48px] sm:text-[32px] text-center tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase w-[570px] lg:w-[570px] md:w-[500px] sm:w-full">
+              <p className="leading-[36px] lg:leading-[36px] md:leading-[32px] sm:leading-[28px] whitespace-pre-wrap">{t('home.waterEnergy.title')}</p>
             </div>
           </div>
         </div>
         <div className="content-stretch flex items-start justify-center relative shrink-0 w-full">
-          <div className="bg-[#00d1ff] h-[5px] rounded-[30px] shrink-0 w-[90px]" />
+          <div className="bg-[#00d1ff] h-[4px] lg:h-[4px] md:h-[5px] sm:h-[5px] rounded-[25px] lg:rounded-[25px] md:rounded-[30px] sm:rounded-[30px] shrink-0 w-[80px] lg:w-[80px] md:w-[90px] sm:w-[90px]" />
         </div>
       </div>
 
       {/* Pure Spring Water / Balanced Hydration Cards */}
       {/* Blue Card (98%) */}
-      <div className="absolute h-[343px] lg:h-[343px] md:h-[280px] sm:h-[240px] left-[729px] lg:left-[729px] md:left-[38%] sm:left-[5%] top-[3570px] lg:top-[3570px] md:top-[2800px] sm:top-[2200px] w-[794px] lg:w-[794px] md:w-[60%] sm:w-[90%]">
-        <div className="absolute bg-[#1ac0fd] inset-0 rounded-[37px] lg:rounded-[37px] md:rounded-[30px] sm:rounded-[24px]" />
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[65.89%_3.9%_22.45%_69.14%] lg:inset-[65.89%_3.9%_22.45%_69.14%] md:inset-[65.89%_3.9%_22.45%_69.14%] sm:inset-[65.89%_3.9%_22.45%_69.14%] justify-center leading-[0] text-[96px] lg:text-[96px] md:text-[72px] sm:text-[56px] text-center text-white tracking-[-0.9px] lg:tracking-[-0.9px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
-          <p className="leading-[40px] lg:leading-[40px] md:leading-[32px] sm:leading-[28px]">{t('home.cards.pureSpringWater.percentage')}</p>
+      <div className="absolute h-[300px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[650px] lg:left-[650px] md:left-[38%] sm:left-[5%] top-[3200px] lg:top-[3200px] md:top-[2800px] sm:top-[2200px] w-[700px] lg:w-[700px] md:w-[60%] sm:w-[90%]">
+        <div className="absolute bg-[#1ac0fd] inset-0 rounded-[32px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]" />
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[65.89%_3.9%_22.45%_69.14%] lg:inset-[65.89%_3.9%_22.45%_69.14%] md:inset-[65.89%_3.9%_22.45%_69.14%] sm:inset-[65.89%_3.9%_22.45%_69.14%] justify-center leading-[0] text-[84px] lg:text-[84px] md:text-[72px] sm:text-[56px] text-center text-white tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
+          <p className="leading-[36px] lg:leading-[36px] md:leading-[32px] sm:leading-[28px]">{t('home.cards.pureSpringWater.percentage')}</p>
         </div>
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[12.83%_29.35%_58.02%_5.29%] lg:inset-[12.83%_29.35%_58.02%_5.29%] md:inset-[12.83%_29.35%_58.02%_5.29%] sm:inset-[12.83%_29.35%_58.02%_5.29%] justify-center leading-[50px] lg:leading-[50px] md:leading-[40px] sm:leading-[32px] text-[46px] lg:text-[46px] md:text-[36px] sm:text-[28px] text-white tracking-[-0.9px] lg:tracking-[-0.9px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[12.83%_29.35%_58.02%_5.29%] lg:inset-[12.83%_29.35%_58.02%_5.29%] md:inset-[12.83%_29.35%_58.02%_5.29%] sm:inset-[12.83%_29.35%_58.02%_5.29%] justify-center leading-[44px] lg:leading-[44px] md:leading-[40px] sm:leading-[32px] text-[40px] lg:text-[40px] md:text-[36px] sm:text-[28px] text-white tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
           <p className="mb-0">{t('home.cards.pureSpringWater.title')}</p>
           <p className="font-['Montserrat',sans-serif] font-light">{t('home.cards.pureSpringWater.subtitle')}</p>
         </div>
-        <div className="absolute flex flex-col font-['Inter',sans-serif] font-medium inset-[83.67%_3.9%_9.33%_82.24%] lg:inset-[83.67%_3.9%_9.33%_82.24%] md:inset-[83.67%_3.9%_9.33%_82.24%] sm:inset-[83.67%_3.9%_9.33%_82.24%] italic justify-center leading-[0] text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
-          <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px]">{t('home.cards.pureSpringWater.source')}</p>
+        <div className="absolute flex flex-col font-['Inter',sans-serif] font-medium inset-[83.67%_3.9%_9.33%_82.24%] lg:inset-[83.67%_3.9%_9.33%_82.24%] md:inset-[83.67%_3.9%_9.33%_82.24%] sm:inset-[83.67%_3.9%_9.33%_82.24%] italic justify-center leading-[0] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
+          <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{t('home.cards.pureSpringWater.source')}</p>
         </div>
       </div>
 
       {/* White Card (100%) */}
-      <div className="absolute h-[343px] lg:h-[343px] md:h-[280px] sm:h-[240px] left-[393px] lg:left-[393px] md:left-[20.5%] sm:left-[5%] top-[3931px] lg:top-[3931px] md:top-[3100px] sm:top-[2500px] w-[795px] lg:w-[795px] md:w-[60%] sm:w-[90%]">
-        <div className="absolute bg-white inset-0 rounded-[37px] lg:rounded-[37px] md:rounded-[30px] sm:rounded-[24px] shadow-[0_20px_60px_rgba(15,23,42,0.20)]" />
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[69.68%_60%_18.66%_7.42%] lg:inset-[69.68%_60%_18.66%_7.42%] md:inset-[69.68%_60%_18.66%_7.42%] sm:inset-[69.68%_60%_18.66%_7.42%] justify-center leading-[0] text-[#0f172a] text-[96px] lg:text-[96px] md:text-[72px] sm:text-[56px] text-center tracking-[-0.9px] lg:tracking-[-0.9px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
-          <p className="leading-[40px] lg:leading-[40px] md:leading-[32px] sm:leading-[28px]">{t('home.cards.balancedHydration.percentage')}</p>
+      <div className="absolute h-[300px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[350px] lg:left-[350px] md:left-[20.5%] sm:left-[5%] top-[3520px] lg:top-[3520px] md:top-[3100px] sm:top-[2500px] w-[700px] lg:w-[700px] md:w-[60%] sm:w-[90%]">
+        <div className="absolute bg-white inset-0 rounded-[32px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px] shadow-[0_20px_60px_rgba(15,23,42,0.20)]" />
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[69.68%_60%_18.66%_7.42%] lg:inset-[69.68%_60%_18.66%_7.42%] md:inset-[69.68%_60%_18.66%_7.42%] sm:inset-[69.68%_60%_18.66%_7.42%] justify-center leading-[0] text-[#0f172a] text-[84px] lg:text-[84px] md:text-[72px] sm:text-[56px] text-center tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
+          <p className="leading-[36px] lg:leading-[36px] md:leading-[32px] sm:leading-[28px]">{t('home.cards.balancedHydration.percentage')}</p>
         </div>
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[12.83%_5.28%_58.02%_22.26%] lg:inset-[12.83%_5.28%_58.02%_22.26%] md:inset-[12.83%_5.28%_58.02%_22.26%] sm:inset-[12.83%_5.28%_58.02%_22.26%] justify-center leading-[50px] lg:leading-[50px] md:leading-[40px] sm:leading-[32px] text-[#00d1ff] text-[46px] lg:text-[46px] md:text-[36px] sm:text-[28px] text-right tracking-[-0.9px] lg:tracking-[-0.9px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[12.83%_5.28%_58.02%_22.26%] lg:inset-[12.83%_5.28%_58.02%_22.26%] md:inset-[12.83%_5.28%_58.02%_22.26%] sm:inset-[12.83%_5.28%_58.02%_22.26%] justify-center leading-[44px] lg:leading-[44px] md:leading-[40px] sm:leading-[32px] text-[#00d1ff] text-[40px] lg:text-[40px] md:text-[36px] sm:text-[28px] text-right tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
           <p className="mb-0">{t('home.cards.balancedHydration.title')}</p>
           <p className="font-['Montserrat',sans-serif] font-light">{t('home.cards.balancedHydration.subtitle')}</p>
         </div>
-        <div className="absolute flex flex-col font-['Inter',sans-serif] font-medium inset-[53.94%_78.24%_39.07%_7.42%] lg:inset-[53.94%_78.24%_39.07%_7.42%] md:inset-[53.94%_78.24%_39.07%_7.42%] sm:inset-[53.94%_78.24%_39.07%_7.42%] italic justify-center leading-[0] text-[#00d1ff] text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center whitespace-nowrap">
-          <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px]">{t('home.cards.balancedHydration.source')}</p>
+        <div className="absolute flex flex-col font-['Inter',sans-serif] font-medium inset-[53.94%_78.24%_39.07%_7.42%] lg:inset-[53.94%_78.24%_39.07%_7.42%] md:inset-[53.94%_78.24%_39.07%_7.42%] sm:inset-[53.94%_78.24%_39.07%_7.42%] italic justify-center leading-[0] text-[#00d1ff] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center whitespace-nowrap">
+          <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{t('home.cards.balancedHydration.source')}</p>
         </div>
       </div>
 
       {/* Side Images */}
-      <div className="absolute h-[343px] lg:h-[343px] md:h-[280px] sm:h-[240px] left-[393px] lg:left-[393px] md:left-[20.5%] sm:left-[5%] top-[3570px] lg:top-[3570px] md:top-[2800px] sm:top-[2200px] w-[306px] lg:w-[306px] md:w-[25%] sm:w-[40%]">
-        <div className="absolute inset-0 rounded-[37px] lg:rounded-[37px] md:rounded-[30px] sm:rounded-[24px]">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[37px] lg:rounded-[37px] md:rounded-[30px] sm:rounded-[24px]">
+      <div className="absolute h-[300px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[350px] lg:left-[350px] md:left-[20.5%] sm:left-[5%] top-[3200px] lg:top-[3200px] md:top-[2800px] sm:top-[2200px] w-[270px] lg:w-[270px] md:w-[25%] sm:w-[40%]">
+        <div className="absolute inset-0 rounded-[32px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[32px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
             <img alt="Screenshot" className="absolute h-[149.05%] left-[-32.81%] max-w-none top-[-32.36%] w-[132.81%]" src={img5} />
           </div>
         </div>
       </div>
 
-      <div className="absolute h-[350px] lg:h-[350px] md:h-[280px] sm:h-[240px] left-[1215px] lg:left-[1215px] md:left-[63.3%] sm:left-[55%] top-[3924px] lg:top-[3924px] md:top-[3100px] sm:top-[2500px] w-[308px] lg:w-[308px] md:w-[25%] sm:w-[40%]">
-        <div className="absolute inset-0 rounded-[37px]">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[37px]">
+      <div className="absolute h-[300px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[1080px] lg:left-[1080px] md:left-[63.3%] sm:left-[55%] top-[3520px] lg:top-[3520px] md:top-[3100px] sm:top-[2500px] w-[270px] lg:w-[270px] md:w-[25%] sm:w-[40%]">
+        <div className="absolute inset-0 rounded-[32px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[32px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
             <img alt="Screenshot" className="absolute h-[101.64%] left-[-6.77%] max-w-none top-[-1.52%] w-[113.53%]" src={img6} />
           </div>
         </div>
       </div>
 
       {/* Why Choose Us Section */}
-      <div className="absolute content-stretch flex flex-col gap-[32px] lg:gap-[32px] md:gap-[24px] sm:gap-[20px] items-start left-1/2 translate-x-[-50%] top-[4422px] lg:top-[4422px] md:top-[3500px] sm:top-[2800px] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%]">
+      <div className="absolute content-stretch flex flex-col gap-[28px] lg:gap-[28px] md:gap-[24px] sm:gap-[20px] items-start left-1/2 translate-x-[-50%] top-[3950px] lg:top-[3950px] md:top-[3500px] sm:top-[2800px] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
         <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
           <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
-            <div className="flex flex-col font-['Montserrat',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[70px] lg:text-[70px] md:text-[48px] sm:text-[32px] text-center tracking-[-0.9px] lg:tracking-[-0.9px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
-              <p className="leading-[40px] lg:leading-[40px] md:leading-[32px] sm:leading-[28px]">{t('home.whyChooseUs.title')}</p>
+            <div className="flex flex-col font-['Montserrat',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[60px] lg:text-[60px] md:text-[48px] sm:text-[32px] text-center tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
+              <p className="leading-[36px] lg:leading-[36px] md:leading-[32px] sm:leading-[28px]">{t('home.whyChooseUs.title')}</p>
             </div>
           </div>
         </div>
         <div className="content-stretch flex items-start justify-center relative shrink-0 w-full">
-          <div className="bg-[#00d1ff] h-[5px] rounded-[30px] shrink-0 w-[90px]" />
+          <div className="bg-[#00d1ff] h-[4px] lg:h-[4px] md:h-[5px] sm:h-[5px] rounded-[25px] lg:rounded-[25px] md:rounded-[30px] sm:rounded-[30px] shrink-0 w-[80px] lg:w-[80px] md:w-[90px] sm:w-[90px]" />
         </div>
       </div>
 
       {/* Why Choose Us Cards */}
       {/* Card 1: Rich in Minerals */}
-      <div className="absolute h-[286px] lg:h-[286px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] top-[4661px] lg:top-[4661px] md:top-[3700px] sm:top-[3000px] w-[375px] lg:w-[375px] md:w-[45%] sm:w-[90%]">
+      <div className="absolute h-[260px] lg:h-[260px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] top-[4200px] lg:top-[4200px] md:top-[3700px] sm:top-[3000px] w-[340px] lg:w-[340px] md:w-[45%] sm:w-[90%]">
         <div className="absolute bg-white inset-[18.18%_0_0_0] rounded-[37px]" />
         <div className="absolute aspect-[100/100] left-[34.13%] right-[34.93%] top-0">
           <div className="absolute inset-[9.48%_0_18.97%_34.91%] overflow-hidden">
@@ -2239,16 +2239,16 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[61.19%_13.33%_22.03%_13.6%] lg:inset-[61.19%_13.33%_22.03%_13.6%] md:inset-[61.19%_13.33%_22.03%_13.6%] sm:inset-[61.19%_13.33%_22.03%_13.6%] justify-center leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px] not-italic text-[#64748b] text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center">
+        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[61.19%_13.33%_22.03%_13.6%] lg:inset-[61.19%_13.33%_22.03%_13.6%] md:inset-[61.19%_13.33%_22.03%_13.6%] sm:inset-[61.19%_13.33%_22.03%_13.6%] justify-center leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px] not-italic text-[#64748b] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center">
           <p className="mb-0">{t('home.whyChooseUs.richInMinerals.description')}</p>
         </div>
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[49.3%_24%_40.91%_23.73%] lg:inset-[49.3%_24%_40.91%_23.73%] md:inset-[49.3%_24%_40.91%_23.73%] sm:inset-[49.3%_24%_40.91%_23.73%] justify-center leading-[0] text-[#0f172a] text-[20px] lg:text-[20px] md:text-[18px] sm:text-[16px] text-center uppercase whitespace-nowrap">
-          <p className="leading-[28px] lg:leading-[28px] md:leading-[24px] sm:leading-[20px]">{t('home.whyChooseUs.richInMinerals.title')}</p>
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[49.3%_24%_40.91%_23.73%] lg:inset-[49.3%_24%_40.91%_23.73%] md:inset-[49.3%_24%_40.91%_23.73%] sm:inset-[49.3%_24%_40.91%_23.73%] justify-center leading-[0] text-[#0f172a] text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] text-center uppercase whitespace-nowrap">
+          <p className="leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px]">{t('home.whyChooseUs.richInMinerals.title')}</p>
         </div>
       </div>
 
       {/* Card 2: Non-Carbonated */}
-      <div className="absolute h-[272px] lg:h-[272px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[-774px] md:translate-x-[-50%] sm:translate-x-[-50%] top-[5086px] lg:top-[5086px] md:top-[4000px] sm:top-[3280px] w-[375px] lg:w-[375px] md:w-[45%] sm:w-[90%]">
+      <div className="absolute h-[250px] lg:h-[250px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[-700px] md:translate-x-[-50%] sm:translate-x-[-50%] top-[4580px] lg:top-[4580px] md:top-[4000px] sm:top-[3280px] w-[340px] lg:w-[340px] md:w-[45%] sm:w-[90%]">
         <div className="absolute bg-white inset-[13.97%_0_0_0] rounded-[37px]" />
         <div className="absolute aspect-[100/100] left-[37.07%] overflow-clip right-[32%] top-0">
           <div className="absolute inset-[10.22%_10.23%_61.04%_62.5%]">
@@ -2265,16 +2265,16 @@ export default function HomePage() {
             <img alt="Top" className="block max-w-none size-full" src={img9} />
           </div>
         </div>
-        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[60.66%_13.33%_24.63%_13.6%] lg:inset-[60.66%_13.33%_24.63%_13.6%] md:inset-[60.66%_13.33%_24.63%_13.6%] sm:inset-[60.66%_13.33%_24.63%_13.6%] justify-center leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] not-italic text-[#64748b] text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center">
+        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[60.66%_13.33%_24.63%_13.6%] lg:inset-[60.66%_13.33%_24.63%_13.6%] md:inset-[60.66%_13.33%_24.63%_13.6%] sm:inset-[60.66%_13.33%_24.63%_13.6%] justify-center leading-[18px] lg:leading-[18px] md:leading-[18px] sm:leading-[16px] not-italic text-[#64748b] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center">
           <p className="mb-0">{t('home.whyChooseUs.nonCarbonated.description')}</p>
         </div>
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[46.69%_22.4%_43.01%_22.4%] lg:inset-[46.69%_22.4%_43.01%_22.4%] md:inset-[46.69%_22.4%_43.01%_22.4%] sm:inset-[46.69%_22.4%_43.01%_22.4%] justify-center leading-[0] text-[#0f172a] text-[20px] lg:text-[20px] md:text-[18px] sm:text-[16px] text-center uppercase whitespace-nowrap">
-          <p className="leading-[28px] lg:leading-[28px] md:leading-[24px] sm:leading-[20px]">{t('home.whyChooseUs.nonCarbonated.title')}</p>
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[46.69%_22.4%_43.01%_22.4%] lg:inset-[46.69%_22.4%_43.01%_22.4%] md:inset-[46.69%_22.4%_43.01%_22.4%] sm:inset-[46.69%_22.4%_43.01%_22.4%] justify-center leading-[0] text-[#0f172a] text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] text-center uppercase whitespace-nowrap">
+          <p className="leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px]">{t('home.whyChooseUs.nonCarbonated.title')}</p>
         </div>
       </div>
 
       {/* Card 3: No Artificial Ingredients */}
-      <div className="absolute h-[278px] lg:h-[278px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[362.5px] md:translate-x-[-50%] sm:translate-x-[-50%] top-[4932px] lg:top-[4932px] md:top-[4300px] sm:top-[3560px] w-[375px] lg:w-[375px] md:w-[45%] sm:w-[90%]">
+      <div className="absolute h-[255px] lg:h-[255px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[330px] md:translate-x-[-50%] sm:translate-x-[-50%] top-[4430px] lg:top-[4430px] md:top-[4300px] sm:top-[3560px] w-[340px] lg:w-[340px] md:w-[45%] sm:w-[90%]">
         <div className="absolute bg-white inset-[15.83%_0_0_0] rounded-[37px]" />
         <div className="absolute aspect-[100/100] left-[34.53%] right-[34.53%] top-0">
           <div className="absolute inset-[5.88%_0_26.15%_50.33%] overflow-hidden">
@@ -2289,35 +2289,35 @@ export default function HomePage() {
             <img alt="Top" className="block max-w-none size-full" src={img12} />
           </div>
         </div>
-        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[60.07%_10.4%_22.66%_10.67%] lg:inset-[60.07%_10.4%_22.66%_10.67%] md:inset-[60.07%_10.4%_22.66%_10.67%] sm:inset-[60.07%_10.4%_22.66%_10.67%] justify-center leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px] not-italic text-[#64748b] text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center">
+        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[60.07%_10.4%_22.66%_10.67%] lg:inset-[60.07%_10.4%_22.66%_10.67%] md:inset-[60.07%_10.4%_22.66%_10.67%] sm:inset-[60.07%_10.4%_22.66%_10.67%] justify-center leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px] not-italic text-[#64748b] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center">
           <p className="mb-0">{t('home.whyChooseUs.noArtificialIngredients.description')}</p>
         </div>
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[47.84%_11.2%_42.09%_10.93%] lg:inset-[47.84%_11.2%_42.09%_10.93%] md:inset-[47.84%_11.2%_42.09%_10.93%] sm:inset-[47.84%_11.2%_42.09%_10.93%] justify-center leading-[0] text-[#0f172a] text-[20px] lg:text-[20px] md:text-[18px] sm:text-[16px] text-center uppercase whitespace-nowrap">
-          <p className="leading-[28px] lg:leading-[28px] md:leading-[24px] sm:leading-[20px]">{t('home.whyChooseUs.noArtificialIngredients.title')}</p>
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[47.84%_11.2%_42.09%_10.93%] lg:inset-[47.84%_11.2%_42.09%_10.93%] md:inset-[47.84%_11.2%_42.09%_10.93%] sm:inset-[47.84%_11.2%_42.09%_10.93%] justify-center leading-[0] text-[#0f172a] text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] text-center uppercase whitespace-nowrap">
+          <p className="leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px]">{t('home.whyChooseUs.noArtificialIngredients.title')}</p>
         </div>
       </div>
 
       {/* Trusted By Section */}
-      <div className="absolute content-stretch flex flex-col h-[461px] lg:h-[461px] md:h-[380px] sm:h-[320px] items-start left-1/2 px-[192px] lg:px-[192px] md:px-[48px] sm:px-[24px] py-[80px] lg:py-[80px] md:py-[60px] sm:py-[40px] top-[5651px] lg:top-[5651px] md:top-[4500px] sm:top-[3800px] translate-x-[-50%] w-full max-w-[1920px]">
-        <div className="h-[277px] lg:h-[277px] md:h-[240px] sm:h-[200px] max-w-[1536px] relative shrink-0 w-full">
-          <div className="absolute content-stretch flex flex-col items-center left-[calc(50%+0.5px)] top-[-34px] lg:top-[-34px] md:top-[-28px] sm:top-[-24px] translate-x-[-50%] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%]">
-            <div className="flex flex-col font-['Montserrat',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[70px] lg:text-[70px] md:text-[48px] sm:text-[32px] text-center uppercase whitespace-nowrap">
-              <p className="leading-[28px] lg:leading-[28px] md:leading-[24px] sm:leading-[22px]">{t('home.trustedBy.title')}</p>
+      <div className="absolute content-stretch flex flex-col h-[410px] lg:h-[410px] md:h-[380px] sm:h-[320px] items-start left-1/2 px-[170px] lg:px-[170px] md:px-[48px] sm:px-[24px] py-[70px] lg:py-[70px] md:py-[60px] sm:py-[40px] top-[5050px] lg:top-[5050px] md:top-[4500px] sm:top-[3800px] translate-x-[-50%] w-full max-w-[1920px]">
+        <div className="h-[250px] lg:h-[250px] md:h-[240px] sm:h-[200px] max-w-[1536px] relative shrink-0 w-full">
+          <div className="absolute content-stretch flex flex-col items-center left-[calc(50%+0.5px)] top-[-30px] lg:top-[-30px] md:top-[-28px] sm:top-[-24px] translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
+            <div className="flex flex-col font-['Montserrat',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[60px] lg:text-[60px] md:text-[48px] sm:text-[32px] text-center uppercase whitespace-nowrap">
+              <p className="leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[22px]">{t('home.trustedBy.title')}</p>
             </div>
           </div>
-          <div className="absolute content-stretch flex flex-col items-center left-[calc(50%+1px)] top-[37px] lg:top-[37px] md:top-[30px] sm:top-[24px] translate-x-[-50%] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%]">
-            <div className="flex flex-col font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] text-center uppercase whitespace-nowrap">
+          <div className="absolute content-stretch flex flex-col items-center left-[calc(50%+1px)] top-[33px] lg:top-[33px] md:top-[30px] sm:top-[24px] translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
+            <div className="flex flex-col font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center uppercase whitespace-nowrap">
               <p className="leading-[16px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">{t('home.trustedBy.subtitle')}</p>
             </div>
           </div>
           {/* Partner Logos - Show all 3 at once, active one is larger */}
-          <div className="absolute content-stretch flex items-center justify-center gap-[60px] lg:gap-[60px] md:gap-[40px] sm:gap-[30px] left-[calc(50%+0.5px)] top-[96px] translate-x-[-50%] w-[1100px] lg:w-[1100px] md:w-[90%] sm:w-[95%] h-[144px]">
+          <div className="absolute content-stretch flex items-center justify-center gap-[50px] lg:gap-[50px] md:gap-[40px] sm:gap-[30px] left-[calc(50%+0.5px)] top-[85px] lg:top-[85px] md:top-[96px] sm:top-[96px] translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%] h-[130px] lg:h-[130px] md:h-[144px] sm:h-[144px]">
             {/* Logo 0 - sas20 logo */}
             <div 
               className={`relative shrink-0 transition-all duration-300 cursor-pointer ${
                 trustedByIndex === 0 
-                  ? 'h-[144px] w-[178px] scale-110' 
-                  : 'h-[100px] w-[124px] opacity-70 hover:opacity-90'
+                  ? 'h-[130px] w-[160px] scale-110' 
+                  : 'h-[90px] w-[112px] opacity-70 hover:opacity-90'
               }`}
               onClick={() => setTrustedByIndex(0)}
             >
@@ -2331,8 +2331,8 @@ export default function HomePage() {
             <div 
               className={`relative shrink-0 transition-all duration-300 cursor-pointer ${
                 trustedByIndex === 1 
-                  ? 'h-[144px] w-[221px] scale-110' 
-                  : 'h-[100px] w-[154px] opacity-70 hover:opacity-90'
+                  ? 'h-[130px] w-[200px] scale-110' 
+                  : 'h-[90px] w-[138px] opacity-70 hover:opacity-90'
               }`}
               onClick={() => setTrustedByIndex(1)}
             >
@@ -2346,8 +2346,8 @@ export default function HomePage() {
             <div 
               className={`relative shrink-0 transition-all duration-300 cursor-pointer ${
                 trustedByIndex === 2 
-                  ? 'h-[144px] w-[246px] scale-110' 
-                  : 'h-[100px] w-[171px] opacity-70 hover:opacity-90'
+                  ? 'h-[130px] w-[220px] scale-110' 
+                  : 'h-[90px] w-[154px] opacity-70 hover:opacity-90'
               }`}
               onClick={() => setTrustedByIndex(2)}
             >
@@ -2458,32 +2458,32 @@ export default function HomePage() {
       </div>
 
       {/* Footer */}
-      <div className="absolute h-[700px] lg:h-[700px] md:h-[600px] sm:h-[500px] left-0 top-[6201px] lg:top-[6201px] md:top-[5000px] sm:top-[4000px] w-full relative overflow-hidden">
+      <div className="absolute h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 top-[5550px] lg:top-[5550px] md:top-[5000px] sm:top-[4000px] w-full relative overflow-hidden">
         {/* Footer Background Image - daniel sinoca */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <img alt="Footer Background" className="absolute h-[144.5%] left-0 max-w-none top-[-44.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash1} />
         </div>
         {/* Dark overlay for better text readability */}
         <div className="absolute  inset-0" />
-        <div className="absolute h-[449px] lg:h-[449px] md:h-[400px] sm:h-[350px] left-[calc(50%+0.5px)] top-[231px] lg:top-[231px] md:top-[180px] sm:top-[120px] translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] relative z-10">
-          <div className="absolute content-stretch flex gap-[258px] lg:gap-[258px] md:gap-[120px] sm:gap-[40px] items-start justify-start left-[calc(50%-16px)] top-0 translate-x-[-50%] flex-col md:flex-row sm:flex-col">
+        <div className="absolute h-[400px] lg:h-[400px] md:h-[400px] sm:h-[350px] left-[calc(50%+0.5px)] top-[200px] lg:top-[200px] md:top-[180px] sm:top-[120px] translate-x-[-50%] w-[1080px] lg:w-[1080px] md:w-[90%] sm:w-[95%] relative z-10">
+          <div className="absolute content-stretch flex gap-[230px] lg:gap-[230px] md:gap-[120px] sm:gap-[40px] items-start justify-start left-[calc(50%-16px)] top-0 translate-x-[-50%] flex-col md:flex-row sm:flex-col">
             {/* Column 1: Logo + Description */}
-            <div className="flex flex-col h-[312px] lg:h-[312px] md:h-[280px] sm:h-auto relative shrink-0 w-[339px] lg:w-[339px] md:w-[45%] sm:w-full gap-[34px] lg:gap-[34px] md:gap-[24px] sm:gap-[20px]">
-              <div className="content-stretch flex h-[14px] items-center left-0 top-0 w-[336px] lg:w-[336px] md:w-full sm:w-full">
-                <div className="h-[34px] lg:h-[34px] md:h-[30px] sm:h-[26px] relative shrink-0 w-[112px] lg:w-[112px] md:w-[95px] sm:w-[80px]">
+            <div className="flex flex-col h-[280px] lg:h-[280px] md:h-[280px] sm:h-auto relative shrink-0 w-[300px] lg:w-[300px] md:w-[45%] sm:w-full gap-[30px] lg:gap-[30px] md:gap-[24px] sm:gap-[20px]">
+              <div className="content-stretch flex h-[14px] items-center left-0 top-0 w-[300px] lg:w-[300px] md:w-full sm:w-full">
+                <div className="h-[30px] lg:h-[30px] md:h-[30px] sm:h-[26px] relative shrink-0 w-[100px] lg:w-[100px] md:w-[95px] sm:w-[80px]">
                   <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={imgBorborAguaLogoColorB2024Colored1} />
                 </div>
               </div>
-              <div className="content-stretch flex flex-row flex-wrap items-start left-0 w-[336px] lg:w-[336px] md:w-full sm:w-full">
-                <div className="flex font-['Inter',sans-serif] font-bold justify-center leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[22px] not-italic relative shrink-0 text-[18px] lg:text-[18px] md:text-[16px] sm:text-[14px] text-white w-full">
-                  <p className="leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[22px]">
+              <div className="content-stretch flex flex-row flex-wrap items-start left-0 w-[300px] lg:w-[300px] md:w-full sm:w-full">
+                <div className="flex font-['Inter',sans-serif] font-bold justify-center leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[22px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white w-full">
+                  <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[22px]">
                     {t('home.footer.description')}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-[10px] lg:gap-[10px] md:gap-[8px] sm:gap-[6px] left-0 relative">
-                <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[16px] lg:text-[16px] md:text-[14px] sm:text-[12px] whitespace-nowrap">
-                  <p className="leading-[24px] lg:leading-[24px] md:leading-[20px] sm:leading-[18px]">{t('home.footer.more')}</p>
+              <div className="flex items-center gap-[9px] lg:gap-[9px] md:gap-[8px] sm:gap-[6px] left-0 relative">
+                <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] whitespace-nowrap">
+                  <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{t('home.footer.more')}</p>
                 </div>
                 <div className="content-stretch flex flex-col items-start relative shrink-0">
                   <div className="flex items-center justify-center relative shrink-0">
@@ -2498,16 +2498,16 @@ export default function HomePage() {
             </div>
 
             {/* Column 2-4: Contact, Policies, Site Map */}
-            <div className="content-stretch flex gap-[208px] lg:gap-[208px] md:gap-[80px] sm:gap-[40px] items-start relative shrink-0 flex-col md:flex-row sm:flex-col">
+            <div className="content-stretch flex gap-[185px] lg:gap-[185px] md:gap-[80px] sm:gap-[40px] items-start relative shrink-0 flex-col md:flex-row sm:flex-col">
               {/* Column 2: Contact */}
-              <div className="content-stretch flex flex-col gap-[24px] lg:gap-[24px] md:gap-[20px] sm:gap-[16px] items-start relative shrink-0 w-[241px] lg:w-[241px] md:w-[45%] sm:w-full">
+              <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-start relative shrink-0 w-[215px] lg:w-[215px] md:w-[45%] sm:w-full">
                 <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                  <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[24px] lg:text-[24px] md:text-[20px] sm:text-[18px] text-white tracking-[1.8px] lg:tracking-[1.8px] md:tracking-[1.5px] sm:tracking-[1.2px] uppercase w-full">
-                    <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.contact.title')}</p>
+                  <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[21px] lg:text-[21px] md:text-[20px] sm:text-[18px] text-white tracking-[1.6px] lg:tracking-[1.6px] md:tracking-[1.5px] sm:tracking-[1.2px] uppercase w-full">
+                    <p className="leading-[18px] lg:leading-[18px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.contact.title')}</p>
                   </div>
                 </div>
-                <div className="content-stretch flex flex-row flex-wrap gap-[16px] lg:gap-[16px] md:gap-[12px] sm:gap-[10px] items-start relative shrink-0 w-[249px] lg:w-[249px] md:w-full sm:w-full">
-                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[18px] lg:text-[18px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
+                <div className="content-stretch flex flex-row flex-wrap gap-[14px] lg:gap-[14px] md:gap-[12px] sm:gap-[10px] items-start relative shrink-0 w-[215px] lg:w-[215px] md:w-full sm:w-full">
+                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
                     <p className="font-['Inter',sans-serif] font-bold mb-0">
                       <span className="leading-[24px]">{t('home.footer.contact.office')} </span>
                       <a className="[text-decoration-skip-ink:none] cursor-pointer decoration-solid leading-[24px] underline" href="tel:0037433000401">
@@ -2515,91 +2515,91 @@ export default function HomePage() {
                       </a>
                     </p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white whitespace-nowrap">
+                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
                     <p className="font-['Inter',sans-serif] font-bold">
-                      <span className="leading-[24px]">{t('home.footer.contact.delivery')} </span>
-                      <a className="[text-decoration-skip-ink:none] cursor-pointer decoration-solid leading-[24px] underline" href="tel:0037441012004">
-                        <span className="[text-decoration-skip-ink:none] decoration-solid leading-[24px]">+374 41 012004</span>
+                      <span className="leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px]">{t('home.footer.contact.delivery')} </span>
+                      <a className="[text-decoration-skip-ink:none] cursor-pointer decoration-solid leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px] underline" href="tel:0037441012004">
+                        <span className="[text-decoration-skip-ink:none] decoration-solid leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px]">+374 41 012004</span>
                       </a>
                     </p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white whitespace-nowrap">
+                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
                     <p className="font-['Inter',sans-serif] font-bold">
-                      <span className="leading-[24px]">{t('home.footer.contact.email')} </span>
-                      <a className="[text-decoration-skip-ink:none] cursor-pointer decoration-solid leading-[24px] underline" href="mailto:borboraqua.am@gmail.com">
-                        <span className="[text-decoration-skip-ink:none] decoration-solid leading-[24px]">info@borboraqua.am</span>
+                      <span className="leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px]">{t('home.footer.contact.email')} </span>
+                      <a className="[text-decoration-skip-ink:none] cursor-pointer decoration-solid leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px] underline" href="mailto:borboraqua.am@gmail.com">
+                        <span className="[text-decoration-skip-ink:none] decoration-solid leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px]">info@borboraqua.am</span>
                       </a>
                     </p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-bold justify-center leading-[24px] lg:leading-[24px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[18px] lg:text-[18px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
+                  <div className="flex font-['Inter',sans-serif] font-bold justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
                     <p className="mb-0">{t('home.footer.contact.location')} {t('home.footer.contact.locationLine1')}</p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-bold justify-center leading-[24px] lg:leading-[24px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[18px] lg:text-[18px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
+                  <div className="flex font-['Inter',sans-serif] font-bold justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
                     <p className="mb-0">{t('home.footer.contact.locationLine2')}</p>
                   </div>
                 </div>
               </div>
 
               {/* Column 3: Policies */}
-              <div className="content-stretch flex flex-col gap-[24px] lg:gap-[24px] md:gap-[20px] sm:gap-[16px] items-start relative shrink-0 w-[154px] lg:w-[154px] md:w-[45%] sm:w-full">
+              <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-start relative shrink-0 w-[140px] lg:w-[140px] md:w-[45%] sm:w-full">
                 <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                  <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[18px] lg:text-[18px] md:text-[16px] sm:text-[14px] text-white tracking-[1.6px] lg:tracking-[1.6px] md:tracking-[1.4px] sm:tracking-[1.2px] uppercase w-full">
-                    <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.policies.title')}</p>
+                  <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white tracking-[1.4px] lg:tracking-[1.4px] md:tracking-[1.4px] sm:tracking-[1.2px] uppercase w-full">
+                    <p className="leading-[18px] lg:leading-[18px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.policies.title')}</p>
                   </div>
                 </div>
-                <div className="content-stretch flex flex-row flex-wrap gap-[18px] lg:gap-[18px] md:gap-[14px] sm:gap-[12px] items-start relative shrink-0 w-full">
+                <div className="content-stretch flex flex-row flex-wrap gap-[16px] lg:gap-[16px] md:gap-[14px] sm:gap-[12px] items-start relative shrink-0 w-full">
                   <div
                     onClick={() => router.push('/privacy')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[18px] lg:text-[18px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[24px] lg:leading-[24px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.privacyPolicy')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.privacyPolicy')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/terms')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[24px]">{t('home.footer.policies.termsConditions')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.termsConditions')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/delivery-terms')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[24px]">{t('home.footer.policies.deliveryTerms')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.deliveryTerms')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/refund-policy')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[24px]">{t('home.footer.policies.refundPolicy')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.refundPolicy')}</p>
                   </div>
                 </div>
               </div>
 
               {/* Column 4: Site Map */}
-              <div className="content-stretch flex flex-col gap-[24px] lg:gap-[24px] md:gap-[20px] sm:gap-[16px] items-start relative shrink-0 w-[94px] lg:w-[94px] md:w-[45%] sm:w-full">
+              <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-start relative shrink-0 w-[94px] lg:w-[94px] md:w-[45%] sm:w-full">
                 <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                  <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16.5px] lg:text-[16.5px] md:text-[15px] sm:text-[13px] text-white tracking-[1.4px] lg:tracking-[1.4px] md:tracking-[1.2px] sm:tracking-[1px] uppercase w-full">
-                    <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.siteMap.title')}</p>
+                  <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white tracking-[1.3px] lg:tracking-[1.3px] md:tracking-[1.2px] sm:tracking-[1px] uppercase w-full">
+                    <p className="leading-[18px] lg:leading-[18px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.siteMap.title')}</p>
                   </div>
                 </div>
-                <div className="content-stretch flex flex-row flex-wrap gap-[18px] lg:gap-[18px] md:gap-[14px] sm:gap-[12px] items-start relative shrink-0 w-full">
+                <div className="content-stretch flex flex-row flex-wrap gap-[16px] lg:gap-[16px] md:gap-[14px] sm:gap-[12px] items-start relative shrink-0 w-full">
                   <div
                     onClick={() => router.push('/about')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[18px] lg:text-[18px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[24px] lg:leading-[24px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.aboutUs')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.aboutUs')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/contact')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[24px]">{t('home.footer.siteMap.contact')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.contact')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/products')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[24px]">{t('home.footer.siteMap.shop')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.shop')}</p>
                   </div>
                 </div>
               </div>
@@ -2607,33 +2607,33 @@ export default function HomePage() {
           </div>
 
           {/* Social Media Icons */}
-          <div className="absolute content-stretch flex gap-[16px] h-[48px] items-center left-[19px] pt-[8px] top-[312px] w-[336px]">
-            <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[40px]">
-              <div className="relative shrink-0 size-[20px]">
+          <div className="absolute content-stretch flex gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center left-[17px] lg:left-[17px] md:left-[19px] sm:left-[19px] pt-[7px] lg:pt-[7px] md:pt-[8px] sm:pt-[8px] top-[280px] lg:top-[280px] md:top-[312px] sm:top-[312px] w-[300px] lg:w-[300px] md:w-[336px] sm:w-[336px]">
+            <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
+              <div className="relative shrink-0 size-[18px] lg:size-[18px] md:size-[20px] sm:size-[20px]">
                 <img alt="Social" className="block max-w-none size-full" src={imgSvg} />
               </div>
             </div>
-            <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[40px]">
-              <div className="relative shrink-0 size-[20px]">
+            <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
+              <div className="relative shrink-0 size-[18px] lg:size-[18px] md:size-[20px] sm:size-[20px]">
                 <img alt="Social" className="block max-w-none size-full" src={imgSvg1} />
               </div>
             </div>
-            <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[40px]">
+            <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
               <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
-                <div className="col-1 ml-0 mt-0 relative row-1 size-[18px] overflow-hidden">
+                <div className="col-1 ml-0 mt-0 relative row-1 size-[16px] lg:size-[16px] md:size-[18px] sm:size-[18px] overflow-hidden">
                   <div className="absolute inset-0">
                     <img alt="Social" className="block max-w-none size-full" src={imgGroup} />
                   </div>
                 </div>
               </div>
             </div>
-            <div className="relative shrink-0 size-[40px]">
+            <div className="relative shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
               <img alt="Social" className="block max-w-none size-full" src={imgLink} />
             </div>
           </div>
 
           {/* Copyright & Payment Icons */}
-          <div className="absolute border-[#e2e8f0] border-solid border-t content-stretch flex items-center justify-between left-0 right-0 px-[24px] lg:px-[24px] md:px-[16px] sm:px-[12px] pt-[41px] lg:pt-[41px] md:pt-[32px] sm:pt-[24px] top-[392px] lg:top-[392px] md:top-[320px] sm:top-[280px] w-full flex-col sm:flex-col md:flex-row">
+          <div className="absolute border-[#e2e8f0] border-solid border-t content-stretch flex items-center justify-between left-0 right-0 px-[20px] lg:px-[20px] md:px-[16px] sm:px-[12px] pt-[36px] lg:pt-[36px] md:pt-[32px] sm:pt-[24px] top-[350px] lg:top-[350px] md:top-[320px] sm:top-[280px] w-full flex-col sm:flex-col md:flex-row">
             <div className="relative shrink-0">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center justify-center relative">
                 <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[12px] lg:text-[12px] md:text-[11px] sm:text-[10px] text-white whitespace-nowrap">
