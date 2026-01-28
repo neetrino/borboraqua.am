@@ -998,11 +998,11 @@ export default function HomePage() {
         })()}
 
         {/* Mobile Carousel Navigation */}
-        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-between left-[calc(50%+0.5px)] top-[1285px] w-[339px]">
+        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-between left-[calc(50%+0.5px)] top-[1285px] w-[500px]">
           <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
             <button
               onClick={handlePreviousProducts}
-              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid col-1 content-stretch flex flex-col items-center justify-center ml-0 mt-0 px-[8.5px] py-[6.5px] relative rounded-[9999px] row-1"
+              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid col-1 content-stretch flex flex-col items-center justify-center ml-0 mt-0 px-[8.5px] py-[6.5px] relative rounded-[9999px] row-1 transition-colors duration-200 hover:bg-[#00d1ff] hover:border-[#00d1ff]"
             >
               <div className="relative shrink-0">
                 <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
@@ -1021,7 +1021,7 @@ export default function HomePage() {
             <div className="-scale-y-100 flex-none rotate-180">
               <button
                 onClick={handleNextProducts}
-                className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch flex flex-col items-center justify-center px-[8.5px] py-[6.5px] relative rounded-[9999px]"
+                className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch flex flex-col items-center justify-center px-[8.5px] py-[6.5px] relative rounded-[9999px] transition-colors duration-200 hover:bg-[#00d1ff] hover:border-[#00d1ff]"
               >
                 <div className="relative shrink-0">
                   <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
