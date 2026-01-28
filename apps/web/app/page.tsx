@@ -1477,6 +1477,20 @@ export default function HomePage() {
                 <p className="leading-[26px] whitespace-pre-wrap">New Aqua LLC introduces its Natural Spring Bottled Water – Borbor Aqua. Our range of products consists of 0.25L, 0.33L, 0.5L, 1L, 5L & 19L water bottles. Our Natural spring bottled water is non-carbonated. It is Rich in Natural Minerals that provides valuable health benefits to everyone.</p>
               </div>
             </div>
+            <div className="absolute flex items-center gap-[9px] left-0 top-[280px] cursor-pointer" onClick={() => router.push('/about')}>
+              <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[14px] whitespace-nowrap">
+                <p className="leading-[22px]">{t('home.footer.more')}</p>
+              </div>
+              <div className="content-stretch flex flex-col items-start relative shrink-0">
+                <div className="flex items-center justify-center relative shrink-0">
+                  <div className="flex-none scale-y-[-100%]">
+                    <div className="h-[28px] relative w-[24.02px]">
+                      <img alt="Icon" className="block max-w-none size-full" src={imgIcon2} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="content-stretch flex flex-col gap-[1px] h-[165px] items-start relative shrink-0 w-full">
             <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
@@ -2491,7 +2505,7 @@ export default function HomePage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-[9px] lg:gap-[9px] md:gap-[8px] sm:gap-[6px] left-0 relative">
+              <div className="flex items-center gap-[9px] lg:gap-[9px] md:gap-[8px] sm:gap-[6px] left-0 relative cursor-pointer" onClick={() => router.push('/about')}>
                 <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] whitespace-nowrap">
                   <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{t('home.footer.more')}</p>
                 </div>
