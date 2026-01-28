@@ -609,6 +609,11 @@ export default function HomePage() {
         {/* Mobile Background Gradient */}
         <div className="absolute bg-gradient-to-b blur-[50px] from-[#62b3e8] h-[850px] left-0 right-0 to-[rgba(221,216,216,0.75)] top-0 w-full" />
 
+        {/* Mobile Hero Section Decorative Group */}
+        <div className="absolute inset-[10%_8%_75%_8%]">
+          <img alt="Decorative Group" className="block max-w-none size-full figma-fade-in" src={imgGroup2105} />
+        </div>
+
         {/* Mobile Decorative Background Images */}
         <div className="absolute h-[312px] left-0 right-0 top-[789px] w-full">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
