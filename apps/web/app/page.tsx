@@ -58,6 +58,13 @@ const img12 = "/assets/home/img12.svg";
 const img13 = "/assets/home/img13.svg";
 const img13Decorative = "/assets/home/img13Decorative.png";
 const img14 = "/assets/home/img14.svg";
+
+// Shared configuration for "Trusted By" logos (used on both desktop and mobile)
+const TRUSTED_BY_LOGOS = [
+  { src: imgSas20Logo1, alt: 'Partner Logo 1' },
+  { src: img6Eb12990A37F43358E368Af827A9C8A5Png1, alt: 'Partner Logo 2' },
+  { src: imgLogo1, alt: 'Partner Logo 3' },
+];
 const img15 = "/assets/home/img15.svg";
 const img16 = "/assets/home/img16.svg";
 const img18 = "/assets/home/img18.svg";
@@ -343,6 +350,18 @@ export default function HomePage() {
   };
 
   /**
+   * Open single product page by slug (or id fallback)
+   */
+  const handleOpenProduct = (product: Product) => {
+    if (product.slug) {
+      const encodedSlug = encodeURIComponent(product.slug.trim());
+      router.push(`/products/${encodedSlug}`);
+    } else {
+      router.push(`/products/${product.id}`);
+    }
+  };
+
+  /**
    * Handle adding product to cart
    */
   const handleAddToCart = async (product: Product) => {
@@ -432,7 +451,7 @@ export default function HomePage() {
       {/* Mobile / Tablet Version - Visible up to lg */}
       <div className="lg:hidden bg-white relative w-full max-w-[430px] md:max-w-none mx-auto min-h-screen overflow-x-hidden">
         {/* Mobile Header */}
-        <div className="absolute content-stretch flex items-center justify-between left-[17px] top-[35px] w-[398px] z-50">
+        <div className="absolute content-stretch flex items-center justify-between left-[17px] right-[17px] top-[35px] z-50">
           <div className="content-stretch flex gap-[6px] items-center relative shrink-0">
             {/* Mobile Menu Button (Hamburger) */}
             <button
@@ -461,35 +480,8 @@ export default function HomePage() {
               </div>
             </button>
           </div>
-          <div className="h-[31px] relative shrink-0 w-[101px] cursor-pointer" onClick={() => router.push('/')}>
+          <div className="h-[31px] relative shrink-0 w-[101px] cursor-pointer ml-4 md:ml-6" onClick={() => router.push('/')}>
             <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgBorborAguaLogoColorB2024Colored1} />
-          </div>
-          {/* Mobile Language Menu */}
-          <div className="relative shrink-0" ref={languageMenuRef}>
-            <button
-              onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch cursor-pointer flex items-center p-[14.5px] relative rounded-[9999px] transition-all duration-300 hover:bg-white/10 hover:border-white/80 hover:scale-110 active:scale-95"
-            >
-              <div className="flex items-center justify-center relative shrink-0">
-                <LanguageIcon size={20} />
-              </div>
-            </button>
-            {showLanguageMenu && (
-              <div className="absolute top-full right-0 mt-2 w-40 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                {Object.entries(LANGUAGES).map(([code, lang]) => (
-                  <button
-                    key={code}
-                    onClick={() => handleLanguageChange(code as LanguageCode)}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-all duration-150 ${getStoredLanguage() === code
-                        ? 'bg-gray-100 text-gray-900 font-semibold'
-                        : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                  >
-                    {lang.name}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
@@ -781,10 +773,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Mobile Decorative Elements */}
-        <div className="absolute inset-[3.23%_6.74%_94.81%_7.44%]">
-          <img alt="Decorative Group" className="block max-w-none size-full" src={imgGroup2105} />
-        </div>
+       
 
         {/* Mobile Hero Image */}
         <div className="-translate-x-1/2 absolute bottom-[88.94%] flex items-center justify-center left-1/2 top-[48%] w-full max-w-[440px]">
@@ -952,7 +941,10 @@ export default function HomePage() {
         {featuredProducts.length > 0 && (() => {
           const currentProduct = featuredProducts[carouselIndex] || featuredProducts[0];
           return (
-            <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[40px] items-center left-1/2 px-[16px] top-[1088px] w-full max-w-[371px]">
+            <div
+              className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[40px] items-center left-1/2 px-[16px] top-[1088px] w-full max-w-[371px] cursor-pointer"
+              onClick={() => handleOpenProduct(currentProduct)}
+            >
               <div className="h-[435px] relative shrink-0 w-[155px]">
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                   <img
@@ -980,12 +972,17 @@ export default function HomePage() {
                   </div>
                   <div className="content-stretch flex flex-col items-start relative shrink-0">
                     <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
-                      <p className="leading-[28px]">{formatPrice(currentProduct.price)}</p>
+                      <p className="leading-[28px]">
+                        {formatPrice(currentProduct.price, getStoredCurrency())}
+                      </p>
                     </div>
                   </div>
                 </div>
                 <button
-                  onClick={() => handleAddToCart(currentProduct)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToCart(currentProduct);
+                  }}
                   disabled={addingToCart.has(currentProduct.id) || !currentProduct.inStock}
                   className="bg-[#00d1ff] content-stretch cursor-pointer flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-[339px] disabled:opacity-50"
                 >
@@ -1042,12 +1039,44 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Mobile Pagination Dots */}
-        <div className="absolute contents left-1/2 top-[1666px]">
-          <div className="absolute bg-white left-[calc(50%-17px)] rounded-[9999px] size-[6px] top-[1666px]" />
-          <div className="absolute bg-[#00d1ff] h-[6px] left-1/2 rounded-[9999px] top-[1666px] w-[16px]" />
-          <div className="absolute bg-white left-[calc(50%+17px)] rounded-[9999px] size-[6px] top-[1666px]" />
-        </div>
+        {/* Mobile Pagination Dots (interactive, synced with featured products carousel) */}
+        {featuredProducts.length > 3 && (
+          <div className="absolute contents left-1/2 top-[1666px]">
+            {/* Dot 1 - First mode (products 0-2) */}
+            <button
+              type="button"
+              onClick={() => setCarouselIndex(0)}
+              className={`absolute rounded-full top-[1666px] translate-x-[-50%] transition-all duration-300 ${
+                carouselIndex === 0
+                  ? 'bg-[#00d1ff] h-[6px] w-[16px] left-[calc(80%-17px)]'
+                  : 'bg-white size-[6px] left-[calc(50%-17px)] hover:bg-[#00d1ff]/50'
+              }`}
+              aria-label="Show first featured products"
+            />
+            {/* Dot 2 - Second mode (products 3-5) */}
+            <button
+              type="button"
+              onClick={() => setCarouselIndex(3)}
+              className={`absolute rounded-full top-[1666px] translate-x-[-50%] transition-all duration-300 ${
+                carouselIndex === 3
+                  ? 'bg-[#00d1ff] h-[6px] w-[16px] left-1/2'
+                  : 'bg-white size-[6px] left-1/2 hover:bg-[#00d1ff]/50'
+              }`}
+              aria-label="Show middle featured products"
+            />
+            {/* Dot 3 - Third mode (products 6-8) */}
+            <button
+              type="button"
+              onClick={() => setCarouselIndex(6)}
+              className={`absolute rounded-full top-[1666px] translate-x-[-50%] transition-all duration-300 ${
+                carouselIndex === 6
+                  ? 'bg-[#00d1ff] h-[6px] w-[16px] left-[calc(50%+17px)]'
+                  : 'bg-white size-[6px] left-[calc(50%+17px)] hover:bg-[#00d1ff]/50'
+              }`}
+              aria-label="Show last featured products"
+            />
+          </div>
+        )}
 
         {/* Mobile View All Products Button */}
         <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1708px] w-[241px]">
@@ -1343,19 +1372,23 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Mobile Trusted By Logo */}
-        <div className="-translate-x-1/2 absolute content-stretch flex items-center left-[calc(50%+9px)] top-[4360px]">
-          <div className="h-[68.253px] relative shrink-0 w-[246px]">
-            <img alt="" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgLogo1} />
+        {/* Mobile Trusted By Logo - uses same 3 logos as desktop via trustedByIndex */}
+        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[4360px] w-full">
+          <div className="h-[72px] relative shrink-0 w-[260px]">
+            <img
+              alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
+              className="absolute inset-0 max-w-none object-contain pointer-events-none size-full"
+              src={TRUSTED_BY_LOGOS[trustedByIndex].src}
+            />
           </div>
         </div>
 
-        {/* Mobile Trusted By Navigation */}
-        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-[calc(50%+8.5px)] top-[4374px] w-[377px]">
+        {/* Mobile Trusted By Navigation - same handlers as desktop */}
+        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-[calc(50%+8.5px)] top-[4374px] w-[470px]">
           <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
             <button
               onClick={handlePreviousTrustedBy}
-              className="bg-[rgba(0,0,0,0)] border-[#eee] border-[0.5px] border-solid col-1 content-stretch flex flex-col items-center justify-center ml-0 mt-0 px-[8.5px] py-[6.5px] relative rounded-[9999px] row-1"
+              className="bg-[rgba(0,0,0,0)] border-[#eee] border-[0.5px] border-solid col-1 content-stretch flex flex-col items-center justify-center ml-0 mt-0 px-[8.5px] py-[6.5px] relative rounded-[9999px] row-1 transition-colors duration-200 hover:bg-[#00d1ff] hover:border-[#00d1ff]"
             >
               <div className="relative shrink-0">
                 <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
@@ -1374,7 +1407,7 @@ export default function HomePage() {
             <div className="-scale-y-100 flex-none rotate-180">
               <button
                 onClick={handleNextTrustedBy}
-                className="bg-[rgba(0,0,0,0)] border-[#eee] border-[0.5px] border-solid content-stretch flex flex-col items-center justify-center px-[8.5px] py-[6.5px] relative rounded-[9999px]"
+                className="bg-[rgba(0,0,0,0)] border-[#eee] border-[0.5px] border-solid content-stretch flex flex-col items-center justify-center px-[8.5px] py-[6.5px] relative rounded-[9999px] transition-colors duration-200 hover:bg-[#00d1ff] hover:border-[#00d1ff]"
               >
                 <div className="relative shrink-0">
                   <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex items-start relative">
@@ -1390,6 +1423,40 @@ export default function HomePage() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Mobile Trusted By Pagination Dots */}
+        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[4430px]">
+          <button
+            type="button"
+            onClick={() => setTrustedByIndex(0)}
+            className={`rounded-full transition-all duration-300 ${
+              trustedByIndex === 0
+                ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
+            }`}
+            aria-label="Show first partner"
+          />
+          <button
+            type="button"
+            onClick={() => setTrustedByIndex(1)}
+            className={`rounded-full transition-all duration-300 ${
+              trustedByIndex === 1
+                ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
+            }`}
+            aria-label="Show second partner"
+          />
+          <button
+            type="button"
+            onClick={() => setTrustedByIndex(2)}
+            className={`rounded-full transition-all duration-300 ${
+              trustedByIndex === 2
+                ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
+            }`}
+            aria-label="Show third partner"
+          />
         </div>
 
         {/* Mobile Footer */}
@@ -1890,7 +1957,7 @@ export default function HomePage() {
                     return (
                       <div
                         key={product.id}
-                        onClick={() => router.push(`/products/${product.slug}`)}
+                        onClick={() => handleOpenProduct(product)}
                         className="flex flex-col items-center gap-[24px] w-[320px] lg:w-[320px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate bg-transparent"
                       >
                         {/* Image Container - Uniform size with overflow hidden */}
