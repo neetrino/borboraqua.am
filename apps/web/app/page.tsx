@@ -636,7 +636,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <div className="absolute blur-[2px] h-[480px] left-0 right-0 top-[4600px] w-full overflow-hidden pointer-events-none">
+        <div className="absolute blur-[2px] h-[480px] left-0 right-0 top-[4350px] w-full overflow-hidden pointer-events-none">
           <div className="relative w-full h-full">
             <img
               alt=""
@@ -645,7 +645,7 @@ export default function HomePage() {
             />
           </div>
         </div>
-        <div className="absolute flex h-[873px] items-center justify-center left-0 right-0 top-[5075px] w-full">
+        <div className="absolute flex h-[873px] items-center justify-center left-0 right-0 top-[4820px] w-full">
           <div className="-scale-y-100 flex-none">
             <div className="blur-[2px] h-[873px] relative w-[2078px]">
               <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -1393,7 +1393,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Footer */}
-        <div className="absolute content-stretch flex flex-col gap-[30px] items-start justify-center left-[35px] top-[4669px] w-[339px] pb-[0px]">
+        <div className="absolute content-stretch flex flex-col gap-[30px] items-start justify-center left-[35px] top-[4539px] w-[339px] pb-[0px]">
           <div className="h-[312px] relative shrink-0 w-full">
             <div className="absolute content-stretch flex h-[34px] items-center left-0 top-0 w-[336px]">
               <div className="h-[34px] relative shrink-0 w-[112px]">
@@ -1406,7 +1406,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <div className="content-stretch flex flex-col gap-[4px] h-[165px] items-start relative shrink-0 w-full">
+          <div className="content-stretch flex flex-col gap-[1px] h-[165px] items-start relative shrink-0 w-full">
             <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
               <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase w-full">
                 <p className="leading-[20px] whitespace-pre-wrap">CONTACT</p>
@@ -1492,7 +1492,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Footer Copyright */}
-        <div className="-translate-x-1/2 absolute border-[#e2e8f0] border-solid border-t content-stretch flex flex-col gap-[21px] items-center justify-center left-1/2 pt-[29px] top-[5650px] w-[386px] z-10">
+        <div className="-translate-x-1/2 absolute border-[#e2e8f0] border-solid border-t content-stretch flex flex-col gap-[21px] items-center justify-center left-1/2 pt-[29px] top-[5380px] w-[386px] z-10">
           <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-white whitespace-nowrap">
             <p className="leading-[16px]">Copyright © 2024 | New Aqua LLC | All Rights Reserved</p>
           </div>
@@ -2391,14 +2391,14 @@ export default function HomePage() {
       </div>
 
       {/* Footer */}
-      <div className="absolute h-[700px] lg:h-[700px] md:h-[600px] sm:h-[500px] left-0 top-[6201px] lg:top-[6201px] md:top-[5000px] sm:top-[4200px] w-full relative overflow-hidden">
+      <div className="absolute h-[700px] lg:h-[700px] md:h-[600px] sm:h-[500px] left-0 top-[6201px] lg:top-[6201px] md:top-[5000px] sm:top-[4000px] w-full relative overflow-hidden">
         {/* Footer Background Image - daniel sinoca */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <img alt="Footer Background" className="absolute h-[144.5%] left-0 max-w-none top-[-44.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash1} />
         </div>
         {/* Dark overlay for better text readability */}
         <div className="absolute  inset-0" />
-        <div className="absolute h-[449px] lg:h-[449px] md:h-[400px] sm:h-[350px] left-[calc(50%+0.5px)] top-[231px] lg:top-[231px] md:top-[180px] sm:top-[140px] translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] relative z-10">
+        <div className="absolute h-[449px] lg:h-[449px] md:h-[400px] sm:h-[350px] left-[calc(50%+0.5px)] top-[231px] lg:top-[231px] md:top-[180px] sm:top-[120px] translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] relative z-10">
           <div className="absolute content-stretch flex gap-[258px] lg:gap-[258px] md:gap-[120px] sm:gap-[40px] items-start justify-start left-[calc(50%-16px)] top-0 translate-x-[-50%] flex-col md:flex-row sm:flex-col">
             {/* Column 1: Logo + Description */}
             <div className="flex flex-col h-[312px] lg:h-[312px] md:h-[280px] sm:h-auto relative shrink-0 w-[339px] lg:w-[339px] md:w-[45%] sm:w-full gap-[34px] lg:gap-[34px] md:gap-[24px] sm:gap-[20px]">
