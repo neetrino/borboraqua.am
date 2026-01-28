@@ -1736,13 +1736,13 @@ export default function HomePage() {
       <div className="absolute bg-gradient-to-b blur-[50px] from-[#62b3e8] h-[1075px] left-1/2 to-[rgba(221,216,216,0.75)] top-0 translate-x-[-50%] w-full max-w-[1920px]" />
 
       {/* Hero Section Decorative Group */}
-      <div className="absolute inset-[3.74%_14.27%_90%_14.64%]">
+      <div className="absolute inset-[3.34%_14.2%_90%_14.64%]">
         <img alt="Decorative Group" className="block max-w-none size-full figma-fade-in" src={imgGroup2105} />
 
       </div>
 
       {/* Image 13 - Decorative Element */}
-      <div className="absolute flex items-center justify-center left-[600px] top-[410px] size-[806px] pointer-events-none">
+      <div className="absolute flex items-center justify-center left-1/2 top-[410px] translate-x-[-50%] size-[606px] pointer-events-none">
         <div className="relative rounded-[320px] size-full">
           {/* Soft blue glow bubble without dark blend artifacts */}
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] rounded-[770px]" />
@@ -1810,7 +1810,7 @@ export default function HomePage() {
       </div>
 
       {/* Water Wave Graphic */}
-      <div className="absolute h-[807px] left-0 top-[1158px] w-full max-w-[1920px] z-[-1]">
+      <div className="absolute h-[527px] left-0 top-[1158px] w-full max-w-[1920px] z-[-0]">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <img alt="Water Wave" className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash1} />
         </div>
@@ -2712,6 +2712,9 @@ export default function HomePage() {
         </div>
       </div>
 
+
+      
+
       {/* Image 11 - Decorative Element */}
       <div className="absolute flex items-center justify-center left-[1603px] top-[1233px] size-[150px]">
         <div className="relative rounded-[320px] size-full">
@@ -2726,7 +2729,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="absolute flex inset-[19.54%_16.59%_77.5%_76.61%] items-center justify-center">
+      <div className="absolute flex inset-[19%_16.59%_77.5%_76.61%] items-center justify-center">
         <div className="relative rounded-[320px] size-[102.381px]">
           {/* Soft blue glow bubble without dark blend artifacts */}
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] rounded-[770px]" />
