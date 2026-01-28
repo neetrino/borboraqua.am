@@ -449,7 +449,7 @@ export default function HomePage() {
   return (
     <div className="w-full bg-white overflow-x-hidden">
       {/* Mobile / Tablet Version - Visible up to lg */}
-      <div className="lg:hidden bg-white relative w-full max-w-[430px] md:max-w-none mx-auto min-h-screen overflow-x-hidden">
+      <div className="lg:hidden bg-white relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden">
         {/* Mobile Header */}
         <div className="absolute content-stretch flex items-center justify-between left-[17px] right-[17px] top-[35px] z-50">
           <div className="content-stretch flex gap-[6px] items-center relative shrink-0">
@@ -845,7 +845,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Bottom Navigation Frame - sticky expressive glassmorphism bar */}
-        <div className="-translate-x-1/2 fixed md:hidden left-1/2 bottom-0 w-full max-w-[430px] px-4 pb-5 z-50">
+        <div className="-translate-x-1/2 fixed lg:hidden left-1/2 bottom-0 w-full max-w-[430px] px-4 pb-5 z-50">
           <div className="relative bg-white/5 backdrop-blur-3xl h-[72px] rounded-[999px] shadow-[0_20px_55px_rgba(0,0,0,0.25)] border border-white/10 overflow-hidden">
             <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-1/2 w-[348px]">
               <div className="content-stretch flex items-center justify-between relative shrink-0 w-[252px]">
