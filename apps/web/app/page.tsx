@@ -1585,7 +1585,7 @@ export default function HomePage() {
       {/* Desktop Version - Only for large screens */}
       <div
         ref={containerRef}
-        className="hidden lg:block bg-white relative w-full mx-auto h-[7200px] home-page-container overflow-x-hidden overflow-y-hidden"
+        className="hidden lg:block bg-white relative w-full mx-auto h-[6901px] home-page-container overflow-x-hidden overflow-y-hidden"
       >
       {/* Header Section - Navigation Bar */}
       <div className="fixed bg-[rgba(255,255,255,0.08)] backdrop-blur-[15px] content-stretch flex flex-col h-[65px] md:h-[60px] sm:h-[50px] items-center justify-center left-1/2 px-[32px] md:px-[24px] sm:px-[16px] py-[14px] md:py-[12px] sm:py-[8px] rounded-[60px] md:rounded-[50px] sm:rounded-[40px] top-[56px] md:top-[32px] sm:top-[16px] translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] z-50 border border-[rgba(255,255,255,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_60px_rgba(98,179,232,0.15)]">
