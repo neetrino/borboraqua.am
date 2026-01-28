@@ -226,7 +226,7 @@
 
 
   .home-page-wrapper {
-    @apply w-full relative overflow-x-hidden overflow-y-hidden;
+    @apply w-full relative overflow-x-hidden;
   }
 }
 

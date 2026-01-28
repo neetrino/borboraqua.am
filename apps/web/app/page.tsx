@@ -1585,7 +1585,7 @@ export default function HomePage() {
       {/* Desktop Version - Only for large screens */}
       <div
         ref={containerRef}
-        className="hidden lg:block bg-white relative w-full mx-auto h-[6901px] home-page-container overflow-x-hidden overflow-y-hidden"
+        className="hidden lg:block bg-white relative w-full mx-auto h-[6170px] home-page-container overflow-x-hidden overflow-y-hidden"
       >
       {/* Header Section - Navigation Bar */}
       <div className="fixed bg-[rgba(255,255,255,0.08)] backdrop-blur-[15px] content-stretch flex flex-col h-[65px] md:h-[60px] sm:h-[50px] items-center justify-center left-1/2 px-[32px] md:px-[24px] sm:px-[16px] py-[14px] md:py-[12px] sm:py-[8px] rounded-[60px] md:rounded-[50px] sm:rounded-[40px] top-[56px] md:top-[32px] sm:top-[16px] translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] z-50 border border-[rgba(255,255,255,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_60px_rgba(98,179,232,0.15)]">
@@ -1861,13 +1861,11 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="absolute flex items-center justify-center left-[calc(50%+119.2px)] size-[956.401px]  top-[5477px] translate-x-[-50%]">
+      <div className="absolute flex items-center justify-center left-[calc(50%+119.2px)] size-[956.401px]  top-[5197px] translate-x-[-50%]">
         <div className="flex-none rotate-[-16.26deg] scale-y-[-100%] ">
           <div className="relative size-[524.132px] ">
             <img alt="Shape" className="block max-w-none size-full " src={imgShape3}   />
             {/* White background overlay with gradient for bottom section */}
-            <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-gradient-to-t from-white to-transparent pointer-events-none rounded-[40px] overflow-hidden"></div>
-
           </div>
         </div>
       </div>
