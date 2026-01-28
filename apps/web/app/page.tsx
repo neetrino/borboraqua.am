@@ -998,7 +998,7 @@ export default function HomePage() {
         })()}
 
         {/* Mobile Carousel Navigation */}
-        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-between left-[calc(50%+0.5px)] top-[1285px] w-[500px]">
+        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-between left-1/2 top-[1285px] w-full max-w-[500px] px-4">
           <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
             <button
               onClick={handlePreviousProducts}
@@ -1041,15 +1041,15 @@ export default function HomePage() {
 
         {/* Mobile Pagination Dots (interactive, synced with featured products carousel) */}
         {featuredProducts.length > 3 && (
-          <div className="absolute contents left-1/2 top-[1666px]">
+          <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[1666px]">
             {/* Dot 1 - First mode (products 0-2) */}
             <button
               type="button"
               onClick={() => setCarouselIndex(0)}
-              className={`absolute rounded-full top-[1666px] translate-x-[-50%] transition-all duration-300 ${
+              className={`rounded-full transition-all duration-300 ${
                 carouselIndex === 0
-                  ? 'bg-[#00d1ff] h-[6px] w-[16px] left-[calc(80%-17px)]'
-                  : 'bg-white size-[6px] left-[calc(50%-17px)] hover:bg-[#00d1ff]/50'
+                  ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                  : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
               }`}
               aria-label="Show first featured products"
             />
@@ -1057,10 +1057,10 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setCarouselIndex(3)}
-              className={`absolute rounded-full top-[1666px] translate-x-[-50%] transition-all duration-300 ${
+              className={`rounded-full transition-all duration-300 ${
                 carouselIndex === 3
-                  ? 'bg-[#00d1ff] h-[6px] w-[16px] left-1/2'
-                  : 'bg-white size-[6px] left-1/2 hover:bg-[#00d1ff]/50'
+                  ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                  : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
               }`}
               aria-label="Show middle featured products"
             />
@@ -1068,10 +1068,10 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => setCarouselIndex(6)}
-              className={`absolute rounded-full top-[1666px] translate-x-[-50%] transition-all duration-300 ${
+              className={`rounded-full transition-all duration-300 ${
                 carouselIndex === 6
-                  ? 'bg-[#00d1ff] h-[6px] w-[16px] left-[calc(50%+17px)]'
-                  : 'bg-white size-[6px] left-[calc(50%+17px)] hover:bg-[#00d1ff]/50'
+                  ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                  : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
               }`}
               aria-label="Show last featured products"
             />
@@ -1384,7 +1384,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Trusted By Navigation - same handlers as desktop */}
-        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-[calc(50%+8.5px)] top-[4374px] w-[470px]">
+        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-1/2 top-[4374px] w-full max-w-[470px] px-4">
           <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
             <button
               onClick={handlePreviousTrustedBy}
@@ -1426,7 +1426,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Trusted By Pagination Dots */}
-        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[4430px]">
+        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[4450px]">
           <button
             type="button"
             onClick={() => setTrustedByIndex(0)}
