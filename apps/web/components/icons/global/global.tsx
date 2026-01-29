@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { getStoredLanguage, LANGUAGES, type LanguageCode } from '../../lib/language';
-import { apiClient } from '../../lib/api-client';
-import { SearchIcon } from './SearchIcon';
-import { HeaderCartIcon } from './HeaderCartIcon';
-import { LanguageIcon } from './LanguageIcon';
-import { ExitIcon } from './ExitIcon';
+import { getStoredLanguage, LANGUAGES, type LanguageCode } from '../../../lib/language';
+import { apiClient } from '../../../lib/api-client';
+import { SearchIcon } from '../SearchIcon';
+import { HeaderCartIcon } from '../HeaderCartIcon';
+import { LanguageIcon } from '../LanguageIcon';
+import { ExitIcon } from '../ExitIcon';
 
 // Export HeaderCartIcon for use in other components
 export { HeaderCartIcon };

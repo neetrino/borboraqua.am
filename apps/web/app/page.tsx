@@ -12,7 +12,7 @@ import { SearchIcon } from '../components/icons/SearchIcon';
 import { HeaderCartIcon } from '../components/icons/HeaderCartIcon';
 import { LanguageIcon } from '../components/icons/LanguageIcon';
 import { ExitIcon } from '../components/icons/ExitIcon';
-import { Header, Footer, Button, addToCart } from '../components/icons/HomePageComponents';
+import { Header, Footer, Button, addToCart } from '../components/icons/global/global';
 
 // Local image paths - Images stored in public/assets/home/
 const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";

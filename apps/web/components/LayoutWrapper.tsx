@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { Header, Footer } from './icons/HomePageComponents';
+import { Header, Footer } from './icons/global/global';
 import { Breadcrumb } from './Breadcrumb';
 import { MobileBottomNav } from './MobileBottomNav';
 import { useAuth } from '../lib/auth/AuthContext';

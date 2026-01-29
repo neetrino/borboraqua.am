@@ -9,7 +9,7 @@ import { formatPrice, getStoredCurrency } from '../lib/currency';
 import { apiClient } from '../lib/api-client';
 import { useAuth } from '../lib/auth/AuthContext';
 import { useTranslation } from '../lib/i18n-client';
-import { HeaderCartIcon } from './icons/HomePageComponents';
+import { HeaderCartIcon } from './icons/global/global';
 import { ProductLabels } from './ProductLabels';
 
 interface Product {

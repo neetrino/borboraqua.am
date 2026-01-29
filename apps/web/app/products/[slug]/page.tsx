@@ -13,7 +13,7 @@ import { RelatedProducts } from '../../../components/RelatedProducts';
 import { ProductReviews } from '../../../components/ProductReviews';
 import { Minus, Plus, Maximize2 } from 'lucide-react';
 import { ProductLabels } from '../../../components/ProductLabels';
-import { addToCart } from '../../../components/icons/HomePageComponents';
+import { addToCart } from '../../../components/icons/global/global';
 import {
   processImageUrl,
   smartSplitUrls,
