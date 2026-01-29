@@ -60,7 +60,7 @@ export function Header({
 }: HeaderProps) {
   // Header positioned on top of white spacer section
   const topPosition = isHomePage 
-    ? 'top-[2px] md:top-[2px] sm:top-[2px]'
+    ? 'top-[4px] md:top-[40px] sm:top-[4px]'
     : 'top-[80px] md:top-[40px] sm:top-[60px]';
   
   return (
