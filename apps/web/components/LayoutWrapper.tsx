@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { Header, Footer } from './icons/global/global';
-import { MobileHeader, MobileMenu, MobileSearch, MobileFooter, MobileBottomNavigation } from './icons/global/globalMobile';
+import { MobileHeader, MobileMenu, MobileSearch, MobileFooter, MobileBottomNavigation, TopHeaderBar } from './icons/global/globalMobile';
 import { Breadcrumb } from './Breadcrumb';
 import { useAuth } from '../lib/auth/AuthContext';
 import { useTranslation } from '../lib/i18n-client';
@@ -93,18 +93,15 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative flex min-h-screen flex-col pb-16 lg:pb-0 bg-white">
-      {/* Blue gradient section - 800px from top with smooth transition */}
-      <div className="absolute top-0 left-0 right-0 h-[1100px] bg-[#8fd4ff] z-0" style={{ background: 'linear-gradient(to bottom, #8fd4ff 0%, #8fd4ff 50%, #9dd0ff 60%, #acd4ff 68%, #bbd8ff 75%, #cadeff 80%, #d9e6ff 83%, #e8eeff 86%, #f0f4ff 88%, #ffffff 96%)' }} />
-      
-      {/* Mobile Header - Only visible on mobile */}
-      <MobileHeader
+      {/* Top Header Bar - Only visible on mobile, white background */}
+      <TopHeaderBar
         router={router}
-        t={t}
         setShowSearchModal={setShowSearchModal}
         setShowMobileMenu={setShowMobileMenu}
-        isLoggedIn={isLoggedIn}
-        isAdmin={isAdmin}
       />
+      
+      {/* Blue gradient section - 800px from top with smooth transition */}
+      <div className="absolute top-0 left-0 right-0 h-[1100px] bg-[#8fd4ff] z-0" style={{ background: 'linear-gradient(to bottom, #8fd4ff 0%, #8fd4ff 50%, #9dd0ff 60%, #acd4ff 68%, #bbd8ff 75%, #cadeff 80%, #d9e6ff 83%, #e8eeff 86%, #f0f4ff 88%, #ffffff 96%)' }} />
 
       {/* Mobile Menu - Only visible on mobile */}
       <MobileMenu
@@ -154,7 +151,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <div className="hidden xl:block">
         <Breadcrumb />
       </div>
-      <main className={`flex-1 w-full relative z-10 ${isProductsPage || isAdminPage || isProfilePage ? 'pt-4 xl:pt-4' : 'xl:pt-[80px]'}`}>
+      <main className={`flex-1 w-full relative z-10 ${isProductsPage || isAdminPage || isProfilePage ? 'pt-20 xl:pt-4' : 'xl:pt-[80px] pt-20'}`}>
         {children}
       </main>
       {/* Desktop Footer - Only visible on desktop */}
