@@ -2337,7 +2337,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <Footer router={router} t={t} />
+      <Footer router={router} t={t} isHomePage={true} />
 
       {/* Additional Decorative Elements - Hero Section Bubbles */}
       {/* Background ellipse at original left position */}

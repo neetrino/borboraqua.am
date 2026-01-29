@@ -206,13 +206,14 @@ export function Header({
 interface FooterProps {
   router: ReturnType<typeof useRouter>;
   t: (key: string) => string;
+  isHomePage?: boolean;
 }
 
-export function Footer({ router, t }: FooterProps) {
+export function Footer({ router, t, isHomePage = false }: FooterProps) {
   return (
     <>
       {/* Footer */}
-      <div className="absolute h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 top-[5550px] lg:top-[5550px] md:top-[5000px] sm:top-[4000px] w-full relative overflow-hidden">
+      <div className={`relative h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 w-full overflow-hidden ${isHomePage ? 'mt-[5550px] lg:mt-[5550px] md:mt-[5000px] sm:mt-[4000px]' : ''}`}>
         {/* Footer Background Image - daniel sinoca */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <img 
