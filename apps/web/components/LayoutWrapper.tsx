@@ -15,6 +15,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const { isLoggedIn, logout, isAdmin } = useAuth();
   const { t } = useTranslation();
   const isHomePage = pathname === '/';
+  const isProductsPage = pathname.startsWith('/products');
+  const isAdminPage = pathname.startsWith('/admin');
+  const isProfilePage = pathname.startsWith('/profile');
 
   // State for header navigation
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -86,7 +89,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         isHomePage={false}
       />
       <Breadcrumb />
-      <main className="flex-1 w-full pt-[80px] md:pt-[70px] sm:pt-[60px]">
+      <main className={`flex-1 w-full ${isProductsPage || isAdminPage || isProfilePage ? 'pt-4' : 'pt-[80px] md:pt-[70px] sm:pt-[60px]'}`}>
         {children}
       </main>
       <Footer router={router} t={t} isHomePage={false} />
