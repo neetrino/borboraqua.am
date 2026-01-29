@@ -836,18 +836,18 @@ export default function HomePage() {
         {/* Mobile Carousel Navigation */}
         <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-between left-1/2 top-[1285px] w-full max-w-[500px] px-4">
           <FeaturedProductsNavigationArrow
-            direction="next"
-            onClick={handleNextProducts}
-            isMobile={true}
-            className="bg-[#00d1ff]/90"
-            ariaLabel={t('home.trustedBy.nextProducts')}
-          />
-          <FeaturedProductsNavigationArrow
             direction="prev"
             onClick={handlePreviousProducts}
             isMobile={true}
             className="bg-[#00d1ff]/90"
             ariaLabel={t('home.trustedBy.previousProducts')}
+          />
+          <FeaturedProductsNavigationArrow
+            direction="next"
+            onClick={handleNextProducts}
+            isMobile={true}
+            className="bg-[#00d1ff]/90"
+            ariaLabel={t('home.trustedBy.nextProducts')}
           />
         </div>
 

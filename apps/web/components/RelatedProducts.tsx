@@ -457,7 +457,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                     }
                     goToNext();
                   }}
-                  className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-16 z-20 bg-[#00d1ff]/90 backdrop-blur-sm"
+                  className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-16 rotate-180 z-20 bg-[#00d1ff]/90 backdrop-blur-sm"
                   ariaLabel="Next products"
                 />
 
@@ -470,7 +470,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                     }
                     goToPrevious();
                   }}
-                  className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-16 z-20 bg-[#00d1ff]/90 backdrop-blur-sm"
+                  className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-16 rotate-180 z-20 bg-[#00d1ff]/90 backdrop-blur-sm"
                   ariaLabel="Previous products"
                 />
               </>
