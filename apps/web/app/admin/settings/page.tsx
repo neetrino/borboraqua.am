@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { Card, Button } from '@shop/ui';
 import { apiClient } from '../../../lib/api-client';
 import { useTranslation } from '../../../lib/i18n-client';
 import { clearCurrencyRatesCache } from '../../../lib/currency';
+import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/global/global';
 
 interface Settings {
   defaultCurrency?: string;
@@ -20,6 +21,9 @@ export default function SettingsPage() {
   const { t } = useTranslation();
   const { isLoggedIn, isAdmin, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const adminTabs = getAdminMenuTABS(t);
+  const currentPath = pathname || '/admin/settings';
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<Settings>({
@@ -144,19 +148,48 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <button
-            onClick={() => router.push('/admin')}
-            className="text-gray-600 hover:text-gray-900 mb-4 flex items-center"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            {t('admin.settings.backToAdmin')}
-          </button>
           <h1 className="text-3xl font-bold text-gray-900">{t('admin.settings.title')}</h1>
         </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="lg:hidden mb-6">
+            <AdminMenuDrawer tabs={adminTabs} currentPath={currentPath} />
+          </div>
+          {/* Sidebar Navigation */}
+          <aside className="hidden lg:block lg:w-64 flex-shrink-0">
+            <nav className="bg-white border border-gray-200 rounded-lg p-2 space-y-1">
+              {adminTabs.map((tab) => {
+                const isActive = currentPath === tab.path || 
+                  (tab.path === '/admin' && currentPath === '/admin') ||
+                  (tab.path !== '/admin' && currentPath.startsWith(tab.path));
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      router.push(tab.path);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-all ${
+                      tab.isSubCategory ? 'pl-12' : ''
+                    } ${
+                      isActive
+                        ? 'bg-gray-900 text-white'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <span className={`flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-500'}`}>
+                      {tab.icon}
+                    </span>
+                    <span className="text-left">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </aside>
+
+          {/* Main Content */}
+          <div className="flex-1 min-w-0">
 
         {/* General Settings */}
         <Card className="p-6 mb-6">
@@ -450,6 +483,8 @@ export default function SettingsPage() {
           >
             {t('admin.settings.cancel')}
           </Button>
+        </div>
+          </div>
         </div>
       </div>
     </div>

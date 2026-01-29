@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { Card, Button, Input } from '@shop/ui';
 import { apiClient } from '../../../lib/api-client';
 import { useTranslation } from '../../../lib/i18n-client';
+import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/global/global';
 
 interface User {
   id: string;
@@ -33,6 +34,9 @@ export default function UsersPage() {
   const { t } = useTranslation();
   const { isLoggedIn, isAdmin, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const adminTabs = getAdminMenuTABS(t);
+  const currentPath = pathname || '/admin/users';
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -189,15 +193,6 @@ export default function UsersPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <button
-            onClick={() => router.push('/admin')}
-            className="text-gray-600 hover:text-gray-900 mb-4 flex items-center"
-          >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            {t('admin.users.backToAdmin')}
-          </button>
           <h1 className="text-3xl font-bold text-gray-900">{t('admin.users.title')}</h1>
         </div>
 
