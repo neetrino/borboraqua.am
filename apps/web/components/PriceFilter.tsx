@@ -218,7 +218,7 @@ export function PriceFilter({ currentMinPrice, currentMaxPrice, category }: Pric
   const maxPercentage = getPercentage(safeMaxPrice);
 
   return (
-    <Card className="p-4 mb-6">
+    <Card className="p-4 mb-6 bg-[#8fd4ff] border-gray-200">
       <h3 className="text-base font-bold text-gray-800 mb-4 text-center uppercase tracking-wide">{t('products.filters.price.title')}</h3>
       
       {/* Range Slider */}

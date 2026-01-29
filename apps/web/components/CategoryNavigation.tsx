@@ -294,7 +294,7 @@ function CategoryNavigationContent() {
 
   if (loading) {
     return (
-      <div className="bg-white border-b border-gray-200 py-3 sm:py-4 md:py-6 w-full">
+      <div className="bg-[#8fd4ff] border-b border-gray-200 py-3 sm:py-4 md:py-6 w-full">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
@@ -343,7 +343,7 @@ function CategoryNavigationContent() {
   };
 
   return (
-    <div className="bg-white border-b border-gray-200 py-3 sm:py-4 md:py-6 w-full">
+    <div className="bg-[#8fd4ff] border-b border-gray-200 py-3 sm:py-4 md:py-6 w-full">
       <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
         <div className="relative">
           {/* Левая стрелка - всегда видна, но неактивна когда нельзя прокрутить */}
@@ -470,7 +470,7 @@ function CategoryNavigationContent() {
 export function CategoryNavigation() {
   return (
     <Suspense fallback={
-      <div className="bg-white border-b border-gray-200 py-3 sm:py-4 md:py-6 w-full">
+      <div className="bg-[#8fd4ff] border-b border-gray-200 py-3 sm:py-4 md:py-6 w-full">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
           <div className="flex items-center gap-4 sm:gap-6 overflow-x-auto">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (

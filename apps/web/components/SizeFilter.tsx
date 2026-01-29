@@ -89,7 +89,7 @@ export function SizeFilter({ category, search, minPrice, maxPrice, selectedSizes
 
   if (loading) {
     return (
-      <Card className="p-4 mb-6">
+      <Card className="p-4 mb-6 bg-[#8fd4ff] border-gray-200">
         <h3 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">{t('products.filters.size.title')}</h3>
         <div className="text-sm text-gray-500">{t('products.filters.size.loading')}</div>
       </Card>
@@ -97,7 +97,7 @@ export function SizeFilter({ category, search, minPrice, maxPrice, selectedSizes
   }
 
   return (
-    <Card className="p-4 mb-6">
+    <Card className="p-4 mb-6 bg-[#8fd4ff] border-gray-200">
       <h3 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">{t('products.filters.size.title')}</h3>
       {sizes.length === 0 ? (
         <div className="text-sm text-gray-500 py-4 text-center">

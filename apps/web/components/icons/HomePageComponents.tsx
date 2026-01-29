@@ -224,6 +224,10 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
     <>
       {/* Footer */}
       <div className={`relative h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 w-full overflow-hidden ${isHomePage ? 'mt-[5550px] lg:mt-[5550px] md:mt-[5000px] sm:mt-[4000px]' : ''}`}>
+        {/* Footer transition gradient - seamless blend with page background (only for non-home pages) */}
+        {!isHomePage && (
+          <div className="absolute top-0 left-0 right-0 h-[150px] bg-gradient-to-b from-[#8fd4ff] to-transparent z-[1]" />
+        )}
         {/* Footer Background Image - daniel sinoca */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <img 

@@ -69,9 +69,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
-      {/* White spacer section at the top - increases page height */}
-      <div className="w-full bg-white h-[80px] md:h-[70px] sm:h-[60px] flex-shrink-0 relative z-0" />
+    <div className="flex min-h-screen flex-col pb-16 lg:pb-0 bg-[#8fd4ff]">
+      {/* Spacer section at the top - increases page height */}
+      <div className="w-full bg-[#8fd4ff] h-[80px] md:h-[70px] sm:h-[60px] flex-shrink-0 relative z-0" />
       <Header
         router={router}
         t={t}
@@ -89,7 +89,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         isHomePage={false}
       />
       <Breadcrumb />
-      <main className={`flex-1 w-full ${isProductsPage || isAdminPage || isProfilePage ? 'pt-4' : 'pt-[80px] md:pt-[70px] sm:pt-[60px]'}`}>
+      <main className={`flex-1 w-full bg-[#8fd4ff] ${isProductsPage || isAdminPage || isProfilePage ? 'pt-4' : 'pt-[80px] md:pt-[70px] sm:pt-[60px]'}`}>
         {children}
       </main>
       <Footer router={router} t={t} isHomePage={false} />
@@ -97,4 +97,3 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
-

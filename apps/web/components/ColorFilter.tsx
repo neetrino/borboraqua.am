@@ -92,7 +92,7 @@ export function ColorFilter({ category, search, minPrice, maxPrice, selectedColo
 
   if (loading) {
     return (
-      <Card className="p-4 mb-6">
+      <Card className="p-4 mb-6 bg-[#8fd4ff] border-gray-200">
         <h3 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">{t('products.filters.color.title')}</h3>
         <div className="text-sm text-gray-500">{t('products.filters.color.loading')}</div>
       </Card>
@@ -100,7 +100,7 @@ export function ColorFilter({ category, search, minPrice, maxPrice, selectedColo
   }
 
   return (
-    <Card className="p-4 mb-6">
+    <Card className="p-4 mb-6 bg-[#8fd4ff] border-gray-200">
       <h3 className="text-base font-bold text-gray-800 mb-4 uppercase tracking-wide">{t('products.filters.color.title')}</h3>
       {colors.length === 0 ? (
         <div className="text-sm text-gray-500 py-4 text-center">

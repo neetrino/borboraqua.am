@@ -292,7 +292,7 @@ export function ProductCard({ product, viewMode = 'grid-3' }: ProductCardProps) 
   // List view layout (similar to cart)
   if (viewMode === 'list') {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:bg-gray-50 transition-colors">
+      <div className="bg-[#8fd4ff] rounded-lg border border-gray-200 overflow-hidden hover:bg-[#7bc4e8] transition-colors">
         {/* Mobile: Vertical layout, Desktop: Horizontal layout */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 px-4 sm:px-6 py-4">
           {/* Product Image - small like in cart */}
@@ -433,7 +433,7 @@ export function ProductCard({ product, viewMode = 'grid-3' }: ProductCardProps) 
 
   // Grid view layout (original)
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow relative group">
+    <div className="bg-[#8fd4ff] rounded-lg border border-gray-200 overflow-hidden hover:shadow-md transition-shadow relative group">
       {/* Product Image */}
       <div className="aspect-square bg-gray-100 relative overflow-hidden">
         <Link href={`/products/${product.slug}`} className="block w-full h-full">
