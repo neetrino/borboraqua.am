@@ -67,6 +67,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
+      {/* White spacer section at the top - increases page height */}
+      <div className="w-full bg-white h-[80px] md:h-[70px] sm:h-[60px] flex-shrink-0 relative z-0" />
       <Header
         router={router}
         t={t}
@@ -81,9 +83,10 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         handleLogout={handleLogout}
         languageMenuRef={languageMenuRef}
         userMenuRef={userMenuRef}
+        isHomePage={false}
       />
       <Breadcrumb />
-      <main className="flex-1 w-full">
+      <main className="flex-1 w-full pt-[80px] md:pt-[70px] sm:pt-[60px]">
         {children}
       </main>
       <Footer router={router} t={t} isHomePage={false} />

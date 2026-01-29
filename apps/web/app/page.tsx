@@ -1623,6 +1623,7 @@ export default function HomePage() {
         handleLogout={handleLogout}
         languageMenuRef={languageMenuRef}
         userMenuRef={userMenuRef}
+        isHomePage={true}
       />
 
       {/* Background Gradient */}
