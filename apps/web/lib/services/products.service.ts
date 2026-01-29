@@ -376,7 +376,7 @@ class ProductsService {
           },
         },
         skip,
-        take: limit * 10, // Get more to filter in memory
+        take: Math.min(limit * 3, Math.max(limit, 2000)), // Get more to filter in memory, but cap at max(limit, 2000) for performance
       });
       console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (with productAttributes)`);
     } catch (error: any) {

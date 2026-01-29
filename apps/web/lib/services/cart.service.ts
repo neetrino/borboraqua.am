@@ -84,24 +84,39 @@ class CartService {
     }
 
     // Format items with details
-    const itemsWithDetails = await Promise.all(
-      cart.items.map(async (item: {
-        id: string;
-        productId: string;
-        variantId: string;
-        quantity: number;
-      }) => {
-        const product = await db.product.findUnique({
-          where: { id: item.productId },
-          include: {
-            translations: true,
-            variants: {
-              where: { id: item.variantId },
-            },
-          },
-        });
+    // OPTIMIZATION: Batch load all products and variants to avoid N+1 queries
+    const productIds = cart.items.map(item => item.productId);
+    const variantIds = cart.items.map(item => item.variantId);
+    
+    // Load all products in one query
+    const products = await db.product.findMany({
+      where: { id: { in: productIds } },
+      include: {
+        translations: true,
+        variants: {
+          where: { id: { in: variantIds } },
+        },
+      },
+    });
+    
+    // Create maps for quick lookup
+    const productMap = new Map(products.map(p => [p.id, p]));
+    const variantMap = new Map<string, any>();
+    products.forEach(p => {
+      p.variants.forEach(v => {
+        variantMap.set(v.id, v);
+      });
+    });
+    
+    const itemsWithDetails = cart.items.map((item: {
+      id: string;
+      productId: string;
+      variantId: string;
+      quantity: number;
+    }) => {
+        const product = productMap.get(item.productId);
 
-        const variant = product?.variants[0];
+        const variant = variantMap.get(item.variantId) || product?.variants.find(v => v.id === item.variantId);
         const translation =
           product?.translations.find((t: { locale: string }) => t.locale === locale) ||
           product?.translations[0];
@@ -172,8 +187,7 @@ class CartService {
           originalPrice: originalPrice,
           total: finalPrice * item.quantity,
         };
-      })
-    );
+    });
 
     const subtotal = itemsWithDetails.reduce((sum, item) => sum + item.total, 0);
 
