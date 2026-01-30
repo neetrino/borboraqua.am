@@ -1445,7 +1445,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                   <button 
                     key={actualIndex}
                     onClick={() => setCurrentImageIndex(actualIndex)}
-                    className={`relative w-full aspect-[3/4] rounded-lg overflow-hidden border bg-white transition-all duration-300 flex-shrink-0 ${
+                    className={`relative w-full aspect-[3/4] rounded-[1rem] overflow-hidden border bg-white transition-all duration-300 flex-shrink-0 ${
                       isActive 
                         ? 'border-gray-400 shadow-[0_2px_8px_rgba(0,0,0,0.12)] ring-2 ring-gray-300' 
                         : 'border-gray-200 hover:border-gray-300 hover:shadow-[0_2px_6px_rgba(0,0,0,0.08)]'
@@ -1536,7 +1536,7 @@ export default function ProductPage({ params }: ProductPageProps) {
           
           {/* Right Column - Main Image */}
           <div className="flex-1">
-            <div className="relative aspect-square bg-white rounded-lg overflow-hidden group shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+            <div className="relative aspect-square product-card-glass overflow-hidden group">
             {images.length > 0 ? (
               <img 
                 src={images[currentImageIndex]} 
