@@ -840,10 +840,10 @@ export function FeaturedProductCard({
       <div
         key={product.id}
         onClick={() => onProductClick(product)}
-        className="flex flex-col items-center gap-[12px] w-full cursor-pointer product-card-hover z-[11] isolate bg-transparent"
+        className="flex flex-col items-center gap-[12px] w-full cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2"
       >
         {/* Image Container - Smaller for shop */}
-        <div className="h-[200px] w-full relative overflow-hidden flex items-center justify-center bg-transparent rounded-lg">
+        <div className="h-[200px] w-full relative product-image-container flex items-center justify-center bg-transparent rounded-lg">
           {product.image ? (
             <img
               alt={product.title}
@@ -893,10 +893,10 @@ export function FeaturedProductCard({
     <div
       key={product.id}
       onClick={() => onProductClick(product)}
-      className="flex flex-col items-center gap-[20px] lg:gap-[20px] md:gap-[24px] sm:gap-[24px] w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate bg-transparent"
+      className="flex flex-col items-center gap-[20px] lg:gap-[20px] md:gap-[24px] sm:gap-[24px] w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2"
     >
       {/* Image Container - Uniform size with overflow hidden */}
-      <div className="h-[280px] lg:h-[280px] md:h-[280px] sm:h-[240px] w-full relative overflow-hidden flex items-center justify-center bg-transparent">
+      <div className="h-[280px] lg:h-[280px] md:h-[280px] sm:h-[240px] w-full relative product-image-container flex items-center justify-center bg-transparent">
         {product.image ? (
           <img
             alt={product.title}

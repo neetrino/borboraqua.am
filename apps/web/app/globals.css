@@ -171,17 +171,46 @@
     box-shadow: 0 20px 40px rgba(0, 209, 255, 0.2);
   }
 
+  /* Glassmorphism effect for product cards */
+  .product-card-glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease-out;
+  }
+
+  .product-card-glass:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 209, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 209, 255, 0.15);
+  }
+
+  /* Image container - allows overflow on hover */
+  .product-image-container {
+    overflow: hidden;
+    transition: overflow 0.3s ease-out;
+  }
+
+  .product-card-hover:hover .product-image-container {
+    overflow: visible;
+  }
+
   .product-image-hover {
     transition: transform 0.4s ease-out;
     transform-origin: center bottom;
   }
 
   .product-card-hover:hover .product-image-hover {
-    transform: rotate(5deg) scale(1.08) translateY(-15px);
+    transform: rotate(5deg) scale(1.15) translateY(-20px);
+    z-index: 10;
+    position: relative;
   }
 
   .product-card-hover-centered:hover .product-image-hover {
-    transform: rotate(5deg) scale(1.08) translateY(-15px);
+    transform: rotate(5deg) scale(1.15) translateY(-20px);
+    z-index: 10;
+    position: relative;
   }
 }
 
