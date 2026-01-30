@@ -27,6 +27,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const searchModalRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Close language menu and user menu when clicking outside
   useEffect(() => {
@@ -37,6 +39,9 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setShowUserMenu(false);
       }
+      if (searchModalRef.current && !searchModalRef.current.contains(event.target as Node)) {
+        setShowSearchModal(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -44,6 +49,27 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Focus search input when modal opens
+  useEffect(() => {
+    if (showSearchModal && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [showSearchModal]);
+
+  // Close search modal on ESC key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showSearchModal) {
+        setShowSearchModal(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [showSearchModal]);
 
   /**
    * Handle language change
@@ -130,6 +156,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         <Header
           router={router}
           t={t}
+          setShowSearchModal={setShowSearchModal}
           setShowLanguageMenu={setShowLanguageMenu}
           showLanguageMenu={showLanguageMenu}
           handleLanguageChange={handleLanguageChange}
@@ -159,6 +186,42 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       </div>           
       {/* Mobile Bottom Navigation - Only visible on mobile */}
       <MobileBottomNavigation />
+
+      {/* Desktop Search Modal - Only visible on desktop */}
+      {showSearchModal && (
+        <div 
+          className="hidden xl:flex fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[100] items-start justify-center pt-16 px-4"
+          onClick={() => setShowSearchModal(false)}
+        >
+          <div
+            ref={searchModalRef}
+            className="w-full max-w-2xl animate-in fade-in slide-in-from-top-2 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <form onSubmit={handleSearch} className="relative">
+              {/* Search Input with glassy effect */}
+              <div className="relative">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t('home.search.placeholder')}
+                  className="w-full h-14 pl-14 pr-4 bg-[#60b3e8]/80 backdrop-blur-md border-2 border-white/90 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white text-lg placeholder:text-white/70 text-white shadow-lg"
+                  autoFocus
+                  autoComplete="off"
+                />
+                {/* Search Icon inside input */}
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

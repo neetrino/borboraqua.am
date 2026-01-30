@@ -209,6 +209,7 @@ interface HeaderProps {
 export function Header({
   router,
   t,
+  setShowSearchModal,
   setShowLanguageMenu,
   showLanguageMenu,
   handleLanguageChange,
@@ -292,7 +293,7 @@ export function Header({
           <div className="content-stretch flex gap-[28px] lg:gap-[28px] md:gap-[20px] sm:gap-[12px] items-center justify-center relative shrink-0">
             {/* Search Icon */}
             <div
-              onClick={() => router.push('/products')}
+              onClick={() => setShowSearchModal(true)}
               className={`h-[21px] md:h-[18px] sm:h-[16px] w-[21px] md:w-[18px] sm:w-[16px] relative shrink-0 cursor-pointer flex items-center justify-center ${!isHomePage ? 'drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]' : ''}`}
             >
               <SearchIcon size={21} />
