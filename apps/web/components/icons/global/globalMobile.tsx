@@ -402,7 +402,7 @@ export function MobileFooter({ router, t }: MobileFooterProps) {
   return (
     <div className="xl:hidden relative w-full mt-auto overflow-hidden">
       {/* Mobile Footer Background Images - Daniel Sinoca */}
-      <div className="absolute h-[480px] left-[-0.6px] right-0 top-0 w-full pointer-events-none">
+      <div className="absolute h-[490px] left-[-0.6px] right-0 top-0 w-full pointer-events-none">
         <div className="relative w-full h-full">
           <img
             alt=""
