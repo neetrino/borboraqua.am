@@ -584,8 +584,8 @@ export function TopHeaderBar({
   setShowMobileMenu,
 }: TopHeaderBarProps) {
   return (
-    <div className="xl:hidden fixed top-0 left-0 right-0 z-50 bg-[rgba(255,255,255,0.32)] backdrop-blur-[15px] border-b border-black shadow-sm rounded-t-3xl rounded-b-3xl overflow-hidden max-w-full" style={{ paddingTop: 'max(env(safe-area-inset-top), 8px)', borderRadius: '24px 24px 24px 24px' }}>
-      <div className="flex items-center justify-between pl-4 pr-4 py-3 h-[73px] max-w-full">
+    <div className="xl:hidden fixed top-0 left-0 right-0 w-full z-50 bg-[rgba(255,255,255,0.32)] backdrop-blur-[15px] border-b border-black shadow-sm rounded-b-3xl overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+      <div className="flex items-center justify-between pl-4 pr-4 py-3 h-[73px] w-full">
         <div className="flex items-center gap-2">
           {/* Hamburger Menu Button */}
           <button
