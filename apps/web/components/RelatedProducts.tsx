@@ -191,6 +191,37 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     });
   }, [visibleCards, products.length]);
 
+  // Update currentIndex based on scroll position for mobile
+  useEffect(() => {
+    if (visibleCards > 1 || !carouselRef.current) return; // Only for mobile with native scroll
+    
+    const handleScroll = () => {
+      if (!carouselRef.current) return;
+      const scrollLeft = carouselRef.current.scrollLeft;
+      const clientWidth = carouselRef.current.clientWidth;
+      
+      // Calculate which card is currently visible
+      // Card width is min(85vw, 320px) + padding (24px total: 12px on each side)
+      const cardWidth = Math.min(clientWidth * 0.85, 320) + 24;
+      const currentCardIndex = Math.round(scrollLeft / cardWidth);
+      const clampedIndex = Math.max(0, Math.min(products.length - 1, currentCardIndex));
+      
+      setCurrentIndex((prevIndex) => {
+        if (prevIndex !== clampedIndex) {
+          return clampedIndex;
+        }
+        return prevIndex;
+      });
+    };
+
+    const carousel = carouselRef.current;
+    carousel.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      carousel.removeEventListener('scroll', handleScroll);
+    };
+  }, [visibleCards, products.length]);
+
   const maxIndex = Math.max(0, products.length - visibleCards);
 
   const goToPrevious = () => {
@@ -394,7 +425,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
             {/* Carousel Container */}
             <div 
               ref={carouselRef}
-              className="relative overflow-hidden cursor-grab active:cursor-grabbing select-none"
+              className={`relative ${visibleCards === 1 ? 'overflow-x-auto' : 'sm:overflow-hidden'} cursor-grab active:cursor-grabbing select-none scrollbar-hide`}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -403,12 +434,16 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
               onWheel={handleWheel}
+              style={{
+                WebkitOverflowScrolling: 'touch',
+                scrollSnapType: visibleCards === 1 ? 'x mandatory' : 'none',
+              }}
             >
               <div
-                className="flex items-stretch"
+                className="flex items-stretch sm:flex-row"
                 style={{
-                  transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
-                  transition: isDragging ? 'none' : 'transform 0.5s ease-in-out',
+                  transform: visibleCards > 1 ? `translateX(-${currentIndex * (100 / visibleCards)}%)` : 'none',
+                  transition: visibleCards > 1 && !isDragging ? 'transform 0.5s ease-in-out' : 'none',
                 }}
               >
                 {products.map((product) => {
@@ -416,8 +451,10 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                   return (
                     <div
                       key={product.id}
-                      className="flex-shrink-0 px-3 h-full"
-                      style={{ width: `${100 / visibleCards}%` }}
+                      className="flex-shrink-0 px-3 h-full snap-start"
+                      style={{ 
+                        width: visibleCards === 1 ? 'min(85vw, 320px)' : `${100 / visibleCards}%`,
+                      }}
                       onClick={(e) => {
                         // Prevent navigation if we actually dragged
                         if (hasMoved) {
@@ -445,7 +482,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
               </div>
             </div>
 
-            {/* Navigation Arrows - Only show if there are more products than visible */}
+            {/* Navigation Arrows - Only show on desktop (hidden on mobile) */}
             {products.length > visibleCards && (
               <>
                 <FeaturedProductsNavigationArrow
@@ -457,7 +494,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                     }
                     goToNext();
                   }}
-                  className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-8 sm:translate-x-12 md:translate-x-16 lg:translate-x-20 rotate-180 z-20 bg-[#00d1ff]/90 backdrop-blur-sm size-[32px] sm:size-[36px] md:size-[42px] lg:size-[48px]"
+                  className="hidden sm:block absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-8 sm:translate-x-12 md:translate-x-16 lg:translate-x-20 rotate-180 z-20 bg-[#00d1ff]/90 backdrop-blur-sm size-[32px] sm:size-[36px] md:size-[42px] lg:size-[48px]"
                   ariaLabel="Next products"
                 />
 
@@ -470,7 +507,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                     }
                     goToPrevious();
                   }}
-                  className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-8 sm:-translate-x-12 md:-translate-x-16 lg:-translate-x-20 rotate-180 z-20 bg-[#00d1ff]/90 backdrop-blur-sm size-[32px] sm:size-[36px] md:size-[42px] lg:size-[48px]"
+                  className="hidden sm:block absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-8 sm:-translate-x-12 md:-translate-x-16 lg:-translate-x-20 rotate-180 z-20 bg-[#00d1ff]/90 backdrop-blur-sm size-[32px] sm:size-[36px] md:size-[42px] lg:size-[48px]"
                   ariaLabel="Previous products"
                 />
               </>
@@ -479,19 +516,37 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
             {/* Dots Indicator - Only show if there are more products than visible */}
             {products.length > visibleCards && (
               <div className="flex justify-center gap-2 mt-6">
-                {Array.from({ length: Math.ceil(products.length / visibleCards) }).map((_, index) => {
-                  const startIndex = index * visibleCards;
-                  const endIndex = Math.min(startIndex + visibleCards, products.length);
-                  const isActive = currentIndex >= startIndex && currentIndex < endIndex;
+                {Array.from({ 
+                  length: visibleCards === 1 ? products.length : Math.ceil(products.length / visibleCards) 
+                }).map((_, index) => {
+                  // For mobile (visibleCards === 1), each dot represents one product
+                  // For desktop, each dot represents a page of visibleCards products
+                  const startIndex = visibleCards === 1 ? index : index * visibleCards;
+                  const endIndex = visibleCards === 1 ? index + 1 : Math.min(startIndex + visibleCards, products.length);
+                  
+                  // For mobile, check exact match; for desktop, check if currentIndex is within page range
+                  const isActive = visibleCards === 1 
+                    ? currentIndex === index
+                    : currentIndex >= startIndex && currentIndex < endIndex;
                   
                   return (
                     <button
                       key={index}
-                      onClick={() => setCurrentIndex(startIndex)}
+                      onClick={() => {
+                        if (visibleCards === 1 && carouselRef.current) {
+                          // For mobile, scroll to the card
+                          const cardWidth = Math.min(carouselRef.current.clientWidth * 0.85, 320);
+                          carouselRef.current.scrollTo({
+                            left: index * (cardWidth + 24), // cardWidth + padding
+                            behavior: 'smooth'
+                          });
+                        }
+                        setCurrentIndex(startIndex);
+                      }}
                       className={`h-2 rounded-full transition-all duration-300 ${
                         isActive
-                          ? 'bg-gray-900 w-8'
-                          : 'bg-gray-300 hover:bg-gray-400 w-2'
+                          ? 'bg-[#00d1ff] w-8'
+                          : 'bg-gray-300 hover:bg-[#00d1ff]/50 w-2'
                       }`}
                       aria-label={`Go to slide ${index + 1}`}
                     />
