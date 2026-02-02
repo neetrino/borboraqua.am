@@ -118,7 +118,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className={`relative flex min-h-screen flex-col pb-16 lg:pb-0 ${isAdminPage || isProfilePage ? 'bg-white' : 'app-page-background'}`}>
+    <div className={`relative flex min-h-screen flex-col pb-16 lg:pb-0 overflow-y-hidden xl:overflow-y-visible ${isAdminPage || isProfilePage ? 'bg-white' : 'app-page-background'}`}>
       {/* Top Header Bar - Only visible on mobile, white background */}
       <TopHeaderBar
         router={router}
