@@ -726,11 +726,11 @@ export function ProductPageButton({
   const baseStyles = 'transition-colors font-bold';
   
   const variantStyles = {
-    primary: 'bg-[#00d1ff] text-white rounded-[34px] uppercase disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-[#00b8e6] px-6',
-    secondary: 'bg-[#00d1ff] text-white rounded-[34px] uppercase disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-[#00b8e6] px-6',
-    icon: 'bg-[#00d1ff] text-white rounded-full uppercase disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-[#00b8e6] flex items-center justify-center',
+    primary: 'bg-[#00d1ff] text-white rounded-[34px] disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-[#00b8e6] px-6',
+    secondary: 'bg-[#00d1ff] text-white rounded-[34px] disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-[#00b8e6] px-6',
+    icon: 'bg-[#00d1ff] text-white rounded-full disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-[#00b8e6] flex items-center justify-center',
     cancel: 'bg-[#00d1ff] text-white rounded-[34px] disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-[#00b8e6] h-[48px] px-6',
-    outline: 'bg-transparent border-2 border-[#00d1ff] text-[#00d1ff] rounded-[34px] uppercase disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed hover:bg-[#00d1ff] hover:text-white px-6',
+    outline: 'bg-transparent border-2 border-[#00d1ff] text-[#00d1ff] rounded-[34px] disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed hover:bg-[#00d1ff] hover:text-white px-6',
   };
   
   return (
