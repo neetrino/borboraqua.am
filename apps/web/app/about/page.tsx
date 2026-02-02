@@ -16,7 +16,7 @@ export const dynamicParams = true;
 export default function AboutPage() {
   const { t } = useTranslation();
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       {/* Секция: About our online store */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -63,7 +63,7 @@ export default function AboutPage() {
       </section>
 
       {/* Секция: Our Team */}
-      <section className="py-16 md:py-24 bg-gray-50">
+      <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             {/* Подзаголовок */}
