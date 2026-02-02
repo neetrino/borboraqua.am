@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } from '../../../lib/language';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { useTranslation } from '../../../lib/i18n-client';
+import { apiClient } from '../../../lib/api-client';
 
 // Local image paths
 const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
@@ -631,6 +632,57 @@ export function TopHeaderBar({
 export function MobileBottomNavigation() {
   const router = useRouter();
   const pathname = usePathname();
+  const { isLoggedIn } = useAuth();
+  const [cartCount, setCartCount] = useState<number>(0);
+
+  // Fetch cart count
+  useEffect(() => {
+    async function fetchCartCount() {
+      try {
+        if (isLoggedIn) {
+          // If user is logged in, fetch from API
+          const response = await apiClient.get<{ cart: { itemsCount?: number; items?: Array<{ quantity: number }> } }>('/api/v1/cart');
+          const itemsCount = response.cart.itemsCount || response.cart.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+          setCartCount(itemsCount);
+        } else {
+          // If guest, load from localStorage
+          if (typeof window === 'undefined') {
+            setCartCount(0);
+            return;
+          }
+
+          const CART_KEY = 'shop_cart_guest';
+          const stored = localStorage.getItem(CART_KEY);
+          if (!stored) {
+            setCartCount(0);
+            return;
+          }
+
+          const guestCart: Array<{ quantity: number }> = JSON.parse(stored);
+          const count = guestCart.reduce((sum, item) => sum + item.quantity, 0);
+          setCartCount(count);
+        }
+      } catch (error) {
+        console.error('Error fetching cart count:', error);
+        setCartCount(0);
+      }
+    }
+
+    fetchCartCount();
+
+    // Listen to cart-updated event
+    const handleCartUpdate = () => {
+      fetchCartCount();
+    };
+
+    window.addEventListener('cart-updated', handleCartUpdate);
+    window.addEventListener('auth-updated', handleCartUpdate);
+
+    return () => {
+      window.removeEventListener('cart-updated', handleCartUpdate);
+      window.removeEventListener('auth-updated', handleCartUpdate);
+    };
+  }, [isLoggedIn]);
 
   // Determine active navigation index based on current pathname
   const getActiveIndex = () => {
@@ -686,6 +738,12 @@ export function MobileBottomNavigation() {
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
               <img className="relative block max-w-none h-[22.312px] w-[25px]" alt="" src={imgGroup2148} />
+              {/* Cart Count Badge */}
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#00d1ff] text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1.5 flex items-center justify-center border-2 border-white">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
             </button>
             {/* Profile */}
             <button
