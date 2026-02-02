@@ -1420,7 +1420,7 @@ export default function HomePage() {
       </div>
 
       {/* Image 13 - Decorative Element */}
-      <div className="absolute flex items-center justify-center left-1/2 top-[410px] translate-x-[-50%] size-[606px] pointer-events-none">
+      <div className="absolute flex items-center justify-center left-1/2 top-[350px] translate-x-[-50%] size-[606px] pointer-events-none">
         <div className="relative rounded-[320px] size-full">
           {/* Soft blue glow bubble without dark blend artifacts */}
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] rounded-[770px]" />
@@ -2059,7 +2059,7 @@ export default function HomePage() {
       </div>
 
       {/* Image 5 - Decorative Element */}
-      <div className="absolute flex items-center justify-center left-[1124px] top-[1350px] size-[200px]">
+      <div className="absolute flex items-center justify-center left-[1394px] top-[1190px] size-[100px]">
         <div className="relative rounded-[320px] size-full">
           {/* Soft blue glow bubble without dark blend artifacts */}
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] rounded-[770px]" />
@@ -2076,7 +2076,7 @@ export default function HomePage() {
       
 
       {/* Image 11 - Decorative Element */}
-      <div className="absolute flex items-center justify-center left-[203px] top-[1433px] size-[150px]">
+      <div className="absolute flex items-center justify-center left-[203px] top-[1433px] size-[100px]">
         <div className="relative rounded-[320px] size-full">
           {/* Soft blue glow bubble without dark blend artifacts */}
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] rounded-[770px]" />
@@ -2213,7 +2213,7 @@ export default function HomePage() {
       {/* Featured Products Section Decorative Elements */}
 
       <div className="absolute flex top-[1%] right-[75.18%] bottom-[55.65%] left-[-9.5%] items-center justify-center overflow-hidden">
-        <div className="relative rounded-[320px] size-[256.082px]">
+        <div className="relative rounded-[320px] size-[156.082px]">
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
           <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
