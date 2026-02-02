@@ -95,11 +95,11 @@ export function ProductsPagination({
   }
 
   return (
-    <div className="flex gap-[5px] items-center justify-center mt-8">
+    <div className="flex gap-[4px] items-center justify-center mt-6">
       {/* First Page Button */}
       <Link
         href={buildPaginationUrl(1)}
-        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[10px] rounded-[32px] shrink-0 size-[56px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
+        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
           currentPage === 1 ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
         }`}
         aria-label="First page"
@@ -112,7 +112,7 @@ export function ProductsPagination({
       {/* Previous Page Button */}
       <Link
         href={buildPaginationUrl(currentPage - 1)}
-        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[10px] rounded-[32px] shrink-0 size-[56px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
+        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
           currentPage === 1 ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
         }`}
         aria-label="Previous page"
@@ -128,9 +128,9 @@ export function ProductsPagination({
           return (
             <div
               key={`ellipsis-${index}`}
-              className="bg-white flex items-center justify-center p-[10px] rounded-[78px] shrink-0 size-[56px]"
+              className="bg-white flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px]"
             >
-              <p className="font-['Open_Sans',sans-serif] font-semibold text-[13px] text-[#333] leading-[normal]">
+              <p className="font-['Open_Sans',sans-serif] font-semibold text-[12px] text-[#333] leading-[normal]">
                 ...
               </p>
             </div>
@@ -143,7 +143,7 @@ export function ProductsPagination({
           <Link
             key={page}
             href={buildPaginationUrl(page)}
-            className={`flex items-center justify-center p-[10px] rounded-[32px] shrink-0 size-[56px] transition-all ${
+            className={`flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all ${
               isActive
                 ? 'bg-[#00d1ff]'
                 : 'bg-white hover:bg-gray-50'
@@ -152,7 +152,7 @@ export function ProductsPagination({
             aria-current={isActive ? 'page' : undefined}
           >
             <p
-              className={`font-['Open_Sans',sans-serif] leading-[normal] text-[16px] ${
+              className={`font-['Open_Sans',sans-serif] leading-[normal] text-[14px] ${
                 isActive
                   ? 'font-extrabold text-white'
                   : 'font-semibold text-[#333]'
@@ -167,7 +167,7 @@ export function ProductsPagination({
       {/* Next Page Button */}
       <Link
         href={buildPaginationUrl(currentPage + 1)}
-        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[10px] rounded-[32px] shrink-0 size-[56px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
+        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
           currentPage === totalPages ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
         }`}
         aria-label="Next page"
@@ -180,7 +180,7 @@ export function ProductsPagination({
       {/* Last Page Button */}
       <Link
         href={buildPaginationUrl(totalPages)}
-        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[10px] rounded-[32px] shrink-0 size-[56px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
+        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
           currentPage === totalPages ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
         }`}
         aria-label="Last page"
