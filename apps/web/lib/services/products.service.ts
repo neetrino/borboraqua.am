@@ -121,7 +121,8 @@ class ProductsService {
       lang = "en",
     } = filters;
 
-    const skip = (page - 1) * limit;
+    // Don't use skip here - we'll fetch all products, filter in memory, then paginate
+    // This ensures accurate total count for pagination
     const bestsellerProductIds: string[] = [];
 
     // Build where clause
@@ -375,8 +376,8 @@ class ProductsService {
             },
           },
         },
-        skip,
-        take: Math.min(limit * 3, Math.max(limit, 2000)), // Get more to filter in memory, but cap at max(limit, 2000) for performance
+        // Fetch all products for filtering (no skip - we'll paginate after filtering)
+        take: 10000, // Fetch a large batch to ensure we get all products for accurate total count
       });
       console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (with productAttributes)`);
     } catch (error: any) {
@@ -387,8 +388,8 @@ class ProductsService {
           products = await db.product.findMany({
             where,
             include: baseInclude,
-            skip,
-            take: limit * 10,
+            // Fetch all products for filtering (no skip - we'll paginate after filtering)
+            take: 10000,
           });
           console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without productAttributes)`);
         } catch (retryError: any) {
@@ -422,8 +423,8 @@ class ProductsService {
                 products = await db.product.findMany({
                   where,
                   include: baseIncludeWithoutAttributeValue,
-                  skip,
-                  take: limit * 10,
+                  // Fetch all products for filtering (no skip - we'll paginate after filtering)
+                  take: 10000,
                 });
                 console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without attributeValue relation)`);
               } else {
@@ -467,26 +468,26 @@ class ProductsService {
         };
         try {
           products = await db.product.findMany({
-            where,
-            include: {
-              ...baseIncludeWithoutAttributeValue,
-              productAttributes: {
-                include: {
-                  attribute: {
-                    include: {
-                      translations: true,
-                      values: {
-                        include: {
-                          translations: true,
+              where,
+              include: {
+                ...baseIncludeWithoutAttributeValue,
+                productAttributes: {
+                  include: {
+                    attribute: {
+                      include: {
+                        translations: true,
+                        values: {
+                          include: {
+                            translations: true,
+                          },
                         },
                       },
                     },
                   },
                 },
               },
-            },
-            skip,
-            take: limit * 10,
+            // Fetch all products for filtering (no skip - we'll paginate after filtering)
+            take: 10000,
           });
           console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without attributeValue, with productAttributes)`);
         } catch (retryError: any) {
@@ -649,8 +650,12 @@ class ProductsService {
       });
     }
 
+    // Calculate total from filtered products (before pagination)
     const total = products.length;
-    products = products.slice(0, limit);
+    
+    // Apply pagination after filtering
+    const skip = (page - 1) * limit;
+    products = products.slice(skip, skip + limit);
 
     // Get discount settings
     const discountSettings = await db.settings.findMany({

@@ -90,37 +90,59 @@ export function ProductsPagination({
     </svg>
   );
 
+  // Don't show pagination if there's only one page or no pages
   if (totalPages <= 1) {
     return null;
   }
 
+  const isFirstPage = currentPage === 1;
+  const isLastPage = currentPage === totalPages;
+
   return (
     <div className="flex gap-[4px] items-center justify-center mt-6">
-      {/* First Page Button */}
-      <Link
-        href={buildPaginationUrl(1)}
-        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
-          currentPage === 1 ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
-        }`}
-        aria-label="First page"
-      >
-        <div className="text-[#333]">
-          <FirstIcon />
+      {/* First Page Button - Always visible, disabled on first page */}
+      {isFirstPage ? (
+        <div
+          className="bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] opacity-50 cursor-not-allowed"
+          aria-label="First page (disabled)"
+        >
+          <div className="text-[#333]">
+            <FirstIcon />
+          </div>
         </div>
-      </Link>
+      ) : (
+        <Link
+          href={buildPaginationUrl(1)}
+          className="bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)]"
+          aria-label="First page"
+        >
+          <div className="text-[#333]">
+            <FirstIcon />
+          </div>
+        </Link>
+      )}
 
-      {/* Previous Page Button */}
-      <Link
-        href={buildPaginationUrl(currentPage - 1)}
-        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
-          currentPage === 1 ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
-        }`}
-        aria-label="Previous page"
-      >
-        <div className="text-[#333]">
-          <PrevIcon />
+      {/* Previous Page Button - Always visible, disabled on first page */}
+      {isFirstPage ? (
+        <div
+          className="bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] opacity-50 cursor-not-allowed"
+          aria-label="Previous page (disabled)"
+        >
+          <div className="text-[#333]">
+            <PrevIcon />
+          </div>
         </div>
-      </Link>
+      ) : (
+        <Link
+          href={buildPaginationUrl(currentPage - 1)}
+          className="bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)]"
+          aria-label="Previous page"
+        >
+          <div className="text-[#333]">
+            <PrevIcon />
+          </div>
+        </Link>
+      )}
 
       {/* Page Numbers */}
       {pageNumbers.map((page, index) => {
@@ -164,31 +186,49 @@ export function ProductsPagination({
         );
       })}
 
-      {/* Next Page Button */}
-      <Link
-        href={buildPaginationUrl(currentPage + 1)}
-        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
-          currentPage === totalPages ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
-        }`}
-        aria-label="Next page"
-      >
-        <div className="text-[#333]">
-          <NextIcon />
+      {/* Next Page Button - Always visible, disabled on last page */}
+      {isLastPage ? (
+        <div
+          className="bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] opacity-50 cursor-not-allowed"
+          aria-label="Next page (disabled)"
+        >
+          <div className="text-[#333]">
+            <NextIcon />
+          </div>
         </div>
-      </Link>
+      ) : (
+        <Link
+          href={buildPaginationUrl(currentPage + 1)}
+          className="bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)]"
+          aria-label="Next page"
+        >
+          <div className="text-[#333]">
+            <NextIcon />
+          </div>
+        </Link>
+      )}
 
-      {/* Last Page Button */}
-      <Link
-        href={buildPaginationUrl(totalPages)}
-        className={`bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)] ${
-          currentPage === totalPages ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
-        }`}
-        aria-label="Last page"
-      >
-        <div className="text-[#333]">
-          <LastIcon />
+      {/* Last Page Button - Always visible, disabled on last page */}
+      {isLastPage ? (
+        <div
+          className="bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] opacity-50 cursor-not-allowed"
+          aria-label="Last page (disabled)"
+        >
+          <div className="text-[#333]">
+            <LastIcon />
+          </div>
         </div>
-      </Link>
+      ) : (
+        <Link
+          href={buildPaginationUrl(totalPages)}
+          className="bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)]"
+          aria-label="Last page"
+        >
+          <div className="text-[#333]">
+            <LastIcon />
+          </div>
+        </Link>
+      )}
     </div>
   );
 }
