@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { Button } from '@shop/ui';
 import { getStoredLanguage } from '../../lib/language';
 import { t } from '../../lib/i18n';
-import { ProductsHeader } from '../../components/ProductsHeader';
+
 import { ProductsGrid } from '../../components/ProductsGrid';
+import { ProductsHero } from '../../components/ProductsHero';
 import { productsService } from '../../lib/services/products.service';
 
 const PAGE_CONTAINER = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8';
@@ -138,12 +139,9 @@ export default async function ProductsPage({ searchParams }: any) {
 
   return (
     <div className="w-full overflow-x-hidden max-w-full">
-      {/* Products Header - With Container */}
-      <div className={PAGE_CONTAINER}>
-        <ProductsHeader
-          total={productsData.meta.total}
-          perPage={productsData.meta.limit}
-        />
+      {/* Products Hero Section - Figma Design */}
+      <div className="max-w-7xl mx-auto pl-4 sm:pl-6 lg:pl-8 pr-0 sm:pr-2 lg:pr-4">
+        <ProductsHero total={productsData.meta.total} />
       </div>
 
       <div className="max-w-7xl mx-auto pl-2 sm:pl-4 md:pl-6 lg:pl-8 pr-4 sm:pr-6 lg:pr-8">

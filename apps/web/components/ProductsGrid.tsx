@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FeaturedProductCard, type FeaturedProduct, addToCart } from './icons/global/global';
 import { useTranslation } from '../lib/i18n-client';
 import { useAuth } from '../lib/auth/AuthContext';
@@ -31,6 +31,7 @@ interface ProductsGridProps {
 export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps) {
   const { t } = useTranslation();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isLoggedIn } = useAuth();
   const [viewMode, setViewMode] = useState<ViewMode>('grid-2');
   const [sortedProducts, setSortedProducts] = useState<Product[]>(products);
@@ -38,17 +39,25 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
   // Initialize with 'AMD' to match server-side default and prevent hydration mismatch
   const [currency, setCurrency] = useState<'USD' | 'AMD' | 'EUR' | 'RUB' | 'GEL'>('AMD');
 
-  // Load view mode from localStorage
+  // Load view mode from URL or localStorage
   useEffect(() => {
-    const stored = localStorage.getItem('products-view-mode');
-    if (stored && ['list', 'grid-2', 'grid-3'].includes(stored)) {
-      setViewMode(stored as ViewMode);
+    const urlView = searchParams.get('view');
+    if (urlView && ['list', 'grid'].includes(urlView)) {
+      // Map 'grid' from URL to 'grid-2' for compatibility
+      const mappedView: ViewMode = urlView === 'grid' ? 'grid-2' : urlView as ViewMode;
+      setViewMode(mappedView);
+      localStorage.setItem('products-view-mode', mappedView);
     } else {
-      // Default to grid-2 if nothing stored
-      setViewMode('grid-2');
-      localStorage.setItem('products-view-mode', 'grid-2');
+      const stored = localStorage.getItem('products-view-mode');
+      if (stored && ['list', 'grid-2', 'grid-3'].includes(stored)) {
+        setViewMode(stored as ViewMode);
+      } else {
+        // Default to grid-2 if nothing stored
+        setViewMode('grid-2');
+        localStorage.setItem('products-view-mode', 'grid-2');
+      }
     }
-  }, []);
+  }, [searchParams]);
 
   // Initialize currency from localStorage after mount to prevent hydration mismatch
   useEffect(() => {

@@ -3,8 +3,6 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { useTranslation } from '../lib/i18n-client';
-
-type ViewMode = 'list' | 'grid-2' | 'grid-3';
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
 
 interface ProductsHeaderProps {
@@ -22,7 +20,6 @@ function ProductsHeaderContent({ total, perPage }: ProductsHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
-  const [viewMode, setViewMode] = useState<ViewMode>('grid-2');
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
@@ -50,18 +47,6 @@ function ProductsHeaderContent({ total, perPage }: ProductsHeaderProps) {
     return filterKeys.some((key) => !!searchParams.get(key));
   })();
 
-  // Load view mode from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem('products-view-mode');
-    if (stored && ['list', 'grid-2', 'grid-3'].includes(stored)) {
-      setViewMode(stored as ViewMode);
-    } else {
-      // Default to grid-2 if nothing stored
-      setViewMode('grid-2');
-      localStorage.setItem('products-view-mode', 'grid-2');
-    }
-  }, []);
-
   // Load sort from URL params
   useEffect(() => {
     const sortParam = searchParams.get('sort') as SortOption;
@@ -87,13 +72,6 @@ function ProductsHeaderContent({ total, perPage }: ProductsHeaderProps) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
-  const handleViewModeChange = (mode: ViewMode) => {
-    setViewMode(mode);
-    localStorage.setItem('products-view-mode', mode);
-    // Dispatch event to update grid layout
-    window.dispatchEvent(new CustomEvent('view-mode-changed', { detail: mode }));
-  };
 
   const handleSortChange = (option: SortOption) => {
     setSortBy(option);
