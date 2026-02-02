@@ -109,8 +109,8 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
             <div
               className="absolute bg-[#00d1ff] rounded-full transition-all duration-300"
               style={{
-                left: priceFilter === 'all' ? '1.45%' : priceFilter === 'low' ? '33.69%' : '66.58%',
-                right: priceFilter === 'all' ? '77.07%' : priceFilter === 'low' ? '44.47%' : '10.24%',
+                left: priceFilter === 'all' ? '1%' : priceFilter === 'low' ? '30%' : '63%',
+                right: priceFilter === 'all' ? '70%' : priceFilter === 'low' ? '37%' : '7%',
                 top: '7.74%',
                 bottom: '8.93%',
               }}
