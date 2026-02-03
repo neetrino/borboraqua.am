@@ -8,6 +8,7 @@ import { apiClient } from '../../../lib/api-client';
 import { formatPrice, getStoredCurrency } from '../../../lib/currency';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { useTranslation } from '../../../lib/i18n-client';
+import { ProductPageButton } from '../../../components/icons/global/globalMobile';
 
 // Helper function to get color hex/rgb from color name
 const getColorValue = (colorName: string): string => {
@@ -389,16 +390,16 @@ export default function OrderPage() {
               )}
             </div>
 
-            <div className="space-y-3">
+            <div>
               <Link href="/products">
-                <Button variant="primary" className="w-full">
+                <ProductPageButton variant="primary" className="w-full py-3">
                   {t('orders.buttons.continueShopping')}
-                </Button>
+                </ProductPageButton>
               </Link>
               <Link href="/cart">
-                <Button variant="ghost" className="w-full">
+                <ProductPageButton variant="outline" className="w-full mt-3 py-3">
                   {t('orders.buttons.viewCart')}
-                </Button>
+                </ProductPageButton>
               </Link>
             </div>
           </Card>
