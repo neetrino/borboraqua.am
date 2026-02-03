@@ -492,7 +492,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                 </div>
               </div>
               <div className="content-stretch flex flex-row flex-wrap items-start left-0 w-[300px] lg:w-[300px] md:w-full sm:w-full">
-                <div className="flex font-['Inter',sans-serif] font-bold justify-center leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[22px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white w-full">
+                <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[22px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white w-full">
                   <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[22px]">
                     {t('home.footer.description')}
                   </p>
@@ -525,7 +525,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                 </div>
                 <div className="content-stretch flex flex-row flex-wrap gap-[14px] lg:gap-[14px] md:gap-[12px] sm:gap-[10px] items-start relative shrink-0 w-[215px] lg:w-[215px] md:w-full sm:w-full">
                   <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
-                    <p className="font-['Inter',sans-serif] font-bold mb-0">
+                    <p className="font-['Inter',sans-serif] font-normal mb-0">
                       <span className="leading-[24px]">{t('home.footer.contact.office')} </span>
                       <a className="[text-decoration-skip-ink:none] cursor-pointer decoration-solid leading-[24px] underline" href="tel:0037433000401">
                         <span className="[text-decoration-skip-ink:none] decoration-solid leading-[24px]">+374 33 000401</span>
@@ -533,7 +533,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                     </p>
                   </div>
                   <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
-                    <p className="font-['Inter',sans-serif] font-bold">
+                    <p className="font-['Inter',sans-serif] font-normal">
                       <span className="leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px]">{t('home.footer.contact.delivery')} </span>
                       <a className="[text-decoration-skip-ink:none] cursor-pointer decoration-solid leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px] underline" href="tel:0037441012004">
                         <span className="[text-decoration-skip-ink:none] decoration-solid leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px]">+374 41 012004</span>
@@ -541,17 +541,17 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                     </p>
                   </div>
                   <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
-                    <p className="font-['Inter',sans-serif] font-bold">
+                    <p className="font-['Inter',sans-serif] font-normal">
                       <span className="leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px]">{t('home.footer.contact.email')} </span>
                       <a className="[text-decoration-skip-ink:none] cursor-pointer decoration-solid leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px] underline" href="mailto:borboraqua.am@gmail.com">
                         <span className="[text-decoration-skip-ink:none] decoration-solid leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px]">info@borboraqua.am</span>
                       </a>
                     </p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-bold justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
+                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
                     <p className="mb-0">{t('home.footer.contact.location')} {t('home.footer.contact.locationLine1')}</p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-bold justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
+                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
                     <p className="mb-0">{t('home.footer.contact.locationLine2')}</p>
                   </div>
                 </div>
@@ -567,25 +567,25 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                 <div className="content-stretch flex flex-row flex-wrap gap-[16px] lg:gap-[16px] md:gap-[14px] sm:gap-[12px] items-start relative shrink-0 w-full">
                   <div
                     onClick={() => router.push('/privacy')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
                     <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.privacyPolicy')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/terms')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
                     <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.termsConditions')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/delivery-terms')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
                     <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.deliveryTerms')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/refund-policy')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
                     <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.refundPolicy')}</p>
                   </div>
@@ -602,19 +602,19 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                 <div className="content-stretch flex flex-row flex-wrap gap-[16px] lg:gap-[16px] md:gap-[14px] sm:gap-[12px] items-start relative shrink-0 w-full">
                   <div
                     onClick={() => router.push('/about')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
                     <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.aboutUs')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/contact')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
                     <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.contact')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/products')}
-                    className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                   >
                     <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.shop')}</p>
                   </div>
@@ -627,12 +627,12 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
           <div className="absolute content-stretch flex gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center left-[-150px] lg:left-[-150px] md:left-[-150px] sm:left-[-150px] pt-[7px] lg:pt-[7px] md:pt-[8px] sm:pt-[8px] top-[295px] lg:top-[295px] md:top-[332px] sm:top-[332px] w-[300px] lg:w-[300px] md:w-[336px] sm:w-[336px]">
             <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
               <div className="relative shrink-0 size-[18px] lg:size-[18px] md:size-[20px] sm:size-[20px]">
-                <img alt="Social" className="block max-w-none size-full" src={imgSvg} />
+                <img alt="Social" className="block max-w-none size-full" src={imgSvg} onClick={() => window.open('https://www.instagram.com/borboraguamarket', '_blank')} />
               </div>
             </div>
             <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
               <div className="relative shrink-0 size-[18px] lg:size-[18px] md:size-[20px] sm:size-[20px]">
-                <img alt="Social" className="block max-w-none size-full" src={imgSvg1} />
+                <img alt="Social" className="block max-w-none size-full" src={imgSvg1} onClick={() => window.open('https://www.facebook.com/borboraguamarket', '_blank')} />
               </div>
             </div>
             <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
@@ -645,7 +645,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
               </div>
             </div>
             <div className="relative shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
-              <img alt="Social" className="block max-w-none size-full" src={imgLink} />
+              <img alt="Social" className="block max-w-none size-full" src={imgLink}   />
             </div>
           </div>
         </div>

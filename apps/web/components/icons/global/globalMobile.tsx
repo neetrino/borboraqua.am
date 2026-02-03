@@ -432,7 +432,7 @@ export function MobileFooter({ router, t }: MobileFooterProps) {
             </div>
           </div>
           <div className="absolute content-stretch flex flex-col items-start left-0 top-[68px] w-[336px]">
-            <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-full">
+            <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-full">
               <p className="leading-[26px] whitespace-pre-wrap">{t('home.footer.description')}</p>
             </div>
           </div>
