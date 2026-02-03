@@ -40,7 +40,7 @@ export default function BlogPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="mb-10 text-center">
           <p className="text-sm md:text-base font-semibold uppercase tracking-wider text-[#00d1ff] mb-2">
