@@ -899,7 +899,7 @@ export function FeaturedProductCard({
       <div
         key={product.id}
         onClick={() => onProductClick(product)}
-        className="flex flex-col items-center gap-[12px] w-full cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2"
+        className="flex flex-col items-center gap-[12px] w-full cursor-pointer product-card-hover product-card-compact  z-[11] isolate rounded-[45px] p-2"
       >
         {/* Image Container - Smaller for shop */}
         <div className="h-[200px] w-full relative product-image-container flex items-center justify-center bg-transparent rounded-lg">

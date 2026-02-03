@@ -204,7 +204,7 @@
     box-shadow: 0 8px 32px rgba(0, 209, 255, 0.15);
   }
 
-  /* Image container - allows overflow on hover */
+  /* Image container - allows overflow on hover for home page */
   .product-image-container {
     overflow: hidden;
     transition: overflow 0.3s ease-out;
@@ -214,11 +214,17 @@
     overflow: visible;
   }
 
+  /* Compact cards (related products) - keep overflow hidden */
+  .product-card-compact:hover .product-image-container {
+    overflow: hidden;
+  }
+
   .product-image-hover {
     transition: transform 0.4s ease-out;
     transform-origin: center bottom;
   }
 
+  /* Home page - full transform effect */
   .product-card-hover:hover .product-image-hover {
     transform: rotate(5deg) scale(1.15) translateY(-20px);
     z-index: 10;
@@ -227,6 +233,13 @@
 
   .product-card-hover-centered:hover .product-image-hover {
     transform: rotate(5deg) scale(1.15) translateY(-20px);
+    z-index: 10;
+    position: relative;
+  }
+
+  /* Compact cards (related products) - smaller scale, no overflow */
+  .product-card-compact:hover .product-image-hover {
+    transform: scale(1.05);
     z-index: 10;
     position: relative;
   }
