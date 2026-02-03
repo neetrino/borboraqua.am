@@ -92,7 +92,7 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
   return (
     <div className="relative w-full" data-node-id="4:1680">
       {/* Hero Section Container - Compact Layout */}
-      <div className="flex items-center justify-between py-3 mb-0" data-name="Hero" data-node-id="4:1681">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-3 mb-0 gap-3 sm:gap-0" data-name="Hero" data-node-id="4:1681">
         {/* Left: Show Results Text */}
         {total > 0 && (
           <p className="font-['Montserrat',sans-serif] font-bold text-sm text-[rgba(0,0,0,0.87)] whitespace-nowrap" data-node-id="4:1712">
@@ -101,10 +101,10 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
         )}
         
         {/* Right: Filters Container */}
-        <div className="flex items-center gap-3 ml-auto" style={{ width: 'fit-content' }}>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto sm:ml-auto">
         {/* Price Filter Tabs */}
-        <div className="relative flex-shrink-0" data-name="Tab" data-node-id="4:1706">
-          <div className="bg-[rgba(250,254,255,0.33)] h-9 overflow-hidden rounded-full w-72 relative">
+        <div className="relative flex-shrink-0 w-full sm:w-auto" data-name="Tab" data-node-id="4:1706">
+          <div className="bg-[rgba(250,254,255,0.33)] h-9 overflow-hidden rounded-full w-full sm:w-72 relative min-w-0">
             {/* Active tab background */}
             <div
               className="absolute bg-[#00d1ff] rounded-full transition-all duration-300"
@@ -136,7 +136,8 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
                 data-node-id="4:1709"
               >
                 <span className={priceFilter === 'low' ? 'text-white' : 'text-[#1b1f21]'}>
-                  Low Price
+                  <span className="hidden sm:inline">Low Price</span>
+                  <span className="sm:hidden">Low</span>
                 </span>
               </button>
               
@@ -146,7 +147,8 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
                 data-node-id="4:1710"
               >
                 <span className={priceFilter === 'high' ? 'text-white' : 'text-[#1b1f21]'}>
-                  High Price
+                  <span className="hidden sm:inline">High Price</span>
+                  <span className="sm:hidden">High</span>
                 </span>
               </button>
             </div>
@@ -154,11 +156,11 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
         </div>
 
         {/* Right: Sort by dropdown */}
-        <div className="flex items-center" data-name="Sort by" data-node-id="4:1682">
-          <div className="relative" ref={sortDropdownRef}>
+        <div className="flex items-center w-full sm:w-auto" data-name="Sort by" data-node-id="4:1682">
+          <div className="relative w-full sm:w-auto" ref={sortDropdownRef}>
             <button
               onClick={() => setShowSortDropdown(!showSortDropdown)}
-              className="bg-[rgba(255,255,255,0.33)] h-9 overflow-hidden rounded-full w-28 flex items-center justify-between px-2.5"
+              className="bg-[rgba(255,255,255,0.33)] h-9 overflow-hidden rounded-full w-full sm:w-28 flex items-center justify-between px-2.5"
               data-name="Sort Active"
               data-node-id="4:1683"
             >
