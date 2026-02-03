@@ -648,9 +648,11 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
               <img alt="Social" className="block max-w-none size-full" src={imgLink} />
             </div>
           </div>
+        </div>
 
-          {/* Copyright & Payment Icons */}
-          <div className="absolute border-[#e2e8f0] border-solid border-t content-stretch flex items-center justify-between left-0 right-0 px-[20px] lg:px-[20px] md:px-[16px] sm:px-[12px] pt-[36px] lg:pt-[36px] md:pt-[32px] sm:pt-[24px] top-[350px] lg:top-[350px] md:top-[320px] sm:top-[280px] w-full flex-col sm:flex-col md:flex-row">
+        {/* Copyright & Payment Icons - Full width border on desktop */}
+        <div className="absolute border-[#e2e8f0] border-solid border-t left-0 right-0 top-[550px] lg:top-[550px] md:top-[520px] sm:top-[480px] w-full z-10">
+          <div className="max-w-[1080px] lg:max-w-[1080px] mx-auto px-[20px] lg:px-[20px] md:px-[16px] sm:px-[12px] pt-[36px] lg:pt-[36px] md:pt-[32px] sm:pt-[24px] content-stretch flex items-center justify-between flex-col sm:flex-col md:flex-row">
             <div className="relative shrink-0">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center justify-center relative">
                 <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[12px] lg:text-[12px] md:text-[11px] sm:text-[10px] text-white whitespace-nowrap">
