@@ -31,6 +31,7 @@ import enRegister from '../locales/en/register.json';
 import enCategories from '../locales/en/categories.json';
 import enOrders from '../locales/en/orders.json';
 import enAdmin from '../locales/en/admin.json';
+import enBlog from '../locales/en/blog.json';
 
 import hyCommon from '../locales/hy/common.json';
 import hyHome from '../locales/hy/home.json';
@@ -55,6 +56,7 @@ import hyRegister from '../locales/hy/register.json';
 import hyCategories from '../locales/hy/categories.json';
 import hyOrders from '../locales/hy/orders.json';
 import hyAdmin from '../locales/hy/admin.json';
+import hyBlog from '../locales/hy/blog.json';
 
 import ruCommon from '../locales/ru/common.json';
 import ruHome from '../locales/ru/home.json';
@@ -79,9 +81,10 @@ import ruRegister from '../locales/ru/register.json';
 import ruCategories from '../locales/ru/categories.json';
 import ruOrders from '../locales/ru/orders.json';
 import ruAdmin from '../locales/ru/admin.json';
+import ruBlog from '../locales/ru/blog.json';
 
 // Type definitions for better type safety
-export type Namespace = 'common' | 'home' | 'product' | 'products' | 'attributes' | 'delivery' | 'about' | 'contact' | 'faq' | 'login' | 'delivery-terms' | 'terms' | 'privacy' | 'support' | 'stores' | 'returns' | 'refund-policy' | 'profile' | 'checkout' | 'register' | 'categories' | 'orders' | 'admin';
+export type Namespace = 'common' | 'home' | 'product' | 'products' | 'attributes' | 'delivery' | 'about' | 'contact' | 'faq' | 'login' | 'delivery-terms' | 'terms' | 'privacy' | 'support' | 'stores' | 'returns' | 'refund-policy' | 'profile' | 'checkout' | 'register' | 'categories' | 'orders' | 'admin' | 'blog';
 export type ProductField = 'title' | 'shortDescription' | 'longDescription';
 
 // Translation store - organized by language and namespace
@@ -111,6 +114,7 @@ const translations: Partial<Record<LanguageCode, Record<Namespace, any>>> = {
     categories: enCategories,
     orders: enOrders,
     admin: enAdmin,
+    blog: enBlog,
   },
   hy: {
     common: hyCommon,
@@ -136,6 +140,7 @@ const translations: Partial<Record<LanguageCode, Record<Namespace, any>>> = {
     categories: hyCategories,
     orders: hyOrders,
     admin: hyAdmin,
+    blog: hyBlog,
   },
   ru: {
     common: ruCommon,
@@ -161,6 +166,7 @@ const translations: Partial<Record<LanguageCode, Record<Namespace, any>>> = {
     categories: ruCategories,
     orders: ruOrders,
     admin: ruAdmin,
+    blog: ruBlog,
   },
 };
 
@@ -248,7 +254,7 @@ export function t(lang: LanguageCode | undefined, path: string): string {
   }
 
   // Validate namespace
-  const validNamespaces: Namespace[] = ['common', 'home', 'product', 'products', 'attributes', 'delivery', 'about', 'contact', 'faq', 'login', 'delivery-terms', 'terms', 'privacy', 'support', 'stores', 'returns', 'refund-policy', 'profile', 'checkout', 'register', 'categories', 'orders', 'admin'];
+  const validNamespaces: Namespace[] = ['common', 'home', 'product', 'products', 'attributes', 'delivery', 'about', 'contact', 'faq', 'login', 'delivery-terms', 'terms', 'privacy', 'support', 'stores', 'returns', 'refund-policy', 'profile', 'checkout', 'register', 'categories', 'orders', 'admin', 'blog'];
   if (!validNamespaces.includes(namespace)) {
     if (process.env.NODE_ENV === 'development') {
       console.warn(`[i18n] Invalid namespace: "${namespace}". Valid namespaces: ${validNamespaces.join(', ')}`);
@@ -500,7 +506,7 @@ export function clearTranslationCache(): void {
  * Get all available namespaces
  */
 export function getAvailableNamespaces(): Namespace[] {
-  return ['common', 'home', 'product', 'products', 'attributes', 'delivery', 'about', 'contact', 'faq', 'login', 'delivery-terms', 'terms', 'privacy', 'support', 'stores', 'returns', 'refund-policy', 'profile', 'checkout', 'register', 'categories', 'orders'];
+  return ['common', 'home', 'product', 'products', 'attributes', 'delivery', 'about', 'contact', 'faq', 'login', 'delivery-terms', 'terms', 'privacy', 'support', 'stores', 'returns', 'refund-policy', 'profile', 'checkout', 'register', 'categories', 'orders', 'admin', 'blog'];
 }
 
 /**

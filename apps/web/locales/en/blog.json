@@ -1,0 +1,9 @@
+{
+  "subtitle": "BLOG",
+  "title": "Our Blog",
+  "description": "Stay updated with our latest news, tips, and insights",
+  "loading": "Loading posts...",
+  "empty": "No blog posts available at the moment.",
+  "publishedAt": "Published on {date}",
+  "readMore": "Read More"
+}
