@@ -40,7 +40,7 @@ export default function ContactPage() {
 
   useEffect(() => {
     const storedLang = getStoredLanguage();
-    const mappedLang = storedLang === 'hy' ? 'am' : (storedLang === 'ka' ? 'en' : storedLang);
+    const mappedLang = storedLang === 'hy' ? 'am' : storedLang;
     if (mappedLang === 'am' || mappedLang === 'ru' || mappedLang === 'en') {
       setLanguage(mappedLang as 'en' | 'ru' | 'am');
     } else {

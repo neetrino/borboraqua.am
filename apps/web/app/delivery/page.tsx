@@ -13,7 +13,7 @@ export default function DeliveryPage() {
 
   useEffect(() => {
     const language = typeof window !== 'undefined' ? localStorage.getItem('language') || 'en' : 'en';
-    const mappedLang = language === 'hy' ? 'am' : (language === 'ka' ? 'en' : language); // Map 'hy' to 'am' for config
+    const mappedLang = language === 'hy' ? 'am' : language; // Map 'hy' to 'am' for config
     setLang(mappedLang as 'en' | 'ru' | 'am');
   }, []);
   

@@ -13,7 +13,7 @@ interface BreadcrumbItem {
 
 export function Breadcrumb() {
   const pathname = usePathname();
-  const [language, setLanguage] = useState<'en' | 'ru' | 'hy' | 'ka'>('en');
+  const [language, setLanguage] = useState<'en' | 'ru' | 'hy'>('en');
 
   useEffect(() => {
     const storedLang = getStoredLanguage();
