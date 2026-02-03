@@ -1403,6 +1403,21 @@ export function getAdminMenuTABS(t: (path: string) => string): AdminMenuItem[] {
     ),
   },
   {
+    id: 'blog',
+    label: t('admin.menu.blog'),
+    path: '/admin/blog',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M7 4h10a2 2 0 012 2v12l-4-2-4 2-4-2-4 2V6a2 2 0 012-2z"
+        />
+      </svg>
+    ),
+  },
+  {
     id: 'settings',
     label: t('admin.menu.settings'),
     path: '/admin/settings',
