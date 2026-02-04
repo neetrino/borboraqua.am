@@ -1382,9 +1382,9 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Footer Copyright */}
-        <div className="-translate-x-1/2 absolute border-[#e2e8f0] border-solid border-t content-stretch flex flex-col gap-[21px] items-center justify-center left-1/2 pt-[29px] top-[5380px] w-[386px] z-10">
-          <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-white whitespace-nowrap">
-            <p className="leading-[16px]">{t('home.footer.copyright')}</p>
+        <div className="-translate-x-1/2 absolute border-[#e2e8f0] border-solid border-t content-stretch flex flex-col gap-[18px] items-center justify-center left-1/2 pt-[20px] top-[5380px] w-[90%] max-w-[386px] z-10 px-4">
+          <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[11px] text-center text-white break-words">
+            <p className="leading-[16px] whitespace-pre-wrap">{t('home.footer.copyright')}</p>
           </div>
           <div className="relative shrink-0">
             <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[13px] items-center justify-end relative">
