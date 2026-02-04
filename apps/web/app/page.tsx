@@ -1252,7 +1252,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Footer */}
-        <div className="absolute content-stretch flex flex-col gap-[30px] items-start justify-center left-[35px] top-[4539px] w-[339px] pb-[0px]">
+        <div className="absolute content-stretch flex flex-col gap-[24px] items-start justify-center left-[24px] top-[4539px] w-[339px] pb-[0px] pr-4">
           <div className="h-[312px] relative shrink-0 w-full">
             <div className="absolute content-stretch flex h-[34px] items-center left-0 top-0 w-[336px]">
               <div className="h-[34px] relative shrink-0 w-[112px]">
@@ -1260,13 +1260,13 @@ export default function HomePage() {
               </div>
             </div>
             <div className="absolute content-stretch flex flex-col items-start left-0 top-[58px] w-[336px]">
-              <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-full">
-                <p className="leading-[26px] whitespace-pre-wrap">{t('home.footer.description')}</p>
+              <div className="flex flex-col font-['Inter:Medium',sans-serif] font-medium justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white w-full">
+                <p className="leading-[22px] whitespace-pre-wrap break-words">{t('home.footer.description')}</p>
               </div>
             </div>
             <div className="absolute flex items-center gap-[9px] left-0 top-[280px] cursor-pointer" onClick={() => router.push('/about')}>
-              <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[14px] whitespace-nowrap">
-                <p className="leading-[22px]">{t('home.footer.more')}</p>
+              <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[13px] break-words">
+                <p className="leading-[20px] whitespace-pre-wrap">{t('home.footer.more')}</p>
               </div>
               <div className="content-stretch flex flex-col items-start relative shrink-0">
                 <div className="flex items-center justify-center relative shrink-0">
@@ -1281,28 +1281,28 @@ export default function HomePage() {
           </div>
           <div className="content-stretch flex flex-col gap-[1px] h-[165px] items-start relative shrink-0 w-full">
             <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase w-full">
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[13px] text-white tracking-[1.2px] uppercase w-full">
                 <p className="leading-[20px] whitespace-pre-wrap">CONTACT</p>
               </div>
             </div>
             <div className="content-stretch flex flex-col gap-[6px] items-start relative shrink-0 w-[249px]">
               <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white whitespace-pre-wrap">
-                  <p className="mb-0 leading-[24px]">Office: <a href="tel:0037433000401" className="underline">+374 33 000401</a></p>
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                  <p className="mb-0 leading-[22px]">Office: <a href="tel:0037433000401" className="underline">+374 33 000401</a></p>
                 </div>
               </div>
               <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
-                  <p className="leading-[24px] whitespace-pre-wrap">Delivery: <a href="tel:0037441012004" className="underline">+374 41 012004</a></p>
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                  <p className="leading-[22px] whitespace-pre-wrap">Delivery: <a href="tel:0037441012004" className="underline">+374 41 012004</a></p>
                 </div>
               </div>
               <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
-                  <p className="leading-[24px] whitespace-pre-wrap">Email: <a href="mailto:borboraqua.am@gmail.com" className="underline">info@borboraqua.am</a></p>
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                  <p className="leading-[22px] whitespace-pre-wrap">Email: <a href="mailto:borboraqua.am@gmail.com" className="underline">info@borboraqua.am</a></p>
                 </div>
               </div>
               <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[24px] not-italic relative shrink-0 text-[16px] text-white w-[228px] whitespace-pre-wrap">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[22px] not-italic relative shrink-0 text-[14px] text-white w-[228px] whitespace-pre-wrap break-words">
                   <p className="mb-0">Location: 1412, Gegharkunik,</p>
                   <p className="mb-0">v. Dzoragyugh, Armenia</p>
                 </div>

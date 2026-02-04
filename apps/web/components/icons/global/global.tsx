@@ -492,8 +492,8 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                 </div>
               </div>
               <div className="content-stretch flex flex-row flex-wrap items-start left-0 w-[300px] lg:w-[300px] md:w-full sm:w-full">
-                <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[22px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white w-full">
-                  <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[22px]">
+                <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white w-full">
+                  <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">
                     {t('home.footer.description')}
                   </p>
                 </div>
@@ -524,7 +524,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                   </div>
                 </div>
                 <div className="content-stretch flex flex-row flex-wrap gap-[14px] lg:gap-[14px] md:gap-[12px] sm:gap-[10px] items-start relative shrink-0 w-[215px] lg:w-[215px] md:w-full sm:w-full">
-                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
+                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
                     <p className="font-['Inter',sans-serif] font-normal mb-0">
                       <span className="leading-[24px]">{t('home.footer.contact.office')} </span>
                       <a className="[text-decoration-skip-ink:none] cursor-pointer decoration-solid leading-[24px] underline" href="tel:0037433000401">
@@ -532,7 +532,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                       </a>
                     </p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
+                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
                     <p className="font-['Inter',sans-serif] font-normal">
                       <span className="leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px]">{t('home.footer.contact.delivery')} </span>
                       <a className="[text-decoration-skip-ink:none] cursor-pointer decoration-solid leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px] underline" href="tel:0037441012004">
@@ -540,7 +540,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                       </a>
                     </p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
+                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
                     <p className="font-['Inter',sans-serif] font-normal">
                       <span className="leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px]">{t('home.footer.contact.email')} </span>
                       <a className="[text-decoration-skip-ink:none] cursor-pointer decoration-solid leading-[22px] lg:leading-[22px] md:leading-[24px] sm:leading-[24px] underline" href="mailto:borboraqua.am@gmail.com">
@@ -548,10 +548,10 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                       </a>
                     </p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
+                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
                     <p className="mb-0">{t('home.footer.contact.location')} {t('home.footer.contact.locationLine1')}</p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap">
+                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
                     <p className="mb-0">{t('home.footer.contact.locationLine2')}</p>
                   </div>
                 </div>
@@ -567,27 +567,27 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                 <div className="content-stretch flex flex-row flex-wrap gap-[16px] lg:gap-[16px] md:gap-[14px] sm:gap-[12px] items-start relative shrink-0 w-full">
                   <div
                     onClick={() => router.push('/privacy')}
-                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.privacyPolicy')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">{t('home.footer.policies.privacyPolicy')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/terms')}
-                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.termsConditions')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">{t('home.footer.policies.termsConditions')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/delivery-terms')}
-                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.deliveryTerms')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">{t('home.footer.policies.deliveryTerms')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/refund-policy')}
-                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.refundPolicy')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">{t('home.footer.policies.refundPolicy')}</p>
                   </div>
                 </div>
               </div>
@@ -602,21 +602,21 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                 <div className="content-stretch flex flex-row flex-wrap gap-[16px] lg:gap-[16px] md:gap-[14px] sm:gap-[12px] items-start relative shrink-0 w-full">
                   <div
                     onClick={() => router.push('/about')}
-                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.aboutUs')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">{t('home.footer.siteMap.aboutUs')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/contact')}
-                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.contact')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">{t('home.footer.siteMap.contact')}</p>
                   </div>
                   <div
                     onClick={() => router.push('/products')}
-                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
                   >
-                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.shop')}</p>
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">{t('home.footer.siteMap.shop')}</p>
                   </div>
                 </div>
               </div>
