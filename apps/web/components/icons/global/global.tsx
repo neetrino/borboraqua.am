@@ -627,12 +627,12 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
           <div className="absolute content-stretch flex gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center left-[-150px] lg:left-[-150px] md:left-[-150px] sm:left-[-150px] pt-[7px] lg:pt-[7px] md:pt-[8px] sm:pt-[8px] top-[295px] lg:top-[295px] md:top-[332px] sm:top-[332px] w-[300px] lg:w-[300px] md:w-[336px] sm:w-[336px]">
             <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
               <div className="relative shrink-0 size-[18px] lg:size-[18px] md:size-[20px] sm:size-[20px]">
-                <img alt="Social" className="block max-w-none size-full" src={imgSvg} onClick={() => window.open('https://www.instagram.com/borboraguamarket', '_blank')} />
+                <img alt="Social" className="block max-w-none size-full" src={imgSvg} onClick={() => window.open('https://www.instagram.com/borbor_aqua/', '_blank')} />
               </div>
             </div>
             <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
               <div className="relative shrink-0 size-[18px] lg:size-[18px] md:size-[20px] sm:size-[20px]">
-                <img alt="Social" className="block max-w-none size-full" src={imgSvg1} onClick={() => window.open('https://www.facebook.com/borboraguamarket', '_blank')} />
+                <img alt="Social" className="block max-w-none size-full" src={imgSvg1} onClick={() => window.open('https://www.facebook.com/borbor.aqua', '_blank')} />
               </div>
             </div>
             <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
