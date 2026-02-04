@@ -614,6 +614,9 @@ export default function CheckoutPage() {
     if (!isLoggedIn) {
       console.log('[Checkout] Opening modal for guest checkout');
       setShowShippingModal(true);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('app:modal-open'));
+      }
       return;
     }
     
@@ -1080,6 +1083,9 @@ export default function CheckoutPage() {
           onClick={() => {
             console.log('[Checkout] Modal backdrop clicked, closing modal');
             setShowShippingModal(false);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new Event('app:modal-close'));
+            }
           }}
         >
           <div 
@@ -1095,7 +1101,12 @@ export default function CheckoutPage() {
                 {shippingMethod === 'delivery' ? t('checkout.modals.completeOrder') : t('checkout.modals.confirmOrder')}
               </h2>
               <button
-                onClick={() => setShowShippingModal(false)}
+                onClick={() => {
+                  setShowShippingModal(false);
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new Event('app:modal-close'));
+                  }
+                }}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
                 aria-label={t('checkout.modals.closeModal')}
               >
@@ -1473,6 +1484,9 @@ export default function CheckoutPage() {
           onClick={() => {
             console.log('[Checkout] Card modal backdrop clicked, closing modal');
             setShowCardModal(false);
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new Event('app:modal-close'));
+            }
           }}
         >
           <div 
@@ -1488,7 +1502,12 @@ export default function CheckoutPage() {
                 {t('checkout.modals.cardDetails').replace('{method}', paymentMethod === 'arca' ? t('checkout.payment.arca') : t('checkout.payment.idram'))}
               </h2>
               <button
-                onClick={() => setShowCardModal(false)}
+                onClick={() => {
+                  setShowCardModal(false);
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new Event('app:modal-close'));
+                  }
+                }}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
                 aria-label={t('checkout.modals.closeModal')}
               >

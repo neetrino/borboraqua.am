@@ -396,7 +396,8 @@ export default function HomePage() {
     <div className="w-full bg-white overflow-x-hidden">
       {/* Mobile / Tablet Version - Visible up to xl */}
       <div className="xl:hidden bg-white relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden">
-        {/* Mobile Header */}
+        {/* Mobile Header (hidden when menu/search popups are open) */}
+        {!showMobileMenu && !showSearchModal && (
         <div className="absolute content-stretch flex items-center justify-between left-[17px] right-[17px] top-[35px] z-50">
           <div className="content-stretch flex gap-[6px] items-center relative shrink-0">
             {/* Mobile Menu Button (Hamburger) */}
@@ -430,6 +431,7 @@ export default function HomePage() {
             <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgBorborAguaLogoColorB2024Colored1} />
           </div>
         </div>
+        )}
 
         {/* Mobile Menu Overlay */}
         {showMobileMenu && (

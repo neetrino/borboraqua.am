@@ -25,6 +25,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [globalModalOpen, setGlobalModalOpen] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchModalRef = useRef<HTMLDivElement>(null);
@@ -47,6 +48,20 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Listen for global modal open/close events (e.g. checkout modals)
+  useEffect(() => {
+    const handleModalOpen = () => setGlobalModalOpen(true);
+    const handleModalClose = () => setGlobalModalOpen(false);
+
+    window.addEventListener('app:modal-open', handleModalOpen);
+    window.addEventListener('app:modal-close', handleModalClose);
+
+    return () => {
+      window.removeEventListener('app:modal-open', handleModalOpen);
+      window.removeEventListener('app:modal-close', handleModalClose);
     };
   }, []);
 
@@ -119,12 +134,14 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={`relative flex min-h-screen flex-col pb-16 lg:pb-0 overflow-x-hidden overflow-y-hidden xl:overflow-y-visible ${isAdminPage || isProfilePage ? 'bg-white' : 'app-page-background'}`}>
-      {/* Top Header Bar - Only visible on mobile, white background */}
-      <TopHeaderBar
-        router={router}
-        setShowSearchModal={setShowSearchModal}
-        setShowMobileMenu={setShowMobileMenu}
-      />
+      {/* Top Header Bar - Only visible on mobile, hidden when a popup is open */}
+      {!showMobileMenu && !showSearchModal && !globalModalOpen && (
+        <TopHeaderBar
+          router={router}
+          setShowSearchModal={setShowSearchModal}
+          setShowMobileMenu={setShowMobileMenu}
+        />
+      )}
 
       {/* Mobile Menu - Only visible on mobile */}
       <MobileMenu
@@ -151,25 +168,27 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       
       {/* Spacer section at the top - increases page height */}
       <div className="hidden xl:block w-full bg-transparent h-[80px] md:h-[70px] sm:h-[60px] flex-shrink-0 relative z-10" />
-      {/* Desktop Header - Only visible on desktop */}
-      <div className="hidden xl:block">
-        <Header
-          router={router}
-          t={t}
-          setShowSearchModal={setShowSearchModal}
-          setShowLanguageMenu={setShowLanguageMenu}
-          showLanguageMenu={showLanguageMenu}
-          handleLanguageChange={handleLanguageChange}
-          isLoggedIn={isLoggedIn}
-          isAdmin={isAdmin}
-          setShowUserMenu={setShowUserMenu}
-          showUserMenu={showUserMenu}
-          handleLogout={handleLogout}
-          languageMenuRef={languageMenuRef}
-          userMenuRef={userMenuRef}
-          isHomePage={false}
-        />
-      </div>
+      {/* Desktop Header - Only visible on desktop and hidden when any global popup is open */}
+      {!showSearchModal && !globalModalOpen && (
+        <div className="hidden xl:block">
+          <Header
+            router={router}
+            t={t}
+            setShowSearchModal={setShowSearchModal}
+            setShowLanguageMenu={setShowLanguageMenu}
+            showLanguageMenu={showLanguageMenu}
+            handleLanguageChange={handleLanguageChange}
+            isLoggedIn={isLoggedIn}
+            isAdmin={isAdmin}
+            setShowUserMenu={setShowUserMenu}
+            showUserMenu={showUserMenu}
+            handleLogout={handleLogout}
+            languageMenuRef={languageMenuRef}
+            userMenuRef={userMenuRef}
+            isHomePage={false}
+          />
+        </div>
+      )}
       {/* Breadcrumb - Only visible on desktop, integrated into content */}
       <div className="hidden xl:block pt-14">
         <Breadcrumb />
