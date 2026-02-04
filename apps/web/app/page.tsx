@@ -932,7 +932,7 @@ export default function HomePage() {
 
         {/* Mobile Water Energy Content */}
         <div className="-translate-x-1/2 absolute left-[calc(50%-10.5px)] top-[1900px] lg:top-[1895px] w-[322px] h-[372px]">
-          <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[54.84%_0.99%_16.56%_68.49%] justify-center leading-[0] text-[#0f172a] text-[0px] tracking-[-0.9px] uppercase whitespace-nowrap">
+          <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[54.84%_0.99%_16.56%_74.49%] justify-center leading-[0] text-[#0f172a] text-[0px] tracking-[-0.9px] uppercase whitespace-nowrap">
             <p className="leading-[20px] mb-0 text-[23px]">{t('home.waterEnergySection.pure')}</p>
             <p className="leading-[20px] mb-0 text-[23px]">{t('home.waterEnergySection.energy')}</p>
             <p className="font-['Montserrat:Regular',sans-serif] font-normal leading-[16px] mb-0 text-[11px]">{t('home.waterEnergySection.drawnFrom')}</p>
@@ -940,7 +940,7 @@ export default function HomePage() {
             <p className="font-['Montserrat:Regular',sans-serif] font-normal leading-[16px] mb-0 text-[11px]">{t('home.waterEnergySection.capturedIn')}</p>
             <p className="font-['Montserrat:Regular',sans-serif] font-normal leading-[16px] text-[11px]">{t('home.waterEnergySection.everyDrop')}</p>
           </div>
-          <div className="absolute flex flex-col font-['Montserrat:Regular',sans-serif] font-normal inset-[22.8%_59.55%_60%_13.65%] justify-center leading-[16px] text-[#0f172a] text-[14px] text-right tracking-[-0.9px] uppercase whitespace-nowrap">
+          <div className="absolute flex flex-col font-['Montserrat:Regular',sans-serif] font-normal left-[30px] inset-[18.1%_68.55%_60%_13.65%] justify-center leading-[16px] text-[#0f172a] text-[14px] text-right tracking-[-0.9px] uppercase whitespace-nowrap">
             <p className="mb-0">{t('home.waterEnergySection.crystal')}</p>
             <p className="mb-0">{t('home.waterEnergySection.clarityThat')}</p>
             <p className="mb-0">{t('home.waterEnergySection.refreshesThe')}</p>
