@@ -973,29 +973,29 @@ export default function HomePage() {
               <div className="absolute contents inset-[5.91%_9.77%_0.02%_16.13%]">
                 <div className="absolute inset-[9.43%_9.77%_67.89%_74%]" data-name="Vector" data-node-id="3:2109">
                   <div className="absolute inset-[0_3.7%_4.59%_0.78%]">
-                    <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/08813665-fb7d-46ff-a20b-bd1f72beebdf" />
+                    <img alt="" className="block max-w-none size-full" src={img15} />
                   </div>
                 </div>
                 <div className="absolute inset-[48.32%_67.73%_31.94%_18%]" data-name="Vector" data-node-id="3:2110">
-                  <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/4621d6c7-4dbd-4afd-9ec4-29430094f5e3" />
+                  <img alt="" className="block max-w-none size-full" src={imgVector8} />
                 </div>
                 <div className="absolute aspect-[157.45058065837884/437.4313836472372] flex items-center justify-center left-[34.21%] right-[26.72%] top-[27.48px]">
                   <div className="flex-none h-[436.107px] rotate-[-0.5deg] w-[153.651px]">
                     <div className="relative size-full" data-name="\sqawdef 1">
                       <div className="absolute inset-0 opacity-88 overflow-hidden pointer-events-none">
-                        <img alt="" className="absolute h-full left-[-91.91%] max-w-none top-0 w-[283.83%]" src="https://www.figma.com/api/mcp/asset/655c1036-cbe5-4609-b621-924834d6314f" />
+                        <img alt="" className="absolute h-full left-[-91.91%] max-w-none top-0 w-[283.83%]" src={imgSqawdef1} />
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="absolute inset-[15.61%_15.04%_66.56%_63.72%]" data-name="glass">
                   <div className="absolute inset-[-3.62%_-4.67%_-6.03%_-4.67%]">
-                    <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/aadbc746-1d0b-416c-8ec8-f41cc8e9d911" />
+                    <img alt="" className="block max-w-none size-full" src={imgGlass3} />
                   </div>
                 </div>
                 <div className="absolute inset-[54.8%_56.51%_27.38%_22.25%]" data-name="glass">
                   <div className="absolute inset-[-3.62%_-4.67%_-6.03%_-4.67%]">
-                    <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/cd530067-d699-40ac-bdbd-e431ca8dce60" />
+                    <img alt="" className="block max-w-none size-full" src={imgGlass4} />
                   </div>
                 </div>
               </div>
@@ -1085,7 +1085,7 @@ export default function HomePage() {
               <div className="absolute contents inset-[5.91%_9.77%_0.02%_16.13%]">
                 <div className="absolute inset-[9.43%_9.77%_67.89%_74%]" data-name="Vector">
                   <div className="absolute inset-[0_3.7%_4.59%_0.78%]">
-                    <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/08813665-fb7d-46ff-a20b-bd1f72beebdf" />
+                    <img alt="" className="block max-w-none size-full" src={imgVector8} />
                   </div>
                 </div>
           
@@ -1097,11 +1097,11 @@ export default function HomePage() {
             <div className="absolute aspect-[100/100] left-[33.98%] right-[33.7%] top-0" data-name="pc" data-node-id="0:182">
               <div className="relative size-full">
                 <div className="absolute inset-[9.48%_-14.22%_18.97%_34.91%]" data-name="Vector" data-node-id="0:183">
-                  <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/f252f37e-868c-46c2-be96-f822d3aab537" />
+                  <img alt="" className="block max-w-none size-full" src={img13} />
                 </div>
                 <div className="absolute inset-[29.31%_16.81%_0_9.91%]" data-name="glass" data-node-id="0:184">
                   <div className="absolute inset-[-3.66%_-4.71%_-6.1%_-4.71%]">
-                    <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/e777528f-0907-4aa7-a28e-871308fd4e93" />
+                    <img alt="" className="block max-w-none size-full" src={img14} />
                   </div>
                 </div>
               </div>
@@ -1119,15 +1119,15 @@ export default function HomePage() {
             <div className="absolute aspect-[100/100] left-[33.52%] right-[34.08%] top-0" data-name="warning" data-node-id="0:165">
               <div className="relative size-full">
                 <div className="absolute inset-[5.88%_-4.86%_26.15%_50.33%]" data-name="Group" data-node-id="0:166">
-                  <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/fbb7061c-d20f-4cdf-b279-e5796eec7550" />
+                  <img alt="" className="block max-w-none size-full" src={img10} />
                 </div>
                 <div className="absolute inset-[13.93%_8.94%_9.09%_8.94%]" data-name="glass" data-node-id="0:169">
                   <div className="absolute inset-[-3.36%_-4.2%_-5.6%_-4.2%]">
-                    <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/be7ad9f7-327f-4e89-9ba1-222f20a54476" />
+                    <img alt="" className="block max-w-none size-full" src={img11} />
                   </div>
                 </div>
                 <div className="absolute inset-[39.77%_45.45%_20.45%_45.45%]" data-name="top" data-node-id="0:170">
-                  <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/15315365-c5b2-42c7-9756-074acb2eb650" />
+                  <img alt="" className="block max-w-none size-full" src={img12} />
                 </div>
               </div>
             </div>
@@ -1144,15 +1144,15 @@ export default function HomePage() {
             <div className="absolute aspect-[100/100] left-[34.07%] overflow-clip right-[33.8%] top-0" data-name="leaf" data-node-id="0:150">
               <div className="relative size-full">
                 <div className="absolute inset-[10.22%_10.23%_61.04%_62.5%]" data-name="bg" data-node-id="0:151">
-                  <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/5fd94071-5e89-4d8b-9dc1-0186aee60a37" />
+                  <img alt="" className="block max-w-none size-full" src={img7} />
                 </div>
                 <div className="absolute inset-[16.22%_15.91%_6.5%_4.41%]" data-name="glass" data-node-id="0:152">
                   <div className="absolute inset-[-3.35%_-4.33%_-5.58%_-4.33%]">
-                    <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/7dbb068b-eecb-4cb8-8b19-c14124babcea" />
+                    <img alt="" className="block max-w-none size-full" src={img8} />
                   </div>
                 </div>
                 <div className="absolute inset-[32.96%_31.82%_25.5%_35.23%]" data-name="top" data-node-id="0:153">
-                  <img alt="" className="block max-w-none size-full" src="https://www.figma.com/api/mcp/asset/0ffabdd4-6cad-4a82-85b4-c6701ed0bb8f" />
+                  <img alt="" className="block max-w-none size-full" src={img9} />
                 </div>
               </div>
             </div>
