@@ -1059,11 +1059,11 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Why Choose Us Section */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-start left-[calc(50%+0.5px)] top-[3113px] w-full max-w-[429px]">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[12px] items-start left-[calc(50%+0.5px)] top-[3113px] w-full max-w-[429px] px-4">
           <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
             <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
-              <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[40px] text-center tracking-[-0.9px] uppercase w-full">
-                <p className="leading-[40px] whitespace-pre-wrap">{t('home.whyChooseUs.title')}</p>
+              <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[32px] relative shrink-0 text-[#0f172a] text-[28px] text-center tracking-[-0.9px] uppercase w-full break-words">
+                <p className="leading-[32px] whitespace-pre-wrap">{t('home.whyChooseUs.title')}</p>
               </div>
             </div>
           </div>
@@ -1077,7 +1077,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Why Choose Us Cards */}
-        <div className="-translate-x-1/2 absolute left-[calc(50%+0.5px)] top-[3210px] w-[361px]">
+        <div className="-translate-x-1/2 absolute left-[calc(50%+0.5px)] top-[3235px] w-[361px] px-4">
           <div className="relative content-stretch flex flex-col gap-[50px] items-end w-full">
           {/* Decorative Vectors - Same as Water Energy */}
           <div className="absolute contents inset-[5.91%_9.77%_0.02%_3.97%]">
@@ -1106,12 +1106,12 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal inset-[61.19%_11.7%_22.03%_11.98%] justify-center leading-[24px] not-italic text-[#64748b] text-[16px] text-center whitespace-pre-wrap" data-node-id="3:2135">
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal inset-[62.5%_11.7%_20.5%_11.98%] justify-center leading-[22px] not-italic text-[#64748b] text-[14px] text-center break-words" data-node-id="3:2135">
               <p className="mb-0">{t('home.whyChooseUs.richInMinerals.descriptionLine1')}</p>
               <p>{t('home.whyChooseUs.richInMinerals.descriptionLine2')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[49.3%_22.56%_40.91%_22.84%] justify-center leading-[0] text-[#0f172a] text-[20px] text-center uppercase" data-node-id="3:2136">
-              <p className="leading-[28px] whitespace-pre-wrap">{t('home.whyChooseUs.richInMinerals.title')}</p>
+            <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[48%_18%_43%_18%] justify-center leading-[22px] text-[#0f172a] text-[16px] text-center uppercase break-words" data-node-id="3:2136">
+              <p className="leading-[22px] whitespace-pre-wrap">{t('home.whyChooseUs.richInMinerals.title')}</p>
             </div>
           </div>
           <div className="h-[278px] relative shrink-0 w-full" data-node-id="3:2137">
@@ -1131,12 +1131,12 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal inset-[60.07%_8.94%_22.66%_8.38%] justify-center leading-[24px] not-italic text-[#64748b] text-[16px] text-center whitespace-pre-wrap" data-node-id="3:2140">
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal inset-[61.5%_8.94%_21.5%_8.38%] justify-center leading-[22px] not-italic text-[#64748b] text-[14px] text-center break-words" data-node-id="3:2140">
               <p className="mb-0">{t('home.whyChooseUs.noArtificialIngredients.descriptionLine1')}</p>
               <p>{t('home.whyChooseUs.noArtificialIngredients.descriptionLine2')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[47.84%_9.5%_42.09%_8.94%] justify-center leading-[0] text-[#0f172a] text-[20px] text-center uppercase" data-node-id="3:2141">
-              <p className="leading-[28px] whitespace-pre-wrap">{t('home.whyChooseUs.noArtificialIngredients.title')}</p>
+            <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[46.5%_9.5%_44%_8.94%] justify-center leading-[22px] text-[#0f172a] text-[16px] text-center uppercase break-words" data-node-id="3:2141">
+              <p className="leading-[22px] whitespace-pre-wrap">{t('home.whyChooseUs.noArtificialIngredients.title')}</p>
             </div>
           </div>
           <div className="h-[272px] relative shrink-0 w-full" data-node-id="3:2142">
@@ -1156,12 +1156,12 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal inset-[60.66%_11.91%_24.63%_12.19%] justify-center leading-[20px] not-italic text-[#64748b] text-[16px] text-center whitespace-nowrap" data-node-id="3:2145">
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal inset-[62%_11.91%_23%_12.19%] justify-center leading-[20px] not-italic text-[#64748b] text-[14px] text-center break-words" data-node-id="3:2145">
               <p className="mb-0">{t('home.whyChooseUs.nonCarbonated.descriptionLine1')}</p>
               <p>{t('home.whyChooseUs.nonCarbonated.descriptionLine2')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[46.69%_21.05%_43.01%_21.61%] justify-center leading-[0] text-[#0f172a] text-[20px] text-center uppercase whitespace-nowrap" data-node-id="3:2146">
-              <p className="leading-[28px]">{t('home.whyChooseUs.nonCarbonated.title')}</p>
+            <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[45.5%_16%_45%_16%] justify-center leading-[22px] text-[#0f172a] text-[16px] text-center uppercase break-words" data-node-id="3:2146">
+              <p className="leading-[22px] whitespace-pre-wrap">{t('home.whyChooseUs.nonCarbonated.title')}</p>
             </div>
           </div>
           </div>
