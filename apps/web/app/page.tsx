@@ -931,7 +931,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Water Energy Content */}
-        <div className="-translate-x-1/2 absolute left-[calc(50%-10.5px)] top-[1900px] lg:top-[1895px] w-[322px] h-[372px]">
+        <div className="-translate-x-1/2 absolute left-[calc(43%-10.5px)] top-[1900px] lg:top-[1895px] w-[322px] h-[372px]">
           <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[54.84%_0.99%_16.56%_74.49%] justify-center leading-[0] text-[#0f172a] text-[0px] tracking-[-0.9px] uppercase whitespace-nowrap">
             <p className="leading-[20px] mb-0 text-[23px]">{t('home.waterEnergySection.pure')}</p>
             <p className="leading-[20px] mb-0 text-[23px]">{t('home.waterEnergySection.energy')}</p>
