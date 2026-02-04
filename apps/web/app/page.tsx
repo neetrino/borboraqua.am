@@ -457,7 +457,7 @@ export default function HomePage() {
                   }}
                   className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
                 >
-                  MY ACCOUNT
+                  {t('common.navigation.myAccount')}
                 </button>
                 <button
                   onClick={() => {
@@ -466,7 +466,7 @@ export default function HomePage() {
                   }}
                   className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
                 >
-                  CATALOG
+                  {t('common.navigation.catalog')}
                 </button>
                 <button
                   onClick={() => {
@@ -475,7 +475,7 @@ export default function HomePage() {
                   }}
                   className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
                 >
-                  DELIVERY
+                  {t('common.navigation.delivery')}
                 </button>
                 <button
                   onClick={() => {
@@ -484,7 +484,7 @@ export default function HomePage() {
                   }}
                   className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
                 >
-                  CART
+                  {t('common.navigation.cart')}
                 </button>
                 
                 <div className="h-px bg-gray-200 my-2" />
@@ -495,7 +495,7 @@ export default function HomePage() {
                   }}
                   className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
                 >
-                  LANGUAGE
+                  {t('common.navigation.language')}
                 </button>
                 {isLoggedIn && (
                   <button
@@ -505,7 +505,7 @@ export default function HomePage() {
                     }}
                     className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
                   >
-                    LOG OUT
+                    {t('common.navigation.logout')}
                   </button>
                 )}
               </nav>

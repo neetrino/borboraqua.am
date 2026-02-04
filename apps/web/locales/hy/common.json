@@ -37,7 +37,10 @@
     "privacy": "Գաղտնիություն",
     "terms": "Պայմաններ",
     "delivery": "Առաքում",
-    "stores": "Խանութներ"
+    "stores": "Խանութներ",
+    "myAccount": "Իմ հաշիվը",
+    "catalog": "Կատալոգ",
+    "language": "Լեզու"
   },
   "stock": {
     "inStock": "Պահեստում",

@@ -37,7 +37,10 @@
     "privacy": "Конфиденциальность",
     "terms": "Условия",
     "delivery": "Доставка",
-    "stores": "Магазины"
+    "stores": "Магазины",
+    "myAccount": "Мой аккаунт",
+    "catalog": "Каталог",
+    "language": "Язык"
   },
   "stock": {
     "inStock": "В наличии",

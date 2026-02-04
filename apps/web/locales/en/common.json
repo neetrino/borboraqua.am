@@ -37,7 +37,10 @@
     "privacy": "Privacy",
     "terms": "Terms",
     "delivery": "Delivery",
-    "stores": "Stores"
+    "stores": "Stores",
+    "myAccount": "My Account",
+    "catalog": "Catalog",
+    "language": "Language"
   },
   "stock": {
     "inStock": "In Stock",
