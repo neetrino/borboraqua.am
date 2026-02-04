@@ -424,7 +424,7 @@ export function MobileFooter({ router, t }: MobileFooterProps) {
       </div>
 
       {/* Mobile Footer */}
-      <div className="relative z-10 content-stretch flex flex-col gap-[30px] items-start justify-center left-0 w-[339px] max-w-[calc(1200%-70px)] mx-auto pb-[0px] pt-48 ">
+      <div className="relative z-10 content-stretch flex flex-col gap-[24px] items-start justify-center left-0 w-[339px] max-w-[calc(1200%-70px)] mx-auto pb-[0px] pt-48 px-4">
         <div className="h-[312px] relative shrink-0 w-full">
           <div className="absolute content-stretch flex h-[34px] items-center left-0 top-0 w-[336px]">
             <div className="h-[34px] relative shrink-0 w-[112px]">
@@ -432,13 +432,13 @@ export function MobileFooter({ router, t }: MobileFooterProps) {
             </div>
           </div>
           <div className="absolute content-stretch flex flex-col items-start left-0 top-[68px] w-[336px]">
-            <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-full">
-              <p className="leading-[26px] whitespace-pre-wrap">{t('home.footer.description')}</p>
+            <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white w-full">
+              <p className="leading-[22px] whitespace-pre-wrap break-words">{t('home.footer.description')}</p>
             </div>
           </div>
           <div className="absolute flex items-center gap-[9px] left-0 top-[280px] cursor-pointer" onClick={() => router.push('/about')}>
-            <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[14px] whitespace-nowrap">
-              <p className="leading-[22px]">{t('home.footer.more')}</p>
+            <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[13px] break-words">
+              <p className="leading-[20px] whitespace-pre-wrap">{t('home.footer.more')}</p>
             </div>
             <div className="content-stretch flex flex-col items-start relative shrink-0">
               <div className="flex items-center justify-center relative shrink-0">
@@ -453,28 +453,28 @@ export function MobileFooter({ router, t }: MobileFooterProps) {
         </div>
         <div className="content-stretch flex flex-col gap-[1px] h-[165px] items-start relative shrink-0 w-full">
           <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-            <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase w-full">
+            <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[13px] text-white tracking-[1.2px] uppercase w-full">
               <p className="leading-[20px] whitespace-pre-wrap">CONTACT</p>
             </div>
           </div>
           <div className="content-stretch flex flex-col gap-[6px] items-start relative shrink-0 w-[249px]">
             <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white whitespace-pre-wrap">
-                <p className="mb-0 leading-[24px]">Office: <a href="tel:0037433000401" className="underline">+374 33 000401</a></p>
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                <p className="mb-0 leading-[22px]">Office: <a href="tel:0037433000401" className="underline">+374 33 000401</a></p>
               </div>
             </div>
             <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
-                <p className="leading-[24px] whitespace-pre-wrap">Delivery: <a href="tel:0037441012004" className="underline">+374 41 012004</a></p>
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                <p className="leading-[22px] whitespace-pre-wrap">Delivery: <a href="tel:0037441012004" className="underline">+374 41 012004</a></p>
               </div>
             </div>
             <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
-                <p className="leading-[24px] whitespace-pre-wrap">Email: <a href="mailto:borboraqua.am@gmail.com" className="underline">info@borboraqua.am</a></p>
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                <p className="leading-[22px] whitespace-pre-wrap">Email: <a href="mailto:borboraqua.am@gmail.com" className="underline">info@borboraqua.am</a></p>
               </div>
             </div>
             <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[24px] not-italic relative shrink-0 text-[16px] text-white w-[228px] whitespace-pre-wrap">
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[22px] not-italic relative shrink-0 text-[14px] text-white w-[228px] whitespace-pre-wrap break-words">
                 <p className="mb-0">Location: {t('home.footer.contact.locationLine1')}</p>
                 <p className="mb-0">{t('home.footer.contact.locationLine2')}</p>
               </div>
@@ -483,53 +483,53 @@ export function MobileFooter({ router, t }: MobileFooterProps) {
         </div>
         <div className="content-stretch flex flex-col gap-[6px] h-[140px] items-start relative shrink-0 w-full">
           <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-            <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase w-full">
+            <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[13px] text-white tracking-[1.2px] uppercase w-full">
               <p className="leading-[20px] whitespace-pre-wrap">POLICIES</p>
             </div>
           </div>
           <div className="content-stretch flex flex-col gap-[6px] items-start relative shrink-0 w-full">
             <button onClick={() => router.push('/privacy')} className="text-left">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
-                <p className="leading-[24px] whitespace-pre-wrap">{t('home.footer.policies.privacyPolicy')}</p>
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                <p className="leading-[22px] whitespace-pre-wrap">{t('home.footer.policies.privacyPolicy')}</p>
               </div>
             </button>
             <button onClick={() => router.push('/terms')} className="text-left">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
-                <p className="leading-[24px] whitespace-pre-wrap">{t('home.footer.policies.termsConditions')}</p>
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                <p className="leading-[22px] whitespace-pre-wrap">{t('home.footer.policies.termsConditions')}</p>
               </div>
             </button>
             <button onClick={() => router.push('/delivery-terms')} className="text-left">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
-                <p className="leading-[24px] whitespace-pre-wrap">{t('home.footer.policies.deliveryTerms')}</p>
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                <p className="leading-[22px] whitespace-pre-wrap">{t('home.footer.policies.deliveryTerms')}</p>
               </div>
             </button>
             <button onClick={() => router.push('/refund-policy')} className="text-left">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white w-full">
-                <p className="leading-[24px] whitespace-pre-wrap">{t('home.footer.policies.refundPolicy')}</p>
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white w-full break-words">
+                <p className="leading-[22px] whitespace-pre-wrap">{t('home.footer.policies.refundPolicy')}</p>
               </div>
             </button>
           </div>
         </div>
         <div className="content-stretch flex flex-col gap-[6px] h-[312px] items-start relative shrink-0 w-[94px]">
           <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-            <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase w-full">
+            <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[13px] text-white tracking-[1.2px] uppercase w-full">
               <p className="leading-[20px] whitespace-pre-wrap">SITE MAP</p>
             </div>
           </div>
           <div className="content-stretch flex flex-col gap-[6px] items-start relative shrink-0 w-full">
             <button onClick={() => router.push('/about')} className="text-left w-full">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
-                <p className="leading-[24px] whitespace-pre-wrap">{t('home.footer.siteMap.aboutUs')}</p>
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                <p className="leading-[22px] whitespace-pre-wrap">{t('home.footer.siteMap.aboutUs')}</p>
               </div>
             </button>
             <button onClick={() => router.push('/contact')} className="text-left w-full">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
-                <p className="leading-[24px] whitespace-pre-wrap">{t('home.footer.siteMap.contact')}</p>
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                <p className="leading-[22px] whitespace-pre-wrap">{t('home.footer.siteMap.contact')}</p>
               </div>
             </button>
             <button onClick={() => router.push('/products')} className="text-left w-full">
-              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
-                <p className="leading-[24px] whitespace-pre-wrap">{t('home.footer.siteMap.shop')}</p>
+              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white break-words">
+                <p className="leading-[22px] whitespace-pre-wrap">{t('home.footer.siteMap.shop')}</p>
               </div>
             </button>
           </div>
