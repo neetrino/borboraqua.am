@@ -44,6 +44,18 @@ interface Cart {
   itemsCount: number;
 }
 
+type DeliveryTimeSlot = 'first_half' | 'second_half';
+
+type DeliveryDayOption = {
+  date: string;
+  label: string;
+};
+
+const DELIVERY_TIME_SLOTS: Array<{ id: DeliveryTimeSlot; labelKey: string }> = [
+  { id: 'first_half', labelKey: 'checkout.delivery.timeSlots.firstHalf' },
+  { id: 'second_half', labelKey: 'checkout.delivery.timeSlots.secondHalf' },
+];
+
 type CheckoutFormData = {
   firstName: string;
   lastName: string;
@@ -59,6 +71,8 @@ type CheckoutFormData = {
   cardExpiry?: string;
   cardCvv?: string;
   cardHolderName?: string;
+  deliveryDay?: string;
+  deliveryTimeSlot?: DeliveryTimeSlot;
 };
 
 export default function CheckoutPage() {
@@ -77,6 +91,12 @@ export default function CheckoutPage() {
   const [showCardModal, setShowCardModal] = useState(false);
   const [deliveryPrice, setDeliveryPrice] = useState<number | null>(null);
   const [loadingDeliveryPrice, setLoadingDeliveryPrice] = useState(false);
+  const [enabledWeekdays, setEnabledWeekdays] = useState<number[] | null>(null);
+  const [calendarMonth, setCalendarMonth] = useState<Date>(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
 
   // Payment methods configuration
   const paymentMethods = [
@@ -122,6 +142,9 @@ export default function CheckoutPage() {
     cardExpiry: z.string().optional(),
     cardCvv: z.string().optional(),
     cardHolderName: z.string().optional(),
+    // Delivery date & time - required only for home delivery
+    deliveryDay: z.string().optional(),
+    deliveryTimeSlot: z.enum(['first_half', 'second_half']).optional(),
   }).refine((data) => {
     if (data.shippingMethod === 'delivery') {
       return data.shippingAddress && data.shippingAddress.trim().length > 0;
@@ -194,6 +217,24 @@ export default function CheckoutPage() {
   }, {
     message: t('checkout.errors.cardHolderNameRequired'),
     path: ['cardHolderName'],
+  }).refine((data) => {
+    // For delivery, user must pick a delivery day
+    if (data.shippingMethod === 'delivery') {
+      return !!data.deliveryDay;
+    }
+    return true;
+  }, {
+    message: t('checkout.errors.deliveryDayRequired'),
+    path: ['deliveryDay'],
+  }).refine((data) => {
+    // For delivery, user must pick a delivery time slot
+    if (data.shippingMethod === 'delivery') {
+      return !!data.deliveryTimeSlot;
+    }
+    return true;
+  }, {
+    message: t('checkout.errors.deliveryTimeRequired'),
+    path: ['deliveryTimeSlot'],
   }), [t]);
 
   // Debug: Log modal state changes
@@ -224,12 +265,85 @@ export default function CheckoutPage() {
       cardExpiry: '',
       cardCvv: '',
       cardHolderName: '',
+      deliveryDay: '',
+      deliveryTimeSlot: undefined,
     },
   });
 
   const paymentMethod = watch('paymentMethod');
   const shippingMethod = watch('shippingMethod');
   const shippingCity = watch('shippingCity');
+  const deliveryDay = watch('deliveryDay');
+  const deliveryTimeSlot = watch('deliveryTimeSlot');
+
+  const availableDeliveryDays: DeliveryDayOption[] = useMemo(() => {
+    // Calculate enabled delivery days for the currently visible calendar month.
+    // Only days that match the admin-configured weekdays and are at least 1 day in advance are enabled.
+    if (!enabledWeekdays || enabledWeekdays.length === 0) {
+      return [];
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const minDate = new Date(today);
+    // At least 1 day before delivery (no same-day)
+    minDate.setDate(minDate.getDate() + 1);
+
+    const monthStart = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
+    const monthEnd = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0);
+
+    const storedLang = getStoredLanguage();
+    const locale =
+      storedLang === 'hy'
+        ? 'hy-AM'
+        : storedLang === 'ru'
+          ? 'ru-RU'
+          : 'en-US';
+
+    const results: DeliveryDayOption[] = [];
+    const cursor = new Date(monthStart);
+
+    while (cursor <= monthEnd) {
+      const dateCopy = new Date(cursor);
+      dateCopy.setHours(0, 0, 0, 0);
+
+      const dayOfWeek = dateCopy.getDay(); // 0=Sun..6=Sat
+      const isEnabledWeekday = enabledWeekdays.includes(dayOfWeek);
+      const isAfterMinDate = dateCopy >= minDate;
+
+      if (isEnabledWeekday && isAfterMinDate) {
+        results.push({
+          date: dateCopy.toISOString().split('T')[0],
+          label: dateCopy.toLocaleDateString(locale, {
+            day: 'numeric',
+          }),
+        });
+      }
+
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    return results;
+  }, [calendarMonth, enabledWeekdays, language]);
+
+  // Fetch delivery schedule (enabled weekdays) once
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      try {
+        const response = await apiClient.get<{ enabledWeekdays: number[] }>('/api/v1/delivery/schedule');
+        const days =
+          Array.isArray(response.enabledWeekdays) && response.enabledWeekdays.length > 0
+            ? response.enabledWeekdays
+            : [2, 4];
+        setEnabledWeekdays(days);
+      } catch (err) {
+        console.error('❌ [CHECKOUT] Error fetching delivery schedule:', err);
+        setEnabledWeekdays([2, 4]);
+      }
+    };
+
+    fetchSchedule();
+  }, []);
 
   // Fetch delivery price when city changes
   useEffect(() => {
@@ -658,6 +772,9 @@ export default function CheckoutPage() {
             city: data.shippingCity,
             postalCode: data.shippingPostalCode,
             phone: data.shippingPhone,
+            // Store delivery scheduling info together with the address
+            ...(data.deliveryDay ? { deliveryDay: data.deliveryDay } : {}),
+            ...(data.deliveryTimeSlot ? { deliveryTimeSlot: data.deliveryTimeSlot } : {}),
           }
         : undefined;
 
@@ -960,6 +1077,168 @@ export default function CheckoutPage() {
                       error={errors.shippingPhone?.message}
                       disabled={isSubmitting}
                     />
+                  </div>
+                </div>
+
+                {/* Delivery day & time selection */}
+                <div className="mt-8 space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      {t('checkout.delivery.day')}
+                    </h3>
+
+                    {/* Calendar-style month selector */}
+                    <div className="border border-gray-200 rounded-lg p-4 inline-block">
+                      <div className="flex items-center justify-between mb-3">
+                        <button
+                          type="button"
+                          className="p-1 rounded hover:bg-gray-100 disabled:opacity-40"
+                          onClick={() => {
+                            const prev = new Date(calendarMonth);
+                            prev.setMonth(prev.getMonth() - 1);
+                            setCalendarMonth(prev);
+                          }}
+                          disabled={isSubmitting}
+                          aria-label="Previous month"
+                        >
+                          ‹
+                        </button>
+                        <div className="text-sm font-medium text-gray-900">
+                          {calendarMonth.toLocaleDateString(getStoredLanguage() === 'hy' ? 'hy-AM' : getStoredLanguage() === 'ru' ? 'ru-RU' : 'en-US', {
+                            month: 'long',
+                            year: 'numeric',
+                          })}
+                        </div>
+                        <button
+                          type="button"
+                          className="p-1 rounded hover:bg-gray-100 disabled:opacity-40"
+                          onClick={() => {
+                            const next = new Date(calendarMonth);
+                            next.setMonth(next.getMonth() + 1);
+                            setCalendarMonth(next);
+                          }}
+                          disabled={isSubmitting}
+                          aria-label="Next month"
+                        >
+                          ›
+                        </button>
+                      </div>
+
+                      {/* Weekday header (Mon-Sun) */}
+                      <div className="grid grid-cols-7 text-xs text-gray-500 mb-1">
+                        <div className="text-center">M</div>
+                        <div className="text-center">T</div>
+                        <div className="text-center">W</div>
+                        <div className="text-center">T</div>
+                        <div className="text-center">F</div>
+                        <div className="text-center">S</div>
+                        <div className="text-center">S</div>
+                      </div>
+
+                      {/* Days grid */}
+                      <div className="grid grid-cols-7 gap-1 text-sm">
+                        {(() => {
+                          const days: JSX.Element[] = [];
+                          const year = calendarMonth.getFullYear();
+                          const month = calendarMonth.getMonth();
+                          const firstOfMonth = new Date(year, month, 1);
+                          const firstDayJS = firstOfMonth.getDay(); // 0=Sun..6=Sat
+                          // Convert to Monday-based index (0=Mon..6=Sun)
+                          const leadingEmpty = (firstDayJS + 6) % 7;
+                          const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                          // Empty cells before first day
+                          for (let i = 0; i < leadingEmpty; i++) {
+                            days.push(<div key={`empty-${i}`} />);
+                          }
+
+                          const enabledSet = new Set(availableDeliveryDays.map((d) => d.date));
+
+                          for (let day = 1; day <= daysInMonth; day++) {
+                            const date = new Date(year, month, day);
+                            date.setHours(0, 0, 0, 0);
+                            const iso = date.toISOString().split('T')[0];
+                            const isEnabled = enabledSet.has(iso);
+                            const isSelected = deliveryDay === iso;
+
+                            days.push(
+                              <button
+                                key={iso}
+                                type="button"
+                                disabled={!isEnabled || isSubmitting}
+                                onClick={() => {
+                                  setValue('deliveryDay', iso);
+                                  // Reset time slot when changing the day
+                                  setValue('deliveryTimeSlot', undefined);
+                                }}
+                                className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm
+                                  ${!isEnabled ? 'text-gray-300 cursor-default' : 'cursor-pointer hover:bg-purple-50'}
+                                  ${
+                                    isSelected
+                                      ? 'bg-purple-600 text-white hover:bg-purple-700'
+                                      : isEnabled
+                                        ? 'text-gray-900'
+                                        : ''
+                                  }`}
+                              >
+                                {day}
+                              </button>,
+                            );
+                          }
+
+                          return days;
+                        })()}
+                      </div>
+                    </div>
+
+                    {errors.deliveryDay && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.deliveryDay.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      {t('checkout.delivery.time')}
+                    </h3>
+                    <div className="space-y-3">
+                      {DELIVERY_TIME_SLOTS.map((slot) => (
+                        <label
+                          key={slot.id}
+                          className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                            deliveryTimeSlot === slot.id
+                              ? 'border-purple-600 bg-purple-50'
+                              : 'border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            {...register('deliveryTimeSlot')}
+                            value={slot.id}
+                            checked={deliveryTimeSlot === slot.id}
+                            onChange={(e) =>
+                              setValue(
+                                'deliveryTimeSlot',
+                                e.target.value as DeliveryTimeSlot
+                              )
+                            }
+                            className="mr-3"
+                            disabled={isSubmitting || !deliveryDay}
+                          />
+                          <div className="flex-1">
+                            <div className="font-medium text-gray-900">
+                              {t(slot.labelKey)}
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                    {errors.deliveryTimeSlot && (
+                      <p className="mt-2 text-sm text-red-600">
+                        {errors.deliveryTimeSlot.message}
+                      </p>
+                    )}
                   </div>
                 </div>
               </Card>

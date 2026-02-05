@@ -4796,7 +4796,7 @@ class AdminService {
   }
 
   /**
-   * Get delivery settings
+   * Get delivery settings (locations + optional schedule)
    */
   async getDeliverySettings() {
     console.log('🚚 [ADMIN SERVICE] getDeliverySettings called');
@@ -4809,13 +4809,31 @@ class AdminService {
       console.log('✅ [ADMIN SERVICE] Delivery settings not found, returning defaults');
       return {
         locations: [],
+        schedule: {
+          // Default: Tuesday (2) and Thursday (4)
+          enabledWeekdays: [2, 4],
+        },
       };
     }
 
-    const value = setting.value as { locations?: Array<{ id?: string; country: string; city: string; price: number }> };
+    const value = setting.value as {
+      locations?: Array<{ id?: string; country: string; city: string; price: number }>;
+      schedule?: {
+        enabledWeekdays?: number[];
+      };
+    };
+
+    const enabledWeekdays =
+      Array.isArray(value.schedule?.enabledWeekdays) && value.schedule!.enabledWeekdays.length > 0
+        ? value.schedule!.enabledWeekdays
+        : [2, 4];
+
     console.log('✅ [ADMIN SERVICE] Delivery settings loaded:', value);
     return {
       locations: value.locations || [],
+      schedule: {
+        enabledWeekdays,
+      },
     };
   }
 
@@ -4865,9 +4883,14 @@ class AdminService {
   }
 
   /**
-   * Update delivery settings
+   * Update delivery settings (locations + optional schedule)
    */
-  async updateDeliverySettings(data: { locations: Array<{ id?: string; country: string; city: string; price: number }> }) {
+  async updateDeliverySettings(data: {
+    locations: Array<{ id?: string; country: string; city: string; price: number }>;
+    schedule?: {
+      enabledWeekdays?: number[];
+    };
+  }) {
     console.log('🚚 [ADMIN SERVICE] updateDeliverySettings called:', data);
     
     // Validate locations
@@ -4900,6 +4923,22 @@ class AdminService {
       }
     }
 
+    // Normalise schedule
+    const enabledWeekdays = Array.isArray(data.schedule?.enabledWeekdays)
+      ? Array.from(
+          new Set(
+            data.schedule!.enabledWeekdays
+              .map((d) => Number(d))
+              .filter((d) => Number.isInteger(d) && d >= 0 && d <= 6),
+          ),
+        )
+      : [2, 4];
+
+    if (enabledWeekdays.length === 0) {
+      // Fallback to default Tue/Thu if admin clears all days
+      enabledWeekdays.push(2, 4);
+    }
+
     // Generate IDs for new locations
     const locationsWithIds = data.locations.map((location, index) => ({
       ...location,
@@ -4909,19 +4948,32 @@ class AdminService {
     const setting = await db.settings.upsert({
       where: { key: 'delivery-locations' },
       update: {
-        value: { locations: locationsWithIds },
+        value: {
+          locations: locationsWithIds,
+          schedule: {
+            enabledWeekdays,
+          },
+        },
         updatedAt: new Date(),
       },
       create: {
         key: 'delivery-locations',
-        value: { locations: locationsWithIds },
-        description: 'Delivery prices by country and city',
+        value: {
+          locations: locationsWithIds,
+          schedule: {
+            enabledWeekdays,
+          },
+        },
+        description: 'Delivery prices and schedule by country and city',
       },
     });
 
     console.log('✅ [ADMIN SERVICE] Delivery settings updated:', setting);
     return {
       locations: locationsWithIds,
+      schedule: {
+        enabledWeekdays,
+      },
     };
   }
 }

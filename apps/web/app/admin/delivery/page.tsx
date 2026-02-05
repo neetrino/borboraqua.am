@@ -16,8 +16,13 @@ interface DeliveryLocation {
   price: number;
 }
 
+interface DeliverySchedule {
+  enabledWeekdays: number[];
+}
+
 interface DeliverySettings {
   locations: DeliveryLocation[];
+  schedule?: DeliverySchedule;
 }
 
 export default function DeliveryPage() {
@@ -29,6 +34,7 @@ export default function DeliveryPage() {
   const [loading, setLoading] = useState(true);
   const [locations, setLocations] = useState<DeliveryLocation[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [enabledWeekdays, setEnabledWeekdays] = useState<number[]>([2, 4]); // Default Tue & Thu
 
   useEffect(() => {
     if (!isLoading) {
@@ -51,6 +57,11 @@ export default function DeliveryPage() {
       console.log('🚚 [ADMIN] Fetching delivery settings...');
       const data = await apiClient.get<DeliverySettings>('/api/v1/admin/delivery');
       setLocations(data.locations || []);
+      const weekdays =
+        data.schedule?.enabledWeekdays && data.schedule.enabledWeekdays.length > 0
+          ? data.schedule.enabledWeekdays
+          : [2, 4];
+      setEnabledWeekdays(weekdays);
       console.log('✅ [ADMIN] Delivery settings loaded:', data);
     } catch (err: any) {
       console.error('❌ [ADMIN] Error fetching delivery settings:', err);
@@ -65,7 +76,12 @@ export default function DeliveryPage() {
     setSaving(true);
     try {
       console.log('🚚 [ADMIN] Saving delivery settings...', { locations });
-      await apiClient.put('/api/v1/admin/delivery', { locations });
+      await apiClient.put('/api/v1/admin/delivery', {
+        locations,
+        schedule: {
+          enabledWeekdays,
+        },
+      });
       alert(t('admin.delivery.savedSuccess'));
       console.log('✅ [ADMIN] Delivery settings saved');
       setEditingId(null);
@@ -77,6 +93,27 @@ export default function DeliveryPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const WEEKDAY_OPTIONS: Array<{ value: number; label: string }> = [
+    { value: 1, label: t('admin.delivery.weekdays.mon') },
+    { value: 2, label: t('admin.delivery.weekdays.tue') },
+    { value: 3, label: t('admin.delivery.weekdays.wed') },
+    { value: 4, label: t('admin.delivery.weekdays.thu') },
+    { value: 5, label: t('admin.delivery.weekdays.fri') },
+    { value: 6, label: t('admin.delivery.weekdays.sat') },
+    { value: 0, label: t('admin.delivery.weekdays.sun') },
+  ];
+
+  const toggleWeekday = (day: number) => {
+    setEnabledWeekdays((prev) => {
+      if (prev.includes(day)) {
+        const next = prev.filter((d) => d !== day);
+        // Avoid empty schedule – keep at least one day selected
+        return next.length > 0 ? next : prev;
+      }
+      return [...prev, day];
+    });
   };
 
   const handleAddLocation = () => {
@@ -245,6 +282,38 @@ export default function DeliveryPage() {
                   ))}
                 </div>
               )}
+            </Card>
+
+            {/* Delivery Schedule (Days) */}
+            <Card className="p-6 mb-6">
+              <div className="mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {t('admin.delivery.deliveryDaysTitle')}
+                </h2>
+                <p className="mt-1 text-sm text-gray-600">
+                  {t('admin.delivery.deliveryDaysDescription')}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {WEEKDAY_OPTIONS.map((day) => {
+                  const isActive = enabledWeekdays.includes(day.value);
+                  return (
+                    <button
+                      key={day.value}
+                      type="button"
+                      onClick={() => toggleWeekday(day.value)}
+                      className={`px-3 py-2 rounded-md text-sm font-medium border transition-colors ${
+                        isActive
+                          ? 'bg-gray-900 text-white border-gray-900'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                      disabled={saving}
+                    >
+                      {day.label}
+                    </button>
+                  );
+                })}
+              </div>
             </Card>
 
             {/* Actions */}

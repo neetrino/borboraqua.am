@@ -38,6 +38,17 @@
     "loading": "Loading...",
     "enterCity": "Enter city"
   },
+  "delivery": {
+    "day": "Delivery day",
+    "time": "Delivery time slot",
+    "selectDay": "Select delivery day",
+    "selectTime": "Select delivery time slot",
+    "noAvailableDays": "No available delivery days",
+    "timeSlots": {
+      "firstHalf": "First half of the day",
+      "secondHalf": "Second half of the day"
+    }
+  },
   "payment": {
     "cashOnDelivery": "Cash on Delivery",
     "cashOnDeliveryDescription": "Pay with cash when you receive your order",
@@ -104,7 +115,9 @@
     "fillShippingAddress": "Please fill in all shipping address fields",
     "cartEmpty": "Cart is empty",
     "failedToLoadCart": "Failed to load cart",
-    "failedToCreateOrder": "Failed to create order. Please try again."
+    "failedToCreateOrder": "Failed to create order. Please try again.",
+    "deliveryDayRequired": "Please select a delivery day",
+    "deliveryTimeRequired": "Please select a delivery time slot"
   }
 }
 

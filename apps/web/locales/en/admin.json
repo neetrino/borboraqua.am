@@ -211,7 +211,18 @@
     "saving": "Saving...",
     "cancel": "Cancel",
     "savedSuccess": "Delivery settings saved successfully!",
-    "errorSaving": "Error: {message}"
+    "errorSaving": "Error: {message}",
+    "deliveryDaysTitle": "Delivery Days",
+    "deliveryDaysDescription": "Select which weekdays are available for delivery. These days will be shown in the checkout calendar.",
+    "weekdays": {
+      "mon": "Monday",
+      "tue": "Tuesday",
+      "wed": "Wednesday",
+      "thu": "Thursday",
+      "fri": "Friday",
+      "sat": "Saturday",
+      "sun": "Sunday"
+    }
   },
   "users": {
     "title": "Manage Users",
