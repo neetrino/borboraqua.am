@@ -39,6 +39,143 @@ interface ProductsResponse {
   };
 }
 
+interface ProductExportRow {
+  id: string;
+  title: string;
+  slug: string;
+  price: number;
+  compareAtPrice: number | null;
+  discountPercent: number;
+  stock: number;
+  published: string;
+  featured: string;
+  createdAt: string;
+}
+
+const PRODUCT_EXPORT_COLUMNS: { key: keyof ProductExportRow; header: string }[] = [
+  { key: 'id', header: 'ID' },
+  { key: 'title', header: 'Title' },
+  { key: 'slug', header: 'Slug' },
+  { key: 'price', header: 'Price' },
+  { key: 'compareAtPrice', header: 'Compare At Price' },
+  { key: 'discountPercent', header: 'Discount %' },
+  { key: 'stock', header: 'Stock' },
+  { key: 'published', header: 'Published' },
+  { key: 'featured', header: 'Featured' },
+  { key: 'createdAt', header: 'Created At' },
+];
+
+const getTotalProductStock = (product: Product): number => {
+  if (product.colorStocks && product.colorStocks.length > 0) {
+    return product.colorStocks.reduce((sum, cs) => sum + (cs.stock || 0), 0);
+  }
+  return product.stock ?? 0;
+};
+
+const mapProductToExportRow = (product: Product): ProductExportRow => ({
+  id: product.id,
+  title: product.title,
+  slug: product.slug,
+  price: product.price,
+  compareAtPrice: product.compareAtPrice ?? null,
+  discountPercent: product.discountPercent ?? 0,
+  stock: getTotalProductStock(product),
+  published: product.published ? 'published' : 'draft',
+  featured: product.featured ? 'yes' : 'no',
+  createdAt: product.createdAt,
+});
+
+const escapeCsvValue = (value: string | number): string => {
+  const str = String(value ?? '');
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+};
+
+const escapeHtml = (value: string | number): string => {
+  const str = String(value ?? '');
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
+const createProductsCsvBlob = (products: Product[]): Blob => {
+  const rows = products.map(mapProductToExportRow);
+
+  // Fixed-width columns so all rows align in text editors.
+  const columnWidths = PRODUCT_EXPORT_COLUMNS.map((column) => {
+    const headerLength = column.header.length;
+    const maxDataLength = rows.reduce((max, row) => {
+      const value = String(row[column.key] ?? '');
+      return Math.max(max, value.length);
+    }, 0);
+    return Math.max(headerLength, maxDataLength) + 2;
+  });
+
+  const formatRow = (row: ProductExportRow | null): string =>
+    PRODUCT_EXPORT_COLUMNS
+      .map((column, index) => {
+        const raw =
+          row === null ? column.header : String(row[column.key] ?? '');
+        const value = escapeCsvValue(raw);
+        return value.padEnd(columnWidths[index], ' ');
+      })
+      .join('');
+
+  const headerLine = formatRow(null);
+  const bodyLines = rows.map((row) => formatRow(row)).join('\r\n');
+  const csv = `${headerLine}\r\n${bodyLines}`;
+
+  return new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+};
+
+const createProductsExcelBlob = (products: Product[]): Blob => {
+  const rows = products.map(mapProductToExportRow);
+  const headerRow = `<tr>${PRODUCT_EXPORT_COLUMNS.map((c) => `<th>${escapeHtml(c.header)}</th>`).join('')}</tr>`;
+  const bodyRows = rows
+    .map(
+      (row) =>
+        `<tr>${PRODUCT_EXPORT_COLUMNS.map((c) => `<td>${escapeHtml(row[c.key] ?? '')}</td>`).join('')}</tr>`,
+    )
+    .join('');
+
+  const tableHtml = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      table { border-collapse: collapse; }
+      th, td { padding: 4px 8px; }
+    </style>
+  </head>
+  <body>
+    <table>
+      <thead>${headerRow}</thead>
+      <tbody>${bodyRows}</tbody>
+    </table>
+  </body>
+</html>`;
+
+  return new Blob([tableHtml], {
+    type: 'application/vnd.ms-excel;charset=utf-8;',
+  });
+};
+
+const downloadBlob = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 interface Category {
   id: string;
   title: string;
@@ -72,6 +209,7 @@ export default function ProductsPage() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [togglingAllFeatured, setTogglingAllFeatured] = useState(false);
   const [currency, setCurrency] = useState<CurrencyCode>('USD'); // Default для SSR
+  const [exporting, setExporting] = useState<'csv' | 'excel' | null>(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -160,64 +298,66 @@ export default function ProductsPage() {
   }, [isLoggedIn, isAdmin, page, search, selectedCategories, skuSearch, stockFilter, sortBy, minPrice, maxPrice]);
 
 
+  const buildProductsParams = (pageValue: number, limitValue: number): Record<string, string> => {
+    const params: Record<string, string> = {
+      page: pageValue.toString(),
+      limit: limitValue.toString(),
+    };
+
+    if (search.trim()) {
+      params.search = search.trim();
+    }
+
+    // Եթե ընտրված են category-ներ, ուղարկում ենք comma-separated string
+    if (selectedCategories.size > 0) {
+      params.category = Array.from(selectedCategories).join(',');
+    }
+
+    if (skuSearch.trim()) {
+      params.sku = skuSearch.trim();
+    }
+
+    if (minPrice.trim()) {
+      params.minPrice = minPrice.trim();
+    }
+
+    if (maxPrice.trim()) {
+      params.maxPrice = maxPrice.trim();
+    }
+
+    // Սերվերը հիմա աջակցում է միայն createdAt դաշտով սորտավորում
+    if (sortBy && sortBy.startsWith('createdAt')) {
+      params.sort = sortBy;
+    }
+
+    return params;
+  };
+
+  const applyStockFilter = (items: Product[]): Product[] => {
+    if (stockFilter === 'all') return items;
+
+    return items.filter((product) => {
+      const totalStock = getTotalProductStock(product);
+      if (stockFilter === 'inStock') {
+        return totalStock > 0;
+      }
+      if (stockFilter === 'outOfStock') {
+        return totalStock === 0;
+      }
+      return true;
+    });
+  };
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const params: Record<string, string> = {
-        page: page.toString(),
-        limit: '20',
-      };
-      
-      if (search.trim()) {
-        params.search = search.trim();
-      }
-
-      // Եթե ընտրված են category-ներ, ուղարկում ենք comma-separated string
-      if (selectedCategories.size > 0) {
-        params.category = Array.from(selectedCategories).join(',');
-      }
-
-      if (skuSearch.trim()) {
-        params.sku = skuSearch.trim();
-      }
-
-      if (minPrice.trim()) {
-        params.minPrice = minPrice.trim();
-      }
-
-      if (maxPrice.trim()) {
-        params.maxPrice = maxPrice.trim();
-      }
-
-      // Սերվերը հիմա աջակցում է միայն createdAt դաշտով սորտավորում
-      if (sortBy && sortBy.startsWith('createdAt')) {
-        params.sort = sortBy;
-      }
 
       const response = await apiClient.get<ProductsResponse>('/api/v1/admin/products', {
-        params,
+        params: buildProductsParams(page, 20),
       });
       
-      let filteredProducts = response.data || [];
-
-      // Stock filter (client-side, քանի որ API-ն չի աջակցում stock filter-ը)
-      if (stockFilter !== 'all') {
-        filteredProducts = filteredProducts.filter(product => {
-          const getTotalStock = (p: Product) => {
-            if (p.colorStocks && p.colorStocks.length > 0) {
-              return p.colorStocks.reduce((sum, cs) => sum + (cs.stock || 0), 0);
-            }
-            return p.stock ?? 0;
-          };
-          const totalStock = getTotalStock(product);
-          if (stockFilter === 'inStock') {
-            return totalStock > 0;
-          } else if (stockFilter === 'outOfStock') {
-            return totalStock === 0;
-          }
-          return true;
-        });
-      }
+      const allProducts = response.data || [];
+      const filteredProducts = applyStockFilter(allProducts);
 
       setProducts(filteredProducts);
       setMeta(response.meta || null);
@@ -242,10 +382,81 @@ export default function ProductsPage() {
     return url.startsWith('/') ? url : `/${url}`;
   };
 
+  const fetchAllProductsForExport = async (): Promise<Product[]> => {
+    try {
+      console.log('📦 [ADMIN] Fetching all products for export...', {
+        search,
+        selectedCategories: Array.from(selectedCategories),
+        skuSearch,
+        stockFilter,
+        sortBy,
+        minPrice,
+        maxPrice,
+      });
+
+      const limit = 100;
+      const firstResponse = await apiClient.get<ProductsResponse>('/api/v1/admin/products', {
+        params: buildProductsParams(1, limit),
+      });
+
+      let allProducts: Product[] = firstResponse.data || [];
+      const metaInfo = firstResponse.meta;
+
+      if (metaInfo && metaInfo.totalPages > 1) {
+        const pagePromises: Promise<ProductsResponse>[] = [];
+        for (let p = 2; p <= metaInfo.totalPages; p++) {
+          pagePromises.push(
+            apiClient.get<ProductsResponse>('/api/v1/admin/products', {
+              params: buildProductsParams(p, limit),
+            }),
+          );
+        }
+
+        const otherPages = await Promise.all(pagePromises);
+        otherPages.forEach((resp) => {
+          if (resp.data && Array.isArray(resp.data)) {
+            allProducts = allProducts.concat(resp.data);
+          }
+        });
+      }
+
+      const filtered = applyStockFilter(allProducts);
+      console.log('✅ [ADMIN] All products loaded for export (after stock filter):', filtered.length);
+      return filtered;
+    } catch (err: any) {
+      console.error('❌ [ADMIN] Error fetching products for export:', err);
+      alert(t('admin.products.errorLoading').replace('{message}', err.message || t('admin.common.unknownErrorFallback')));
+      return [];
+    }
+  };
+
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
     setPage(1);
     fetchProducts();
+  };
+
+  const handleExport = async (format: 'csv' | 'excel') => {
+    if (exporting) return;
+    setExporting(format);
+    try {
+      const allProducts = await fetchAllProductsForExport();
+      if (!allProducts.length) {
+        alert(t('admin.products.noProducts'));
+        return;
+      }
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      if (format === 'csv') {
+        const blob = createProductsCsvBlob(allProducts);
+        downloadBlob(blob, `products-${timestamp}.csv`);
+      } else {
+        const blob = createProductsExcelBlob(allProducts);
+        downloadBlob(blob, `products-${timestamp}.xls`);
+      }
+    } finally {
+      setExporting(null);
+    }
   };
 
   const toggleSelect = (id: string) => {
@@ -753,6 +964,31 @@ export default function ProductsPage() {
             </div>
           ) : (
             <>
+              <div className="px-6 pt-4 pb-2 flex items-center justify-between gap-4 border-b border-gray-100">
+                {meta && (
+                  <div className="text-sm text-gray-600">
+                    {t('admin.products.totalProducts')}: <span className="font-medium">{meta.total}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 ml-auto">
+                  <ProductPageButton
+                    variant="outline"
+                    className="px-3 py-1 text-xs"
+                    onClick={() => handleExport('csv')}
+                    disabled={exporting !== null}
+                  >
+                    {exporting === 'csv' ? 'Exporting CSV...' : 'Export CSV'}
+                  </ProductPageButton>
+                  <ProductPageButton
+                    variant="outline"
+                    className="px-3 py-1 text-xs"
+                    onClick={() => handleExport('excel')}
+                    disabled={exporting !== null}
+                  >
+                    {exporting === 'excel' ? 'Exporting Excel...' : 'Export Excel'}
+                  </ProductPageButton>
+                </div>
+              </div>
               <div className="overflow-x-auto xl:overflow-x-visible">
                 <table className="w-full table-auto divide-y divide-gray-200">
                   <thead className="bg-gray-50">
