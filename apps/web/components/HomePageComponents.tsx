@@ -151,6 +151,12 @@ export function HomePageHeader() {
             >
               <p className="leading-[20px]">{t('home.navigation.blog')}</p>
             </div>
+            <div
+              onClick={() => router.push('/delivery-terms')}
+              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+            >
+              <p className="leading-[20px]">{t('home.navigation.delivery')}</p>
+            </div>
           </div>
 
           {/* Header Icons - Separate Vector Groups */}

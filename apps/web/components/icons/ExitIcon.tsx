@@ -5,11 +5,10 @@ interface ExitIconProps {
   className?: string;
 }
 
-/**
- * Exit/Logout icon from Figma vector group
- */
-export function ExitIcon({ size = 20, className = '' }: ExitIconProps) {
-  const imgExitIcon = "/assets/home/imgHeaderExitIcon.svg";
+// Slightly larger/bolder logout icon for header (default 22px)
+export function ExitIcon({ size = 22, className = '' }: ExitIconProps) {
+  // Logout icon SVG saved locally from Figma: public/assets/home/Group 2146.svg
+  const imgExitIcon = "/assets/home/Group 2146.svg";
   
   return (
     <img 

@@ -7,6 +7,7 @@ interface HeaderCartIconProps {
 
 /**
  * Cart icon from Figma vector group for header
+ * Default size matches original header design (20px)
  */
 export function HeaderCartIcon({ size = 20, className = '' }: HeaderCartIconProps) {
   const imgCartIcon = "/assets/home/imgHeaderCartIcon.svg";

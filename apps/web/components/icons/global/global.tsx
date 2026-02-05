@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getStoredLanguage, LANGUAGES, type LanguageCode } from '../../../lib/language';
 import { apiClient } from '../../../lib/api-client';
-import { type CurrencyCode } from '../../../lib/currency';
+import { type CurrencyCode, CURRENCIES, getStoredCurrency, setStoredCurrency } from '../../../lib/currency';
 import { SearchIcon } from '../SearchIcon';
 import { HeaderCartIcon } from '../HeaderCartIcon';
 import { LanguageIcon } from '../LanguageIcon';
@@ -188,6 +188,8 @@ const imgGroup2121 = "/assets/home/imgGroup2121.svg";
 const imgGroup2124 = "/assets/home/imgGroup2124.svg";
 const imgGroup2123 = "/assets/home/imgGroup2123.svg";
 const img4 = "/assets/home/img4.svg";
+// Currency dropdown arrow from Figma (node-id: 92:731)
+const imgCurrencyArrow = "http://localhost:3845/assets/1df18b1c925444bdbdca1d804466e1927b561a35.svg";
 
 interface HeaderProps {
   router: ReturnType<typeof useRouter>;
@@ -225,6 +227,10 @@ export function Header({
 }: HeaderProps) {
   // Cart count state
   const [cartCount, setCartCount] = useState<number>(0);
+  // Header currency display (e.g. AMD)
+  const [currency, setCurrency] = useState<CurrencyCode>('AMD');
+  const [showCurrencyMenu, setShowCurrencyMenu] = useState(false);
+  const currencyMenuRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch cart count
   useEffect(() => {
@@ -275,6 +281,35 @@ export function Header({
     };
   }, [isLoggedIn]);
 
+  // Initialize and keep header currency in sync with stored currency
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const updateCurrency = () => {
+      setCurrency(getStoredCurrency());
+    };
+
+    // Set initial value
+    updateCurrency();
+
+    // Listen for currency changes
+    window.addEventListener('currency-updated', updateCurrency);
+
+    return () => {
+      window.removeEventListener('currency-updated', updateCurrency);
+    };
+  }, []);
+
+  const handleCurrencyChange = (code: CurrencyCode) => {
+    if (code === currency) {
+      setShowCurrencyMenu(false);
+      return;
+    }
+    setCurrency(code);
+    setStoredCurrency(code);
+    setShowCurrencyMenu(false);
+  };
+
   // Header positioned on top of white spacer section
   const topPosition = isHomePage 
     ? 'top-[4px] md:top-[40px] sm:top-[4px]'
@@ -298,8 +333,8 @@ export function Header({
   return (
     <>
       {/* Header Section - Navigation Bar */}
-      <div className={`fixed ${bgClass} backdrop-blur-[15px] content-stretch flex flex-col h-[65px] md:h-[60px] sm:h-[50px] items-center justify-center left-1/2 px-[32px] md:px-[24px] sm:px-[16px] py-[14px] md:py-[12px] sm:py-[8px] rounded-[60px] md:rounded-[50px] sm:rounded-[40px] ${topPosition} translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] z-50 border ${borderClass} ${shadowClass}`}>
-        <div className="content-stretch flex gap-[160px] lg:gap-[160px] md:gap-[120px] sm:gap-[16px] h-[50px] md:h-[44px] sm:h-[36px] items-center justify-center relative shrink-0">
+      <div className={`fixed ${bgClass} backdrop-blur-[15px] content-stretch flex flex-col h-[66px] md:h-[60px] sm:h-[52px] items-center justify-center left-1/2 px-[28px] md:px-[22px] sm:px-[14px] rounded-[64px] md:rounded-[56px] sm:rounded-[40px] ${topPosition} translate-x-[-50%] w-[1300px] xl:w-[1300px] lg:w-[1180px] md:w-[90%] sm:w-[95%] z-50 border ${borderClass} ${shadowClass}`}>
+        <div className="content-stretch flex gap-[110px] lg:gap-[100px] md:gap-[70px] sm:gap-[16px] h-[42px] md:h-[38px] sm:h-[34px] items-center justify-center relative shrink-0">
           {/* Logo */}
           <div
             onClick={() => router.push('/')}
@@ -340,10 +375,59 @@ export function Header({
             >
               <p className="leading-[20px]">{t('home.navigation.blog')}</p>
             </div>
+            <div
+              onClick={() => router.push('/delivery-terms')}
+              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+            >
+              <p className="leading-[20px]">{t('home.navigation.delivery')}</p>
+            </div>
           </div>
 
           {/* Header Icons - Separate Vector Groups */}
           <div className="content-stretch flex gap-[28px] lg:gap-[28px] md:gap-[20px] sm:gap-[12px] items-center justify-center relative shrink-0">
+            {/* Currency Display (e.g. AMD ▼) */}
+            <div
+              className="hidden sm:flex items-center justify-center relative shrink-0 h-[20px] md:h-[18px] sm:h-[16px]"
+              ref={currencyMenuRef}
+            >
+              <button
+                type="button"
+                onClick={() => setShowCurrencyMenu((prev) => !prev)}
+                className="flex items-center gap-[6px] md:gap-[4px] font-['Inter:Bold',sans-serif] font-bold text-[#151e21] text-[15px] md:text-[14px] leading-none cursor-pointer focus:outline-none"
+                aria-haspopup="listbox"
+                aria-expanded={showCurrencyMenu}
+              >
+                <span>{currency}</span>
+                <span className="flex items-center justify-center h-[12px] w-[12px] md:h-[10px] md:w-[10px]">
+                  <img
+                    alt="Change currency"
+                    src={imgCurrencyArrow}
+                    className="block max-w-none w-full h-full transition-transform duration-150"
+                    style={{
+                      transform: showCurrencyMenu ? 'rotate(270deg)' : 'rotate(90deg)',
+                    }}
+                  />
+                </span>
+              </button>
+              {showCurrencyMenu && (
+                <div className="absolute top-full right-0 mt-2 w-24 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden">
+                  {(['USD', 'AMD', 'EUR', 'RUB', 'GEL'] as CurrencyCode[]).map((code) => (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => handleCurrencyChange(code)}
+                      className={`w-full text-left px-3 py-2 text-xs md:text-sm transition-colors ${
+                        currency === code
+                          ? 'bg-gray-100 text-gray-900 font-semibold cursor-default'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {code}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             {/* Search Icon */}
             <div
               onClick={() => setShowSearchModal(true)}
@@ -397,9 +481,9 @@ export function Header({
               <div className="relative shrink-0" ref={userMenuRef}>
                 <div
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="h-[20px] md:h-[18px] sm:h-[16px] w-[20px] md:w-[18px] sm:w-[16px] relative cursor-pointer flex items-center justify-center"
+                  className="h-[24px] md:h-[22px] sm:h-[20px] w-[24px] md:w-[22px] sm:w-[20px] relative cursor-pointer flex items-center justify-center"
                 >
-                  <ExitIcon size={20} className="brightness-0" />
+                  <ExitIcon size={24} className="brightness-0" />
                 </div>
                 {showUserMenu && (
                   <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
