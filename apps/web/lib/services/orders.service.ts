@@ -283,6 +283,27 @@ class OrdersService {
       const taxAmount = 0; // TODO: Calculate tax if needed
       const total = subtotal - discountAmount + shippingAmount + taxAmount;
 
+      // Validate delivery date/time: must be at least 24 hours in the future
+      if (shippingMethod === 'delivery' && shippingAddress && (shippingAddress as any).deliveryDay) {
+        const rawDay = (shippingAddress as any).deliveryDay as string;
+        const parts = rawDay?.split('-').map((p: string) => Number(p)) || [];
+        const [year, month, day] = parts;
+        if (year && month && day) {
+          const deliveryDate = new Date(year, month - 1, day);
+          const now = new Date();
+          const diffMs = deliveryDate.getTime() - now.getTime();
+          const minMs = 24 * 60 * 60 * 1000;
+          if (diffMs < minMs) {
+            throw {
+              status: 400,
+              type: "https://api.shop.am/problems/validation-error",
+              title: "Validation Error",
+              detail: "Delivery must be scheduled at least 24 hours in advance",
+            };
+          }
+        }
+      }
+
       // Generate order number
       const orderNumber = generateOrderNumber();
 

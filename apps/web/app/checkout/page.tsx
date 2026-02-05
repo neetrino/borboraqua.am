@@ -278,16 +278,13 @@ export default function CheckoutPage() {
 
   const availableDeliveryDays: DeliveryDayOption[] = useMemo(() => {
     // Calculate enabled delivery days for the currently visible calendar month.
-    // Only days that match the admin-configured weekdays and are at least 1 day in advance are enabled.
+    // Only days that match the admin-configured weekdays and are at least 24 hours in advance are enabled.
     if (!enabledWeekdays || enabledWeekdays.length === 0) {
       return [];
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const minDate = new Date(today);
-    // At least 1 day before delivery (no same-day)
-    minDate.setDate(minDate.getDate() + 1);
+    const now = new Date();
+    const minAllowedDateTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // +24 hours
 
     const monthStart = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
     const monthEnd = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0);
@@ -309,9 +306,9 @@ export default function CheckoutPage() {
 
       const dayOfWeek = dateCopy.getDay(); // 0=Sun..6=Sat
       const isEnabledWeekday = enabledWeekdays.includes(dayOfWeek);
-      const isAfterMinDate = dateCopy >= minDate;
+      const isAfterMinDateTime = dateCopy.getTime() >= minAllowedDateTime.getTime();
 
-      if (isEnabledWeekday && isAfterMinDate) {
+      if (isEnabledWeekday && isAfterMinDateTime) {
         const year = dateCopy.getFullYear();
         const month = String(dateCopy.getMonth() + 1).padStart(2, '0');
         const day = String(dateCopy.getDate()).padStart(2, '0');
