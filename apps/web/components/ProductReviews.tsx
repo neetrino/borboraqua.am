@@ -404,6 +404,7 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
               <ProductPageButton
                 type="submit"
                 disabled={submitting}
+                className="py-3"
               >
                 {submitting
                   ? t('common.reviews.submitting')
@@ -414,6 +415,7 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
               <ProductPageButton
                 type="button"
                 variant="outline"
+                className="py-3"
                 onClick={editingReviewId ? handleCancelEdit : () => {
                   setShowForm(false);
                   setRating(0);

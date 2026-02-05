@@ -942,7 +942,11 @@ function ProfilePageContent() {
               placeholder={t('profile.personal.phonePlaceholder')}
             />
             <div className="flex items-center gap-2 pt-4">
-              <ProductPageButton type="submit" disabled={savingPersonal}>
+              <ProductPageButton
+                type="submit"
+                disabled={savingPersonal}
+                className="h-11 px-6"
+              >
                 {savingPersonal ? t('profile.personal.saving') : t('profile.personal.save')}
               </ProductPageButton>
               <ProductPageButton
@@ -956,7 +960,7 @@ function ProfilePageContent() {
                     phone: profile?.phone || '',
                   });
                 }}
-                className="px-4"
+                className="px-6 h-11"
               >
                 {t('profile.personal.cancel')}
               </ProductPageButton>
@@ -977,6 +981,7 @@ function ProfilePageContent() {
                   setShowAddressForm(!showAddressForm);
                   setEditingAddress(null);
                 }}
+                className="h-11 px-6"
               >
                 {showAddressForm ? t('profile.addresses.form.cancel') : `+ ${t('profile.addresses.addNew')}`}
               </ProductPageButton>
@@ -1037,7 +1042,11 @@ function ProfilePageContent() {
                   <span className="ml-2 text-sm text-gray-700">{t('profile.addresses.form.isDefault')}</span>
                 </label>
                 <div className="flex gap-2">
-                  <ProductPageButton type="submit" disabled={savingAddress}>
+                  <ProductPageButton
+                    type="submit"
+                    disabled={savingAddress}
+                    className="h-11 px-6"
+                  >
                     {savingAddress ? t('profile.addresses.form.saving') : editingAddress ? t('profile.addresses.form.update') : t('profile.addresses.form.add')}
                   </ProductPageButton>
                   <ProductPageButton
@@ -1047,6 +1056,7 @@ function ProfilePageContent() {
                       setEditingAddress(null);
                       resetAddressForm();
                     }}
+                    className="h-11 px-6"
                   >
                     {t('profile.addresses.form.cancel')}
                   </ProductPageButton>
@@ -1239,7 +1249,11 @@ function ProfilePageContent() {
               required
             />
             <div className="pt-4">
-              <ProductPageButton type="submit" disabled={savingPassword}>
+              <ProductPageButton
+                type="submit"
+                disabled={savingPassword}
+                className="h-11 px-6"
+              >
                 {savingPassword ? t('profile.password.changing') : t('profile.password.change')}
               </ProductPageButton>
             </div>

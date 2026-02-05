@@ -4519,7 +4519,7 @@ function AddProductPageContent() {
                 <ProductPageButton
                   type="submit"
                   disabled={loading}
-                  className="flex-1 w-full sm:w-auto order-2 sm:order-1"
+                  className="flex-1 w-full sm:w-auto order-2 sm:order-1 h-11"
                 >
                   {loading
                     ? (isEditMode ? t('admin.products.add.updating') : t('admin.products.add.creating'))
@@ -4529,7 +4529,7 @@ function AddProductPageContent() {
                   variant="outline"
                   type="button"
                   onClick={() => router.push('/admin/products')}
-                  className="w-full sm:w-auto order-1 sm:order-2"
+                  className="w-full sm:w-auto order-1 sm:order-2 h-11"
                 >
                   {t('admin.common.cancel')}
                 </ProductPageButton>
