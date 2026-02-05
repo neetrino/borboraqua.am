@@ -544,13 +544,6 @@ export default function QuickSettingsPage() {
                         >
                           50%
                         </ProductPageButton>
-                        <ProductPageButton
-                          variant="outline"
-                          className="px-3 py-1 text-sm"
-                          onClick={() => setGlobalDiscount(0)}
-                        >
-                          {t('admin.quickSettings.cancel')}
-                        </ProductPageButton>
                       </div>
                     </div>
                   )}
