@@ -398,7 +398,7 @@ export function Header({
                 aria-expanded={showCurrencyMenu}
               >
                 <span>{currency}</span>
-                <span className="flex items-center justify-center h-[12px] w-[12px] md:h-[10px] md:w-[10px]">
+                <span className="flex items-center justify-center h-[10px] w-[10px] md:h-[10px] md:w-[10px]">
                   <img
                     alt="Change currency"
                     src={imgCurrencyArrow}
