@@ -31,6 +31,98 @@ interface UsersResponse {
   };
 }
 
+interface UserExportRow {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  roles: string;
+  blocked: string;
+  ordersCount: number;
+  createdAt: string;
+}
+
+const USER_EXPORT_COLUMNS: { key: keyof UserExportRow; header: string }[] = [
+  { key: 'id', header: 'ID' },
+  { key: 'firstName', header: 'First Name' },
+  { key: 'lastName', header: 'Last Name' },
+  { key: 'email', header: 'Email' },
+  { key: 'phone', header: 'Phone' },
+  { key: 'roles', header: 'Roles' },
+  { key: 'blocked', header: 'Blocked' },
+  { key: 'ordersCount', header: 'Orders Count' },
+  { key: 'createdAt', header: 'Created At' },
+];
+
+const mapUserToExportRow = (user: User): UserExportRow => ({
+  id: user.id,
+  firstName: user.firstName,
+  lastName: user.lastName,
+  email: user.email,
+  phone: user.phone || '',
+  roles: (user.roles || []).join(', '),
+  blocked: user.blocked ? 'blocked' : 'active',
+  ordersCount: user.ordersCount ?? 0,
+  createdAt: user.createdAt,
+});
+
+const escapeCsvValue = (value: string | number): string => {
+  const str = String(value ?? '');
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+};
+
+const escapeHtml = (value: string | number): string => {
+  const str = String(value ?? '');
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
+const createUsersCsvBlob = (users: User[]): Blob => {
+  const rows = users.map(mapUserToExportRow);
+  const header = USER_EXPORT_COLUMNS.map((c) => c.header).join(',');
+  const body = rows
+    .map((row) =>
+      USER_EXPORT_COLUMNS.map((c) => escapeCsvValue(row[c.key])).join(','),
+    )
+    .join('\r\n');
+  const csv = `${header}\r\n${body}`;
+  return new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+};
+
+const createUsersExcelBlob = (users: User[]): Blob => {
+  const rows = users.map(mapUserToExportRow);
+  const headerRow = `<tr>${USER_EXPORT_COLUMNS.map((c) => `<th>${escapeHtml(c.header)}</th>`).join('')}</tr>`;
+  const bodyRows = rows
+    .map(
+      (row) =>
+        `<tr>${USER_EXPORT_COLUMNS.map((c) => `<td>${escapeHtml(row[c.key])}</td>`).join('')}</tr>`,
+    )
+    .join('');
+  const tableHtml = `<table>${headerRow}${bodyRows}</table>`;
+  return new Blob([tableHtml], {
+    type: 'application/vnd.ms-excel;charset=utf-8;',
+  });
+};
+
+const downloadBlob = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 export default function UsersPage() {
   const { t } = useTranslation();
   const { isLoggedIn, isAdmin, isLoading } = useAuth();
@@ -46,6 +138,7 @@ export default function UsersPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'customer'>('all');
+  const [exporting, setExporting] = useState<'csv' | 'excel' | null>(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -79,6 +172,77 @@ export default function UsersPage() {
       setLoading(false);
     }
   }, [page, search, roleFilter]);
+
+  const fetchAllUsersForExport = useCallback(async (): Promise<User[]> => {
+    try {
+      console.log('👥 [ADMIN] Fetching all users for export...', { search, roleFilter });
+      const limit = 100;
+      const firstResponse = await apiClient.get<UsersResponse>('/api/v1/admin/users', {
+        params: {
+          page: '1',
+          limit: limit.toString(),
+          search: search || '',
+          role: roleFilter === 'all' ? '' : roleFilter,
+        },
+      });
+
+      let allUsers: User[] = firstResponse.data || [];
+      const metaInfo = firstResponse.meta;
+
+      if (metaInfo && metaInfo.totalPages > 1) {
+        const pagePromises: Promise<UsersResponse>[] = [];
+        for (let p = 2; p <= metaInfo.totalPages; p++) {
+          pagePromises.push(
+            apiClient.get<UsersResponse>('/api/v1/admin/users', {
+              params: {
+                page: p.toString(),
+                limit: limit.toString(),
+                search: search || '',
+                role: roleFilter === 'all' ? '' : roleFilter,
+              },
+            }),
+          );
+        }
+
+        const otherPages = await Promise.all(pagePromises);
+        otherPages.forEach((resp) => {
+          if (resp.data && Array.isArray(resp.data)) {
+            allUsers = allUsers.concat(resp.data);
+          }
+        });
+      }
+
+      console.log('✅ [ADMIN] All users loaded for export:', allUsers.length);
+      return allUsers;
+    } catch (err) {
+      console.error('❌ [ADMIN] Error fetching all users for export:', err);
+      alert('Failed to export users. Please try again.');
+      return [];
+    }
+  }, [search, roleFilter]);
+
+  const handleExport = async (format: 'csv' | 'excel') => {
+    if (exporting) return;
+    setExporting(format);
+    try {
+      const allUsers = await fetchAllUsersForExport();
+      if (!allUsers.length) {
+        alert('No users to export.');
+        return;
+      }
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      if (format === 'csv') {
+        const blob = createUsersCsvBlob(allUsers);
+        downloadBlob(blob, `users-${timestamp}.csv`);
+      } else {
+        const blob = createUsersExcelBlob(allUsers);
+        downloadBlob(blob, `users-${timestamp}.xls`);
+      }
+    } finally {
+      setExporting(null);
+    }
+  };
 
   useEffect(() => {
     if (isLoggedIn && isAdmin) {
@@ -282,6 +446,31 @@ export default function UsersPage() {
             </div>
           ) : (
             <>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                {meta && (
+                  <div className="text-sm text-gray-600">
+                    Total users: <span className="font-medium">{meta.total}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 ml-auto">
+                  <ProductPageButton
+                    variant="outline"
+                    className="px-3 py-1 text-xs"
+                    onClick={() => handleExport('csv')}
+                    disabled={exporting !== null}
+                  >
+                    {exporting === 'csv' ? 'Exporting CSV...' : 'Export CSV'}
+                  </ProductPageButton>
+                  <ProductPageButton
+                    variant="outline"
+                    className="px-3 py-1 text-xs"
+                    onClick={() => handleExport('excel')}
+                    disabled={exporting !== null}
+                  >
+                    {exporting === 'excel' ? 'Exporting Excel...' : 'Export Excel'}
+                  </ProductPageButton>
+                </div>
+              </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
