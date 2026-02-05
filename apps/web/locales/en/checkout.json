@@ -73,6 +73,16 @@
     "cashOnDeliveryPickup": "Cash on Delivery: You will pay with cash when you pick up your order. No card details required.",
     "storePickupInfo": "Store Pickup: You will pick up your order from our store. Shipping is free."
   },
+  "status": {
+    "successTitle": "Thank you for your order!",
+    "successMessage": "Your order has been placed successfully.",
+    "successWithNumber": "Your order {orderNumber} has been placed successfully.",
+    "errorTitle": "Something went wrong",
+    "errorMessage": "We couldn't complete your order. Please try again or contact support.",
+    "backToShop": "Back to shop",
+    "backToOrder": "Back to order",
+    "tryAgain": "Try again"
+  },
   "errors": {
     "firstNameRequired": "First name is required",
     "lastNameRequired": "Last name is required",

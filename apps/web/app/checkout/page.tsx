@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Card, Input } from '@shop/ui';
-import { apiClient } from '../../lib/api-client';
+import { apiClient, ApiError } from '../../lib/api-client';
 import { formatPrice, getStoredCurrency } from '../../lib/currency';
 import { getStoredLanguage } from '../../lib/language';
 import { useAuth } from '../../lib/auth/AuthContext';
@@ -735,10 +735,14 @@ export default function CheckoutPage() {
       }
 
       // Otherwise redirect to order success page
-      router.push(`/orders/${response.order.number}`);
+      router.push(`/checkout/success?order=${encodeURIComponent(response.order.number)}`);
     } catch (err: any) {
       console.error('[Checkout] Error creating order:', err);
-      setError(err.message || t('checkout.errors.failedToCreateOrder'));
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : t('checkout.errors.failedToCreateOrder');
+      router.push(`/checkout/error?message=${encodeURIComponent(message)}`);
     }
   }
 
