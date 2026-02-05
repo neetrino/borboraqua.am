@@ -945,9 +945,9 @@ function ProfilePageContent() {
               <ProductPageButton type="submit" disabled={savingPersonal}>
                 {savingPersonal ? t('profile.personal.saving') : t('profile.personal.save')}
               </ProductPageButton>
-              <Button
-                type="button"
+              <ProductPageButton
                 variant="outline"
+                type="button"
                 onClick={() => {
                   setPersonalInfo({
                     firstName: profile?.firstName || '',
@@ -956,9 +956,10 @@ function ProfilePageContent() {
                     phone: profile?.phone || '',
                   });
                 }}
+                className="px-4"
               >
                 {t('profile.personal.cancel')}
-              </Button>
+              </ProductPageButton>
             </div>
           </form>
         </Card>

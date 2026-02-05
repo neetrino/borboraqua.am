@@ -403,7 +403,6 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
             <div className="flex gap-4">
               <ProductPageButton
                 type="submit"
-                variant="cancel"
                 disabled={submitting}
               >
                 {submitting
@@ -414,7 +413,7 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
               </ProductPageButton>
               <ProductPageButton
                 type="button"
-                variant="cancel"
+                variant="outline"
                 onClick={editingReviewId ? handleCancelEdit : () => {
                   setShowForm(false);
                   setRating(0);
