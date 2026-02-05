@@ -1083,7 +1083,7 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Delivery day & time selection */}
-                <div className="mt-8 space-y-6">
+                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">
                       {t('checkout.delivery.day')}
