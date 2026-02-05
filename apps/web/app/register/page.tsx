@@ -48,8 +48,8 @@ export default function RegisterPage() {
       return;
     }
 
-    if (!email.trim() && !phone.trim()) {
-      console.log('❌ [REGISTER PAGE] Validation failed: No email or phone');
+    if (!phone.trim()) {
+      console.log('❌ [REGISTER PAGE] Validation failed: No phone');
       setError(t('register.errors.emailOrPhoneRequired'));
       setIsSubmitting(false);
       return;
@@ -119,7 +119,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="w-full max-w-md sm:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Card className="p-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('register.title')}</h1>
         <p className="text-gray-600 mb-8">{t('register.subtitle')}</p>
@@ -135,6 +135,7 @@ export default function RegisterPage() {
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
                 {t('register.form.firstName')}
+                <span className="text-red-500 ml-0.5">*</span>
               </label>
               <Input
                 id="firstName"
@@ -144,11 +145,13 @@ export default function RegisterPage() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 disabled={isSubmitting || isLoading}
+              required
               />
             </div>
             <div>
               <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
                 {t('register.form.lastName')}
+                <span className="text-red-500 ml-0.5">*</span>
               </label>
               <Input
                 id="lastName"
@@ -158,6 +161,7 @@ export default function RegisterPage() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 disabled={isSubmitting || isLoading}
+              required
               />
             </div>
           </div>
@@ -178,6 +182,7 @@ export default function RegisterPage() {
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
               {t('register.form.phone')}
+              <span className="text-red-500 ml-0.5">*</span>
             </label>
             <Input
               id="phone"
@@ -187,11 +192,13 @@ export default function RegisterPage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               disabled={isSubmitting || isLoading}
+              required
             />
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               {t('register.form.password')}
+              <span className="text-red-500 ml-0.5">*</span>
             </label>
             <div className="relative">
               <Input
@@ -248,6 +255,7 @@ export default function RegisterPage() {
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
               {t('register.form.confirmPassword')}
+              <span className="text-red-500 ml-0.5">*</span>
             </label>
             <div className="relative">
               <Input
