@@ -250,6 +250,7 @@
   },
   "products": {
     "title": "Товары",
+    "totalProducts": "Всего товаров",
     "backToAdmin": "Вернуться в панель администратора",
     "searchPlaceholder": "Поиск по названию или slug...",
     "searchByTitleOrSlug": "Поиск по названию или slug",

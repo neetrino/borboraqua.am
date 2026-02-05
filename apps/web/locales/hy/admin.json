@@ -251,6 +251,7 @@
   },
   "products": {
     "title": "Ապրանքներ",
+    "totalProducts": "Ընդամենը ապրանքներ",
     "backToAdmin": "Վերադառնալ ադմինիստրատորի վահան",
     "searchPlaceholder": "Որոնել ըստ վերնագրի կամ slug-ի...",
     "searchByTitleOrSlug": "Որոնել ըստ վերնագրի կամ slug-ի",

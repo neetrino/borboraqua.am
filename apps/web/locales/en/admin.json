@@ -251,6 +251,7 @@
   },
   "products": {
     "title": "Products",
+    "totalProducts": "Total products",
     "backToAdmin": "Back to Admin Panel",
     "searchPlaceholder": "Search by title or slug...",
     "searchByTitleOrSlug": "Search by title or slug",
