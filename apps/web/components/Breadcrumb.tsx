@@ -98,7 +98,11 @@ export function Breadcrumb() {
   const isProfilePage = pathname.startsWith('/profile');
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div
+      className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${
+        isProductsPage ? 'py-8' : 'pt-4 pb-2'
+      }`}
+    >
       <div className="flex items-center text-sm flex-wrap">
         {breadcrumbs.map((item, index) => (
           <div key={`${item.href}-${index}`} className="flex items-center">

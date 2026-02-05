@@ -193,7 +193,13 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       <div className="hidden xl:block pt-14">
         <Breadcrumb />
       </div>
-      <main className={`flex-1 w-full relative z-10 ${isProductsPage || isAdminPage || isProfilePage ? 'pt-20 xl:pt-4 pb-0 xl:pb-0' : 'xl:pt-[80px] pt-20 pb-0 xl:pb-0'}`}>
+      <main
+        className={`flex-1 w-full relative z-10 ${
+          isProductsPage 
+            ? 'pt-20 xl:pt-4 pb-0 xl:pb-0'
+            : 'pt-0 xl:pt-0 pb-0 xl:pb-0'
+        }`}
+      >
         {children}
       </main>
       {/* Desktop Footer - Only visible on desktop */}
