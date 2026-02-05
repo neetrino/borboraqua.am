@@ -753,8 +753,8 @@ export default function ProductsPage() {
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
+              <div className="overflow-x-auto xl:overflow-x-visible">
+                <table className="w-full table-auto divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-3">
@@ -870,10 +870,10 @@ export default function ProductsPage() {
                           </span>
                         </button>
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {t('admin.products.status')}
                       </th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {t('admin.products.featured')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -927,7 +927,7 @@ export default function ProductsPage() {
                             onChange={() => toggleSelect(product.id)}
                           />
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4">
                           <div className="flex items-center">
                             {product.image && (
                               <img
@@ -961,7 +961,7 @@ export default function ProductsPage() {
                             </span>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4">
                           <div className="flex flex-col">
                             <div className="text-sm font-medium text-gray-900">
                               {formatPrice(product.price, currency)}
@@ -979,7 +979,7 @@ export default function ProductsPage() {
                             ) : null}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-4 whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => handleTogglePublished(product.id, product.published, product.title)}
@@ -998,7 +998,7 @@ export default function ProductsPage() {
                             />
                           </button>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <td className="px-3 py-4 text-center">
                           <button
                             onClick={() => handleToggleFeatured(product.id, product.featured || false, product.title)}
                             className="inline-flex items-center justify-center w-8 h-8 transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded"
@@ -1022,27 +1022,27 @@ export default function ProductsPage() {
                             </svg>
                           </button>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <td className="px-6 py-4 text-sm text-gray-500">
                           {new Date(product.createdAt).toLocaleDateString('hy-AM')}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center gap-2">
+                        <td className="px-6 py-4 text-sm font-medium">
+                          <div className="flex items-center justify-end gap-0.5 w-full">
                             <ProductPageButton
                               variant="outline"
-                              className="text-xs px-3 py-1 text-blue-600 border-blue-300 hover:bg-blue-50"
+                              className="h-7 px-1.5 text-[10px] font-medium flex items-center justify-center gap-0 text-blue-600 border-blue-300 hover:bg-blue-50"
                               onClick={() => router.push(`/admin/products/add?id=${product.id}`)}
                             >
-                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                               </svg>
                               {t('admin.products.edit')}
                             </ProductPageButton>
                             <ProductPageButton
                               variant="outline"
-                              className="text-xs px-3 py-1 text-red-600 border-red-300 hover:bg-red-50"
+                              className="h-7 px-1.5 text-[10px] font-medium flex items-center justify-center gap-0 text-red-600 border-red-300 hover:bg-red-50"
                               onClick={() => handleDeleteProduct(product.id, product.title)}
                             >
-                              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
                               {t('admin.products.delete')}

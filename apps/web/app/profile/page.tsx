@@ -1091,11 +1091,11 @@ function ProfilePageContent() {
                         </p>
                         <p className="text-sm text-gray-700">{address.countryCode}</p>
                       </div>
-                      <div className="flex gap-2 ml-4">
+                      <div className="flex gap-1.5 ml-4">
                         {!address.isDefault && (
                           <ProductPageButton
                             variant="outline"
-                            className="text-xs px-3 py-1"
+                            className="h-7 px-3 text-[10px] font-medium flex items-center justify-center text-blue-600 border-blue-300 hover:bg-blue-50 hover:text-blue-700"
                             onClick={() => address.id && handleSetDefaultAddress(address.id)}
                           >
                             {t('profile.addresses.setDefault')}
@@ -1103,14 +1103,14 @@ function ProfilePageContent() {
                         )}
                         <ProductPageButton
                           variant="outline"
-                          className="text-xs px-3 py-1"
+                          className="h-7 px-3 text-[10px] font-medium flex items-center justify-center text-blue-600 border-blue-300 hover:bg-blue-50 hover:text-blue-700"
                           onClick={() => handleEditAddress(address)}
                         >
                           {t('profile.addresses.edit')}
                         </ProductPageButton>
                         <ProductPageButton
                           variant="outline"
-                          className="text-xs px-3 py-1 text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
+                          className="h-7 px-3 text-[10px] font-medium flex items-center justify-center text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
                           onClick={() => address.id && handleDeleteAddress(address.id)}
                         >
                           {t('profile.addresses.delete')}
