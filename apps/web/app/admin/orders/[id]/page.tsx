@@ -264,6 +264,51 @@ export default function OrderDetailsPage() {
                         {order.shippingAddress.phone || order.shippingAddress.shippingPhone}
                       </div>
                     )}
+
+                    {/* Delivery schedule info */}
+                    {(order.shippingAddress as any)?.deliveryDay && (
+                      <div className="mt-2">
+                        <span className="font-medium">
+                          {t('admin.orders.orderDetails.deliveryDay')}
+                        </span>{' '}
+                        {(() => {
+                          const raw = (order.shippingAddress as any).deliveryDay as string;
+                          // raw is stored as "YYYY-MM-DD" (date-only). Parse manually to avoid timezone shifts.
+                          const parts = raw?.split('-').map((p) => Number(p)) || [];
+                          const [year, month, day] = parts;
+                          if (!year || !month || !day) {
+                            return raw;
+                          }
+                          const date = new Date(year, month - 1, day);
+                          if (isNaN(date.getTime())) {
+                            return raw;
+                          }
+                          return date.toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            weekday: 'long',
+                          });
+                        })()}
+                      </div>
+                    )}
+                    {(order.shippingAddress as any)?.deliveryTimeSlot && (
+                      <div>
+                        <span className="font-medium">
+                          {t('admin.orders.orderDetails.deliveryTimeSlot')}
+                        </span>{' '}
+                        {(() => {
+                          const slot = (order.shippingAddress as any).deliveryTimeSlot as string;
+                          if (slot === 'first_half') {
+                            return t('checkout.delivery.timeSlots.firstHalf');
+                          }
+                          if (slot === 'second_half') {
+                            return t('checkout.delivery.timeSlots.secondHalf');
+                          }
+                          return slot;
+                        })()}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-sm text-gray-500">

@@ -610,6 +610,8 @@
       "shippingAddress": "Адрес доставки",
       "noShippingAddress": "Нет адреса доставки",
       "shippingMethod": "Способ доставки:",
+      "deliveryDay": "День доставки:",
+      "deliveryTimeSlot": "Временной интервал доставки:",
       "pickup": "самовывоз",
       "paymentInfo": "Оплата",
       "method": "Метод:",

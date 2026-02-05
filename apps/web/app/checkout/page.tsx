@@ -312,8 +312,13 @@ export default function CheckoutPage() {
       const isAfterMinDate = dateCopy >= minDate;
 
       if (isEnabledWeekday && isAfterMinDate) {
+        const year = dateCopy.getFullYear();
+        const month = String(dateCopy.getMonth() + 1).padStart(2, '0');
+        const day = String(dateCopy.getDate()).padStart(2, '0');
+        const localDateStr = `${year}-${month}-${day}`;
+
         results.push({
-          date: dateCopy.toISOString().split('T')[0],
+          date: localDateStr,
           label: dateCopy.toLocaleDateString(locale, {
             day: 'numeric',
           }),
@@ -1157,17 +1162,20 @@ export default function CheckoutPage() {
                           for (let day = 1; day <= daysInMonth; day++) {
                             const date = new Date(year, month, day);
                             date.setHours(0, 0, 0, 0);
-                            const iso = date.toISOString().split('T')[0];
-                            const isEnabled = enabledSet.has(iso);
-                            const isSelected = deliveryDay === iso;
+                            const y = date.getFullYear();
+                            const m = String(date.getMonth() + 1).padStart(2, '0');
+                            const d = String(date.getDate()).padStart(2, '0');
+                            const localDateStr = `${y}-${m}-${d}`;
+                            const isEnabled = enabledSet.has(localDateStr);
+                            const isSelected = deliveryDay === localDateStr;
 
                             days.push(
                               <button
-                                key={iso}
+                                key={localDateStr}
                                 type="button"
                                 disabled={!isEnabled || isSubmitting}
                                 onClick={() => {
-                                  setValue('deliveryDay', iso);
+                                  setValue('deliveryDay', localDateStr);
                                   // Reset time slot when changing the day
                                   setValue('deliveryTimeSlot', undefined);
                                 }}

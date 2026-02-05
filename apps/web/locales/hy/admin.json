@@ -651,6 +651,8 @@
       "shippingAddress": "Առաքման հասցե",
       "noShippingAddress": "Առաքման հասցե չկա",
       "shippingMethod": "Առաքման եղանակ:",
+      "deliveryDay": "Առաքման օր:",
+      "deliveryTimeSlot": "Առաքման ժամային միջակայք:",
       "pickup": "ինքնավերցում",
       "paymentInfo": "Վճարում",
       "method": "Եղանակ:",

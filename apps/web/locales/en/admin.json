@@ -659,6 +659,8 @@
       "shippingAddress": "Shipping Address",
       "noShippingAddress": "No shipping address",
       "shippingMethod": "Shipping method:",
+      "deliveryDay": "Delivery day:",
+      "deliveryTimeSlot": "Delivery time:",
       "pickup": "pickup",
       "paymentInfo": "Payment",
       "method": "Method:",
