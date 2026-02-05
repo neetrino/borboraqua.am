@@ -36,6 +36,144 @@ interface OrdersResponse {
   };
 }
 
+interface OrderExportRow {
+  id: string;
+  number: string;
+  status: string;
+  paymentStatus: string;
+  fulfillmentStatus: string;
+  total: number;
+  currency: string;
+  customerEmail: string;
+  customerPhone: string;
+  customerName: string;
+  customerId: string;
+  itemsCount: number;
+  createdAt: string;
+}
+
+const ORDER_EXPORT_COLUMNS: { key: keyof OrderExportRow; header: string }[] = [
+  { key: 'id', header: 'ID' },
+  { key: 'number', header: 'Order Number' },
+  { key: 'status', header: 'Status' },
+  { key: 'paymentStatus', header: 'Payment Status' },
+  { key: 'fulfillmentStatus', header: 'Fulfillment Status' },
+  { key: 'total', header: 'Total' },
+  { key: 'currency', header: 'Currency' },
+  { key: 'customerEmail', header: 'Customer Email' },
+  { key: 'customerPhone', header: 'Customer Phone' },
+  { key: 'customerName', header: 'Customer Name' },
+  { key: 'customerId', header: 'Customer ID' },
+  { key: 'itemsCount', header: 'Items Count' },
+  { key: 'createdAt', header: 'Created At' },
+];
+
+const mapOrderToExportRow = (order: Order): OrderExportRow => ({
+  id: order.id,
+  number: order.number,
+  status: order.status,
+  paymentStatus: order.paymentStatus,
+  fulfillmentStatus: order.fulfillmentStatus,
+  total: order.total,
+  currency: order.currency,
+  customerEmail: order.customerEmail,
+  customerPhone: order.customerPhone,
+  customerName: [order.customerFirstName, order.customerLastName].filter(Boolean).join(' '),
+  customerId: order.customerId || '',
+  itemsCount: order.itemsCount,
+  createdAt: order.createdAt,
+});
+
+const escapeCsvValue = (value: string | number): string => {
+  const str = String(value ?? '');
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+};
+
+const escapeHtml = (value: string | number): string => {
+  const str = String(value ?? '');
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
+const createOrdersCsvBlob = (orders: Order[]): Blob => {
+  const rows = orders.map(mapOrderToExportRow);
+
+  const columnWidths = ORDER_EXPORT_COLUMNS.map((column) => {
+    const headerLength = column.header.length;
+    const maxDataLength = rows.reduce((max, row) => {
+      const value = String(row[column.key] ?? '');
+      return Math.max(max, value.length);
+    }, 0);
+    return Math.max(headerLength, maxDataLength) + 2;
+  });
+
+  const formatRow = (row: OrderExportRow | null): string =>
+    ORDER_EXPORT_COLUMNS
+      .map((column, index) => {
+        const raw =
+          row === null ? column.header : String(row[column.key] ?? '');
+        const value = escapeCsvValue(raw);
+        return value.padEnd(columnWidths[index], ' ');
+      })
+      .join('');
+
+  const headerLine = formatRow(null);
+  const bodyLines = rows.map((row) => formatRow(row)).join('\r\n');
+  const csv = `${headerLine}\r\n${bodyLines}`;
+
+  return new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+};
+
+const createOrdersExcelBlob = (orders: Order[]): Blob => {
+  const rows = orders.map(mapOrderToExportRow);
+  const headerRow = `<tr>${ORDER_EXPORT_COLUMNS.map((c) => `<th>${escapeHtml(c.header)}</th>`).join('')}</tr>`;
+  const bodyRows = rows
+    .map(
+      (row) =>
+        `<tr>${ORDER_EXPORT_COLUMNS.map((c) => `<td>${escapeHtml(row[c.key] ?? '')}</td>`).join('')}</tr>`,
+    )
+    .join('');
+
+  const tableHtml = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      table { border-collapse: collapse; }
+      th, td { padding: 4px 8px; }
+    </style>
+  </head>
+  <body>
+    <table>
+      <thead>${headerRow}</thead>
+      <tbody>${bodyRows}</tbody>
+    </table>
+  </body>
+</html>`;
+
+  return new Blob([tableHtml], {
+    type: 'application/vnd.ms-excel;charset=utf-8;',
+  });
+};
+
+const downloadBlob = (blob: Blob, filename: string) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 export default function OrdersPage() {
   const { t } = useTranslation();
   const { isLoggedIn, isAdmin, isLoading } = useAuth();
@@ -57,6 +195,7 @@ export default function OrdersPage() {
   const [updateMessage, setUpdateMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [exporting, setExporting] = useState<'csv' | 'excel' | null>(null);
 
   // Initialize filters from URL params on mount and when URL changes
   useEffect(() => {
@@ -77,20 +216,24 @@ export default function OrdersPage() {
     }
   }, [isLoggedIn, isAdmin, isLoading, router]);
 
+  const buildOrdersParams = (pageValue: number, limitValue: number): Record<string, string> => {
+    return {
+      page: pageValue.toString(),
+      limit: limitValue.toString(),
+      status: statusFilter || '',
+      paymentStatus: paymentStatusFilter || '',
+      sortBy: sortBy || '',
+      sortOrder: sortOrder || '',
+    };
+  };
+
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
       console.log('📦 [ADMIN] Fetching orders...', { page, statusFilter, paymentStatusFilter, sortBy, sortOrder });
       
       const response = await apiClient.get<OrdersResponse>('/api/v1/admin/orders', {
-        params: {
-          page: page.toString(),
-          limit: '20',
-          status: statusFilter || '',
-          paymentStatus: paymentStatusFilter || '',
-          sortBy: sortBy || '',
-          sortOrder: sortOrder || '',
-        },
+        params: buildOrdersParams(page, 20),
       });
 
       console.log('✅ [ADMIN] Orders fetched:', response);
@@ -109,6 +252,64 @@ export default function OrdersPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, isAdmin, page, statusFilter, paymentStatusFilter, sortBy, sortOrder]);
+
+  const fetchAllOrdersForExport = useCallback(async (): Promise<Order[]> => {
+    try {
+      console.log('📦 [ADMIN] Fetching all orders for export...', {
+        statusFilter,
+        paymentStatusFilter,
+        sortBy,
+        sortOrder,
+      });
+
+      const limit = 100;
+      const firstResponse = await apiClient.get<OrdersResponse>('/api/v1/admin/orders', {
+        params: buildOrdersParams(1, limit),
+      });
+
+      let allOrders: Order[] = firstResponse.data || [];
+      const metaInfo = firstResponse.meta;
+
+      if (metaInfo && metaInfo.totalPages > 1) {
+        const pagePromises: Promise<OrdersResponse>[] = [];
+        for (let p = 2; p <= metaInfo.totalPages; p++) {
+          pagePromises.push(
+            apiClient.get<OrdersResponse>('/api/v1/admin/orders', {
+              params: buildOrdersParams(p, limit),
+            }),
+          );
+        }
+
+        const otherPages = await Promise.all(pagePromises);
+        otherPages.forEach((resp) => {
+          if (resp.data && Array.isArray(resp.data)) {
+            allOrders = allOrders.concat(resp.data);
+          }
+        });
+      }
+
+      // Apply same filters on frontend for extra safety
+      const filtered = allOrders.filter((order) => {
+        if (statusFilter && order.status.toLowerCase() !== statusFilter.toLowerCase()) {
+          return false;
+        }
+        if (
+          paymentStatusFilter &&
+          order.paymentStatus.toLowerCase() !== paymentStatusFilter.toLowerCase()
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+      console.log('✅ [ADMIN] All orders loaded for export (after filters):', filtered.length);
+      return filtered;
+    } catch (err) {
+      console.error('❌ [ADMIN] Error fetching orders for export:', err);
+      alert(t('admin.orders.failedToDelete')); // generic error message reuse
+      return [];
+    }
+  }, [statusFilter, paymentStatusFilter, sortBy, sortOrder, t]);
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
@@ -312,6 +513,29 @@ export default function OrdersPage() {
     }
   };
 
+  const handleExport = async (format: 'csv' | 'excel') => {
+    if (exporting) return;
+    setExporting(format);
+    try {
+      const allOrders = await fetchAllOrdersForExport();
+      if (!allOrders.length) {
+        alert(t('admin.orders.noOrders'));
+        return;
+      }
+
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      if (format === 'csv') {
+        const blob = createOrdersCsvBlob(allOrders);
+        downloadBlob(blob, `orders-${timestamp}.csv`);
+      } else {
+        const blob = createOrdersExcelBlob(allOrders);
+        downloadBlob(blob, `orders-${timestamp}.xls`);
+      }
+    } finally {
+      setExporting(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -467,6 +691,32 @@ export default function OrdersPage() {
             </div>
           ) : (
             <>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                {meta && (
+                  <div className="text-sm text-gray-600">
+                    {t('admin.orders.totalOrders') || 'Total orders'}:{' '}
+                    <span className="font-medium">{meta.total}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 ml-auto">
+                  <ProductPageButton
+                    variant="outline"
+                    className="px-3 py-1 text-xs"
+                    onClick={() => handleExport('csv')}
+                    disabled={exporting !== null}
+                  >
+                    {exporting === 'csv' ? 'Exporting CSV...' : 'Export CSV'}
+                  </ProductPageButton>
+                  <ProductPageButton
+                    variant="outline"
+                    className="px-3 py-1 text-xs"
+                    onClick={() => handleExport('excel')}
+                    disabled={exporting !== null}
+                  >
+                    {exporting === 'excel' ? 'Exporting Excel...' : 'Export Excel'}
+                  </ProductPageButton>
+                </div>
+              </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">

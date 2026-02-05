@@ -590,6 +590,7 @@
   },
   "orders": {
     "title": "View Orders",
+    "totalOrders": "Total orders",
     "backToAdmin": "Back to Admin Panel",
     "loading": "Loading...",
     "loadingOrders": "Loading orders...",

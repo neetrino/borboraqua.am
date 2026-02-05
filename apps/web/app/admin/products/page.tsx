@@ -989,7 +989,7 @@ export default function ProductsPage() {
                   </ProductPageButton>
                 </div>
               </div>
-              <div className="overflow-x-auto xl:overflow-x-visible">
+              <div className="overflow-x-auto xl:overflow-x-visible max-h-[600px] overflow-y-auto">
                 <table className="w-full table-auto divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
