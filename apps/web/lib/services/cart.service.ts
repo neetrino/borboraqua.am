@@ -1,4 +1,44 @@
 import { db } from "@white-shop/db";
+import { Prisma } from "@prisma/client";
+
+// Type for product with translations and variants
+type ProductWithDetails = Prisma.ProductGetPayload<{
+  include: {
+    translations: true;
+    variants: true;
+  };
+}>;
+
+// Type for variant with product
+type VariantWithProduct = Prisma.ProductVariantGetPayload<{
+  include: {
+    product: {
+      include: {
+        translations: true;
+      };
+    };
+  };
+}>;
+
+// Type for cart item
+type CartItemWithRelations = Prisma.CartItemGetPayload<{
+  include: {
+    variant: {
+      include: {
+        product: {
+          include: {
+            translations: true;
+          };
+        };
+      };
+    };
+    product: {
+      include: {
+        translations: true;
+      };
+    };
+  };
+}>;
 
 class CartService {
   /**
@@ -85,8 +125,8 @@ class CartService {
 
     // Format items with details
     // OPTIMIZATION: Batch load all products and variants to avoid N+1 queries
-    const productIds = cart.items.map(item => item.productId);
-    const variantIds = cart.items.map(item => item.variantId);
+    const productIds = cart.items.map((item: CartItemWithRelations) => item.productId);
+    const variantIds = cart.items.map((item: CartItemWithRelations) => item.variantId);
     
     // Load all products in one query
     const products = await db.product.findMany({
@@ -100,23 +140,18 @@ class CartService {
     });
     
     // Create maps for quick lookup
-    const productMap = new Map(products.map(p => [p.id, p]));
-    const variantMap = new Map<string, any>();
-    products.forEach(p => {
-      p.variants.forEach(v => {
+    const productMap = new Map<string, ProductWithDetails>(products.map((p: ProductWithDetails) => [p.id, p]));
+    const variantMap = new Map<string, ProductWithDetails['variants'][0]>();
+    products.forEach((p: ProductWithDetails) => {
+      p.variants.forEach((v) => {
         variantMap.set(v.id, v);
       });
     });
     
-    const itemsWithDetails = cart.items.map((item: {
-      id: string;
-      productId: string;
-      variantId: string;
-      quantity: number;
-    }) => {
+    const itemsWithDetails = cart.items.map((item: CartItemWithRelations) => {
         const product = productMap.get(item.productId);
 
-        const variant = variantMap.get(item.variantId) || product?.variants.find(v => v.id === item.variantId);
+        const variant = variantMap.get(item.variantId) || product?.variants.find((v) => v.id === item.variantId);
         const translation =
           product?.translations.find((t: { locale: string }) => t.locale === locale) ||
           product?.translations[0];
@@ -189,7 +224,7 @@ class CartService {
         };
     });
 
-    const subtotal = itemsWithDetails.reduce((sum, item) => sum + item.total, 0);
+    const subtotal = itemsWithDetails.reduce((sum: number, item: typeof itemsWithDetails[0]) => sum + item.total, 0);
 
     return {
       cart: {
@@ -203,7 +238,7 @@ class CartService {
           total: subtotal,
           currency: "AMD",
         },
-        itemsCount: itemsWithDetails.reduce((sum, item) => sum + item.quantity, 0),
+        itemsCount: itemsWithDetails.reduce((sum: number, item: typeof itemsWithDetails[0]) => sum + item.quantity, 0),
       },
     };
   }
