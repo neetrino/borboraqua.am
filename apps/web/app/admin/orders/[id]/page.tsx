@@ -16,6 +16,10 @@ interface OrderDetails {
   fulfillmentStatus: string;
   total: number;
   currency: string;
+  subtotal: number;
+  shippingAmount: number;
+  discountAmount: number;
+  taxAmount: number;
   customerEmail?: string;
   customerPhone?: string;
   customer?: {
@@ -449,6 +453,38 @@ export default function OrderDetailsPage() {
               ) : (
                 <div className="text-sm text-gray-500">{t('admin.orders.orderDetails.noItemsFound')}</div>
               )}
+            </Card>
+
+            {/* Order Summary */}
+            <Card className="p-4 md:p-6">
+              <h2 className="text-sm font-semibold text-gray-900 mb-4">{t('checkout.orderSummary')}</h2>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>{t('checkout.summary.subtotal')}</span>
+                  <span>{formatCurrency(
+                    order.subtotal || 0,
+                    order.currency || 'AMD'
+                  )}</span>
+                </div>
+                {order.shippingAmount > 0 && (
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{t('checkout.summary.shipping')}</span>
+                    <span>{formatCurrency(order.shippingAmount, order.currency || 'AMD')}</span>
+                  </div>
+                )}
+                {order.discountAmount > 0 && (
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{t('checkout.summary.discount')}</span>
+                    <span>-{formatCurrency(order.discountAmount, order.currency || 'AMD')}</span>
+                  </div>
+                )}
+                <div className="border-t border-gray-200 pt-3 mt-3">
+                  <div className="flex justify-between text-base font-bold text-gray-900">
+                    <span>{t('checkout.summary.total')}</span>
+                    <span>{formatCurrency(order.total, order.currency || 'AMD')}</span>
+                  </div>
+                </div>
+              </div>
             </Card>
           </div>
         )}

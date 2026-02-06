@@ -83,6 +83,26 @@ class OrdersService {
           };
         }
 
+        // Get discount settings for logged in user checkout
+        const discountSettings = await db.settings.findMany({
+          where: {
+            key: {
+              in: ["globalDiscount", "categoryDiscounts", "brandDiscounts"],
+            },
+          },
+        });
+
+        const globalDiscount =
+          Number(
+            discountSettings.find((s: { key: string; value: unknown }) => s.key === "globalDiscount")?.value
+          ) || 0;
+        
+        const categoryDiscountsSetting = discountSettings.find((s: { key: string; value: unknown }) => s.key === "categoryDiscounts");
+        const categoryDiscounts = categoryDiscountsSetting ? (categoryDiscountsSetting.value as Record<string, number>) || {} : {};
+        
+        const brandDiscountsSetting = discountSettings.find((s: { key: string; value: unknown }) => s.key === "brandDiscounts");
+        const brandDiscounts = brandDiscountsSetting ? (brandDiscountsSetting.value as Record<string, number>) || {} : {};
+
         // Format cart items
         console.log('🛒 [ORDERS SERVICE] Processing cart items:', cart.items.map((item: any) => ({
           itemId: item.id,
@@ -158,11 +178,43 @@ class OrdersService {
               };
             }
 
+            // Calculate discount and final price (same logic as cart service)
+            const productDiscount = product?.discountPercent || 0;
+            let appliedDiscount = 0;
+            
+            if (productDiscount > 0) {
+              appliedDiscount = productDiscount;
+            } else {
+              // Check category discounts
+              const primaryCategoryId = product?.primaryCategoryId;
+              if (primaryCategoryId && categoryDiscounts[primaryCategoryId]) {
+                appliedDiscount = categoryDiscounts[primaryCategoryId];
+              } else {
+                // Check brand discounts
+                const brandId = product?.brandId;
+                if (brandId && brandDiscounts[brandId]) {
+                  appliedDiscount = brandDiscounts[brandId];
+                } else if (globalDiscount > 0) {
+                  appliedDiscount = globalDiscount;
+                }
+              }
+            }
+
+            // Calculate final price with discount
+            // Use priceSnapshot (original price) and apply current discount
+            const variantOriginalPrice = Number(item.priceSnapshot) || Number(variant.price) || 0;
+            let finalPrice = variantOriginalPrice;
+            
+            if (appliedDiscount > 0 && variantOriginalPrice > 0) {
+              // Calculate discounted price
+              finalPrice = variantOriginalPrice * (1 - appliedDiscount / 100);
+            }
+
             const cartItem = {
               variantId: variant.id,
               productId: product.id,
               quantity: item.quantity,
-              price: Number(item.priceSnapshot),
+              price: finalPrice, // Use discounted price instead of original priceSnapshot
               productTitle: translation?.title || 'Unknown Product',
               variantTitle,
               sku: variant.sku || '',
@@ -174,6 +226,9 @@ class OrdersService {
               productId: cartItem.productId,
               quantity: cartItem.quantity,
               sku: cartItem.sku,
+              originalPrice: variantOriginalPrice,
+              finalPrice: finalPrice,
+              discount: appliedDiscount,
             });
             
             return cartItem;
@@ -182,6 +237,26 @@ class OrdersService {
         
         console.log('✅ [ORDERS SERVICE] All cart items processed:', cartItems.length);
       } else if (guestItems && Array.isArray(guestItems) && guestItems.length > 0) {
+        // Get discount settings for guest checkout
+        const discountSettings = await db.settings.findMany({
+          where: {
+            key: {
+              in: ["globalDiscount", "categoryDiscounts", "brandDiscounts"],
+            },
+          },
+        });
+
+        const globalDiscount =
+          Number(
+            discountSettings.find((s: { key: string; value: unknown }) => s.key === "globalDiscount")?.value
+          ) || 0;
+        
+        const categoryDiscountsSetting = discountSettings.find((s: { key: string; value: unknown }) => s.key === "categoryDiscounts");
+        const categoryDiscounts = categoryDiscountsSetting ? (categoryDiscountsSetting.value as Record<string, number>) || {} : {};
+        
+        const brandDiscountsSetting = discountSettings.find((s: { key: string; value: unknown }) => s.key === "brandDiscounts");
+        const brandDiscounts = brandDiscountsSetting ? (brandDiscountsSetting.value as Record<string, number>) || {} : {};
+
         // Get items from guest checkout
         cartItems = await Promise.all(
           guestItems.map(async (item: any) => {
@@ -246,11 +321,43 @@ class OrdersService {
               }
             }
 
+            // Calculate discount and final price (same logic as cart service)
+            const product = variant.product;
+            const productDiscount = product?.discountPercent || 0;
+            let appliedDiscount = 0;
+            
+            if (productDiscount > 0) {
+              appliedDiscount = productDiscount;
+            } else {
+              // Check category discounts
+              const primaryCategoryId = product?.primaryCategoryId;
+              if (primaryCategoryId && categoryDiscounts[primaryCategoryId]) {
+                appliedDiscount = categoryDiscounts[primaryCategoryId];
+              } else {
+                // Check brand discounts
+                const brandId = product?.brandId;
+                if (brandId && brandDiscounts[brandId]) {
+                  appliedDiscount = brandDiscounts[brandId];
+                } else if (globalDiscount > 0) {
+                  appliedDiscount = globalDiscount;
+                }
+              }
+            }
+
+            // Calculate final price with discount
+            const variantOriginalPrice = Number(variant.price) || 0;
+            let finalPrice = variantOriginalPrice;
+            
+            if (appliedDiscount > 0 && variantOriginalPrice > 0) {
+              // Calculate discounted price
+              finalPrice = variantOriginalPrice * (1 - appliedDiscount / 100);
+            }
+
             return {
               variantId: variant.id,
               productId: variant.product.id,
               quantity,
-              price: Number(variant.price),
+              price: finalPrice, // Use discounted price instead of original price
               productTitle: translation?.title || 'Unknown Product',
               variantTitle,
               sku: variant.sku || '',
@@ -279,7 +386,7 @@ class OrdersService {
       // Calculate totals
       const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const discountAmount = 0; // TODO: Implement discount/coupon logic
-      const shippingAmount = shippingMethod === 'delivery' ? 1000 : 0; // TODO: Calculate based on address
+      const shippingAmount = 0; // Shipping is calculated from delivery price API, not hardcoded
       const taxAmount = 0; // TODO: Calculate tax if needed
       const total = subtotal - discountAmount + shippingAmount + taxAmount;
 

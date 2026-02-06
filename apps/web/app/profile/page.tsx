@@ -1462,10 +1462,6 @@ function ProfilePageContent() {
                                 <span>{t('profile.orderDetails.shipping')}</span>
                                 <span>{formatPrice(selectedOrder.totals.shipping, (selectedOrder.totals.currency || 'AMD') as CurrencyCode)}</span>
                               </div>
-                              <div className="flex justify-between text-gray-600">
-                                <span>{t('profile.orderDetails.tax')}</span>
-                                <span>{formatPrice(selectedOrder.totals.tax, (selectedOrder.totals.currency || 'AMD') as CurrencyCode)}</span>
-                              </div>
                               <div className="border-t border-gray-200 pt-4">
                                 <div className="flex justify-between text-lg font-bold text-gray-900">
                                   <span>{t('profile.orderDetails.total')}</span>

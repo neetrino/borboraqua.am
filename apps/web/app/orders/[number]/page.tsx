@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, Button } from '@shop/ui';
 import { apiClient } from '../../../lib/api-client';
-import { formatPrice, getStoredCurrency } from '../../../lib/currency';
+import { formatPrice, getStoredCurrency, convertPrice } from '../../../lib/currency';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { useTranslation } from '../../../lib/i18n-client';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
@@ -99,6 +99,7 @@ export default function OrderPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currency, setCurrency] = useState(getStoredCurrency());
+  const [shippingPrice, setShippingPrice] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -134,6 +135,22 @@ export default function OrderPage() {
         })),
       });
       setOrder(response);
+
+      // Fetch shipping price if delivery method and shipping is 0
+      if (response.shippingMethod === 'delivery' && response.shippingAddress?.city && response.totals?.shipping === 0) {
+        try {
+          const deliveryPriceResponse = await apiClient.get<{ price: number }>('/api/v1/delivery/price', {
+            params: {
+              city: response.shippingAddress.city,
+              country: 'Armenia',
+            },
+          });
+          setShippingPrice(deliveryPriceResponse.price);
+        } catch (err) {
+          console.error('Error fetching delivery price:', err);
+          setShippingPrice(null);
+        }
+      }
     } catch (error: any) {
       console.error('Error fetching order:', error);
       setError(error.message || t('orders.notFound.description'));
@@ -358,36 +375,56 @@ export default function OrderPage() {
           <Card className="p-6 sticky top-4">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('orders.orderSummary.title')}</h2>
             <div className="space-y-4 mb-6">
-              {order.totals ? (
-                <>
-                  <div className="flex justify-between text-gray-600">
-                    <span>{t('orders.orderSummary.subtotal')}</span>
-                    <span>{formatPrice(order.totals.subtotal, currency)}</span>
-                  </div>
-                  {order.totals.discount > 0 && (
+              {(() => {
+                // Use order.totals.subtotal and subtract discount to get discounted subtotal
+                // (like checkout uses cart.totals.subtotal which is already discounted)
+                // Order totals.subtotal is non-discounted, discount is stored separately
+                const originalSubtotal = order.totals?.subtotal || 0;
+                const discount = order.totals?.discount || 0;
+                // Calculate discounted subtotal: original - discount
+                // If discount is 0, items might already be discounted, so use items total
+                const subtotal = discount > 0 
+                  ? originalSubtotal - discount
+                  : order.items.reduce((sum, item) => sum + item.total, 0);
+                // Use shipping price from API if available, convert from AMD to USD like checkout does
+                // Otherwise use order.totals.shipping (already converted)
+                const shipping = shippingPrice !== null 
+                  ? convertPrice(shippingPrice, 'AMD', 'USD')
+                  : (order.totals?.shipping || 0);
+                // Calculate total the same way checkout does: subtotal + shipping
+                const total = subtotal + shipping;
+
+                return (
+                  <>
                     <div className="flex justify-between text-gray-600">
-                      <span>{t('orders.orderSummary.discount')}</span>
-                      <span>-{formatPrice(order.totals.discount, currency)}</span>
+                      <span>{t('orders.orderSummary.subtotal')}</span>
+                      <span>{formatPrice(subtotal, currency)}</span>
                     </div>
-                  )}
-                  <div className="flex justify-between text-gray-600">
-                    <span>{t('orders.orderSummary.shipping')}</span>
-                    <span>{formatPrice(order.totals.shipping, currency)}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>{t('orders.orderSummary.tax')}</span>
-                    <span>{formatPrice(order.totals.tax, currency)}</span>
-                  </div>
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="flex justify-between text-lg font-bold text-gray-900">
-                      <span>{t('orders.orderSummary.total')}</span>
-                      <span>{formatPrice(order.totals.total, currency)}</span>
+                    {discount > 0 && (
+                      <div className="flex justify-between text-gray-600">
+                        <span>{t('orders.orderSummary.discount')}</span>
+                        <span>-{formatPrice(discount, currency)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-gray-600">
+                      <span>{t('orders.orderSummary.shipping')}</span>
+                      <span>
+                        {order.shippingMethod === 'pickup'
+                          ? t('common.cart.free')
+                          : shipping > 0
+                            ? formatPrice(shipping, currency) + (order.shippingAddress?.city ? ` (${order.shippingAddress.city})` : ` (${t('checkout.shipping.delivery')})`)
+                            : t('checkout.shipping.enterCity')}
+                      </span>
                     </div>
-                  </div>
-                </>
-              ) : (
-                <div className="text-gray-600">{t('orders.orderSummary.loadingTotals')}</div>
-              )}
+                    <div className="border-t border-gray-200 pt-4">
+                      <div className="flex justify-between text-lg font-bold text-gray-900">
+                        <span>{t('orders.orderSummary.total')}</span>
+                        <span>{formatPrice(total, currency)}</span>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             <div>
