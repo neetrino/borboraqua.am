@@ -375,12 +375,6 @@ export function Header({
             >
               <p className="leading-[20px]">{t('home.navigation.blog')}</p>
             </div>
-            <div
-              onClick={() => router.push('/delivery-terms')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
-            >
-              <p className="leading-[20px]">{t('home.navigation.delivery')}</p>
-            </div>
           </div>
 
           {/* Header Icons - Separate Vector Groups */}
@@ -481,9 +475,9 @@ export function Header({
               <div className="relative shrink-0" ref={userMenuRef}>
                 <div
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="h-[24px] md:h-[22px] sm:h-[20px] w-[24px] md:w-[22px] sm:w-[20px] relative cursor-pointer flex items-center justify-center"
+                  className="h-[34px] md:h-[30px] sm:h-[26px] w-[34px] md:w-[30px] sm:w-[26px] relative cursor-pointer flex items-center justify-center"
                 >
-                  <ExitIcon size={24} className="brightness-0" />
+                  <ExitIcon size={34} className="brightness-0" />
                 </div>
                 {showUserMenu && (
                   <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">

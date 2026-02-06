@@ -146,34 +146,17 @@ export default function CheckoutPage() {
     deliveryDay: z.string().optional(),
     deliveryTimeSlot: z.enum(['first_half', 'second_half']).optional(),
   }).refine((data) => {
-    if (data.shippingMethod === 'delivery') {
-      return data.shippingAddress && data.shippingAddress.trim().length > 0;
-    }
-    return true;
+    return data.shippingAddress && data.shippingAddress.trim().length > 0;
   }, {
     message: t('checkout.errors.addressRequired'),
     path: ['shippingAddress'],
   }).refine((data) => {
-    if (data.shippingMethod === 'delivery') {
-      return data.shippingCity && data.shippingCity.trim().length > 0;
-    }
-    return true;
+    return data.shippingCity && data.shippingCity.trim().length > 0;
   }, {
     message: t('checkout.errors.cityRequired'),
     path: ['shippingCity'],
   }).refine((data) => {
-    if (data.shippingMethod === 'delivery') {
-      return data.shippingPostalCode && data.shippingPostalCode.trim().length > 0;
-    }
-    return true;
-  }, {
-    message: t('checkout.errors.postalCodeRequired'),
-    path: ['shippingPostalCode'],
-  }).refine((data) => {
-    if (data.shippingMethod === 'delivery') {
-      return data.shippingPhone && data.shippingPhone.trim().length > 0;
-    }
-    return true;
+    return data.shippingPhone && data.shippingPhone.trim().length > 0;
   }, {
     message: t('checkout.errors.phoneRequiredDelivery'),
     path: ['shippingPhone'],
@@ -218,20 +201,14 @@ export default function CheckoutPage() {
     message: t('checkout.errors.cardHolderNameRequired'),
     path: ['cardHolderName'],
   }).refine((data) => {
-    // For delivery, user must pick a delivery day
-    if (data.shippingMethod === 'delivery') {
-      return !!data.deliveryDay;
-    }
-    return true;
+    // User must pick a delivery day
+    return !!data.deliveryDay;
   }, {
     message: t('checkout.errors.deliveryDayRequired'),
     path: ['deliveryDay'],
   }).refine((data) => {
-    // For delivery, user must pick a delivery time slot
-    if (data.shippingMethod === 'delivery') {
-      return !!data.deliveryTimeSlot;
-    }
-    return true;
+    // User must pick a delivery time slot
+    return !!data.deliveryTimeSlot;
   }, {
     message: t('checkout.errors.deliveryTimeRequired'),
     path: ['deliveryTimeSlot'],
@@ -255,7 +232,7 @@ export default function CheckoutPage() {
       lastName: '',
       email: '',
       phone: '',
-      shippingMethod: 'pickup',
+      shippingMethod: 'delivery',
       paymentMethod: 'cash_on_delivery',
       shippingAddress: '',
       shippingCity: '',
@@ -350,7 +327,7 @@ export default function CheckoutPage() {
   // Fetch delivery price when city changes
   useEffect(() => {
     const fetchDeliveryPrice = async () => {
-      if (shippingMethod === 'delivery' && shippingCity && shippingCity.trim().length > 0) {
+      if (shippingCity && shippingCity.trim().length > 0) {
         setLoadingDeliveryPrice(true);
         try {
           console.log('🚚 [CHECKOUT] Fetching delivery price for city:', shippingCity);
@@ -379,8 +356,8 @@ export default function CheckoutPage() {
       fetchDeliveryPrice();
     }, 500);
 
-    return () => clearTimeout(timeoutId);
-  }, [shippingCity, shippingMethod]);
+        return () => clearTimeout(timeoutId);
+  }, [shippingCity]);
 
   useEffect(() => {
     // Wait for auth to finish loading before checking
@@ -519,11 +496,6 @@ export default function CheckoutPage() {
               if (defaultAddress.city) {
                 setValue('shippingCity', defaultAddress.city);
                 console.log('📝 [CHECKOUT] Set shippingCity:', defaultAddress.city);
-              }
-              
-              if (defaultAddress.postalCode) {
-                setValue('shippingPostalCode', defaultAddress.postalCode);
-                console.log('📝 [CHECKOUT] Set shippingPostalCode:', defaultAddress.postalCode);
               }
               
               // Use address phone if available, otherwise use user phone
@@ -694,29 +666,25 @@ export default function CheckoutPage() {
       cart: cart ? 'exists' : 'null'
     });
     
-    // Validate shipping address if delivery is selected
-    if (shippingMethod === 'delivery') {
-      const formData = watch();
-      const hasShippingAddress = formData.shippingAddress && formData.shippingAddress.trim().length > 0;
-      const hasShippingCity = formData.shippingCity && formData.shippingCity.trim().length > 0;
-      const hasShippingPostalCode = formData.shippingPostalCode && formData.shippingPostalCode.trim().length > 0;
-      const hasShippingPhone = formData.shippingPhone && formData.shippingPhone.trim().length > 0;
-      
-      if (!hasShippingAddress || !hasShippingCity || !hasShippingPostalCode || !hasShippingPhone) {
-        console.log('[Checkout] Shipping address validation failed:', {
-          hasShippingAddress,
-          hasShippingCity,
-          hasShippingPostalCode,
-          hasShippingPhone
-        });
-        setError(t('checkout.errors.fillShippingAddress'));
-        // Scroll to shipping address section
-        const shippingSection = document.querySelector('[data-shipping-section]');
-        if (shippingSection) {
-          shippingSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return;
+    // Validate shipping address (always required since delivery is always selected)
+    const formData = watch();
+    const hasShippingAddress = formData.shippingAddress && formData.shippingAddress.trim().length > 0;
+    const hasShippingCity = formData.shippingCity && formData.shippingCity.trim().length > 0;
+    const hasShippingPhone = formData.shippingPhone && formData.shippingPhone.trim().length > 0;
+    
+    if (!hasShippingAddress || !hasShippingCity || !hasShippingPhone) {
+      console.log('[Checkout] Shipping address validation failed:', {
+        hasShippingAddress,
+        hasShippingCity,
+        hasShippingPhone
+      });
+      setError(t('checkout.errors.fillShippingAddress'));
+      // Scroll to shipping address section
+      const shippingSection = document.querySelector('[data-shipping-section]');
+      if (shippingSection) {
+        shippingSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
+      return;
     }
     
     // If ArCa or Idram is selected, show card details modal first
@@ -763,16 +731,13 @@ export default function CheckoutPage() {
         cartId = 'guest-cart'; // Keep as guest-cart for API to recognize
       }
 
-      // Prepare shipping address only for delivery
-      const shippingAddress = data.shippingMethod === 'delivery' && 
-        data.shippingAddress && 
+      // Prepare shipping address (always delivery)
+      const shippingAddress = data.shippingAddress && 
         data.shippingCity && 
-        data.shippingPostalCode &&
         data.shippingPhone
         ? {
             address: data.shippingAddress,
             city: data.shippingCity,
-            postalCode: data.shippingPostalCode,
             phone: data.shippingPhone,
             // Store delivery scheduling info together with the address
             ...(data.deliveryDay ? { deliveryDay: data.deliveryDay } : {}),
@@ -943,72 +908,16 @@ export default function CheckoutPage() {
               </div>
             </Card>
 
-            {/* Shipping Method */}
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.shippingMethod')}</h2>
-              {errors.shippingMethod && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-600">{errors.shippingMethod.message}</p>
-                </div>
-              )}
-              <div className="space-y-3">
-                <label
-                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    shippingMethod === 'pickup'
-                      ? 'border-purple-600 bg-purple-50'
-                      : 'border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    {...register('shippingMethod')}
-                    value="pickup"
-                    checked={shippingMethod === 'pickup'}
-                    onChange={(e) => setValue('shippingMethod', e.target.value as 'pickup' | 'delivery')}
-                    className="mr-4"
-                    disabled={isSubmitting}
-                  />
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{t('checkout.shipping.storePickup')}</div>
-                    <div className="text-sm text-gray-600">{t('checkout.shipping.storePickupDescription')}</div>
-                  </div>
-                </label>
-                <label
-                  className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                    shippingMethod === 'delivery'
-                      ? 'border-purple-600 bg-purple-50'
-                      : 'border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    {...register('shippingMethod')}
-                    value="delivery"
-                    checked={shippingMethod === 'delivery'}
-                    onChange={(e) => setValue('shippingMethod', e.target.value as 'pickup' | 'delivery')}
-                    className="mr-4"
-                    disabled={isSubmitting}
-                  />
-                  <div className="flex-1">
-                    <div className="font-medium text-gray-900">{t('checkout.shipping.delivery')}</div>
-                    <div className="text-sm text-gray-600">{t('checkout.shipping.deliveryDescription')}</div>
-                  </div>
-                </label>
-              </div>
-            </Card>
-
-            {/* Shipping Address - Only show for delivery */}
-            {shippingMethod === 'delivery' && (
-              <Card className="p-6" data-shipping-section>
+            {/* Shipping Address - Always show (delivery is always selected) */}
+            <Card className="p-6" data-shipping-section>
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.shippingAddress')}</h2>
-                {(error && error.includes('shipping address')) || (errors.shippingAddress || errors.shippingCity || errors.shippingPostalCode || errors.shippingPhone) ? (
+                {(error && error.includes('shipping address')) || (errors.shippingAddress || errors.shippingCity || errors.shippingPhone) ? (
                   <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                     <p className="text-sm text-red-600">
                       {error && error.includes('shipping address') 
                         ? error 
                         : (errors.shippingAddress?.message || 
                            errors.shippingCity?.message || 
-                           errors.shippingPostalCode?.message || 
                            errors.shippingPhone?.message)}
                     </p>
                   </div>
@@ -1030,39 +939,21 @@ export default function CheckoutPage() {
                       disabled={isSubmitting}
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Input
-                        label={t('checkout.form.city')}
-                        type="text"
-                        placeholder={t('checkout.placeholders.city')}
-                        {...register('shippingCity', {
-                          onChange: () => {
-                            if (error && error.includes('shipping address')) {
-                              setError(null);
-                            }
+                  <div>
+                    <Input
+                      label={t('checkout.form.city')}
+                      type="text"
+                      placeholder={t('checkout.placeholders.city')}
+                      {...register('shippingCity', {
+                        onChange: () => {
+                          if (error && error.includes('shipping address')) {
+                            setError(null);
                           }
-                        })}
-                        error={errors.shippingCity?.message}
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        label={t('checkout.form.postalCode')}
-                        type="text"
-                        placeholder={t('checkout.placeholders.postalCode')}
-                        {...register('shippingPostalCode', {
-                          onChange: () => {
-                            if (error && error.includes('shipping address')) {
-                              setError(null);
-                            }
-                          }
-                        })}
-                        error={errors.shippingPostalCode?.message}
-                        disabled={isSubmitting}
-                      />
-                    </div>
+                        }
+                      })}
+                      error={errors.shippingCity?.message}
+                      disabled={isSubmitting}
+                    />
                   </div>
                   <div>
                     <Input
@@ -1247,7 +1138,6 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               </Card>
-            )}
 
             {/* Payment Method */}
             <Card className="p-6">
@@ -1317,13 +1207,11 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-gray-600">
                   <span>{t('checkout.summary.shipping')}</span>
                   <span>
-                    {shippingMethod === 'pickup' 
-                      ? t('checkout.shipping.freePickup')
-                      : loadingDeliveryPrice
-                        ? t('checkout.shipping.loading')
-                        : deliveryPrice !== null
-                          ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ` (${t('checkout.shipping.delivery')})`)
-                          : t('checkout.shipping.enterCity')}
+                    {loadingDeliveryPrice
+                      ? t('checkout.shipping.loading')
+                      : deliveryPrice !== null
+                        ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ` (${t('checkout.shipping.delivery')})`)
+                        : t('checkout.shipping.enterCity')}
                   </span>
                 </div>
                 <div className="flex justify-between text-gray-600">
@@ -1337,7 +1225,7 @@ export default function CheckoutPage() {
                       {formatPrice(
                         cart.totals.subtotal + 
                         cart.totals.tax + 
-                        (shippingMethod === 'delivery' && deliveryPrice !== null ? deliveryPrice : 0),
+                        (deliveryPrice !== null ? deliveryPrice : 0),
                         currency
                       )}
                     </span>
@@ -1386,7 +1274,7 @@ export default function CheckoutPage() {
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {shippingMethod === 'delivery' ? t('checkout.modals.completeOrder') : t('checkout.modals.confirmOrder')}
+                {t('checkout.modals.completeOrder')}
               </h2>
               <button
                 onClick={() => {
@@ -1437,10 +1325,9 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {shippingMethod === 'delivery' ? (
-              <>
-                <div className="space-y-4 mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">{t('checkout.shippingAddress')}</h3>
+            <>
+              <div className="space-y-4 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">{t('checkout.shippingAddress')}</h3>
                   <div>
                     <Input
                       label={t('checkout.form.address')}
@@ -1451,27 +1338,15 @@ export default function CheckoutPage() {
                       disabled={isSubmitting}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Input
-                        label={t('checkout.form.city')}
-                        type="text"
-                        placeholder={t('checkout.placeholders.city')}
-                        {...register('shippingCity')}
-                        error={errors.shippingCity?.message}
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        label={t('checkout.form.postalCode')}
-                        type="text"
-                        placeholder={t('checkout.placeholders.postalCode')}
-                        {...register('shippingPostalCode')}
-                        error={errors.shippingPostalCode?.message}
-                        disabled={isSubmitting}
-                      />
-                    </div>
+                  <div>
+                    <Input
+                      label={t('checkout.form.city')}
+                      type="text"
+                      placeholder={t('checkout.placeholders.city')}
+                      {...register('shippingCity')}
+                      error={errors.shippingCity?.message}
+                      disabled={isSubmitting}
+                    />
                   </div>
                   <div>
                     <Input
@@ -1485,12 +1360,11 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {(errors.shippingAddress || errors.shippingCity || errors.shippingPostalCode || errors.shippingPhone) && (
+                {(errors.shippingAddress || errors.shippingCity || errors.shippingPhone) && (
                   <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                     <p className="text-sm text-red-600">
                       {errors.shippingAddress?.message || 
                        errors.shippingCity?.message || 
-                       errors.shippingPostalCode?.message || 
                        errors.shippingPhone?.message}
                     </p>
                   </div>
@@ -1592,7 +1466,7 @@ export default function CheckoutPage() {
                           ? t('checkout.shipping.loading')
                           : deliveryPrice !== null
                             ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ` (${t('checkout.shipping.delivery')})`)
-                            : shippingMethod === 'delivery' ? t('checkout.shipping.enterCity') : t('checkout.shipping.freePickup')}
+                            : t('checkout.shipping.enterCity')}
                       </span>
                     </div>
                     <div className="border-t border-gray-200 pt-2 mt-2">
@@ -1602,7 +1476,7 @@ export default function CheckoutPage() {
                           {formatPrice(
                             cart.totals.subtotal + 
                             cart.totals.tax + 
-                            (shippingMethod === 'delivery' && deliveryPrice !== null ? deliveryPrice : 0),
+                            (deliveryPrice !== null ? deliveryPrice : 0),
                             currency
                           )}
                         </span>
@@ -1611,119 +1485,6 @@ export default function CheckoutPage() {
                   </div>
                 )}
               </>
-            ) : (
-              <div className="mb-6">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <p className="text-sm text-blue-800">
-                    <strong>{t('checkout.shipping.storePickup')}:</strong> {t('checkout.messages.storePickupInfo')}
-                  </p>
-                </div>
-
-                {/* Payment Details for Pickup - Only show for card payments */}
-                {(paymentMethod === 'arca' || paymentMethod === 'idram') && (
-                  <div className="space-y-4 mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {t('checkout.payment.paymentDetails')} ({paymentMethod === 'idram' ? t('checkout.payment.idram') : t('checkout.payment.arca')})
-                    </h3>
-                    <div>
-                      <Input
-                        label={t('checkout.form.cardNumber')}
-                        type="text"
-                        placeholder={t('checkout.placeholders.cardNumber')}
-                        maxLength={19}
-                        {...register('cardNumber')}
-                        error={errors.cardNumber?.message}
-                        disabled={isSubmitting}
-                        onChange={(e) => {
-                          let value = e.target.value.replace(/\s/g, '');
-                          value = value.replace(/(.{4})/g, '$1 ').trim();
-                          setValue('cardNumber', value);
-                        }}
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Input
-                          label={t('checkout.form.expiryDate')}
-                          type="text"
-                          placeholder={t('checkout.placeholders.expiryDate')}
-                          maxLength={5}
-                          {...register('cardExpiry')}
-                          error={errors.cardExpiry?.message}
-                          disabled={isSubmitting}
-                          onChange={(e) => {
-                            let value = e.target.value.replace(/\D/g, '');
-                            if (value.length >= 2) {
-                              value = value.substring(0, 2) + '/' + value.substring(2, 4);
-                            }
-                            setValue('cardExpiry', value);
-                          }}
-                        />
-                      </div>
-                      <div>
-                        <Input
-                          label={t('checkout.form.cvv')}
-                          type="text"
-                          placeholder={t('checkout.placeholders.cvv')}
-                          maxLength={4}
-                          {...register('cardCvv')}
-                          error={errors.cardCvv?.message}
-                          disabled={isSubmitting}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, '');
-                            setValue('cardCvv', value);
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Input
-                        label={t('checkout.form.cardHolderName')}
-                        type="text"
-                        placeholder={t('checkout.placeholders.cardHolderName')}
-                        {...register('cardHolderName')}
-                        error={errors.cardHolderName?.message}
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Cash on Delivery Info for Pickup */}
-                {paymentMethod === 'cash_on_delivery' && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-                    <p className="text-sm text-green-800">
-                      <strong>{t('checkout.payment.cashOnDelivery')}:</strong> {t('checkout.messages.cashOnDeliveryPickup')}
-                    </p>
-                  </div>
-                )}
-
-                {cart && (
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">{t('checkout.summary.items')}:</span>
-                      <span className="font-medium">{cart.itemsCount}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">{t('checkout.summary.subtotal')}:</span>
-                      <span className="font-medium">{formatPrice(cart.totals.subtotal, currency)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">{t('checkout.summary.shipping')}:</span>
-                      <span className="font-medium">{t('checkout.shipping.freePickup')}</span>
-                    </div>
-                    <div className="border-t border-gray-200 pt-2 mt-2">
-                      <div className="flex justify-between">
-                        <span className="font-semibold text-gray-900">{t('checkout.summary.total')}:</span>
-                        <span className="font-bold text-gray-900">
-                          {formatPrice(cart.totals.subtotal + cart.totals.tax, currency)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
 
             <div className="flex gap-3">
               <ProductPageButton
@@ -1923,13 +1684,11 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">{t('checkout.summary.shipping')}:</span>
                   <span className="font-medium">
-                    {shippingMethod === 'pickup' 
-                      ? t('checkout.shipping.freePickup')
-                      : loadingDeliveryPrice
-                        ? t('checkout.shipping.loading')
-                        : deliveryPrice !== null
-                          ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ` (${t('checkout.shipping.delivery')})`)
-                          : t('checkout.shipping.enterCity')}
+                    {loadingDeliveryPrice
+                      ? t('checkout.shipping.loading')
+                      : deliveryPrice !== null
+                        ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ` (${t('checkout.shipping.delivery')})`)
+                        : t('checkout.shipping.enterCity')}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -1943,7 +1702,7 @@ export default function CheckoutPage() {
                       {formatPrice(
                         cart.totals.subtotal + 
                         cart.totals.tax + 
-                        (shippingMethod === 'delivery' && deliveryPrice !== null ? deliveryPrice : 0),
+                        (deliveryPrice !== null ? deliveryPrice : 0),
                         currency
                       )}
                     </span>

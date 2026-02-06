@@ -1,7 +1,6 @@
 {
   "title": "Checkout",
   "contactInformation": "Contact Information",
-  "shippingMethod": "Shipping Method",
   "shippingAddress": "Shipping Address",
   "paymentMethod": "Payment Method",
   "orderSummary": "Order Summary",
@@ -12,7 +11,6 @@
     "phone": "Phone",
     "address": "Address",
     "city": "City",
-    "postalCode": "Postal Code",
     "phoneNumber": "Phone Number",
     "cardNumber": "Card Number",
     "expiryDate": "Expiry Date",
@@ -23,18 +21,14 @@
     "phone": "+374XXXXXXXX",
     "address": "Street address, apartment, suite, etc.",
     "city": "City",
-    "postalCode": "Postal code",
     "cardNumber": "1234 5678 9012 3456",
     "expiryDate": "MM/YY",
     "cvv": "123",
     "cardHolderName": "John Doe"
   },
   "shipping": {
-    "storePickup": "Store Pickup",
-    "storePickupDescription": "Pick up your order from our store (Free)",
     "delivery": "Delivery",
     "deliveryDescription": "We'll deliver your order to your address",
-    "freePickup": "Free (Pickup)",
     "loading": "Loading...",
     "enterCity": "Enter city"
   },
@@ -75,14 +69,11 @@
   },
   "modals": {
     "completeOrder": "Complete Your Order",
-    "confirmOrder": "Confirm Order",
     "cardDetails": "{method} Card Details",
     "closeModal": "Close modal"
   },
   "messages": {
-    "cashOnDeliveryInfo": "Cash on Delivery: You will pay with cash when you receive your order. No card details required.",
-    "cashOnDeliveryPickup": "Cash on Delivery: You will pay with cash when you pick up your order. No card details required.",
-    "storePickupInfo": "Store Pickup: You will pick up your order from our store. Shipping is free."
+    "cashOnDeliveryInfo": "Cash on Delivery: You will pay with cash when you receive your order. No card details required."
   },
   "status": {
     "successTitle": "Thank you for your order!",
@@ -101,11 +92,9 @@
     "invalidEmail": "Invalid email address",
     "phoneRequired": "Phone is required",
     "invalidPhone": "Invalid phone number",
-    "selectShippingMethod": "Please select a shipping method",
     "selectPaymentMethod": "Please select a payment method",
     "addressRequired": "Address is required for delivery",
     "cityRequired": "City is required for delivery",
-    "postalCodeRequired": "Postal code is required for delivery",
     "phoneRequiredDelivery": "Phone number is required for delivery",
     "invalidPhoneFormat": "Invalid phone number format",
     "cardNumberRequired": "Card number is required",

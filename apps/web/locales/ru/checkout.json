@@ -1,7 +1,6 @@
 {
   "title": "Оформление заказа",
   "contactInformation": "Контактная информация",
-  "shippingMethod": "Способ доставки",
   "shippingAddress": "Адрес доставки",
   "paymentMethod": "Способ оплаты",
   "orderSummary": "Итоги заказа",
@@ -12,7 +11,6 @@
     "phone": "Телефон",
     "address": "Адрес",
     "city": "Город",
-    "postalCode": "Почтовый индекс",
     "phoneNumber": "Номер телефона",
     "cardNumber": "Номер карты",
     "expiryDate": "Срок действия",
@@ -23,18 +21,14 @@
     "phone": "+374XXXXXXXX",
     "address": "Улица, квартира, офис и т.д.",
     "city": "Город",
-    "postalCode": "Почтовый индекс",
     "cardNumber": "1234 5678 9012 3456",
     "expiryDate": "ММ/ГГ",
     "cvv": "123",
     "cardHolderName": "Иван Иванов"
   },
   "shipping": {
-    "storePickup": "Самовывоз",
-    "storePickupDescription": "Заберите ваш заказ из нашего магазина (Бесплатно)",
     "delivery": "Доставка",
     "deliveryDescription": "Мы доставим ваш заказ по вашему адресу",
-    "freePickup": "Бесплатно (Самовывоз)",
     "loading": "Загрузка...",
     "enterCity": "Введите город"
   },
@@ -75,14 +69,11 @@
   },
   "modals": {
     "completeOrder": "Завершите ваш заказ",
-    "confirmOrder": "Подтвердить заказ",
     "cardDetails": "Данные карты {method}",
     "closeModal": "Закрыть окно"
   },
   "messages": {
-    "cashOnDeliveryInfo": "Наложенный платеж: Вы заплатите наличными при получении заказа. Данные карты не требуются.",
-    "cashOnDeliveryPickup": "Наложенный платеж: Вы заплатите наличными при самовывозе заказа. Данные карты не требуются.",
-    "storePickupInfo": "Самовывоз: Вы заберете ваш заказ из нашего магазина. Доставка бесплатна."
+    "cashOnDeliveryInfo": "Наложенный платеж: Вы заплатите наличными при получении заказа. Данные карты не требуются."
   },
   "status": {
     "successTitle": "Спасибо за ваш заказ!",
@@ -101,11 +92,9 @@
     "invalidEmail": "Неверный адрес электронной почты",
     "phoneRequired": "Телефон обязателен",
     "invalidPhone": "Неверный номер телефона",
-    "selectShippingMethod": "Пожалуйста, выберите способ доставки",
     "selectPaymentMethod": "Пожалуйста, выберите способ оплаты",
     "addressRequired": "Адрес обязателен для доставки",
     "cityRequired": "Город обязателен для доставки",
-    "postalCodeRequired": "Почтовый индекс обязателен для доставки",
     "phoneRequiredDelivery": "Номер телефона обязателен для доставки",
     "invalidPhoneFormat": "Неверный формат номера телефона",
     "cardNumberRequired": "Номер карты обязателен",
