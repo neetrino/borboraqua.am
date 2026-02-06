@@ -4848,8 +4848,8 @@ class AdminService {
     });
 
     if (!setting) {
-      console.log('✅ [ADMIN SERVICE] Delivery settings not found, returning default price');
-      return 1000; // Default price
+      console.log('⚠️ [ADMIN SERVICE] Delivery settings not found, returning null');
+      return null;
     }
 
     const value = setting.value as { locations?: Array<{ country: string; city: string; price: number }> };
@@ -4877,9 +4877,9 @@ class AdminService {
       return cityMatch.price;
     }
 
-    // Return default price if no match found
-    console.log('✅ [ADMIN SERVICE] No delivery price found, returning default');
-    return 1000; // Default price
+    // Return null if no match found - don't return default price
+    console.log('⚠️ [ADMIN SERVICE] No delivery price found for city:', city);
+    return null;
   }
 
   /**

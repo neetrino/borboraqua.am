@@ -341,8 +341,8 @@ export default function CheckoutPage() {
           setDeliveryPrice(response.price);
         } catch (err: any) {
           console.error('❌ [CHECKOUT] Error fetching delivery price:', err);
-          // Use default price if error
-          setDeliveryPrice(1000);
+          // Don't set default price - keep it null so it doesn't add to total
+          setDeliveryPrice(null);
         } finally {
           setLoadingDeliveryPrice(false);
         }
