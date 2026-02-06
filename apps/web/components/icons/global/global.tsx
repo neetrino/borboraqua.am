@@ -378,7 +378,7 @@ export function Header({
           </div>
 
           {/* Header Icons - Separate Vector Groups */}
-          <div className="content-stretch flex gap-[20px] lg:gap-[18px] md:gap-[16px] sm:gap-[10px] items-center justify-center relative shrink-0">
+          <div className="content-stretch flex gap-[20px] lg:gap-[18px] md:gap-[16px] sm:gap-[10px] items-center justify-center relative shrink-0 ml-[20px] md:ml-[16px] sm:ml-[12px]">
             {/* Currency Display (e.g. AMD ▼) */}
             <div
               className="hidden sm:flex items-center justify-center relative shrink-0 h-[20px] md:h-[18px] sm:h-[16px]"
@@ -392,15 +392,26 @@ export function Header({
                 aria-expanded={showCurrencyMenu}
               >
                 <span>{currency}</span>
-                <span className="flex items-center justify-center h-[10px] w-[10px] md:h-[10px] md:w-[10px]">
-                  <img
-                    alt="Change currency"
-                    src={imgCurrencyArrow}
-                    className="block max-w-none w-full h-full transition-transform duration-150"
+                <span className="flex items-center justify-center h-[12px] w-[12px] md:h-[12px] md:w-[12px]">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 10 10"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="transition-transform duration-150"
                     style={{
-                      transform: showCurrencyMenu ? 'rotate(270deg)' : 'rotate(90deg)',
+                      transform: showCurrencyMenu ? 'rotate(180deg)' : 'rotate(0deg)',
                     }}
-                  />
+                  >
+                    <path
+                      d="M2 3L5 6L8 3"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </span>
               </button>
               {showCurrencyMenu && (
