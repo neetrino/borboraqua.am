@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { getStoredLanguage, LANGUAGES, type LanguageCode } from '../../../lib/language';
 import { apiClient } from '../../../lib/api-client';
 import { type CurrencyCode, CURRENCIES, getStoredCurrency, setStoredCurrency } from '../../../lib/currency';
@@ -455,13 +456,42 @@ export function Header({
               )}
             </div>
 
-            {/* Language Icon */}
-            <div className="relative shrink-0" ref={languageMenuRef}>
+            {/* Language Icon with Badge */}
+            <div className="relative shrink-0 flex items-center" ref={languageMenuRef}>
               <div
                 onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-                className="h-[20px] md:h-[18px] sm:h-[16px] w-[20px] md:w-[18px] sm:w-[16px] relative cursor-pointer flex items-center justify-center"
+                className="relative cursor-pointer flex items-center"
               >
-                <LanguageIcon size={20} className="brightness-0" />
+                {/* Globe Icon */}
+                <div className="relative shrink-0 w-[19px] h-[19px]">
+                  <Image 
+                    alt="Language" 
+                    src="/assets/icons/vector1.svg"
+                    width={19}
+                    height={19}
+                    className="block max-w-none w-full h-full"
+                    unoptimized
+                  />
+                </div>
+                {/* Language Badge - positioned on top of icon */}
+                <div className="absolute left-[11.5px] top-[-4px] flex items-center">
+                  <div className="bg-[#9bcdef] border-[#151e21] border-[1.5px] border-solid h-[15.2px] rounded-[4px] w-[19px] relative flex items-center justify-center">
+                    <span className="capitalize font-['Montserrat_arm:Bold',sans-serif] font-bold text-[#151e21] text-[9px] leading-[18px]">
+                      {(() => {
+                        const currentLang = getStoredLanguage();
+                        // Show the current language code
+                        if (currentLang === 'hy') {
+                          return 'HY';
+                        }
+                        if (currentLang === 'ru') {
+                          return 'RU';
+                        }
+                        // English
+                        return 'EN';
+                      })()}
+                    </span>
+                  </div>
+                </div>
               </div>
               {showLanguageMenu && (
                 <div className="absolute top-full right-0 mt-2 w-40 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
