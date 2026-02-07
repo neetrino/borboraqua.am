@@ -640,23 +640,6 @@ export default function AdminPanel() {
             </ProductPageButton>
             <ProductPageButton
               variant="outline"
-              onClick={() => router.push('/admin/orders')}
-              className="justify-start w-full h-auto py-4 text-sm"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <p className="font-medium text-gray-900">{t('admin.dashboard.manageOrders')}</p>
-                  <p className="text-xs text-gray-500">{t('admin.dashboard.viewAllOrders')}</p>
-                </div>
-              </div>
-            </ProductPageButton>
-            <ProductPageButton
-              variant="outline"
               onClick={() => router.push('/admin/users')}
               className="justify-start w-full h-auto py-4 text-sm"
             >
