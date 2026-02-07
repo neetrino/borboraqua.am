@@ -216,7 +216,19 @@
       "fri": "Friday",
       "sat": "Saturday",
       "sun": "Sunday"
-    }
+    },
+    "timeSlotsTitle": "Delivery Time Slots",
+    "timeSlotsDescription": "Manage available delivery time slots. These will be shown to customers during checkout.",
+    "addTimeSlot": "Add Time Slot",
+    "noTimeSlots": "No time slots added",
+    "enabled": "Enabled",
+    "deleteTimeSlot": "Are you sure you want to delete this time slot?",
+    "atLeastOneTimeSlot": "At least one time slot must exist",
+    "atLeastOneTimeSlotEnabled": "At least one time slot must be enabled",
+    "timeSlotLabelEn": "Label (English)",
+    "timeSlotLabelHy": "Label (Armenian)",
+    "timeSlotLabelRu": "Label (Russian)",
+    "timeSlotLabelPlaceholder": "e.g., Morning (9:00 - 13:00)"
   },
   "users": {
     "title": "Manage Users",

@@ -20,9 +20,20 @@ interface DeliverySchedule {
   enabledWeekdays: number[];
 }
 
+interface DeliveryTimeSlot {
+  id: string;
+  label: {
+    en: string;
+    hy: string;
+    ru: string;
+  };
+  enabled: boolean;
+}
+
 interface DeliverySettings {
   locations: DeliveryLocation[];
   schedule?: DeliverySchedule;
+  timeSlots?: DeliveryTimeSlot[];
 }
 
 export default function DeliveryPage() {
@@ -35,6 +46,10 @@ export default function DeliveryPage() {
   const [locations, setLocations] = useState<DeliveryLocation[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [enabledWeekdays, setEnabledWeekdays] = useState<number[]>([2, 4]); // Default Tue & Thu
+  const [timeSlots, setTimeSlots] = useState<DeliveryTimeSlot[]>([
+    { id: 'first_half', label: { en: 'Morning (9:00 - 13:00)', hy: 'Առավոտյան (9:00 - 13:00)', ru: 'Утро (9:00 - 13:00)' }, enabled: true },
+    { id: 'second_half', label: { en: 'Afternoon (13:00 - 18:00)', hy: 'Երեկոյան (13:00 - 18:00)', ru: 'День (13:00 - 18:00)' }, enabled: true },
+  ]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -62,6 +77,9 @@ export default function DeliveryPage() {
           ? data.schedule.enabledWeekdays
           : [2, 4];
       setEnabledWeekdays(weekdays);
+      if (data.timeSlots && data.timeSlots.length > 0) {
+        setTimeSlots(data.timeSlots);
+      }
       console.log('✅ [ADMIN] Delivery settings loaded:', data);
     } catch (err: any) {
       console.error('❌ [ADMIN] Error fetching delivery settings:', err);
@@ -81,6 +99,7 @@ export default function DeliveryPage() {
         schedule: {
           enabledWeekdays,
         },
+        timeSlots,
       });
       alert(t('admin.delivery.savedSuccess'));
       console.log('✅ [ADMIN] Delivery settings saved');
@@ -132,6 +151,48 @@ export default function DeliveryPage() {
       const updated = locations.filter((_, i) => i !== index);
       setLocations(updated);
     }
+  };
+
+  const handleAddTimeSlot = () => {
+    const newSlot: DeliveryTimeSlot = {
+      id: `slot-${Date.now()}`,
+      label: { en: '', hy: '', ru: '' },
+      enabled: true,
+    };
+    setTimeSlots([...timeSlots, newSlot]);
+    setEditingId(`timeSlot-${newSlot.id}`);
+  };
+
+  const handleUpdateTimeSlot = (index: number, field: keyof DeliveryTimeSlot, value: any) => {
+    const updated = [...timeSlots];
+    if (field === 'label') {
+      updated[index] = { ...updated[index], label: { ...updated[index].label, ...value } };
+    } else {
+      updated[index] = { ...updated[index], [field]: value };
+    }
+    setTimeSlots(updated);
+  };
+
+  const handleDeleteTimeSlot = (index: number) => {
+    if (timeSlots.length <= 1) {
+      alert(t('admin.delivery.atLeastOneTimeSlot') || 'At least one time slot must exist');
+      return;
+    }
+    if (confirm(t('admin.delivery.deleteTimeSlot') || 'Delete this time slot?')) {
+      const updated = timeSlots.filter((_, i) => i !== index);
+      setTimeSlots(updated);
+    }
+  };
+
+  const handleToggleTimeSlot = (index: number) => {
+    const updated = [...timeSlots];
+    updated[index].enabled = !updated[index].enabled;
+    // Ensure at least one slot is enabled
+    if (!updated.some(slot => slot.enabled)) {
+      alert(t('admin.delivery.atLeastOneTimeSlotEnabled') || 'At least one time slot must be enabled');
+      return;
+    }
+    setTimeSlots(updated);
   };
 
   if (isLoading || loading) {
@@ -314,6 +375,105 @@ export default function DeliveryPage() {
                   );
                 })}
               </div>
+            </Card>
+
+            {/* Delivery Time Slots */}
+            <Card className="p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {t('admin.delivery.timeSlotsTitle') || 'Delivery Time Slots'}
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {t('admin.delivery.timeSlotsDescription') || 'Manage available delivery time slots'}
+                  </p>
+                </div>
+                <ProductPageButton
+                  onClick={handleAddTimeSlot}
+                  disabled={saving}
+                  className="px-4 py-2 text-sm"
+                >
+                  {t('admin.delivery.addTimeSlot') || 'Add Time Slot'}
+                </ProductPageButton>
+              </div>
+              
+              {timeSlots.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p>{t('admin.delivery.noTimeSlots') || 'No time slots added'}</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {timeSlots.map((slot, index) => (
+                    <div key={slot.id} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={slot.enabled}
+                              onChange={() => handleToggleTimeSlot(index)}
+                              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                              disabled={saving}
+                            />
+                            <span className="text-sm font-medium text-gray-700">
+                              {t('admin.delivery.enabled') || 'Enabled'}
+                            </span>
+                          </label>
+                        </div>
+                        <ProductPageButton
+                          variant="outline"
+                          onClick={() => handleDeleteTimeSlot(index)}
+                          disabled={saving || timeSlots.length <= 1}
+                          className="px-2 py-1 text-xs text-red-600 border-red-300 hover:bg-red-50"
+                          title={t('admin.delivery.deleteTimeSlot') || 'Delete time slot'}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </ProductPageButton>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('admin.delivery.timeSlotLabelEn') || 'Label (English)'}
+                          </label>
+                          <input
+                            type="text"
+                            value={slot.label.en}
+                            onChange={(e) => handleUpdateTimeSlot(index, 'label', { en: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder={t('admin.delivery.timeSlotLabelPlaceholder') || 'e.g., Morning (9:00 - 13:00)'}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('admin.delivery.timeSlotLabelHy') || 'Label (Armenian)'}
+                          </label>
+                          <input
+                            type="text"
+                            value={slot.label.hy}
+                            onChange={(e) => handleUpdateTimeSlot(index, 'label', { hy: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder={t('admin.delivery.timeSlotLabelPlaceholder') || 'e.g., Առավոտյան (9:00 - 13:00)'}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('admin.delivery.timeSlotLabelRu') || 'Label (Russian)'}
+                          </label>
+                          <input
+                            type="text"
+                            value={slot.label.ru}
+                            onChange={(e) => handleUpdateTimeSlot(index, 'label', { ru: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder={t('admin.delivery.timeSlotLabelPlaceholder') || 'e.g., Утро (9:00 - 13:00)'}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
 
             {/* Actions */}

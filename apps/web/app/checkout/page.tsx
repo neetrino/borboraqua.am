@@ -44,17 +44,22 @@ interface Cart {
   itemsCount: number;
 }
 
-type DeliveryTimeSlot = 'first_half' | 'second_half';
+type DeliveryTimeSlot = string;
 
 type DeliveryDayOption = {
   date: string;
   label: string;
 };
 
-const DELIVERY_TIME_SLOTS: Array<{ id: DeliveryTimeSlot; labelKey: string }> = [
-  { id: 'first_half', labelKey: 'checkout.delivery.timeSlots.firstHalf' },
-  { id: 'second_half', labelKey: 'checkout.delivery.timeSlots.secondHalf' },
-];
+interface DeliveryTimeSlotConfig {
+  id: string;
+  label: {
+    en: string;
+    hy: string;
+    ru: string;
+  };
+  enabled: boolean;
+}
 
 type CheckoutFormData = {
   firstName: string;
@@ -92,6 +97,7 @@ export default function CheckoutPage() {
   const [deliveryPrice, setDeliveryPrice] = useState<number | null>(null);
   const [loadingDeliveryPrice, setLoadingDeliveryPrice] = useState(false);
   const [enabledWeekdays, setEnabledWeekdays] = useState<number[] | null>(null);
+  const [deliveryTimeSlots, setDeliveryTimeSlots] = useState<DeliveryTimeSlotConfig[]>([]);
   const [calendarMonth, setCalendarMonth] = useState<Date>(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -144,7 +150,7 @@ export default function CheckoutPage() {
     cardHolderName: z.string().optional(),
     // Delivery date & time - required only for home delivery
     deliveryDay: z.string().optional(),
-    deliveryTimeSlot: z.enum(['first_half', 'second_half']).optional(),
+    deliveryTimeSlot: z.string().optional(),
   }).refine((data) => {
     return data.shippingAddress && data.shippingAddress.trim().length > 0;
   }, {
@@ -305,23 +311,37 @@ export default function CheckoutPage() {
     return results;
   }, [calendarMonth, enabledWeekdays, language]);
 
-  // Fetch delivery schedule (enabled weekdays) once
+  // Fetch delivery schedule (enabled weekdays) and time slots once
   useEffect(() => {
-    const fetchSchedule = async () => {
+    const fetchDeliverySettings = async () => {
       try {
-        const response = await apiClient.get<{ enabledWeekdays: number[] }>('/api/v1/delivery/schedule');
+        const response = await apiClient.get<{ schedule: { enabledWeekdays: number[] }; timeSlots: DeliveryTimeSlotConfig[] }>('/api/v1/delivery/settings');
         const days =
-          Array.isArray(response.enabledWeekdays) && response.enabledWeekdays.length > 0
-            ? response.enabledWeekdays
+          Array.isArray(response.schedule?.enabledWeekdays) && response.schedule.enabledWeekdays.length > 0
+            ? response.schedule.enabledWeekdays
             : [2, 4];
         setEnabledWeekdays(days);
+        
+        if (Array.isArray(response.timeSlots) && response.timeSlots.length > 0) {
+          setDeliveryTimeSlots(response.timeSlots);
+        } else {
+          // Fallback to default slots
+          setDeliveryTimeSlots([
+            { id: 'first_half', label: { en: 'Morning (9:00 - 13:00)', hy: 'Առավոտյան (9:00 - 13:00)', ru: 'Утро (9:00 - 13:00)' }, enabled: true },
+            { id: 'second_half', label: { en: 'Afternoon (13:00 - 18:00)', hy: 'Երեկոյան (13:00 - 18:00)', ru: 'День (13:00 - 18:00)' }, enabled: true },
+          ]);
+        }
       } catch (err) {
-        console.error('❌ [CHECKOUT] Error fetching delivery schedule:', err);
-        setEnabledWeekdays([2, 4]);
+        console.error('❌ [CHECKOUT] Error fetching delivery settings:', err);
+        setEnabledWeekdays([2, 4]); // Default fallback
+        setDeliveryTimeSlots([
+          { id: 'first_half', label: { en: 'Morning (9:00 - 13:00)', hy: 'Առավոտյան (9:00 - 13:00)', ru: 'Утро (9:00 - 13:00)' }, enabled: true },
+          { id: 'second_half', label: { en: 'Afternoon (13:00 - 18:00)', hy: 'Երեկոյան (13:00 - 18:00)', ru: 'День (13:00 - 18:00)' }, enabled: true },
+        ]);
       }
     };
 
-    fetchSchedule();
+    fetchDeliverySettings();
   }, []);
 
   // Fetch delivery price when city changes
@@ -1099,36 +1119,44 @@ export default function CheckoutPage() {
                       {t('checkout.delivery.time')}
                     </h3>
                     <div className="space-y-3">
-                      {DELIVERY_TIME_SLOTS.map((slot) => (
-                        <label
-                          key={slot.id}
-                          className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
-                            deliveryTimeSlot === slot.id
-                              ? 'border-purple-600 bg-purple-50'
-                              : 'border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            {...register('deliveryTimeSlot')}
-                            value={slot.id}
-                            checked={deliveryTimeSlot === slot.id}
-                            onChange={(e) =>
-                              setValue(
-                                'deliveryTimeSlot',
-                                e.target.value as DeliveryTimeSlot
-                              )
-                            }
-                            className="mr-3"
-                            disabled={isSubmitting || !deliveryDay}
-                          />
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-900">
-                              {t(slot.labelKey)}
-                            </div>
-                          </div>
-                        </label>
-                      ))}
+                      {deliveryTimeSlots.length > 0 ? (
+                        deliveryTimeSlots.map((slot) => {
+                          const storedLang = getStoredLanguage();
+                          const label = slot.label[storedLang as 'en' | 'hy' | 'ru'] || slot.label.en;
+                          return (
+                            <label
+                              key={slot.id}
+                              className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                                deliveryTimeSlot === slot.id
+                                  ? 'border-purple-600 bg-purple-50'
+                                  : 'border-gray-300 hover:bg-gray-50'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                {...register('deliveryTimeSlot')}
+                                value={slot.id}
+                                checked={deliveryTimeSlot === slot.id}
+                                onChange={(e) =>
+                                  setValue(
+                                    'deliveryTimeSlot',
+                                    e.target.value as DeliveryTimeSlot
+                                  )
+                                }
+                                className="mr-3"
+                                disabled={isSubmitting || !deliveryDay}
+                              />
+                              <div className="flex-1">
+                                <div className="font-medium text-gray-900">
+                                  {label}
+                                </div>
+                              </div>
+                            </label>
+                          );
+                        })
+                      ) : (
+                        <p className="text-sm text-gray-500">{t('checkout.delivery.noTimeSlots') || 'No time slots available'}</p>
+                      )}
                     </div>
                     {errors.deliveryTimeSlot && (
                       <p className="mt-2 text-sm text-red-600">

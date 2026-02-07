@@ -4825,6 +4825,10 @@ class AdminService {
           // Default: Tuesday (2) and Thursday (4)
           enabledWeekdays: [2, 4],
         },
+        timeSlots: [
+          { id: 'first_half', label: { en: 'Morning (9:00 - 13:00)', hy: 'Առավոտյան (9:00 - 13:00)', ru: 'Утро (9:00 - 13:00)' }, enabled: true },
+          { id: 'second_half', label: { en: 'Afternoon (13:00 - 18:00)', hy: 'Երեկոյան (13:00 - 18:00)', ru: 'День (13:00 - 18:00)' }, enabled: true },
+        ],
       };
     }
 
@@ -4833,6 +4837,7 @@ class AdminService {
       schedule?: {
         enabledWeekdays?: number[];
       };
+      timeSlots?: Array<{ id: string; label: { en: string; hy: string; ru: string }; enabled: boolean }>;
     };
 
     const enabledWeekdays =
@@ -4840,12 +4845,20 @@ class AdminService {
         ? value.schedule!.enabledWeekdays
         : [2, 4];
 
+    const timeSlots = Array.isArray(value.timeSlots) && value.timeSlots.length > 0
+      ? value.timeSlots
+      : [
+          { id: 'first_half', label: { en: 'Morning (9:00 - 13:00)', hy: 'Առավոտյան (9:00 - 13:00)', ru: 'Утро (9:00 - 13:00)' }, enabled: true },
+          { id: 'second_half', label: { en: 'Afternoon (13:00 - 18:00)', hy: 'Երեկոյան (13:00 - 18:00)', ru: 'День (13:00 - 18:00)' }, enabled: true },
+        ];
+
     console.log('✅ [ADMIN SERVICE] Delivery settings loaded:', value);
     return {
       locations: value.locations || [],
       schedule: {
         enabledWeekdays,
       },
+      timeSlots,
     };
   }
 
@@ -4902,6 +4915,7 @@ class AdminService {
     schedule?: {
       enabledWeekdays?: number[];
     };
+    timeSlots?: Array<{ id: string; label: { en: string; hy: string; ru: string }; enabled: boolean }>;
   }) {
     console.log('🚚 [ADMIN SERVICE] updateDeliverySettings called:', data);
     
@@ -4951,42 +4965,89 @@ class AdminService {
       enabledWeekdays.push(2, 4);
     }
 
+    // Validate time slots
+    const timeSlots = Array.isArray(data.timeSlots) && data.timeSlots.length > 0
+      ? data.timeSlots.map(slot => ({
+          id: slot.id,
+          label: {
+            en: slot.label?.en || '',
+            hy: slot.label?.hy || '',
+            ru: slot.label?.ru || '',
+          },
+          enabled: slot.enabled !== undefined ? slot.enabled : true,
+        }))
+      : [
+          { id: 'first_half', label: { en: 'Morning (9:00 - 13:00)', hy: 'Առավոտյան (9:00 - 13:00)', ru: 'Утро (9:00 - 13:00)' }, enabled: true },
+          { id: 'second_half', label: { en: 'Afternoon (13:00 - 18:00)', hy: 'Երեկոյան (13:00 - 18:00)', ru: 'День (13:00 - 18:00)' }, enabled: true },
+        ];
+
+    // Ensure at least one time slot is enabled
+    if (!timeSlots.some(slot => slot.enabled)) {
+      throw {
+        status: 400,
+        type: "https://api.shop.am/problems/validation-error",
+        title: "Validation Error",
+        detail: "At least one time slot must be enabled",
+      };
+    }
+
     // Generate IDs for new locations
     const locationsWithIds = data.locations.map((location, index) => ({
       ...location,
       id: location.id || `location-${Date.now()}-${index}`,
     }));
 
-    const setting = await db.settings.upsert({
-      where: { key: 'delivery-locations' },
-      update: {
-        value: {
-          locations: locationsWithIds,
-          schedule: {
-            enabledWeekdays,
+    try {
+      const setting = await db.settings.upsert({
+        where: { key: 'delivery-locations' },
+        update: {
+          value: {
+            locations: locationsWithIds,
+            schedule: {
+              enabledWeekdays,
+            },
+            timeSlots,
           },
+          updatedAt: new Date(),
         },
-        updatedAt: new Date(),
-      },
-      create: {
-        key: 'delivery-locations',
-        value: {
-          locations: locationsWithIds,
-          schedule: {
-            enabledWeekdays,
+        create: {
+          key: 'delivery-locations',
+          value: {
+            locations: locationsWithIds,
+            schedule: {
+              enabledWeekdays,
+            },
+            timeSlots,
           },
+          description: 'Delivery prices, schedule, and time slots by country and city',
         },
-        description: 'Delivery prices and schedule by country and city',
-      },
-    });
+      });
 
-    console.log('✅ [ADMIN SERVICE] Delivery settings updated:', setting);
-    return {
-      locations: locationsWithIds,
-      schedule: {
-        enabledWeekdays,
-      },
-    };
+      console.log('✅ [ADMIN SERVICE] Delivery settings updated:', setting);
+      return {
+        locations: locationsWithIds,
+        schedule: {
+          enabledWeekdays,
+        },
+        timeSlots,
+      };
+    } catch (error: any) {
+      // Check for encoding errors (WIN1251 vs UTF-8 mismatch)
+      if (error?.message?.includes('encoding') || 
+          error?.message?.includes('WIN1251') || 
+          error?.message?.includes('UTF8') ||
+          error?.code === '22P05') {
+        console.error('❌ [ADMIN SERVICE] Database encoding error:', error);
+        throw {
+          status: 500,
+          type: "https://api.shop.am/problems/database-encoding-error",
+          title: "Database Encoding Error",
+          detail: "The database is not configured for UTF-8 encoding. Please contact the administrator to migrate the database to UTF-8 encoding. This is required to support Armenian and other Unicode characters.",
+        };
+      }
+      // Re-throw other errors
+      throw error;
+    }
   }
 }
 

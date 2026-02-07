@@ -489,6 +489,26 @@ class ApiClient {
     if (!response.ok) {
       let errorText = '';
       let errorData: any = null;
+      const isUnauthorized = response.status === 401;
+      const isNotFound = response.status === 404;
+      
+      // Log 404 as warning (expected situation - resource doesn't exist)
+      if (this.shouldLogWarning(response.status)) {
+        console.warn(`⚠️ [API CLIENT] PUT Not Found (404): ${url}`);
+      }
+      // Log other errors (except 401 which is expected)
+      else if (this.shouldLogError(response.status)) {
+        console.error(`❌ [API CLIENT] PUT Error: ${response.status} ${response.statusText}`, {
+          url,
+          status: response.status,
+          statusText: response.statusText,
+        });
+      }
+      
+      // Handle 401 Unauthorized - clear token and redirect
+      if (isUnauthorized) {
+        this.handleUnauthorized();
+      }
       
       try {
         const text = await response.text();
@@ -498,7 +518,10 @@ class ApiClient {
         if (errorText && errorText.trim().startsWith('{')) {
           try {
             errorData = JSON.parse(errorText);
-            if (this.shouldLogError(response.status)) {
+            // Log 404 as warning, other errors (except 401) as error
+            if (isNotFound) {
+              console.warn('⚠️ [API CLIENT] PUT Not Found response:', errorData);
+            } else if (!isUnauthorized) {
               console.error('❌ [API CLIENT] PUT Error response (JSON):', {
                 url,
                 status: response.status,
@@ -516,7 +539,9 @@ class ApiClient {
             }
           } catch (parseErr) {
             // If JSON parse fails, use text as is
-            if (this.shouldLogError(response.status)) {
+            if (isNotFound) {
+              console.warn('⚠️ [API CLIENT] PUT Not Found response (text):', errorText);
+            } else if (!isUnauthorized) {
               console.error('❌ [API CLIENT] PUT Error response (text):', {
                 url,
                 status: response.status,
@@ -525,16 +550,22 @@ class ApiClient {
               });
             }
           }
-        } else if (errorText && this.shouldLogError(response.status)) {
-          console.error('❌ [API CLIENT] PUT Error response (text):', {
-            url,
-            status: response.status,
-            statusText: response.statusText,
-            errorText,
-          });
+        } else if (errorText) {
+          if (isNotFound) {
+            console.warn('⚠️ [API CLIENT] PUT Not Found response (text):', errorText);
+          } else if (!isUnauthorized) {
+            console.error('❌ [API CLIENT] PUT Error response (text):', {
+              url,
+              status: response.status,
+              statusText: response.statusText,
+              errorText,
+            });
+          }
         }
       } catch (e) {
-        if (this.shouldLogError(response.status)) {
+        if (isNotFound) {
+          console.warn('⚠️ [API CLIENT] Failed to read 404 response:', e);
+        } else if (!isUnauthorized) {
           console.error('❌ [API CLIENT] Failed to read error response:', {
             url,
             status: response.status,
