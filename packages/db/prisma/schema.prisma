@@ -504,3 +504,20 @@ model Settings {
   @@index([key])
   @@map("settings")
 }
+
+// ============================================
+// CONTACT MESSAGE MODEL
+// ============================================
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdAt(sort: Desc)])
+  @@index([email])
+  @@map("contact_messages")
+}
