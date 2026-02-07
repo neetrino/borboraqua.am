@@ -8,6 +8,7 @@ import { apiClient } from '../../../lib/api-client';
 import { useTranslation } from '../../../lib/i18n-client';
 import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/global/global';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
+import { formatPrice, getStoredCurrency, type CurrencyCode } from '../../../lib/currency';
 
 interface Order {
   id: string;
@@ -50,6 +51,69 @@ interface OrderExportRow {
   customerId: string;
   itemsCount: number;
   createdAt: string;
+}
+
+interface OrderDetails {
+  id: string;
+  number: string;
+  status: string;
+  paymentStatus: string;
+  fulfillmentStatus: string;
+  total: number;
+  currency: string;
+  subtotal: number;
+  shippingAmount: number;
+  discountAmount: number;
+  taxAmount: number;
+  totals?: {
+    subtotal: number;
+    discount: number;
+    shipping: number;
+    tax: number;
+    total: number;
+    currency: string;
+  };
+  customerEmail?: string;
+  customerPhone?: string;
+  customer?: {
+    id: string;
+    email: string | null;
+    phone: string | null;
+    firstName: string | null;
+    lastName: string | null;
+  } | null;
+  billingAddress?: any | null;
+  shippingAddress?: any | null;
+  shippingMethod?: string | null;
+  notes?: string | null;
+  adminNotes?: string | null;
+  payment?: {
+    id: string;
+    provider: string;
+    method?: string | null;
+    amount: number;
+    currency: string;
+    status: string;
+    cardLast4?: string | null;
+    cardBrand?: string | null;
+  } | null;
+  items: Array<{
+    id: string;
+    productTitle: string;
+    sku: string;
+    quantity: number;
+    unitPrice: number;
+    total: number;
+    variantOptions?: Array<{
+      attributeKey?: string;
+      value?: string;
+      label?: string;
+      imageUrl?: string;
+      colors?: string[] | any;
+    }>;
+  }>;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 const ORDER_EXPORT_COLUMNS: { key: keyof OrderExportRow; header: string }[] = [
@@ -186,6 +250,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState<OrdersResponse['meta'] | null>(null);
   const [sortBy, setSortBy] = useState<string>('createdAt');
@@ -196,14 +261,23 @@ export default function OrdersPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [exporting, setExporting] = useState<'csv' | 'excel' | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  const [orderDetailsLoading, setOrderDetailsLoading] = useState(false);
+  const [orderDetailsError, setOrderDetailsError] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<CurrencyCode>(getStoredCurrency());
+  const [deliveryPrice, setDeliveryPrice] = useState<number | null>(null);
+  const [loadingDeliveryPrice, setLoadingDeliveryPrice] = useState(false);
 
   // Initialize filters from URL params on mount and when URL changes
   useEffect(() => {
     if (searchParams) {
       const status = searchParams.get('status') || '';
       const paymentStatus = searchParams.get('paymentStatus') || '';
+      const search = searchParams.get('search') || '';
       setStatusFilter(status);
       setPaymentStatusFilter(paymentStatus);
+      setSearchKeyword(search);
     }
   }, [searchParams]);
 
@@ -222,6 +296,7 @@ export default function OrdersPage() {
       limit: limitValue.toString(),
       status: statusFilter || '',
       paymentStatus: paymentStatusFilter || '',
+      search: searchKeyword || '',
       sortBy: sortBy || '',
       sortOrder: sortOrder || '',
     };
@@ -230,7 +305,7 @@ export default function OrdersPage() {
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('📦 [ADMIN] Fetching orders...', { page, statusFilter, paymentStatusFilter, sortBy, sortOrder });
+      console.log('📦 [ADMIN] Fetching orders...', { page, statusFilter, paymentStatusFilter, searchKeyword, sortBy, sortOrder });
       
       const response = await apiClient.get<OrdersResponse>('/api/v1/admin/orders', {
         params: buildOrdersParams(page, 20),
@@ -244,20 +319,40 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, statusFilter, paymentStatusFilter, sortBy, sortOrder]);
+  }, [page, statusFilter, paymentStatusFilter, searchKeyword, sortBy, sortOrder]);
 
   useEffect(() => {
     if (isLoggedIn && isAdmin) {
       fetchOrders();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn, isAdmin, page, statusFilter, paymentStatusFilter, sortBy, sortOrder]);
+  }, [isLoggedIn, isAdmin, page, statusFilter, paymentStatusFilter, searchKeyword, sortBy, sortOrder]);
+
+  useEffect(() => {
+    const handleCurrencyUpdate = () => {
+      setCurrency(getStoredCurrency());
+    };
+    window.addEventListener('currency-updated', handleCurrencyUpdate);
+    return () => {
+      window.removeEventListener('currency-updated', handleCurrencyUpdate);
+    };
+  }, []);
+
+  // Hide header when order details modal is open
+  useEffect(() => {
+    if (selectedOrderId) {
+      window.dispatchEvent(new Event('app:modal-open'));
+    } else {
+      window.dispatchEvent(new Event('app:modal-close'));
+    }
+  }, [selectedOrderId]);
 
   const fetchAllOrdersForExport = useCallback(async (): Promise<Order[]> => {
     try {
       console.log('📦 [ADMIN] Fetching all orders for export...', {
         statusFilter,
         paymentStatusFilter,
+        searchKeyword,
         sortBy,
         sortOrder,
       });
@@ -299,6 +394,22 @@ export default function OrdersPage() {
         ) {
           return false;
         }
+        if (searchKeyword.trim()) {
+          const keyword = searchKeyword.toLowerCase().trim();
+          const searchableText = [
+            order.number,
+            order.customerEmail,
+            order.customerPhone,
+            order.customerFirstName,
+            order.customerLastName,
+          ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase();
+          if (!searchableText.includes(keyword)) {
+            return false;
+          }
+        }
         return true;
       });
 
@@ -309,7 +420,7 @@ export default function OrdersPage() {
       alert(t('admin.orders.failedToDelete')); // generic error message reuse
       return [];
     }
-  }, [statusFilter, paymentStatusFilter, sortBy, sortOrder, t]);
+  }, [statusFilter, paymentStatusFilter, searchKeyword, sortBy, sortOrder, t]);
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
@@ -469,6 +580,57 @@ export default function OrdersPage() {
         return newSet;
       });
     }
+  };
+
+  const loadOrderDetails = useCallback(async (orderId: string) => {
+    try {
+      setOrderDetailsLoading(true);
+      setOrderDetailsError(null);
+      console.log('📂 [ADMIN][Orders] Loading order details...', { orderId });
+      const response = await apiClient.get<OrderDetails>(`/api/v1/admin/orders/${orderId}`);
+      console.log('✅ [ADMIN][Orders] Order details loaded:', response);
+      setOrderDetails(response);
+      
+      // Fetch delivery price if needed
+      if (response.shippingMethod === 'delivery' && response.shippingAddress?.city) {
+        const currentShipping = response.totals?.shipping ?? response.shippingAmount ?? 0;
+        if (currentShipping === 0) {
+          setLoadingDeliveryPrice(true);
+          try {
+            const deliveryResponse = await apiClient.get<{ price: number }>('/api/v1/delivery/price', {
+              params: {
+                city: response.shippingAddress.city,
+                country: 'Armenia',
+              },
+            });
+            setDeliveryPrice(deliveryResponse.price);
+          } catch (err) {
+            console.error('❌ [ADMIN][Orders] Error fetching delivery price:', err);
+            setDeliveryPrice(null);
+          } finally {
+            setLoadingDeliveryPrice(false);
+          }
+        }
+      }
+    } catch (err: any) {
+      console.error('❌ [ADMIN][Orders] Failed to load order details:', err);
+      setOrderDetailsError(err?.message || t('admin.orders.orderDetails.failedToLoad'));
+    } finally {
+      setOrderDetailsLoading(false);
+    }
+  }, [t]);
+
+  const getColorValue = (colorName: string): string => {
+    const colorMap: Record<string, string> = {
+      'beige': '#F5F5DC', 'black': '#000000', 'blue': '#0000FF', 'brown': '#A52A2A',
+      'gray': '#808080', 'grey': '#808080', 'green': '#008000', 'red': '#FF0000',
+      'white': '#FFFFFF', 'yellow': '#FFFF00', 'orange': '#FFA500', 'pink': '#FFC0CB',
+      'purple': '#800080', 'navy': '#000080', 'maroon': '#800000', 'olive': '#808000',
+      'teal': '#008080', 'cyan': '#00FFFF', 'magenta': '#FF00FF', 'lime': '#00FF00',
+      'silver': '#C0C0C0', 'gold': '#FFD700',
+    };
+    const normalizedName = colorName.toLowerCase().trim();
+    return colorMap[normalizedName] || '#CCCCCC';
   };
 
   const handlePaymentStatusChange = async (orderId: string, newPaymentStatus: string) => {
@@ -647,6 +809,26 @@ export default function OrdersPage() {
               <option value="pending">{t('admin.orders.pendingPayment')}</option>
               <option value="failed">{t('admin.orders.failed')}</option>
             </select>
+            <input
+              type="text"
+              placeholder={t('admin.orders.searchPlaceholder') || 'Search orders...'}
+              value={searchKeyword}
+              onChange={(e) => {
+                const newSearch = e.target.value;
+                setSearchKeyword(newSearch);
+                setPage(1);
+                // Update URL without causing navigation
+                const params = new URLSearchParams(searchParams?.toString() || '');
+                if (newSearch.trim()) {
+                  params.set('search', newSearch.trim());
+                } else {
+                  params.delete('search');
+                }
+                const newUrl = params.toString() ? `/admin/orders?${params.toString()}` : '/admin/orders';
+                router.push(newUrl, { scroll: false });
+              }}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 min-w-[200px]"
+            />
             {updateMessage && (
               <div
                 className={`px-4 py-2 rounded-md text-sm ${
@@ -662,21 +844,23 @@ export default function OrdersPage() {
         </Card>
 
         {/* Selection Controls */}
-        <Card className="p-4 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-700">
-              {t('admin.orders.selectedOrders').replace('{count}', selectedIds.size.toString())}
+        {selectedIds.size > 0 && (
+          <Card className="p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                {t('admin.orders.selectedOrders').replace('{count}', selectedIds.size.toString())}
+              </div>
+              <ProductPageButton
+                variant="outline"
+                className="px-4 py-2 text-sm"
+                onClick={handleBulkDelete}
+                disabled={bulkDeleting}
+              >
+                {bulkDeleting ? t('admin.orders.deleting') : t('admin.orders.deleteSelected')}
+              </ProductPageButton>
             </div>
-            <ProductPageButton
-              variant="outline"
-              className="px-4 py-2 text-sm"
-              onClick={handleBulkDelete}
-              disabled={selectedIds.size === 0 || bulkDeleting}
-            >
-              {bulkDeleting ? t('admin.orders.deleting') : t('admin.orders.deleteSelected')}
-            </ProductPageButton>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* Orders Table */}
         <Card className="p-6">
@@ -811,10 +995,11 @@ export default function OrdersPage() {
                         <td
                           className="px-6 py-4 whitespace-nowrap cursor-pointer hover:bg-gray-50"
                           onClick={() => {
-                            console.log('📂 [ADMIN][Orders] Navigate to order details page', {
+                            console.log('📂 [ADMIN][Orders] Opening order details modal', {
                               orderId: order.id,
                             });
-                            router.push(`/admin/orders/${order.id}`);
+                            setSelectedOrderId(order.id);
+                            loadOrderDetails(order.id);
                           }}
                         >
                           <div className="text-sm font-medium text-gray-900">
@@ -913,6 +1098,329 @@ export default function OrdersPage() {
           </div>
         </div>
       </div>
+
+      {/* Order Details Modal */}
+      {selectedOrderId && (
+        <div className="fixed inset-0 z-50 overflow-y-auto" onClick={() => setSelectedOrderId(null)}>
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={() => setSelectedOrderId(null)}></div>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full" onClick={(e) => e.stopPropagation()}>
+              {/* Modal Content */}
+              <div className="bg-white px-6 py-6 max-h-[80vh] overflow-y-auto relative">
+                {/* Close Button */}
+                <button
+                  onClick={() => {
+                    setSelectedOrderId(null);
+                    setOrderDetails(null);
+                    setOrderDetailsError(null);
+                  }}
+                  className="absolute top-4 right-4 text-red-500 hover:text-red-600 focus:outline-none z-10 bg-white rounded-full p-1 shadow-sm"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+                {orderDetailsLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+                    <p className="text-gray-600">{t('admin.orders.orderDetails.loadingOrderDetails')}</p>
+                  </div>
+                ) : orderDetailsError ? (
+                  <div className="text-center py-12">
+                    <p className="text-red-600 mb-4">{orderDetailsError}</p>
+                  </div>
+                ) : orderDetails ? (
+                  <div className="space-y-6">
+                    {/* Summary */}
+                    <Card className="p-4 md:p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <h2 className="text-sm font-semibold text-gray-900 mb-2">{t('admin.orders.orderDetails.summary')}</h2>
+                          <div className="text-sm text-gray-700 space-y-1">
+                            <div>
+                              <span className="font-medium">{t('admin.orders.orderDetails.orderNumber')}</span> {orderDetails.number}
+                            </div>
+                            <div>
+                              <span className="font-medium">{t('admin.orders.orderDetails.total')}</span>{' '}
+                              {formatPrice(orderDetails.totals?.total ?? orderDetails.total, currency)}
+                            </div>
+                            <div>
+                              <span className="font-medium">{t('admin.orders.orderDetails.status')}</span> {orderDetails.status}
+                            </div>
+                            <div>
+                              <span className="font-medium">{t('admin.orders.orderDetails.payment')}</span> {orderDetails.paymentStatus}
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <h2 className="text-sm font-semibold text-gray-900 mb-2">{t('admin.orders.orderDetails.customer')}</h2>
+                          <div className="text-sm text-gray-700 space-y-1">
+                            <div>
+                              {(orderDetails.customer?.firstName || '') +
+                                (orderDetails.customer?.lastName ? ' ' + orderDetails.customer.lastName : '') ||
+                                t('admin.orders.unknownCustomer')}
+                            </div>
+                            {orderDetails.customerPhone && <div>{orderDetails.customerPhone}</div>}
+                            {orderDetails.customerEmail && <div>{orderDetails.customerEmail}</div>}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+
+                    {/* Addresses & Payment */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Card className="p-4 md:p-6">
+                        <h2 className="text-sm font-semibold text-gray-900 mb-2">{t('admin.orders.orderDetails.shippingAddress')}</h2>
+                        {orderDetails.shippingMethod === 'pickup' ? (
+                          <div className="text-sm text-gray-700 space-y-1">
+                            <div>
+                              <span className="font-medium">{t('admin.orders.orderDetails.shippingMethod')}</span>{' '}
+                              {t('checkout.shipping.storePickup')}
+                            </div>
+                            <p className="text-gray-500 mt-2">{t('checkout.shipping.storePickupDescription')}</p>
+                          </div>
+                        ) : orderDetails.shippingMethod === 'delivery' && orderDetails.shippingAddress ? (
+                          <div className="text-sm text-gray-700 space-y-1">
+                            <div className="mb-2">
+                              <span className="font-medium">{t('admin.orders.orderDetails.shippingMethod')}</span>{' '}
+                              {t('checkout.shipping.delivery')}
+                            </div>
+                            {(orderDetails.shippingAddress.address || orderDetails.shippingAddress.addressLine1) && (
+                              <div>
+                                <span className="font-medium">{t('checkout.form.address')}:</span>{' '}
+                                {orderDetails.shippingAddress.address || orderDetails.shippingAddress.addressLine1}
+                                {orderDetails.shippingAddress.addressLine2 && `, ${orderDetails.shippingAddress.addressLine2}`}
+                              </div>
+                            )}
+                            {orderDetails.shippingAddress.city && (
+                              <div>
+                                <span className="font-medium">{t('checkout.form.city')}:</span> {orderDetails.shippingAddress.city}
+                              </div>
+                            )}
+                            {orderDetails.shippingAddress.postalCode && (
+                              <div>
+                                <span className="font-medium">{t('checkout.form.postalCode')}:</span> {orderDetails.shippingAddress.postalCode}
+                              </div>
+                            )}
+                            {(orderDetails.shippingAddress.phone || orderDetails.shippingAddress.shippingPhone) && (
+                              <div className="mt-2">
+                                <span className="font-medium">{t('checkout.form.phoneNumber')}:</span>{' '}
+                                {orderDetails.shippingAddress.phone || orderDetails.shippingAddress.shippingPhone}
+                              </div>
+                            )}
+                            {(orderDetails.shippingAddress as any)?.deliveryDay && (
+                              <div className="mt-2">
+                                <span className="font-medium">{t('admin.orders.orderDetails.deliveryDay')}</span>{' '}
+                                {(() => {
+                                  const raw = (orderDetails.shippingAddress as any).deliveryDay as string;
+                                  const parts = raw?.split('-').map((p) => Number(p)) || [];
+                                  const [year, month, day] = parts;
+                                  if (!year || !month || !day) return raw;
+                                  const date = new Date(year, month - 1, day);
+                                  if (isNaN(date.getTime())) return raw;
+                                  return date.toLocaleDateString(undefined, {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    weekday: 'long',
+                                  });
+                                })()}
+                              </div>
+                            )}
+                            {(orderDetails.shippingAddress as any)?.deliveryTimeSlot && (
+                              <div>
+                                <span className="font-medium">{t('admin.orders.orderDetails.deliveryTimeSlot')}</span>{' '}
+                                {(() => {
+                                  const slot = (orderDetails.shippingAddress as any).deliveryTimeSlot as string;
+                                  if (slot === 'first_half') return t('checkout.delivery.timeSlots.firstHalf');
+                                  if (slot === 'second_half') return t('checkout.delivery.timeSlots.secondHalf');
+                                  return slot;
+                                })()}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-500">
+                            <p>{t('admin.orders.orderDetails.noShippingAddress')}</p>
+                          </div>
+                        )}
+                      </Card>
+
+                      <Card className="p-4 md:p-6">
+                        <h2 className="text-sm font-semibold text-gray-900 mb-2">{t('admin.orders.orderDetails.paymentInfo')}</h2>
+                        {orderDetails.payment ? (
+                          <div className="text-sm text-gray-700 space-y-1">
+                            {orderDetails.payment.method && <div>{t('admin.orders.orderDetails.method')} {orderDetails.payment.method}</div>}
+                            <div>
+                              {t('admin.orders.orderDetails.amount')} {formatPrice(orderDetails.payment.amount, currency)}
+                            </div>
+                            <div>{t('admin.orders.orderDetails.status')} {orderDetails.payment.status}</div>
+                            {orderDetails.payment.cardBrand && orderDetails.payment.cardLast4 && (
+                              <div>
+                                {t('admin.orders.orderDetails.card')} {orderDetails.payment.cardBrand} ••••{orderDetails.payment.cardLast4}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-sm text-gray-500">{t('admin.orders.orderDetails.noPaymentInfo')}</div>
+                        )}
+                      </Card>
+                    </div>
+
+                    {/* Items */}
+                    <Card className="p-4 md:p-6">
+                      <h2 className="text-sm font-semibold text-gray-900 mb-3">{t('admin.orders.orderDetails.items')}</h2>
+                      {Array.isArray(orderDetails.items) && orderDetails.items.length > 0 ? (
+                        <div className="overflow-x-auto border border-gray-200 rounded-md">
+                          <table className="min-w-full text-sm">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-3 py-2 text-left font-medium text-gray-500">{t('admin.orders.orderDetails.product')}</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-500">{t('admin.orders.orderDetails.sku')}</th>
+                                <th className="px-3 py-2 text-left font-medium text-gray-500">{t('admin.orders.orderDetails.colorSize')}</th>
+                                <th className="px-3 py-2 text-right font-medium text-gray-500">{t('admin.orders.orderDetails.qty')}</th>
+                                <th className="px-3 py-2 text-right font-medium text-gray-500">{t('admin.orders.orderDetails.price')}</th>
+                                <th className="px-3 py-2 text-right font-medium text-gray-500">{t('admin.orders.orderDetails.totalCol')}</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 bg-white">
+                              {orderDetails.items.map((item) => {
+                                const allOptions = item.variantOptions || [];
+                                const getColorsArray = (colors: any): string[] => {
+                                  if (!colors) return [];
+                                  if (Array.isArray(colors)) return colors;
+                                  if (typeof colors === 'string') {
+                                    try {
+                                      const parsed = JSON.parse(colors);
+                                      return Array.isArray(parsed) ? parsed : [];
+                                    } catch {
+                                      return [];
+                                    }
+                                  }
+                                  return [];
+                                };
+                                return (
+                                  <tr key={item.id}>
+                                    <td className="px-3 py-2">{item.productTitle}</td>
+                                    <td className="px-3 py-2 text-gray-500">{item.sku}</td>
+                                    <td className="px-3 py-2">
+                                      {allOptions.length > 0 ? (
+                                        <div className="flex flex-wrap gap-2 items-center">
+                                          {allOptions.map((opt, optIndex) => {
+                                            if (!opt.attributeKey || !opt.value) return null;
+                                            const attributeKey = opt.attributeKey.toLowerCase().trim();
+                                            const isColor = attributeKey === 'color' || attributeKey === 'colour';
+                                            const displayLabel = opt.label || opt.value;
+                                            const hasImage = opt.imageUrl && opt.imageUrl.trim() !== '';
+                                            const colors = getColorsArray(opt.colors);
+                                            const colorHex = colors.length > 0 ? colors[0] : (isColor ? getColorValue(opt.value) : null);
+                                            return (
+                                              <div key={optIndex} className="flex items-center gap-1.5">
+                                                {hasImage ? (
+                                                  <img 
+                                                    src={opt.imageUrl!} 
+                                                    alt={displayLabel}
+                                                    className="w-4 h-4 rounded border border-gray-300 object-cover flex-shrink-0"
+                                                    onError={(e) => {
+                                                      (e.target as HTMLImageElement).style.display = 'none';
+                                                    }}
+                                                  />
+                                                ) : isColor && colorHex ? (
+                                                  <div 
+                                                    className="w-4 h-4 rounded-full border border-gray-300 flex-shrink-0"
+                                                    style={{ backgroundColor: colorHex }}
+                                                    title={displayLabel}
+                                                  />
+                                                ) : null}
+                                                <span className="text-xs text-gray-700 capitalize">{displayLabel}</span>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      ) : (
+                                        <span className="text-xs text-gray-400">—</span>
+                                      )}
+                                    </td>
+                                    <td className="px-3 py-2 text-right">{item.quantity}</td>
+                                    <td className="px-3 py-2 text-right">{formatPrice(item.unitPrice, currency)}</td>
+                                    <td className="px-3 py-2 text-right">{formatPrice(item.total, currency)}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-gray-500">{t('admin.orders.orderDetails.noItemsFound')}</div>
+                      )}
+                    </Card>
+
+                    {/* Order Summary */}
+                    <Card className="p-4 md:p-6">
+                      <h2 className="text-sm font-semibold text-gray-900 mb-4">{t('checkout.orderSummary')}</h2>
+                      <div className="space-y-3">
+                        {(() => {
+                          const originalSubtotal = orderDetails.totals?.subtotal ?? orderDetails.subtotal ?? 0;
+                          const discount = orderDetails.totals?.discount ?? orderDetails.discountAmount ?? 0;
+                          const subtotal = discount > 0 
+                            ? originalSubtotal - discount
+                            : orderDetails.items.reduce((sum, item) => sum + (item.total || 0), 0);
+                          const baseShipping = orderDetails.shippingMethod === 'pickup' 
+                            ? 0 
+                            : (orderDetails.totals?.shipping ?? orderDetails.shippingAmount ?? 0);
+                          const shipping = baseShipping === 0 && deliveryPrice !== null
+                            ? deliveryPrice
+                            : baseShipping;
+                          const tax = orderDetails.totals?.tax ?? orderDetails.taxAmount ?? 0;
+                          const total = subtotal + shipping;
+                          return (
+                            <>
+                              <div className="flex justify-between text-sm text-gray-600">
+                                <span>{t('checkout.summary.subtotal')}</span>
+                                <span>{formatPrice(subtotal, currency)}</span>
+                              </div>
+                              {discount > 0 && (
+                                <div className="flex justify-between text-sm text-gray-600">
+                                  <span>{t('checkout.summary.discount')}</span>
+                                  <span>-{formatPrice(discount, currency)}</span>
+                                </div>
+                              )}
+                              <div className="flex justify-between text-sm text-gray-600">
+                                <span>{t('checkout.summary.shipping')}</span>
+                                <span>
+                                  {orderDetails.shippingMethod === 'pickup'
+                                    ? t('common.cart.free')
+                                    : loadingDeliveryPrice
+                                      ? t('checkout.shipping.loading')
+                                      : orderDetails.shippingAddress?.city
+                                        ? formatPrice(shipping, currency) + (orderDetails.shippingAddress.city ? ` (${orderDetails.shippingAddress.city})` : '')
+                                        : t('checkout.shipping.enterCity')}
+                                </span>
+                              </div>
+                              {tax > 0 && (
+                                <div className="flex justify-between text-sm text-gray-600">
+                                  <span>{t('checkout.summary.tax')}</span>
+                                  <span>{formatPrice(tax, currency)}</span>
+                                </div>
+                              )}
+                              <div className="border-t border-gray-200 pt-3 mt-3">
+                                <div className="flex justify-between text-base font-bold text-gray-900">
+                                  <span>{t('checkout.summary.total')}</span>
+                                  <span>{formatPrice(total, currency)}</span>
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </Card>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

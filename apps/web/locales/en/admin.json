@@ -622,6 +622,7 @@
     "noOrders": "No orders found",
     "allStatuses": "All Statuses",
     "allPaymentStatuses": "All Payment Statuses",
+    "searchPlaceholder": "Search by order number, customer, email...",
     "pending": "Pending",
     "processing": "Processing",
     "completed": "Completed",

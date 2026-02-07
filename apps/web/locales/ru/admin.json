@@ -615,6 +615,7 @@
     "noOrders": "Заказы не найдены",
     "allStatuses": "Все статусы",
     "allPaymentStatuses": "Все статусы оплаты",
+    "searchPlaceholder": "Поиск по номеру заказа, клиенту, email...",
     "pending": "Ожидает",
     "processing": "Обрабатывается",
     "completed": "Завершен",
