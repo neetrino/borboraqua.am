@@ -74,6 +74,38 @@ export default function AdminBlogPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn, isAdmin, isLoading]);
 
+  // Prevent body scroll and hide header when editor modal is open
+  useEffect(() => {
+    if (editorOpen) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      // Prevent scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      // Dispatch event to hide header
+      window.dispatchEvent(new Event('app:modal-open'));
+      
+      return () => {
+        // Restore scroll position
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+        // Dispatch event to show header
+        window.dispatchEvent(new Event('app:modal-close'));
+      };
+    } else {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.dispatchEvent(new Event('app:modal-close'));
+    }
+  }, [editorOpen]);
+
   const fetchPosts = async () => {
     try {
       setLoading(true);

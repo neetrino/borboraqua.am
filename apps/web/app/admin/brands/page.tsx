@@ -43,6 +43,38 @@ function BrandsSection() {
     fetchBrands();
   }, [fetchBrands]);
 
+  // Prevent body scroll and hide header when modal is open
+  useEffect(() => {
+    if (showModal) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      // Prevent scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      // Dispatch event to hide header
+      window.dispatchEvent(new Event('app:modal-open'));
+      
+      return () => {
+        // Restore scroll position
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+        // Dispatch event to show header
+        window.dispatchEvent(new Event('app:modal-close'));
+      };
+    } else {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.dispatchEvent(new Event('app:modal-close'));
+    }
+  }, [showModal]);
+
   const handleDeleteBrand = async (brandId: string, brandName: string) => {
     if (!confirm(t('admin.brands.deleteConfirm').replace('{name}', brandName))) {
       return;
@@ -207,7 +239,7 @@ function BrandsSection() {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] overflow-hidden p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">

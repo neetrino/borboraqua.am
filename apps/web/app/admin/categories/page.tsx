@@ -55,6 +55,38 @@ function CategoriesSection() {
     fetchCategories();
   }, [fetchCategories]);
 
+  // Prevent body scroll and hide header when modals are open
+  useEffect(() => {
+    if (showAddModal || showEditModal) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      // Prevent scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      // Dispatch event to hide header
+      window.dispatchEvent(new Event('app:modal-open'));
+      
+      return () => {
+        // Restore scroll position
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+        // Dispatch event to show header
+        window.dispatchEvent(new Event('app:modal-close'));
+      };
+    } else {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.dispatchEvent(new Event('app:modal-close'));
+    }
+  }, [showAddModal, showEditModal]);
+
   // Build category tree for hierarchy display
   const buildCategoryTree = (categories: Category[]): Array<Category & { level: number; children?: Category[] }> => {
     const categoryMap = new Map<string, Category & { level: number; children?: Category[] }>();
@@ -341,7 +373,7 @@ function CategoriesSection() {
 
       {/* Add Category Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] overflow-hidden">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('admin.categories.addCategory')}</h3>
             <div className="space-y-4">
@@ -415,7 +447,7 @@ function CategoriesSection() {
 
       {/* Edit Category Modal */}
       {showEditModal && editingCategory && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] overflow-hidden">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('admin.categories.editCategory')}</h3>
             <div className="space-y-4">

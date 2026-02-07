@@ -187,6 +187,38 @@ function ProfilePageContent() {
   const [orderDetailsError, setOrderDetailsError] = useState<string | null>(null);
   const [isReordering, setIsReordering] = useState(false);
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (selectedOrder) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      // Prevent scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      // Dispatch event to hide header
+      window.dispatchEvent(new CustomEvent('app:modal-open'));
+      
+      return () => {
+        // Restore scroll position
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+        // Dispatch event to show header
+        window.dispatchEvent(new CustomEvent('app:modal-close'));
+      };
+    } else {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      // Dispatch event to show header
+      window.dispatchEvent(new CustomEvent('app:modal-close'));
+    }
+  }, [selectedOrder]);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -1224,15 +1256,15 @@ function ProfilePageContent() {
 
       {/* Order Details Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-[9999] overflow-hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+            className="fixed inset-0 bg-gray-900 bg-opacity-90 transition-opacity"
             onClick={() => setSelectedOrder(null)}
           ></div>
 
           {/* Modal */}
-          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="flex min-h-full items-center justify-center p-4 overflow-y-auto h-full">
             <div className="relative transform overflow-hidden rounded-lg bg-white shadow-xl transition-all w-full max-w-6xl max-h-[90vh] overflow-y-auto">
               {/* Header */}
               <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">

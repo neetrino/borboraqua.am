@@ -334,11 +334,34 @@ export default function OrdersPage() {
     };
   }, []);
 
-  // Hide header when order details modal is open
+  // Hide header and prevent body scroll when order details modal is open
   useEffect(() => {
     if (selectedOrderId) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      // Prevent scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      // Dispatch event to hide header
       window.dispatchEvent(new Event('app:modal-open'));
+      
+      return () => {
+        // Restore scroll position
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+        // Dispatch event to show header
+        window.dispatchEvent(new Event('app:modal-close'));
+      };
     } else {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
       window.dispatchEvent(new Event('app:modal-close'));
     }
   }, [selectedOrderId]);
@@ -1077,9 +1100,9 @@ export default function OrdersPage() {
 
       {/* Order Details Modal */}
       {selectedOrderId && (
-        <div className="fixed inset-0 z-50 overflow-y-auto" onClick={() => setSelectedOrderId(null)}>
-          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={() => setSelectedOrderId(null)}></div>
+        <div className="fixed inset-0 z-[9999] overflow-hidden" onClick={() => setSelectedOrderId(null)}>
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0 overflow-y-auto h-full">
+            <div className="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-90" onClick={() => setSelectedOrderId(null)}></div>
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full" onClick={(e) => e.stopPropagation()}>
               {/* Modal Content */}
               <div className="bg-white px-6 py-6 max-h-[80vh] overflow-y-auto relative">

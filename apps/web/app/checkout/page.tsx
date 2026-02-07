@@ -225,6 +225,38 @@ export default function CheckoutPage() {
     console.log('[Checkout] showShippingModal changed:', showShippingModal);
   }, [showShippingModal]);
 
+  // Prevent body scroll and hide header when modals are open
+  useEffect(() => {
+    if (showShippingModal || showCardModal) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      // Prevent scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      // Dispatch event to hide header
+      window.dispatchEvent(new Event('app:modal-open'));
+      
+      return () => {
+        // Restore scroll position
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+        // Dispatch event to show header
+        window.dispatchEvent(new Event('app:modal-close'));
+      };
+    } else {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.dispatchEvent(new Event('app:modal-close'));
+    }
+  }, [showShippingModal, showCardModal]);
+
   const {
     register,
     handleSubmit,
@@ -1282,9 +1314,6 @@ export default function CheckoutPage() {
           onClick={() => {
             console.log('[Checkout] Modal backdrop clicked, closing modal');
             setShowShippingModal(false);
-            if (typeof window !== 'undefined') {
-              window.dispatchEvent(new Event('app:modal-close'));
-            }
           }}
         >
           <div 
@@ -1302,9 +1331,6 @@ export default function CheckoutPage() {
               <button
                 onClick={() => {
                   setShowShippingModal(false);
-                  if (typeof window !== 'undefined') {
-                    window.dispatchEvent(new Event('app:modal-close'));
-                  }
                 }}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
                 aria-label={t('checkout.modals.closeModal')}
@@ -1555,9 +1581,6 @@ export default function CheckoutPage() {
           onClick={() => {
             console.log('[Checkout] Card modal backdrop clicked, closing modal');
             setShowCardModal(false);
-            if (typeof window !== 'undefined') {
-              window.dispatchEvent(new Event('app:modal-close'));
-            }
           }}
         >
           <div 
@@ -1575,9 +1598,6 @@ export default function CheckoutPage() {
               <button
                 onClick={() => {
                   setShowCardModal(false);
-                  if (typeof window !== 'undefined') {
-                    window.dispatchEvent(new Event('app:modal-close'));
-                  }
                 }}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
                 aria-label={t('checkout.modals.closeModal')}
