@@ -1,4 +1,16 @@
 {
+  "hero": {
+    "showResults": "Ցուցադրել {total} արդյունք",
+    "all": "Բոլորը",
+    "lowPrice": "Ցածր գին",
+    "low": "Ցածր",
+    "highPrice": "Բարձր գին",
+    "high": "Բարձր",
+    "sortBy": "Դասավորել",
+    "default": "Լռելյայն",
+    "nameAsc": "Անվանում: Ա-ից Զ",
+    "nameDesc": "Անվանում: Զ-ից Ա"
+  },
   "filters": {
     "price": {
       "title": "Զտել ըստ գնի",

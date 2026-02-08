@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from '../lib/i18n-client';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
 type PriceFilter = 'all' | 'low' | 'high';
@@ -13,15 +14,16 @@ interface ProductsHeroProps {
 export function ProductsHero({ total = 0 }: ProductsHeroProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [priceFilter, setPriceFilter] = useState<PriceFilter>('all');
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
   const sortOptions: { value: SortOption; label: string }[] = [
-    { value: 'default', label: 'Default' },
-    { value: 'name-asc', label: 'Name: A to Z' },
-    { value: 'name-desc', label: 'Name: Z to A' },
+    { value: 'default', label: t('products.hero.default') },
+    { value: 'name-asc', label: t('products.hero.nameAsc') },
+    { value: 'name-desc', label: t('products.hero.nameDesc') },
   ];
 
   // Load from URL params
@@ -96,7 +98,7 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
         {/* Left: Show Results Text */}
         {total > 0 && (
           <p className="font-['Montserrat',sans-serif] font-bold text-sm text-[rgba(0,0,0,0.87)] whitespace-nowrap" data-node-id="4:1712">
-            Show {total} Results
+            {t('products.hero.showResults').replace('{total}', total.toString())}
           </p>
         )}
         
@@ -104,13 +106,13 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto sm:ml-auto">
         {/* Price Filter Tabs */}
         <div className="relative flex-shrink-0 w-full sm:w-auto" data-name="Tab" data-node-id="4:1706">
-          <div className="bg-[rgba(250,254,255,0.33)] h-9 overflow-hidden rounded-full w-full sm:w-72 relative min-w-0">
+          <div className="bg-[rgba(250,254,255,0.33)] h-9 overflow-hidden rounded-full w-full sm:w-72 md:w-80 relative min-w-0">
             {/* Active tab background */}
             <div
               className="absolute bg-[#00d1ff] rounded-full transition-all duration-300"
               style={{
                 left: priceFilter === 'all' ? '1%' : priceFilter === 'low' ? '30%' : '63%',
-                right: priceFilter === 'all' ? '70%' : priceFilter === 'low' ? '37%' : '7%',
+                right: priceFilter === 'all' ? '70%' : priceFilter === 'low' ? '37%' : '3%',
                 top: '7.74%',
                 bottom: '8.93%',
               }}
@@ -122,33 +124,33 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
             <div className="relative h-full flex items-center">
               <button
                 onClick={() => handlePriceFilterChange('all')}
-                className="absolute left-[9.16%] right-[84.91%] font-['Montserrat',sans-serif] font-semibold text-xs text-center top-1/2 -translate-y-1/2 z-10"
+                className="absolute left-[9.16%] right-[84.91%] font-['Montserrat',sans-serif] font-semibold text-xs text-center top-1/2 -translate-y-1/2 z-10 whitespace-nowrap"
                 data-node-id="4:1708"
               >
                 <span className={priceFilter === 'all' ? 'text-white' : 'text-[#1b1f21]'}>
-                  All
+                  {t('products.hero.all')}
                 </span>
               </button>
               
               <button
                 onClick={() => handlePriceFilterChange('low')}
-                className="absolute left-[33.69%] right-[44.47%] font-['Montserrat',sans-serif] font-semibold text-xs text-center top-1/2 -translate-y-1/2 z-10"
+                className="absolute left-[33.69%] right-[44.47%] font-['Montserrat',sans-serif] font-semibold text-xs text-center top-1/2 -translate-y-1/2 z-10 whitespace-nowrap"
                 data-node-id="4:1709"
               >
                 <span className={priceFilter === 'low' ? 'text-white' : 'text-[#1b1f21]'}>
-                  <span className="hidden sm:inline">Low Price</span>
-                  <span className="sm:hidden">Low</span>
+                  <span className="hidden sm:inline whitespace-nowrap">{t('products.hero.lowPrice')}</span>
+                  <span className="sm:hidden whitespace-nowrap">{t('products.hero.low')}</span>
                 </span>
               </button>
               
               <button
                 onClick={() => handlePriceFilterChange('high')}
-                className="absolute left-[66.58%] right-[10.24%] font-['Montserrat',sans-serif] font-semibold text-xs text-center top-1/2 -translate-y-1/2 z-10"
+                className="absolute left-[66.58%] right-[10.24%] font-['Montserrat',sans-serif] font-semibold text-xs text-center top-1/2 -translate-y-1/2 z-10 whitespace-nowrap"
                 data-node-id="4:1710"
               >
                 <span className={priceFilter === 'high' ? 'text-white' : 'text-[#1b1f21]'}>
-                  <span className="hidden sm:inline">High Price</span>
-                  <span className="sm:hidden">High</span>
+                  <span className="hidden sm:inline whitespace-nowrap">{t('products.hero.highPrice')}</span>
+                  <span className="sm:hidden whitespace-nowrap">{t('products.hero.high')}</span>
                 </span>
               </button>
             </div>
@@ -165,7 +167,7 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
               data-node-id="4:1683"
             >
               <span className="font-['Montserrat',sans-serif] font-semibold text-xs text-[rgba(0,0,0,0.87)]">
-                {sortOptions.find(opt => opt.value === sortBy)?.label || (sortBy === 'price-asc' || sortBy === 'price-desc' ? 'Default' : 'Sort by')}
+                {sortOptions.find(opt => opt.value === sortBy)?.label || (sortBy === 'price-asc' || sortBy === 'price-desc' ? t('products.hero.default') : t('products.hero.sortBy'))}
               </span>
               <svg
                 width="14"
@@ -190,7 +192,7 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
                   <button
                     key={option.value}
                     onClick={() => handleSortChange(option.value)}
-                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                    className={`w-full text-left px-4 py-2 text-sm transition-colors ${
                       sortBy === option.value
                         ? 'bg-gray-100 text-gray-900 font-semibold'
                         : 'text-gray-700 hover:bg-gray-50'

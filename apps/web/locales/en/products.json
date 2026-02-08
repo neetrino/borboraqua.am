@@ -1,4 +1,16 @@
 {
+  "hero": {
+    "showResults": "Show {total} Results",
+    "all": "All",
+    "lowPrice": "Low Price",
+    "low": "Low",
+    "highPrice": "High Price",
+    "high": "High",
+    "sortBy": "Sort by",
+    "default": "Default",
+    "nameAsc": "Name: A to Z",
+    "nameDesc": "Name: Z to A"
+  },
   "filters": {
     "price": {
       "title": "Filter By Price",
