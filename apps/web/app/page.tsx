@@ -1589,7 +1589,8 @@ export default function HomePage() {
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: "linear-gradient(to bottom, transparent 0%, transparent 15%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, 0.3) 85%, white 100%)"
+            
+            background: "linear-gradient(to bottom, transparent 0%, transparent 10%, rgba(255, 255, 255, 0.1) 45%, rgba(255, 255, 255, 0) 65%, rgba(255, 255, 255, 0.3) 80%, white 100%)"
           }}
         />
         <div className="absolute h-[870px] lg:h-[870px] md:h-[750px] sm:h-[600px] left-1/2 translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%] top-[160px] lg:top-[160px] md:top-[130px] sm:top-[100px] relative z-10">
@@ -1611,7 +1612,7 @@ export default function HomePage() {
           
 
           {/* Products Grid - Uniform Layout */}
-          <div className="absolute h-[390px] lg:h-[390px] md:h-[330px] sm:h-[270px] left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[180px] lg:top-[180px] md:top-[150px] sm:top-[120px] z-[10]">
+          <div className="absolute h-[390px] lg:h-[390px] md:h-[330px] sm:h-[270px] left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[140px] lg:top-[140px] md:top-[110px] sm:top-[80px] z-[10]">
             {productsLoading ? (
               // Loading state - show placeholder with uniform grid
               <div className="flex gap-[32px] lg:gap-[32px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
@@ -1653,12 +1654,12 @@ export default function HomePage() {
 
           {/* Pagination Dots - Show 3 dots for 3 carousel modes (positioned above "View All Products" on non-mobile) */}
           {featuredProducts.length > 3 && (
-            <div className="absolute contents left-1/2 top-[760px] translate-x-[-50%]">
+            <div className="absolute contents left-1/2 top-[580px] lg:top-[580px] md:top-[380px] sm:top-[330px] translate-x-[-50%]">
               {/* Dot 1 - First mode (products 0-2) */}
               <button
                 type="button"
                 onClick={() => setCarouselIndex(0)}
-                className={`absolute rounded-full top-[760px] translate-x-[-50%] transition-all duration-300 ${
+                className={`absolute rounded-full top-[580px] lg:top-[580px] md:top-[380px] sm:top-[330px] translate-x-[-50%] transition-all duration-300 ${
                   carouselIndex === 0
                     ? 'bg-[#00d1ff] h-[6px] w-[16px] left-[calc(50%-17px)]'
                     : 'bg-[#e2e8f0] size-[6px] left-[calc(50%-17px)] hover:bg-[#00d1ff]/50'
@@ -1669,7 +1670,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setCarouselIndex(3)}
-                className={`absolute rounded-full top-[760px] translate-x-[-50%] transition-all duration-300 ${
+                className={`absolute rounded-full top-[580px] lg:top-[580px] md:top-[380px] sm:top-[330px] translate-x-[-50%] transition-all duration-300 ${
                   carouselIndex === 3
                     ? 'bg-[#00d1ff] h-[6px] w-[16px] left-1/2'
                     : 'bg-[#e2e8f0] size-[6px] left-1/2 hover:bg-[#00d1ff]/50'
@@ -1680,7 +1681,7 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setCarouselIndex(6)}
-                className={`absolute rounded-full top-[760px] translate-x-[-50%] transition-all duration-300 ${
+                className={`absolute rounded-full top-[580px] lg:top-[580px] md:top-[380px] sm:top-[330px] translate-x-[-50%] transition-all duration-300 ${
                   carouselIndex === 6
                     ? 'bg-[#00d1ff] h-[6px] w-[16px] left-[calc(50%+17px)]'
                     : 'bg-[#e2e8f0] size-[6px] left-[calc(50%+17px)] hover:bg-[#00d1ff]/50'
@@ -1691,7 +1692,7 @@ export default function HomePage() {
           )}
 
           {/* View All Products Button */}
-          <div className="absolute content-stretch flex flex-col items-center left-[20px] lg:left-[20px] md:left-[16px] sm:left-[12px] right-[20px] lg:right-[20px] md:right-[16px] sm:right-[12px] top-[680px] lg:top-[680px] md:top-[480px] sm:top-[430px]">
+          <div className="absolute content-stretch flex flex-col items-center left-[20px] lg:left-[20px] md:left-[16px] sm:left-[12px] right-[20px] lg:right-[20px] md:right-[16px] sm:right-[12px] top-[620px] lg:top-[620px] md:top-[420px] sm:top-[370px]">
             <div
               onClick={() => router.push('/products')}
               className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[7px] lg:gap-[7px] md:gap-[6px] sm:gap-[4px] items-center px-[30px] lg:px-[30px] md:px-[28px] sm:px-[20px] py-[10px] lg:py-[10px] md:py-[10px] sm:py-[8px] relative rounded-[9999px] shrink-0 cursor-pointer hover:border-[#00d1ff] hover:bg-[#00d1ff]/5 transition-all"
