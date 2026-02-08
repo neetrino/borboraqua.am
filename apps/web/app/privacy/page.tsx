@@ -31,80 +31,84 @@ export default function PrivacyPage() {
             <p className="text-gray-600">
               {t('privacy.introduction.description2')}
             </p>
+            <p className="text-gray-600">
+              {t('privacy.introduction.description3')}
+            </p>
 
-            <h2 className="text-2xl font-semibold text-gray-900">{t('privacy.informationWeCollect.title')}</h2>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{t('privacy.informationWeCollect.personalInformation.title')}</h3>
-                <p className="text-gray-600">
-                  {t('privacy.informationWeCollect.personalInformation.description')}
-                </p>
-                <ul className="list-disc list-inside text-gray-600 ml-4">
-                  <li>{t('privacy.informationWeCollect.personalInformation.items.register')}</li>
-                  <li>{t('privacy.informationWeCollect.personalInformation.items.order')}</li>
-                  <li>{t('privacy.informationWeCollect.personalInformation.items.newsletter')}</li>
-                  <li>{t('privacy.informationWeCollect.personalInformation.items.contact')}</li>
-                  <li>{t('privacy.informationWeCollect.personalInformation.items.surveys')}</li>
-                </ul>
-                <p className="text-gray-600">
-                  {t('privacy.informationWeCollect.personalInformation.details')}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">{t('privacy.informationWeCollect.automaticallyCollected.title')}</h3>
-                <p className="text-gray-600">
-                  {t('privacy.informationWeCollect.automaticallyCollected.description')}
-                </p>
-              </div>
-            </div>
+            <h2 className="text-2xl font-semibold text-gray-900 mt-6">{t('privacy.informationWeCollect.title')}</h2>
+            <p className="text-gray-600">{t('privacy.informationWeCollect.description')}</p>
+            <ul className="list-disc list-inside text-gray-600 ml-4 mt-4">
+              <li>{t('privacy.informationWeCollect.items.contact')}</li>
+              <li>{t('privacy.informationWeCollect.items.purchase')}</li>
+              <li>{t('privacy.informationWeCollect.items.technical')}</li>
+              <li>{t('privacy.informationWeCollect.items.cookies')}</li>
+            </ul>
 
-            <h2 className="text-2xl font-semibold text-gray-900">{t('privacy.howWeUse.title')}</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mt-6">{t('privacy.howWeUse.title')}</h2>
             <p className="text-gray-600">{t('privacy.howWeUse.description')}</p>
-            <ul className="list-disc list-inside text-gray-600 ml-4">
-              <li>{t('privacy.howWeUse.items.process')}</li>
-              <li>{t('privacy.howWeUse.items.confirmations')}</li>
+            <ul className="list-disc list-inside text-gray-600 ml-4 mt-4">
+              <li>{t('privacy.howWeUse.items.orders')}</li>
               <li>{t('privacy.howWeUse.items.support')}</li>
-              <li>{t('privacy.howWeUse.items.marketing')}</li>
               <li>{t('privacy.howWeUse.items.improve')}</li>
-              <li>{t('privacy.howWeUse.items.fraud')}</li>
               <li>{t('privacy.howWeUse.items.legal')}</li>
             </ul>
 
-            <h2 className="text-2xl font-semibold text-gray-900">{t('privacy.informationSharing.title')}</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mt-6">{t('privacy.dataRetention.title')}</h2>
+            <p className="text-gray-600">{t('privacy.dataRetention.description')}</p>
+            <ul className="list-disc list-inside text-gray-600 ml-4 mt-4">
+              <li>{t('privacy.dataRetention.items.account')}</li>
+              <li>{t('privacy.dataRetention.items.purchase')}</li>
+              <li>{t('privacy.dataRetention.items.marketing')}</li>
+            </ul>
+
+            <h2 className="text-2xl font-semibold text-gray-900 mt-6">{t('privacy.dataSecurity.title')}</h2>
+            <p className="text-gray-600">{t('privacy.dataSecurity.description')}</p>
+            <ul className="list-disc list-inside text-gray-600 ml-4 mt-4">
+              <li>{t('privacy.dataSecurity.items.ssl')}</li>
+              <li>{t('privacy.dataSecurity.items.access')}</li>
+              <li>{t('privacy.dataSecurity.items.audits')}</li>
+            </ul>
+
+            <h2 className="text-2xl font-semibold text-gray-900 mt-6">{t('privacy.informationSharing.title')}</h2>
             <p className="text-gray-600">
               {t('privacy.informationSharing.description')}
             </p>
-            <ul className="list-disc list-inside text-gray-600 ml-4">
-              <li>
-                {t('privacy.informationSharing.items.providers')}
-              </li>
+            <ul className="list-disc list-inside text-gray-600 ml-4 mt-4">
+              <li>{t('privacy.informationSharing.items.shipping')}</li>
+              <li>{t('privacy.informationSharing.items.payment')}</li>
               <li>{t('privacy.informationSharing.items.law')}</li>
-              <li>{t('privacy.informationSharing.items.transfer')}</li>
-              <li>{t('privacy.informationSharing.items.consent')}</li>
             </ul>
+            {t('privacy.informationSharing.note') && (
+              <p className="text-gray-600 mt-4">
+                {t('privacy.informationSharing.note')}
+              </p>
+            )}
 
-            <h2 className="text-2xl font-semibold text-gray-900">{t('privacy.dataSecurity.title')}</h2>
-            <p className="text-gray-600">
-              {t('privacy.dataSecurity.description')}
-            </p>
-
-            <h2 className="text-2xl font-semibold text-gray-900">{t('privacy.yourRights.title')}</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mt-6">{t('privacy.yourRights.title')}</h2>
             <p className="text-gray-600">{t('privacy.yourRights.description')}</p>
-            <ul className="list-disc list-inside text-gray-600 ml-4">
+            <ul className="list-disc list-inside text-gray-600 ml-4 mt-4">
               <li>{t('privacy.yourRights.items.access')}</li>
-              <li>{t('privacy.yourRights.items.correct')}</li>
-              <li>{t('privacy.yourRights.items.delete')}</li>
-              <li>{t('privacy.yourRights.items.object')}</li>
-              <li>{t('privacy.yourRights.items.portability')}</li>
-              <li>{t('privacy.yourRights.items.withdraw')}</li>
+              <li>{t('privacy.yourRights.items.edit')}</li>
+              <li>{t('privacy.yourRights.items.optout')}</li>
+              <li>{t('privacy.yourRights.items.request')}</li>
             </ul>
 
-            <h2 className="text-2xl font-semibold text-gray-900">{t('privacy.contact.title')}</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mt-6">{t('privacy.cookiesUsage.title')}</h2>
+            <p className="text-gray-600">{t('privacy.cookiesUsage.description')}</p>
+            <ul className="list-disc list-inside text-gray-600 ml-4 mt-4">
+              <li>{t('privacy.cookiesUsage.items.functional')}</li>
+              <li>{t('privacy.cookiesUsage.items.analytical')}</li>
+              <li>{t('privacy.cookiesUsage.items.marketing')}</li>
+            </ul>
+            {t('privacy.cookiesUsage.note') && (
+              <p className="text-gray-600 mt-4">
+                {t('privacy.cookiesUsage.note')}
+              </p>
+            )}
+
+            <h2 className="text-2xl font-semibold text-gray-900 mt-6">{t('privacy.policyChanges.title')}</h2>
             <p className="text-gray-600">
-              {t('privacy.contact.description')}{' '}
-              <a href="mailto:privacy@whiteshop.com" className="text-blue-600 hover:underline">
-                privacy@whiteshop.com
-              </a>
+              {t('privacy.policyChanges.description')}
             </p>
           </Card>
         </div>
@@ -112,4 +116,3 @@ export default function PrivacyPage() {
     </div>
   );
 }
-
