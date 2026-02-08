@@ -183,6 +183,9 @@
   .product-card-compact {
     transition: box-shadow 0.3s ease-out, border-color 0.3s ease-out;
     border: 1px solid rgba(0, 209, 255, 0.3);
+    overflow: visible;
+    position: relative;
+    z-index: 1;
   }
 
   /* Override product-card-hover transform for compact cards - card stays still */
@@ -256,19 +259,15 @@
   /* Image scales up and moves up to sit on top of border */
   .product-card-compact:hover .product-image-hover {
     transform: scale(1.15) translateY(-12px);
-    z-index: 50;
+    z-index: 100;
     position: relative;
   }
 
   /* Ensure related products carousel doesn't clip hovered images */
-  .product-card-compact {
-    position: relative;
-    z-index: 1;
-  }
-
   .product-card-compact:hover {
     z-index: 50;
     position: relative;
+    overflow: visible !important;
   }
 
   /* Allow overflow in carousel containers when card is hovered */
@@ -279,6 +278,23 @@
   /* Ensure flex container in carousel allows overflow */
   .flex.items-stretch:has(.product-card-compact:hover) {
     overflow: visible;
+  }
+
+  /* Ensure grid containers allow overflow when card is hovered (shop page) */
+  .grid:has(.product-card-compact:hover) {
+    overflow: visible !important;
+  }
+
+  /* Ensure grid items allow overflow */
+  .grid > *:has(.product-card-compact:hover) {
+    overflow: visible !important;
+  }
+
+  /* Ensure common parent containers allow overflow (max-w containers, etc.) */
+  .max-w-7xl:has(.product-card-compact:hover),
+  .max-w-full:has(.product-card-compact:hover),
+  .w-full:has(.product-card-compact:hover) {
+    overflow: visible !important;
   }
 }
 
