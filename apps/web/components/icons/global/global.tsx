@@ -365,75 +365,21 @@ export function Header({
               <p className="leading-[20px]">{t('home.navigation.aboutUs')}</p>
             </div>
             <div
-              onClick={() => router.push('/contact')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
-            >
-              <p className="leading-[20px]">{t('home.navigation.contactUs')}</p>
-            </div>
-            <div
               onClick={() => router.push('/blog')}
               className="flex flex-col justify-center relative shrink-0 cursor-pointer"
             >
               <p className="leading-[20px]">{t('home.navigation.blog')}</p>
             </div>
+            <div
+              onClick={() => router.push('/contact')}
+              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+            >
+              <p className="leading-[20px]">{t('home.navigation.contactUs')}</p>
+            </div>
           </div>
 
           {/* Header Icons - Separate Vector Groups */}
           <div className="content-stretch flex gap-[20px] lg:gap-[18px] md:gap-[16px] sm:gap-[10px] items-center justify-center relative shrink-0 ml-[20px] md:ml-[16px] sm:ml-[12px]">
-            {/* Currency Display (e.g. AMD ▼) */}
-            <div
-              className="hidden sm:flex items-center justify-center relative shrink-0 h-[20px] md:h-[18px] sm:h-[16px]"
-              ref={currencyMenuRef}
-            >
-              <button
-                type="button"
-                onClick={() => setShowCurrencyMenu((prev) => !prev)}
-                className="flex items-center gap-[6px] md:gap-[4px] font-['Inter:Bold',sans-serif] font-bold text-[#151e21] text-[15px] md:text-[14px] leading-none cursor-pointer focus:outline-none"
-                aria-haspopup="listbox"
-                aria-expanded={showCurrencyMenu}
-              >
-                <span>{currency}</span>
-                <span className="flex items-center justify-center h-[12px] w-[12px] md:h-[12px] md:w-[12px]">
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 10 10"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="transition-transform duration-150"
-                    style={{
-                      transform: showCurrencyMenu ? 'rotate(180deg)' : 'rotate(0deg)',
-                    }}
-                  >
-                    <path
-                      d="M2 3L5 6L8 3"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-              </button>
-              {showCurrencyMenu && (
-                <div className="absolute top-full right-0 mt-2 w-24 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden">
-                  {(['USD', 'AMD', 'EUR', 'RUB', 'GEL'] as CurrencyCode[]).map((code) => (
-                    <button
-                      key={code}
-                      type="button"
-                      onClick={() => handleCurrencyChange(code)}
-                      className={`w-full text-left px-3 py-2 text-xs md:text-sm transition-colors ${
-                        currency === code
-                          ? 'bg-gray-100 text-gray-900 font-semibold cursor-default'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      {code}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
             {/* Search Icon */}
             <div
               onClick={() => setShowSearchModal(true)}
@@ -441,6 +387,58 @@ export function Header({
             >
               <SearchIcon size={21} className="brightness-0" />
             </div>
+
+            {/* Exit/Logout Icon with User Menu */}
+            {isLoggedIn ? (
+              <div className="relative shrink-0" ref={userMenuRef}>
+                <div
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="h-[26px] md:h-[24px] sm:h-[20px] w-[26px] md:w-[22px] sm:w-[20px] relative cursor-pointer flex items-center justify-center"
+                >
+                  <ExitIcon size={26} className="brightness-0" />
+                </div>
+                {showUserMenu && (
+                  <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                    <button
+                      onClick={() => {
+                        router.push('/profile');
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-150"
+                    >
+                      {t('common.navigation.profile')}
+                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => {
+                          router.push('/admin');
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-150"
+                      >
+                        {t('common.navigation.adminPanel')}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setShowUserMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-150"
+                    >
+                      {t('common.navigation.logout')}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div
+                onClick={() => router.push('/login')}
+                className="h-[20px] md:h-[18px] sm:h-[16px] w-[20px] md:w-[18px] sm:w-[16px] relative shrink-0 cursor-pointer flex items-center justify-center"
+              >
+                <ExitIcon size={20} className="brightness-0" />
+              </div>
+            )}
 
             {/* Cart Icon */}
             <div
@@ -511,57 +509,60 @@ export function Header({
               )}
             </div>
 
-            {/* Exit/Logout Icon with User Menu */}
-            {isLoggedIn ? (
-              <div className="relative shrink-0" ref={userMenuRef}>
-                <div
-                  onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="h-[26px] md:h-[24px] sm:h-[20px] w-[26px] md:w-[22px] sm:w-[20px] relative cursor-pointer flex items-center justify-center"
-                >
-                  <ExitIcon size={26} className="brightness-0" />
-                </div>
-                {showUserMenu && (
-                  <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                    <button
-                      onClick={() => {
-                        router.push('/profile');
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-150"
-                    >
-                      {t('common.navigation.profile')}
-                    </button>
-                    {isAdmin && (
-                      <button
-                        onClick={() => {
-                          router.push('/admin');
-                          setShowUserMenu(false);
-                        }}
-                        className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-150"
-                      >
-                        {t('common.navigation.adminPanel')}
-                      </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-150"
-                    >
-                      {t('common.navigation.logout')}
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div
-                onClick={() => router.push('/login')}
-                className="h-[20px] md:h-[18px] sm:h-[16px] w-[20px] md:w-[18px] sm:w-[16px] relative shrink-0 cursor-pointer flex items-center justify-center"
+            {/* Currency Display (e.g. AMD ▼) */}
+            <div
+              className="hidden sm:flex items-center justify-center relative shrink-0 h-[20px] md:h-[18px] sm:h-[16px]"
+              ref={currencyMenuRef}
+            >
+              <button
+                type="button"
+                onClick={() => setShowCurrencyMenu((prev) => !prev)}
+                className="flex items-center gap-[6px] md:gap-[4px] font-['Inter:Bold',sans-serif] font-bold text-[#151e21] text-[15px] md:text-[14px] leading-none cursor-pointer focus:outline-none"
+                aria-haspopup="listbox"
+                aria-expanded={showCurrencyMenu}
               >
-                <ExitIcon size={20} className="brightness-0" />
-              </div>
-            )}
+                <span>{currency}</span>
+                <span className="flex items-center justify-center h-[12px] w-[12px] md:h-[12px] md:w-[12px]">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 10 10"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="transition-transform duration-150"
+                    style={{
+                      transform: showCurrencyMenu ? 'rotate(180deg)' : 'rotate(0deg)',
+                    }}
+                  >
+                    <path
+                      d="M2 3L5 6L8 3"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+              </button>
+              {showCurrencyMenu && (
+                <div className="absolute top-full right-0 mt-2 w-24 bg-white rounded-lg shadow-lg border border-gray-200 z-50 overflow-hidden">
+                  {(['USD', 'AMD', 'EUR', 'RUB', 'GEL'] as CurrencyCode[]).map((code) => (
+                    <button
+                      key={code}
+                      type="button"
+                      onClick={() => handleCurrencyChange(code)}
+                      className={`w-full text-left px-3 py-2 text-xs md:text-sm transition-colors ${
+                        currency === code
+                          ? 'bg-gray-100 text-gray-900 font-semibold cursor-default'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {code}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
         </div>

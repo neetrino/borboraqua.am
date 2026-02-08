@@ -140,16 +140,16 @@ export function HomePageHeader() {
               <p className="leading-[20px]">{t('home.navigation.aboutUs')}</p>
             </div>
             <div
-              onClick={() => router.push('/contact')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
-            >
-              <p className="leading-[20px]">{t('home.navigation.contactUs')}</p>
-            </div>
-            <div
               onClick={() => router.push('/blog')}
               className="flex flex-col justify-center relative shrink-0 cursor-pointer"
             >
               <p className="leading-[20px]">{t('home.navigation.blog')}</p>
+            </div>
+            <div
+              onClick={() => router.push('/contact')}
+              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+            >
+              <p className="leading-[20px]">{t('home.navigation.contactUs')}</p>
             </div>
             <div
               onClick={() => router.push('/delivery-terms')}
