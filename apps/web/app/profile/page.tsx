@@ -186,7 +186,8 @@ function ProfilePageContent() {
   const [orderDetailsLoading, setOrderDetailsLoading] = useState(false);
   const [orderDetailsError, setOrderDetailsError] = useState<string | null>(null);
   const [isReordering, setIsReordering] = useState(false);
-
+  const [shippingPrice, setShippingPrice] = useState<number | null>(null);
+  
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (selectedOrder) {
@@ -544,8 +545,25 @@ function ProfilePageContent() {
     try {
       setOrderDetailsLoading(true);
       setOrderDetailsError(null);
+      setShippingPrice(null);
       const data = await apiClient.get<OrderDetails>(`/api/v1/orders/${orderNumber}`);
       setSelectedOrder(data);
+
+      // Fetch shipping price if delivery method and shipping is 0
+      if (data.shippingMethod === 'delivery' && data.shippingAddress?.city && data.totals?.shipping === 0) {
+        try {
+          const deliveryPriceResponse = await apiClient.get<{ price: number }>('/api/v1/delivery/price', {
+            params: {
+              city: data.shippingAddress.city,
+              country: 'Armenia',
+            },
+          });
+          setShippingPrice(deliveryPriceResponse.price);
+        } catch (err) {
+          console.error('Error fetching delivery price:', err);
+          setShippingPrice(null);
+        }
+      }
     } catch (err: any) {
       console.error('Error loading order details:', err);
       setOrderDetailsError(err.message || t('profile.orderDetails.failedToLoad'));
@@ -1440,28 +1458,45 @@ function ProfilePageContent() {
                         <h3 className="text-lg font-semibold text-gray-900 mb-6">{t('profile.orderDetails.orderSummary')}</h3>
                         <div className="space-y-4 mb-6">
                           {selectedOrder.totals ? (
-                            <>
-                              <div className="flex justify-between text-gray-600">
-                                <span>{t('profile.orderDetails.subtotal')}</span>
-                                <span>{formatPrice(selectedOrder.totals.subtotal, (selectedOrder.totals.currency || 'AMD') as CurrencyCode)}</span>
-                              </div>
-                              {selectedOrder.totals.discount > 0 && (
-                                <div className="flex justify-between text-gray-600">
-                                  <span>{t('profile.orderDetails.discount')}</span>
-                                  <span>-{formatPrice(selectedOrder.totals.discount, (selectedOrder.totals.currency || 'AMD') as CurrencyCode)}</span>
-                                </div>
-                              )}
-                              <div className="flex justify-between text-gray-600">
-                                <span>{t('profile.orderDetails.shipping')}</span>
-                                <span>{formatPrice(selectedOrder.totals.shipping, (selectedOrder.totals.currency || 'AMD') as CurrencyCode)}</span>
-                              </div>
-                              <div className="border-t border-gray-200 pt-4">
-                                <div className="flex justify-between text-lg font-bold text-gray-900">
-                                  <span>{t('profile.orderDetails.total')}</span>
-                                  <span>{formatPrice(selectedOrder.totals.total, (selectedOrder.totals.currency || 'AMD') as CurrencyCode)}</span>
-                                </div>
-                              </div>
-                            </>
+                            (() => {
+                              // Calculate subtotal: original subtotal minus discount
+                              const originalSubtotal = selectedOrder.totals.subtotal || 0;
+                              const discount = selectedOrder.totals.discount || 0;
+                              const subtotal = discount > 0 
+                                ? originalSubtotal - discount
+                                : selectedOrder.items.reduce((sum, item) => sum + item.total, 0);
+                              // Use shipping price from API if available, otherwise use order totals
+                              const shipping = shippingPrice !== null 
+                                ? shippingPrice
+                                : (selectedOrder.totals.shipping || 0);
+                              // Calculate total: subtotal + shipping
+                              const total = subtotal + shipping;
+
+                              return (
+                                <>
+                                  <div className="flex justify-between text-gray-600">
+                                    <span>{t('profile.orderDetails.subtotal')}</span>
+                                    <span>{formatPrice(subtotal, (selectedOrder.totals.currency || 'AMD') as CurrencyCode)}</span>
+                                  </div>
+                                  {discount > 0 && (
+                                    <div className="flex justify-between text-gray-600">
+                                      <span>{t('profile.orderDetails.discount')}</span>
+                                      <span>-{formatPrice(discount, (selectedOrder.totals.currency || 'AMD') as CurrencyCode)}</span>
+                                    </div>
+                                  )}
+                                  <div className="flex justify-between text-gray-600">
+                                    <span>{t('profile.orderDetails.shipping')}</span>
+                                    <span>{formatPrice(shipping, (selectedOrder.totals.currency || 'AMD') as CurrencyCode)}</span>
+                                  </div>
+                                  <div className="border-t border-gray-200 pt-4">
+                                    <div className="flex justify-between text-lg font-bold text-gray-900">
+                                      <span>{t('profile.orderDetails.total')}</span>
+                                      <span>{formatPrice(total, (selectedOrder.totals.currency || 'AMD') as CurrencyCode)}</span>
+                                    </div>
+                                  </div>
+                                </>
+                              );
+                            })()
                           ) : (
                             <div className="text-gray-600">{t('profile.orderDetails.loadingTotals')}</div>
                           )}
