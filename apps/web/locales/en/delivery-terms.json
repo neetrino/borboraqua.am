@@ -1,55 +1,59 @@
 {
-  "title": "Delivery Terms",
+  "title": "Delivery & Supply Terms",
   "lastUpdated": "Last updated:",
   "overview": {
-    "title": "Overview",
-    "description": "These Delivery Terms explain how we process, ship, and deliver your orders, including expected timelines, fees, and responsibilities."
-  },
-  "shippingOptions": {
-    "title": "Shipping Options",
-    "description": "Available options are shown at checkout and may include:",
-    "options": {
-      "standard": "Standard delivery with estimated timeframes per region.",
-      "express": "Express delivery where supported.",
-      "pickup": "In-store pickup or local courier (if available in your area)."
-    }
-  },
-  "processingTimes": {
-    "title": "Processing Times",
-    "items": {
-      "typical": "Orders are typically processed within 1–2 business days after payment confirmation.",
-      "weekends": "Orders placed on weekends or holidays process on the next business day.",
-      "preorder": "Pre-order items ship based on the estimated availability shown at purchase."
-    }
+    "title": "Introduction",
+    "description": "We are committed to delivering your order quickly, safely, and conveniently. Below are the main delivery terms."
   },
   "deliveryTimeframes": {
-    "title": "Delivery Timeframes",
-    "description": "Delivery estimates vary by destination and selected method. Tracking details are provided when the order is shipped. Actual delivery times may differ due to carrier capacity or local customs."
+    "title": "1. Delivery Timeframes",
+    "description": "Delivery is carried out on the same day within scheduled time slots.",
+    "note": "Delivery time depends on the day and delivery zone.",
+    "weekdays": {
+      "title": "Monday – Friday",
+      "slot1": "Delivery stages: by 12:00 and by 16:30"
+    },
+    "saturday": {
+      "title": "Saturday",
+      "slot1": "Delivery by 13:30"
+    },
+    "sunday": {
+      "title": "Sunday",
+      "note": "Sunday — no delivery service"
+    },
+    "yerevan": {
+      "title": "Yerevan city",
+      "time": "14:00 – 18:00"
+    },
+    "regions": {
+      "title": "Regions",
+      "time": "09:00 – 13:00"
+    }
+  },
+  "deliveryOptions": {
+    "title": "2. Delivery Options",
+    "description": "We offer:",
+    "items": {
+      "sameDay": "Same-day delivery within fixed time slots",
+      "express": "Express delivery (subject to availability and additional fee)"
+    }
   },
   "shippingFees": {
-    "title": "Shipping Fees & Duties",
+    "title": "3. Delivery Fees",
     "items": {
-      "costs": "Shipping costs are calculated at checkout based on destination and service level.",
-      "duties": "Import duties, taxes, or brokerage fees may apply for international shipments and are the recipient's responsibility.",
-      "promotional": "Promotional free-shipping offers apply only as stated in the promotion."
+      "freeDelivery": "Free delivery for orders above the minimum purchase amount",
+      "smallOrders": "For smaller orders, delivery fees depend on the zone and time",
+      "note": "(Final rates for Yerevan and regions are set separately)"
     }
   },
   "delaysDamageLoss": {
-    "title": "Delays, Damage, or Loss",
+    "title": "4. Possible Delays",
+    "description": "In some cases, delivery may be delayed due to:",
     "items": {
-      "delays": "We are not liable for delays caused by carriers, weather, or customs inspections.",
-      "damage": "Please inspect packages on delivery and report visible damage to the carrier and our support team within 48 hours.",
-      "loss": "If a shipment is lost, contact us with your order number; we will coordinate with the carrier to resolve the issue."
-    }
-  },
-  "contact": {
-    "title": "Contact Us",
-    "description": "For delivery questions or special handling requests, reach us at"
+      "weather": "weather conditions",
+      "traffic": "traffic congestion",
+      "volume": "high order volume"
+    },
+    "note": "We will inform you in advance if any delays occur."
   }
 }
-
-
-
-
-
-
