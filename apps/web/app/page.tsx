@@ -259,8 +259,7 @@ export default function HomePage() {
    * Handle language change
    */
   const handleLanguageChange = (langCode: LanguageCode) => {
-    setStoredLanguage(langCode, { skipReload: true });
-    router.refresh(); // Refresh server components without full reload
+    setStoredLanguage(langCode, { skipReload: false }); // Reload page on home page
     setShowLanguageMenu(false);
   };
 
