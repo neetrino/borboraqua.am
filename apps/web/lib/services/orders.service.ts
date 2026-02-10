@@ -669,7 +669,7 @@ class OrdersService {
   /**
    * Get order by number
    */
-  async findByNumber(orderNumber: string, userId: string) {
+  async findByNumber(orderNumber: string, userId: string, locale: string = 'en') {
     const order = await db.order.findFirst({
       where: {
         number: orderNumber,
@@ -680,6 +680,11 @@ class OrdersService {
           include: {
             variant: {
               include: {
+                product: {
+                  include: {
+                    translations: true,
+                  },
+                },
                 options: {
                   include: {
                     attributeValue: {
@@ -815,9 +820,15 @@ class OrdersService {
           variantOptions,
         });
 
+        // Get product translation for current locale, fallback to stored title
+        const product = (item.variant as any)?.product;
+        const productTranslation = product?.translations?.find((t: { locale: string }) => t.locale === locale) 
+          || product?.translations?.[0];
+        const productTitle = productTranslation?.title || item.productTitle;
+
         return {
           variantId: item.variantId || '',
-          productTitle: item.productTitle,
+          productTitle: productTitle,
           variantTitle: item.variantTitle || '',
           sku: item.sku,
           quantity: item.quantity,

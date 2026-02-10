@@ -18,7 +18,12 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const result = await cartService.getCart(user.id, user.locale);
+    // Get language from query parameter or cookie, fallback to user locale or 'en'
+    const langParam = req.nextUrl.searchParams.get('lang');
+    const langCookie = req.cookies.get('shop_language');
+    const locale = langParam || langCookie?.value || user.locale || 'en';
+
+    const result = await cartService.getCart(user.id, locale);
     return NextResponse.json(result);
   } catch (error: any) {
     console.error("❌ [CART] Error:", error);

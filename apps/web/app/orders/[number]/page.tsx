@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Card, Button } from '@shop/ui';
 import { apiClient } from '../../../lib/api-client';
 import { formatPrice, getStoredCurrency, convertPrice } from '../../../lib/currency';
+import { getStoredLanguage } from '../../../lib/language';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { useTranslation } from '../../../lib/i18n-client';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
@@ -113,17 +114,27 @@ export default function OrderPage() {
       setCurrency(getStoredCurrency());
     };
 
+    const handleLanguageUpdate = () => {
+      // Refetch order to get products with new language translations
+      fetchOrder();
+    };
+
     window.addEventListener('currency-updated', handleCurrencyUpdate);
+    window.addEventListener('language-updated', handleLanguageUpdate);
 
     return () => {
       window.removeEventListener('currency-updated', handleCurrencyUpdate);
+      window.removeEventListener('language-updated', handleLanguageUpdate);
     };
   }, [isLoggedIn, params.number, router]);
 
   async function fetchOrder() {
     try {
       setLoading(true);
-      const response = await apiClient.get<Order>(`/api/v1/orders/${params.number}`);
+      const currentLang = getStoredLanguage();
+      const response = await apiClient.get<Order>(`/api/v1/orders/${params.number}`, {
+        params: { lang: currentLang }
+      });
       console.log('📦 [ORDER PAGE] Order data received:', {
         orderNumber: response.number,
         itemsCount: response.items.length,

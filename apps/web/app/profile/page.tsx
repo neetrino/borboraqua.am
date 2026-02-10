@@ -546,7 +546,10 @@ function ProfilePageContent() {
       setOrderDetailsLoading(true);
       setOrderDetailsError(null);
       setShippingPrice(null);
-      const data = await apiClient.get<OrderDetails>(`/api/v1/orders/${orderNumber}`);
+      const currentLang = getStoredLanguage();
+      const data = await apiClient.get<OrderDetails>(`/api/v1/orders/${orderNumber}`, {
+        params: { lang: currentLang }
+      });
       setSelectedOrder(data);
 
       // Fetch shipping price if delivery method and shipping is 0

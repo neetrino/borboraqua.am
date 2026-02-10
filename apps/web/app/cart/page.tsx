@@ -243,7 +243,10 @@ export default function CartPage() {
       }
 
       // Եթե օգտատերը գրանցված է, օգտագործում ենք API
-      const response = await apiClient.get<{ cart: Cart }>('/api/v1/cart');
+      const currentLang = getStoredLanguage();
+      const response = await apiClient.get<{ cart: Cart }>('/api/v1/cart', {
+        params: { lang: currentLang }
+      });
       setCart(response.cart);
     } catch (error) {
       console.error('Error fetching cart:', error);

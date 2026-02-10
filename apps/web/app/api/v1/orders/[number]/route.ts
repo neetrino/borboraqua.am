@@ -23,7 +23,12 @@ export async function GET(
     }
 
     const { number } = await params;
-    const result = await ordersService.findByNumber(number, user.id);
+    // Get language from query parameter or cookie, fallback to 'en'
+    const langParam = req.nextUrl.searchParams.get('lang');
+    const langCookie = req.cookies.get('shop_language');
+    const locale = langParam || langCookie?.value || 'en';
+    
+    const result = await ordersService.findByNumber(number, user.id, locale);
     return NextResponse.json(result);
   } catch (error: any) {
     const { number } = await params;
