@@ -205,16 +205,13 @@ export async function GET(req: NextRequest) {
  * Create a new product
  * 
  * Request body should contain:
- * - title: string (required)
  * - slug: string (required)
- * - subtitle?: string
- * - descriptionHtml?: string
+ * - translations: Array<{locale: string, title: string, slug: string, descriptionHtml?: string}> (required, at least one translation)
  * - brandId?: string
  * - primaryCategoryId?: string
  * - categoryIds?: string[]
  * - published: boolean (required)
  * - featured?: boolean
- * - locale: string (required)
  * - media?: any[]
  * - labels?: Array<{type: string, value: string, position: string, color?: string}>
  * - attributeIds?: string[]
@@ -260,19 +257,6 @@ export async function POST(req: NextRequest) {
     }
 
     // Базовая валидация обязательных полей
-    if (!body.title || typeof body.title !== 'string' || body.title.trim().length === 0) {
-      return NextResponse.json(
-        {
-          type: "https://api.shop.am/problems/validation-error",
-          title: "Validation Error",
-          status: 400,
-          detail: "Field 'title' is required and must be a non-empty string",
-          instance: req.url,
-        },
-        { status: 400 }
-      );
-    }
-
     if (!body.slug || typeof body.slug !== 'string' || body.slug.trim().length === 0) {
       return NextResponse.json(
         {
@@ -286,6 +270,60 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate translations array
+    if (!Array.isArray(body.translations) || body.translations.length === 0) {
+      return NextResponse.json(
+        {
+          type: "https://api.shop.am/problems/validation-error",
+          title: "Validation Error",
+          status: 400,
+          detail: "Field 'translations' is required and must be a non-empty array with at least one translation",
+          instance: req.url,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate each translation
+    for (const translation of body.translations) {
+      if (!translation.locale || typeof translation.locale !== 'string') {
+        return NextResponse.json(
+          {
+            type: "https://api.shop.am/problems/validation-error",
+            title: "Validation Error",
+            status: 400,
+            detail: "Each translation must have a 'locale' field (string)",
+            instance: req.url,
+          },
+          { status: 400 }
+        );
+      }
+      if (!translation.title || typeof translation.title !== 'string' || translation.title.trim().length === 0) {
+        return NextResponse.json(
+          {
+            type: "https://api.shop.am/problems/validation-error",
+            title: "Validation Error",
+            status: 400,
+            detail: `Translation for locale '${translation.locale}' must have a non-empty 'title' field`,
+            instance: req.url,
+          },
+          { status: 400 }
+        );
+      }
+      if (!translation.slug || typeof translation.slug !== 'string' || translation.slug.trim().length === 0) {
+        return NextResponse.json(
+          {
+            type: "https://api.shop.am/problems/validation-error",
+            title: "Validation Error",
+            status: 400,
+            detail: `Translation for locale '${translation.locale}' must have a non-empty 'slug' field`,
+            instance: req.url,
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     if (typeof body.published !== 'boolean') {
       return NextResponse.json(
         {
@@ -293,19 +331,6 @@ export async function POST(req: NextRequest) {
           title: "Validation Error",
           status: 400,
           detail: "Field 'published' is required and must be a boolean",
-          instance: req.url,
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!body.locale || typeof body.locale !== 'string') {
-      return NextResponse.json(
-        {
-          type: "https://api.shop.am/problems/validation-error",
-          title: "Validation Error",
-          status: 400,
-          detail: "Field 'locale' is required and must be a string",
           instance: req.url,
         },
         { status: 400 }
@@ -326,8 +351,8 @@ export async function POST(req: NextRequest) {
     }
 
     console.log("📤 [ADMIN PRODUCTS API] Creating product:", {
-      title: body.title,
       slug: body.slug,
+      translationsCount: body.translations?.length || 0,
       variantsCount: body.variants?.length || 0,
       hasMedia: !!body.media?.length,
     });
@@ -339,7 +364,6 @@ export async function POST(req: NextRequest) {
     const totalTime = Date.now() - requestStartTime;
     console.log(`✅ [ADMIN PRODUCTS API] Product created in ${totalTime}ms (service: ${serviceTime}ms)`, {
       productId: product.id,
-      title: product.title,
     });
 
     return NextResponse.json(product, { status: 201 });

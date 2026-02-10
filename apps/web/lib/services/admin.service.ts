@@ -1232,10 +1232,9 @@ class AdminService {
       };
     }
 
-    // Безопасное получение translation с проверкой на существование массива
+    // Безопасное получение translations с проверкой на существование массива
     const translations = Array.isArray(product.translations) ? product.translations : [];
-    const translation = translations.find((t: { locale: string }) => t.locale === "en") || translations[0] || null;
-
+    
     // Безопасное получение labels с проверкой на существование массива
     const labels = Array.isArray(product.labels) ? product.labels : [];
     
@@ -1258,12 +1257,24 @@ class AdminService {
     // Merge both sources and remove duplicates
     const allAttributeIds = Array.from(new Set([...attributeIds, ...legacyAttributeIds]));
 
+    // Get default translation for backward compatibility (prefer English, then first available)
+    const defaultTranslation = translations.find((t: { locale: string }) => t.locale === "en") || translations[0] || null;
+
     return {
       id: product.id,
-      title: translation?.title || "",
-      slug: translation?.slug || "",
-      subtitle: translation?.subtitle || null,
-      descriptionHtml: translation?.descriptionHtml || null,
+      // Backward compatibility: include single title/slug/descriptionHtml
+      title: defaultTranslation?.title || "",
+      slug: defaultTranslation?.slug || "",
+      subtitle: defaultTranslation?.subtitle || null,
+      descriptionHtml: defaultTranslation?.descriptionHtml || null,
+      // Include all translations
+      translations: translations.map((t: any) => ({
+        locale: t.locale,
+        title: t.title,
+        slug: t.slug,
+        subtitle: t.subtitle || null,
+        descriptionHtml: t.descriptionHtml || null,
+      })),
       brandId: product.brandId || null,
       primaryCategoryId: product.primaryCategoryId || null,
       categoryIds: product.categoryIds || [],
@@ -1432,16 +1443,18 @@ class AdminService {
    * Create product
    */
   async createProduct(data: {
-    title: string;
     slug: string;
-    subtitle?: string;
-    descriptionHtml?: string;
+    translations: Array<{
+      locale: string;
+      title: string;
+      slug: string;
+      descriptionHtml?: string;
+    }>;
     brandId?: string;
     primaryCategoryId?: string;
     categoryIds?: string[];
     published: boolean;
     featured?: boolean;
-    locale: string;
     media?: any[];
     mainProductImage?: string;
     labels?: Array<{
@@ -1468,7 +1481,10 @@ class AdminService {
     }>;
   }) {
     try {
-      console.log('🆕 [ADMIN SERVICE] Creating product:', data.title);
+      console.log('🆕 [ADMIN SERVICE] Creating product with translations:', {
+        slug: data.slug,
+        translationsCount: data.translations.length,
+      });
 
       const result = await db.$transaction(async (tx: any) => {
         // Track used SKUs within this transaction to ensure uniqueness
@@ -1674,6 +1690,14 @@ class AdminService {
         console.log('📸 [ADMIN SERVICE] Final main media count:', finalMedia.length);
         console.log('📸 [ADMIN SERVICE] Variant images excluded:', allVariantImages.length);
 
+        // Create translations for all provided languages
+        const translationsToCreate = data.translations.map((translation) => ({
+          locale: translation.locale,
+          title: translation.title,
+          slug: translation.slug,
+          descriptionHtml: translation.descriptionHtml || undefined,
+        }));
+
         const product = await tx.product.create({
           data: {
             brandId: data.brandId || undefined,
@@ -1684,13 +1708,7 @@ class AdminService {
             featured: data.featured ?? false,
             publishedAt: data.published ? new Date() : undefined,
             translations: {
-              create: {
-                locale: data.locale || "en",
-                title: data.title,
-                slug: data.slug,
-                subtitle: data.subtitle || undefined,
-                descriptionHtml: data.descriptionHtml || undefined,
-              },
+              create: translationsToCreate,
             },
             variants: {
               create: variantsData,
@@ -1870,16 +1888,18 @@ class AdminService {
   async updateProduct(
     productId: string,
     data: {
-      title?: string;
       slug?: string;
-      subtitle?: string;
-      descriptionHtml?: string;
+      translations?: Array<{
+        locale: string;
+        title: string;
+        slug: string;
+        descriptionHtml?: string;
+      }>;
       brandId?: string;
       primaryCategoryId?: string;
       categoryIds?: string[];
       published?: boolean;
       featured?: boolean;
-      locale?: string;
       media?: any[];
       labels?: Array<{
         id?: string;
@@ -1908,7 +1928,9 @@ class AdminService {
     }
   ) {
     try {
-      console.log('🔄 [ADMIN SERVICE] Updating product:', productId);
+      console.log('🔄 [ADMIN SERVICE] Updating product:', productId, {
+        translationsCount: data.translations?.length || 0,
+      });
       
       // Check if product exists
       const existing = await db.product.findUnique({
@@ -1972,31 +1994,32 @@ class AdminService {
         }
         if (data.featured !== undefined) updateData.featured = data.featured;
 
-        // 2. Update translation
-        if (data.title || data.slug || data.subtitle !== undefined || data.descriptionHtml !== undefined) {
-          const locale = data.locale || "en";
-          await tx.productTranslation.upsert({
-            where: {
-              productId_locale: {
-                productId,
-                locale,
+        // 2. Update translations
+        if (data.translations && data.translations.length > 0) {
+          // Upsert each translation
+          for (const translation of data.translations) {
+            await tx.productTranslation.upsert({
+              where: {
+                productId_locale: {
+                  productId,
+                  locale: translation.locale,
+                },
               },
-            },
-            update: {
-              ...(data.title && { title: data.title }),
-              ...(data.slug && { slug: data.slug }),
-              ...(data.subtitle !== undefined && { subtitle: data.subtitle || null }),
-              ...(data.descriptionHtml !== undefined && { descriptionHtml: data.descriptionHtml || null }),
-            },
-            create: {
-              productId,
-              locale,
-              title: data.title || "",
-              slug: data.slug || "",
-              subtitle: data.subtitle || null,
-              descriptionHtml: data.descriptionHtml || null,
-            },
-          });
+              update: {
+                title: translation.title,
+                slug: translation.slug,
+                descriptionHtml: translation.descriptionHtml || null,
+              },
+              create: {
+                productId,
+                locale: translation.locale,
+                title: translation.title,
+                slug: translation.slug,
+                descriptionHtml: translation.descriptionHtml || null,
+              },
+            });
+          }
+          console.log(`✅ [ADMIN SERVICE] Updated ${data.translations.length} translation(s)`);
         }
 
         // 3. Update labels
@@ -2049,8 +2072,6 @@ class AdminService {
             }
           });
           const incomingVariantIds = new Set<string>();
-          
-          const locale = data.locale || "en";
           
           // Process each variant: update if exists, create if new
           if (data.variants.length > 0) {

@@ -123,9 +123,12 @@ function AddProductPageContent() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [attributes, setAttributes] = useState<Attribute[]>([]);
   const [formData, setFormData] = useState({
-    title: '',
     slug: '',
-    descriptionHtml: '',
+    translations: {
+      hy: { title: '', descriptionHtml: '' },
+      en: { title: '', descriptionHtml: '' },
+      ru: { title: '', descriptionHtml: '' },
+    },
     brandIds: [] as string[], // Changed to array for multi-select
     primaryCategoryId: '',
     categoryIds: [] as string[],
@@ -766,10 +769,36 @@ function AddProductPageContent() {
           // We use the first brand for now, but UI is ready for future multi-brand support
           const brandIds = product.brandId ? [product.brandId] : [];
 
+          // Load translations from product (if available) or use single translation as fallback
+          const productTranslations = (product as any).translations || [];
+          const translationsMap: { hy: { title: string; descriptionHtml: string }; en: { title: string; descriptionHtml: string }; ru: { title: string; descriptionHtml: string } } = {
+            hy: { title: '', descriptionHtml: '' },
+            en: { title: '', descriptionHtml: '' },
+            ru: { title: '', descriptionHtml: '' },
+          };
+          
+          // Fill translations from product.translations array
+          productTranslations.forEach((trans: any) => {
+            if (trans.locale && ['hy', 'en', 'ru'].includes(trans.locale)) {
+              const locale = trans.locale as 'hy' | 'en' | 'ru';
+              translationsMap[locale] = {
+                title: trans.title || '',
+                descriptionHtml: trans.descriptionHtml || '',
+              };
+            }
+          });
+          
+          // Fallback: if no translations array, use single title/description (backward compatibility)
+          if (productTranslations.length === 0 && product.title) {
+            translationsMap.en = {
+              title: product.title || '',
+              descriptionHtml: product.descriptionHtml || '',
+            };
+          }
+
           setFormData({
-            title: product.title || '',
             slug: product.slug || '',
-            descriptionHtml: product.descriptionHtml || '',
+            translations: translationsMap,
             brandIds: brandIds,
             primaryCategoryId: product.primaryCategoryId || '',
             categoryIds: product.categoryIds || [],
@@ -1288,7 +1317,9 @@ function AddProductPageContent() {
       });
       
       // Generate SKU based on all selected values
-      const baseSlug = formData.slug || generateSlug(formData.title) || 'PROD';
+      // Use first available title (prefer English, then Armenian, then Russian)
+      const firstTitle = formData.translations.en.title || formData.translations.hy.title || formData.translations.ru.title || '';
+      const baseSlug = formData.slug || (firstTitle ? generateSlug(firstTitle) : 'PROD');
       let sku = `${baseSlug}`;
       
       // Add selected values to SKU
@@ -1356,7 +1387,7 @@ function AddProductPageContent() {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedAttributesForVariants, selectedAttributeValueIds, attributes, formData.slug, formData.title, isEditMode, productId]);
+  }, [selectedAttributesForVariants, selectedAttributeValueIds, attributes, formData.slug, formData.translations, isEditMode, productId]);
 
   // Apply value to all variants
   const applyToAllVariants = (field: 'price' | 'compareAtPrice' | 'stock' | 'sku', value: string) => {
@@ -1366,12 +1397,35 @@ function AddProductPageContent() {
     })));
   };
 
-  const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const title = e.target.value;
+  const handleTitleChange = (locale: 'hy' | 'en' | 'ru', value: string) => {
+    setFormData((prev) => {
+      const newTranslations = {
+        ...prev.translations,
+        [locale]: {
+          ...prev.translations[locale],
+          title: value,
+        },
+      };
+      // Auto-generate slug from first non-empty title (prefer English, then Armenian, then Russian)
+      const firstTitle = newTranslations.en.title || newTranslations.hy.title || newTranslations.ru.title || '';
+      return {
+        ...prev,
+        translations: newTranslations,
+        slug: prev.slug || (firstTitle ? generateSlug(firstTitle) : ''),
+      };
+    });
+  };
+
+  const handleDescriptionChange = (locale: 'hy' | 'en' | 'ru', value: string) => {
     setFormData((prev) => ({
       ...prev,
-      title,
-      slug: prev.slug || generateSlug(title),
+      translations: {
+        ...prev.translations,
+        [locale]: {
+          ...prev.translations[locale],
+          descriptionHtml: value,
+        },
+      },
     }));
   };
 
@@ -2936,13 +2990,35 @@ function AddProductPageContent() {
       }
       const attributeIds = Array.from(attributeIdsSet);
 
+      // Collect translations - only include languages that have at least title filled
+      const translations: Array<{ locale: string; title: string; slug: string; descriptionHtml?: string }> = [];
+      
+      // Check each language and add if title is filled
+      ['hy', 'en', 'ru'].forEach((locale) => {
+        const translation = formData.translations[locale as 'hy' | 'en' | 'ru'];
+        if (translation.title.trim()) {
+          translations.push({
+            locale,
+            title: translation.title.trim(),
+            slug: formData.slug, // Use same slug for all languages (or generate per language if needed)
+            descriptionHtml: translation.descriptionHtml.trim() || undefined,
+          });
+        }
+      });
+
+      // Validate: at least one translation must be provided
+      if (translations.length === 0) {
+        alert(t('admin.products.add.atLeastOneLanguageRequired') || 'Please fill at least one language (title is required)');
+        setLoading(false);
+        return;
+      }
+
       // Prepare payload
       // Note: Database supports single brandId, so we use the first selected brand
       // For multiple brands, we would need to update the schema to support brandIds array
       const payload: any = {
-        title: formData.title,
         slug: formData.slug,
-        descriptionHtml: formData.descriptionHtml || undefined,
+        translations: translations,
         brandId: finalBrandIds.length > 0 ? finalBrandIds[0] : undefined,
         primaryCategoryId: finalPrimaryCategoryId || undefined,
         categoryIds: formData.categoryIds.length > 0 ? formData.categoryIds : undefined,
@@ -2950,7 +3026,6 @@ function AddProductPageContent() {
         // При редактировании используем значение из формы
         published: isEditMode ? formData.published : true,
         featured: formData.featured,
-        locale: 'en',
         variants: variants,
         attributeIds: attributeIds.length > 0 ? attributeIds : undefined,
       };
@@ -3273,17 +3348,107 @@ function AddProductPageContent() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('admin.products.add.title')} *
-                  </label>
-                  <Input
-                    type="text"
-                    value={formData.title}
-                    onChange={handleTitleChange}
-                    required
-                    placeholder={t('admin.products.add.productTitlePlaceholder')}
-                  />
+                {/* Multi-language Title and Description */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Հայերեն */}
+                  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <span className="text-xl">🇦🇲</span>
+                      <span>Հայերեն</span>
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('admin.products.add.title')}
+                        </label>
+                        <Input
+                          type="text"
+                          value={formData.translations.hy.title}
+                          onChange={(e) => handleTitleChange('hy', e.target.value)}
+                          placeholder={t('admin.products.add.productTitlePlaceholder')}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('admin.products.add.description')}
+                        </label>
+                        <textarea
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          rows={4}
+                          value={formData.translations.hy.descriptionHtml}
+                          onChange={(e) => handleDescriptionChange('hy', e.target.value)}
+                          placeholder={t('admin.products.add.productDescriptionPlaceholder')}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* English */}
+                  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <span className="text-xl">🇬🇧</span>
+                      <span>English</span>
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('admin.products.add.title')} *
+                        </label>
+                        <Input
+                          type="text"
+                          value={formData.translations.en.title}
+                          onChange={(e) => handleTitleChange('en', e.target.value)}
+                          required
+                          placeholder={t('admin.products.add.productTitlePlaceholder')}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('admin.products.add.description')}
+                        </label>
+                        <textarea
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          rows={4}
+                          value={formData.translations.en.descriptionHtml}
+                          onChange={(e) => handleDescriptionChange('en', e.target.value)}
+                          placeholder={t('admin.products.add.productDescriptionPlaceholder')}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Русский */}
+                  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <span className="text-xl">🇷🇺</span>
+                      <span>Русский</span>
+                    </h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('admin.products.add.title')}
+                        </label>
+                        <Input
+                          type="text"
+                          value={formData.translations.ru.title}
+                          onChange={(e) => handleTitleChange('ru', e.target.value)}
+                          placeholder={t('admin.products.add.productTitlePlaceholder')}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t('admin.products.add.description')}
+                        </label>
+                        <textarea
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          rows={4}
+                          value={formData.translations.ru.descriptionHtml}
+                          onChange={(e) => handleDescriptionChange('ru', e.target.value)}
+                          placeholder={t('admin.products.add.productDescriptionPlaceholder')}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div>
@@ -3296,19 +3461,6 @@ function AddProductPageContent() {
                     onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
                     required
                     placeholder={t('admin.products.add.productSlugPlaceholder')}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('admin.products.add.description')}
-                  </label>
-                  <textarea
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={6}
-                    value={formData.descriptionHtml}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, descriptionHtml: e.target.value }))}
-                    placeholder={t('admin.products.add.productDescriptionPlaceholder')}
                   />
                 </div>
               </div>
@@ -3983,7 +4135,8 @@ function AddProductPageContent() {
                             onClick={() => {
                               const skuPrefix = prompt(t('admin.products.add.enterSkuPrefix'));
                               if (skuPrefix !== null) {
-                                const baseSlug = skuPrefix || formData.slug || generateSlug(formData.title) || 'PROD';
+                                const firstTitle = formData.translations.en.title || formData.translations.hy.title || formData.translations.ru.title || '';
+                                const baseSlug = skuPrefix || formData.slug || (firstTitle ? generateSlug(firstTitle) : 'PROD');
                                 setGeneratedVariants(prev => prev.map((variant) => {
                                   // Collect all selected values from all attributes
                                   const valueParts: string[] = [];
