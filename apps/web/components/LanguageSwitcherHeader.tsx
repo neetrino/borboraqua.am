@@ -119,14 +119,11 @@ export function LanguageSwitcherHeader() {
       // Close menu first
       setShowMenu(false);
       
-      // Immediately update the UI state
+      // Immediately update the UI state to prevent showing old language during reload
       setCurrentLang(langCode);
       
-      // Update language without full reload - components will listen to 'language-updated' event
-      setStoredLanguage(langCode, { skipReload: true });
-      
-      // Refresh server components without full page reload
-      router.refresh();
+      // Update language with reload (for header, we want full reload)
+      setStoredLanguage(langCode, { skipReload: false });
     }
   };
 

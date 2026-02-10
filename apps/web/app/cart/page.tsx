@@ -62,6 +62,10 @@ export default function CartPage() {
       setCurrency(getStoredCurrency());
     };
 
+    const handleLanguageUpdate = () => {
+      // Refetch cart to get products with new language translations
+      fetchCart();
+    };
 
     const handleCartUpdate = () => {
       // If we just updated locally, skip re-fetch to avoid page reload
@@ -79,11 +83,13 @@ export default function CartPage() {
     };
 
     window.addEventListener('currency-updated', handleCurrencyUpdate);
+    window.addEventListener('language-updated', handleLanguageUpdate);
     window.addEventListener('cart-updated', handleCartUpdate);
     window.addEventListener('auth-updated', handleAuthUpdate);
 
     return () => {
       window.removeEventListener('currency-updated', handleCurrencyUpdate);
+      window.removeEventListener('language-updated', handleLanguageUpdate);
       window.removeEventListener('cart-updated', handleCartUpdate);
       window.removeEventListener('auth-updated', handleAuthUpdate);
     };
@@ -122,6 +128,7 @@ export default function CartPage() {
                 }
 
                 // Ստանում ենք ապրանքի տվյալները slug-ով
+                const currentLang = getStoredLanguage();
                 const productData = await apiClient.get<{
                   id: string;
                   slug: string;
@@ -135,7 +142,9 @@ export default function CartPage() {
                     originalPrice?: number | null;
                     stock?: number;
                   }>;
-                }>(`/api/v1/products/${item.productSlug}`);
+                }>(`/api/v1/products/${item.productSlug}`, {
+                  params: { lang: currentLang }
+                });
 
                 const variant = productData.variants?.find(v => 
                   (v._id?.toString() || v.id) === item.variantId
@@ -146,7 +155,9 @@ export default function CartPage() {
                   return { item: null, shouldRemove: true };
                 }
 
-                const translation = productData.translations?.[0];
+                // Get translation for current language, fallback to first available
+                const translation = productData.translations?.find((t: { locale: string }) => t.locale === currentLang) 
+                  || productData.translations?.[0];
                 const imageUrl = productData.media?.[0] 
                   ? (typeof productData.media[0] === 'string' 
                       ? productData.media[0] 

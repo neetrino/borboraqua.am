@@ -106,17 +106,20 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
       try {
         setLoading(true);
         
+        // Get current language (may have changed)
+        const currentLang = getStoredLanguage();
+        
         // Build params - if no categorySlug, fetch all products
         const params: Record<string, string> = {
           limit: '30', // Fetch more to ensure we have 10 after filtering
-          lang: language,
+          lang: currentLang,
         };
         
         if (categorySlug) {
           params.category = categorySlug;
-          console.log('[RelatedProducts] Fetching related products for category:', categorySlug);
+          console.log('[RelatedProducts] Fetching related products for category:', categorySlug, 'lang:', currentLang);
         } else {
-          console.log('[RelatedProducts] No categorySlug, fetching all products');
+          console.log('[RelatedProducts] No categorySlug, fetching all products, lang:', currentLang);
         }
         
         const response = await apiClient.get<{
@@ -144,7 +147,27 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     };
 
     fetchRelatedProducts();
-  }, [categorySlug, currentProductId]);
+    
+    return () => {
+      // Cleanup will be handled by the language-updated listener below
+    };
+  }, [categorySlug, currentProductId, language]);
+
+  // Separate effect for language updates to refetch products
+  useEffect(() => {
+    const handleLanguageUpdate = () => {
+      const newLang = getStoredLanguage();
+      console.log('[RelatedProducts] Language updated, refetching products with lang:', newLang);
+      setLanguage(newLang);
+      // fetchRelatedProducts will be called automatically when language state changes
+    };
+    
+    window.addEventListener('language-updated', handleLanguageUpdate);
+    
+    return () => {
+      window.removeEventListener('language-updated', handleLanguageUpdate);
+    };
+  }, [language]);
 
   // Determine visible cards based on screen size
   useEffect(() => {

@@ -407,6 +407,8 @@ export default function CheckoutPage() {
 
     const handleLanguageUpdate = () => {
       setLanguage(getStoredLanguage());
+      // Refetch cart to get products with new language translations
+      fetchCart();
     };
 
     window.addEventListener('currency-updated', handleCurrencyUpdate);
@@ -608,7 +610,9 @@ export default function CheckoutPage() {
               return { item: null, shouldRemove: true };
             }
 
-            const translation = productData.translations?.[0];
+            // Get translation for current language, fallback to first available
+            const translation = productData.translations?.find((t: { locale: string }) => t.locale === currentLang) 
+              || productData.translations?.[0];
             const imageUrl = productData.media?.[0] 
               ? (typeof productData.media[0] === 'string' 
                   ? productData.media[0] 
@@ -802,6 +806,7 @@ export default function CheckoutPage() {
         shippingMethod: data.shippingMethod,
         ...(shippingAddress ? { shippingAddress } : {}),
         paymentMethod: data.paymentMethod,
+        locale: getStoredLanguage(), // Pass current language for product translations
       });
 
       console.log('[Checkout] Order created:', response.order.number);

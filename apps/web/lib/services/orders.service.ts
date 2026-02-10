@@ -23,6 +23,7 @@ class OrdersService {
         shippingMethod = 'pickup',
         shippingAddress,
         paymentMethod = 'idram',
+        locale = 'en', // Language for product translations
       } = data;
 
       // Validate required fields
@@ -148,7 +149,9 @@ class OrdersService {
               variantSku: variant.sku,
             });
             
-            const translation = product.translations?.[0] || product.translations?.[0];
+            // Get translation for the specified locale, fallback to first available
+            const translation = product.translations?.find((t: { locale: string }) => t.locale === locale) 
+              || product.translations?.[0];
 
             // Get variant title from options
             const variantTitle = variant.options
@@ -303,7 +306,9 @@ class OrdersService {
               };
             }
 
-            const translation = variant.product.translations?.[0] || variant.product.translations?.[0];
+            // Get translation for the specified locale, fallback to first available
+            const translation = variant.product.translations?.find((t: { locale: string }) => t.locale === locale) 
+              || variant.product.translations?.[0];
             const variantTitle = variant.options
               ?.map((opt: any) => `${opt.attributeKey}: ${opt.value}`)
               .join(', ') || undefined;
@@ -432,7 +437,7 @@ class OrdersService {
             currency: 'AMD',
             customerEmail: email,
             customerPhone: phone,
-            customerLocale: 'en', // TODO: Get from request
+            customerLocale: locale || 'en',
             shippingMethod,
             shippingAddress: shippingAddress ? JSON.parse(JSON.stringify(shippingAddress)) : null,
             billingAddress: shippingAddress ? JSON.parse(JSON.stringify(shippingAddress)) : null,
