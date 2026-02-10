@@ -27,9 +27,10 @@ export async function GET(
 
     const { id } = await params;
     const { searchParams } = new URL(req.url);
+    const includeTranslations = searchParams.get("includeTranslations") === "true";
     const locale = searchParams.get("locale") || user.locale || "en";
 
-    const post = await blogService.getAdminPost(id, locale);
+    const post = await blogService.getAdminPost(id, locale, includeTranslations);
     if (!post) {
       return NextResponse.json(
         {
@@ -99,15 +100,38 @@ export async function PUT(
       );
     }
 
+    // If translations array is provided, use it; otherwise use single locale update (backward compatibility)
+    if (body.translations && Array.isArray(body.translations)) {
+      const updated = await blogService.updatePost({
+        id,
+        slug: typeof body.slug === "string" ? body.slug : undefined,
+        published:
+          typeof body.published === "boolean" ? body.published : undefined,
+        translations: body.translations.map((t: any) => ({
+          locale: t.locale,
+          title: t.title?.trim() || '',
+          contentHtml: t.contentHtml || null,
+          excerpt: t.excerpt || null,
+          seoTitle: t.seoTitle || null,
+          seoDescription: t.seoDescription || null,
+          featuredImage: body.featuredImage || null,
+          ogImage: body.ogImage || null,
+        })),
+      });
+      return NextResponse.json(updated);
+    }
+
+    // Backward compatibility: single locale update
+    const locale =
+      typeof body.locale === "string" && body.locale.trim()
+        ? body.locale
+        : user.locale || "en";
     const updated = await blogService.updatePost({
       id,
       slug: typeof body.slug === "string" ? body.slug : undefined,
       published:
         typeof body.published === "boolean" ? body.published : undefined,
-      locale:
-        typeof body.locale === "string" && body.locale.trim()
-          ? body.locale
-          : user.locale || "en",
+      locale,
       title: typeof body.title === "string" ? body.title : undefined,
       contentHtml:
         typeof body.contentHtml === "string" ? body.contentHtml : undefined,

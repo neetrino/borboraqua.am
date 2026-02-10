@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { blogService } from '@/lib/services/blog.service';
 import { getStoredLanguage } from '@/lib/language';
 import { BlogArticleContent } from '@/components/BlogArticleContent';
@@ -14,7 +15,19 @@ export async function generateMetadata({
   params,
 }: BlogArticlePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const lang = getStoredLanguage() || 'hy';
+  // Get language from cookies (server-side) first, then fallback
+  let lang: string = 'en';
+  try {
+    const cookieStore = await cookies();
+    const langCookie = cookieStore.get('shop_language');
+    if (langCookie && langCookie.value && ['hy', 'en', 'ru'].includes(langCookie.value)) {
+      lang = langCookie.value;
+    } else {
+      lang = getStoredLanguage() || 'en';
+    }
+  } catch {
+    lang = getStoredLanguage() || 'en';
+  }
   const post = await blogService.getBySlug(slug, lang);
 
   if (!post) {
@@ -51,7 +64,19 @@ export default async function BlogArticlePage({
   params,
 }: BlogArticlePageProps) {
   const { slug } = await params;
-  const lang = getStoredLanguage() || 'hy';
+  // Get language from cookies (server-side) first, then fallback
+  let lang: string = 'en';
+  try {
+    const cookieStore = await cookies();
+    const langCookie = cookieStore.get('shop_language');
+    if (langCookie && langCookie.value && ['hy', 'en', 'ru'].includes(langCookie.value)) {
+      lang = langCookie.value;
+    } else {
+      lang = getStoredLanguage() || 'en';
+    }
+  } catch {
+    lang = getStoredLanguage() || 'en';
+  }
   const post = await blogService.getBySlug(slug, lang);
 
   if (!post) {

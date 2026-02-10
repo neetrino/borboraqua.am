@@ -127,7 +127,7 @@ class BlogService {
   /**
    * Admin get single post by id + locale
    */
-  async getAdminPost(id: string, locale: Locale) {
+  async getAdminPost(id: string, locale: Locale, includeTranslations: boolean = false) {
     const posts = await loadAllPosts();
     const post = posts.find((p) => p.id === id && !p.deletedAt);
 
@@ -137,7 +137,7 @@ class BlogService {
 
     const translation = pickTranslation(post, locale);
 
-    return {
+    const result: any = {
       id: post.id,
       slug: post.slug,
       published: post.published,
@@ -152,22 +152,31 @@ class BlogService {
       featuredImage: translation?.featuredImage || null,
       ogImage: translation?.ogImage || null,
     };
+
+    // If includeTranslations is true, add all translations
+    if (includeTranslations && post.translations) {
+      result.translations = post.translations;
+    }
+
+    return result;
   }
 
   /**
-   * Create new post (single locale)
+   * Create new post with multiple translations
    */
   async createPost(input: {
     slug: string;
     published: boolean;
-    locale: Locale;
-    title: string;
-    contentHtml?: string | null;
-    excerpt?: string | null;
-    seoTitle?: string | null;
-    seoDescription?: string | null;
-    featuredImage?: string | null;
-    ogImage?: string | null;
+    translations: Array<{
+      locale: Locale;
+      title: string;
+      contentHtml?: string | null;
+      excerpt?: string | null;
+      seoTitle?: string | null;
+      seoDescription?: string | null;
+      featuredImage?: string | null;
+      ogImage?: string | null;
+    }>;
   }) {
     const now = new Date().toISOString();
     const posts = await loadAllPosts();
@@ -189,34 +198,45 @@ class BlogService {
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
-      translations: [
-        {
-          locale: input.locale,
-          title: input.title,
-          contentHtml: input.contentHtml ?? null,
-          excerpt: input.excerpt ?? null,
-          seoTitle: input.seoTitle ?? null,
-          seoDescription: input.seoDescription ?? null,
-          featuredImage: input.featuredImage ?? null,
-          ogImage: input.ogImage ?? null,
-        },
-      ],
+      translations: input.translations.map(t => ({
+        locale: t.locale,
+        title: t.title,
+        contentHtml: t.contentHtml ?? null,
+        excerpt: t.excerpt ?? null,
+        seoTitle: t.seoTitle ?? null,
+        seoDescription: t.seoDescription ?? null,
+        featuredImage: t.featuredImage ?? null,
+        ogImage: t.ogImage ?? null,
+      })),
     };
 
     posts.push(newPost);
     await saveAllPosts(posts);
 
-    return this.getAdminPost(newPost.id, input.locale);
+    // Return with first translation locale (or 'en' as fallback)
+    const firstLocale = input.translations[0]?.locale || 'en';
+    return this.getAdminPost(newPost.id, firstLocale);
   }
 
   /**
-   * Update post fields and/or a specific locale translation
+   * Update post fields and/or translations
    */
   async updatePost(input: {
     id: string;
     slug?: string;
     published?: boolean;
-    locale: Locale;
+    translations?: Array<{
+      locale: Locale;
+      title: string;
+      contentHtml?: string | null;
+      excerpt?: string | null;
+      seoTitle?: string | null;
+      seoDescription?: string | null;
+      featuredImage?: string | null;
+      ogImage?: string | null;
+    }>;
+    // Backward compatibility: single locale update
+    locale?: Locale;
     title?: string;
     contentHtml?: string;
     excerpt?: string;
@@ -261,46 +281,73 @@ class BlogService {
       post.published = input.published;
     }
 
-    // Update translation for locale
+    // Update translations
     const translations = Array.isArray(post.translations)
-      ? post.translations
+      ? [...post.translations]
       : [];
-    let translation =
-      translations.find((t) => t.locale === input.locale) || null;
 
-    if (!translation) {
-      translation = {
-        locale: input.locale,
-        title: input.title || post.slug,
-        contentHtml: input.contentHtml ?? null,
-        excerpt: input.excerpt ?? null,
-        seoTitle: input.seoTitle ?? null,
-        seoDescription: input.seoDescription ?? null,
-        featuredImage: input.featuredImage ?? null,
-        ogImage: input.ogImage ?? null,
-      };
-      translations.push(translation);
-    } else {
-      if (typeof input.title === "string") {
-        translation.title = input.title;
-      }
-      if (typeof input.contentHtml === "string") {
-        translation.contentHtml = input.contentHtml;
-      }
-      if (typeof input.excerpt === "string") {
-        translation.excerpt = input.excerpt;
-      }
-      if (typeof input.seoTitle === "string") {
-        translation.seoTitle = input.seoTitle;
-      }
-      if (typeof input.seoDescription === "string") {
-        translation.seoDescription = input.seoDescription;
-      }
-      if (input.featuredImage !== undefined) {
-        translation.featuredImage = input.featuredImage;
-      }
-      if (input.ogImage !== undefined) {
-        translation.ogImage = input.ogImage;
+    if (input.translations && Array.isArray(input.translations)) {
+      // Update multiple translations
+      input.translations.forEach((newTrans) => {
+        const existingIndex = translations.findIndex(
+          (t) => t.locale === newTrans.locale
+        );
+        const translationData = {
+          locale: newTrans.locale,
+          title: newTrans.title,
+          contentHtml: newTrans.contentHtml ?? null,
+          excerpt: newTrans.excerpt ?? null,
+          seoTitle: newTrans.seoTitle ?? null,
+          seoDescription: newTrans.seoDescription ?? null,
+          featuredImage: newTrans.featuredImage ?? null,
+          ogImage: newTrans.ogImage ?? null,
+        };
+
+        if (existingIndex >= 0) {
+          translations[existingIndex] = translationData;
+        } else {
+          translations.push(translationData);
+        }
+      });
+    } else if (input.locale) {
+      // Backward compatibility: single locale update
+      let translation =
+        translations.find((t) => t.locale === input.locale) || null;
+
+      if (!translation) {
+        translation = {
+          locale: input.locale,
+          title: input.title || post.slug,
+          contentHtml: input.contentHtml ?? null,
+          excerpt: input.excerpt ?? null,
+          seoTitle: input.seoTitle ?? null,
+          seoDescription: input.seoDescription ?? null,
+          featuredImage: input.featuredImage ?? null,
+          ogImage: input.ogImage ?? null,
+        };
+        translations.push(translation);
+      } else {
+        if (typeof input.title === "string") {
+          translation.title = input.title;
+        }
+        if (typeof input.contentHtml === "string") {
+          translation.contentHtml = input.contentHtml;
+        }
+        if (typeof input.excerpt === "string") {
+          translation.excerpt = input.excerpt;
+        }
+        if (typeof input.seoTitle === "string") {
+          translation.seoTitle = input.seoTitle;
+        }
+        if (typeof input.seoDescription === "string") {
+          translation.seoDescription = input.seoDescription;
+        }
+        if (input.featuredImage !== undefined) {
+          translation.featuredImage = input.featuredImage;
+        }
+        if (input.ogImage !== undefined) {
+          translation.ogImage = input.ogImage;
+        }
       }
     }
 
@@ -310,7 +357,9 @@ class BlogService {
 
     await saveAllPosts(posts);
 
-    return this.getAdminPost(post.id, input.locale);
+    // Return with first translation locale or provided locale
+    const returnLocale = input.translations?.[0]?.locale || input.locale || 'en';
+    return this.getAdminPost(post.id, returnLocale);
   }
 
   /**

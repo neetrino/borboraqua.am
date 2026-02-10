@@ -50,16 +50,19 @@ export default function AdminBlogPage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<AdminBlogPost | null>(null);
 
-  const [formLocale, setFormLocale] = useState<LanguageCode>(() => getStoredLanguage() as LanguageCode || 'hy');
-  const [formTitle, setFormTitle] = useState('');
   const [formSlug, setFormSlug] = useState('');
-  const [formContentHtml, setFormContentHtml] = useState('');
-  const [formExcerpt, setFormExcerpt] = useState('');
-  const [formSeoTitle, setFormSeoTitle] = useState('');
-  const [formSeoDescription, setFormSeoDescription] = useState('');
+  const [formPublished, setFormPublished] = useState(false);
+  const [formTranslations, setFormTranslations] = useState<{
+    hy: { title: string; contentHtml: string; excerpt: string; seoTitle: string; seoDescription: string };
+    en: { title: string; contentHtml: string; excerpt: string; seoTitle: string; seoDescription: string };
+    ru: { title: string; contentHtml: string; excerpt: string; seoTitle: string; seoDescription: string };
+  }>({
+    hy: { title: '', contentHtml: '', excerpt: '', seoTitle: '', seoDescription: '' },
+    en: { title: '', contentHtml: '', excerpt: '', seoTitle: '', seoDescription: '' },
+    ru: { title: '', contentHtml: '', excerpt: '', seoTitle: '', seoDescription: '' },
+  });
   const [formFeaturedImage, setFormFeaturedImage] = useState<string | null>(null);
   const [formOgImage, setFormOgImage] = useState<string | null>(null);
-  const [formPublished, setFormPublished] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState<'featured' | 'og' | null>(null);
 
@@ -129,13 +132,12 @@ export default function AdminBlogPage() {
 
   const resetForm = () => {
     setEditingPost(null);
-    setFormLocale(getStoredLanguage() as LanguageCode || 'hy');
-    setFormTitle('');
     setFormSlug('');
-    setFormContentHtml('');
-    setFormExcerpt('');
-    setFormSeoTitle('');
-    setFormSeoDescription('');
+    setFormTranslations({
+      hy: { title: '', contentHtml: '', excerpt: '', seoTitle: '', seoDescription: '' },
+      en: { title: '', contentHtml: '', excerpt: '', seoTitle: '', seoDescription: '' },
+      ru: { title: '', contentHtml: '', excerpt: '', seoTitle: '', seoDescription: '' },
+    });
     setFormFeaturedImage(null);
     setFormOgImage(null);
     setFormPublished(false);
@@ -151,28 +153,67 @@ export default function AdminBlogPage() {
       setLoading(true);
       setError(null);
 
-      const language = getStoredLanguage();
+      // Fetch post with all translations
       const response = await apiClient.get<AdminBlogPost & {
-        contentHtml?: string | null;
-        excerpt?: string | null;
-        seoTitle?: string | null;
-        seoDescription?: string | null;
+        translations?: Array<{
+          locale: string;
+          title: string;
+          contentHtml?: string | null;
+          excerpt?: string | null;
+          seoTitle?: string | null;
+          seoDescription?: string | null;
+        }>;
         featuredImage?: string | null;
         ogImage?: string | null;
       }>(`/api/v1/admin/blog/${post.id}`, {
-        params: { locale: language },
+        params: { includeTranslations: 'true' },
       });
 
       const data = response;
 
       setEditingPost(post);
-      setFormLocale((data.locale as LanguageCode) || (language as LanguageCode));
-      setFormTitle(data.title || '');
       setFormSlug(data.slug || '');
-      setFormContentHtml(data.contentHtml || '');
-      setFormExcerpt(data.excerpt || '');
-      setFormSeoTitle(data.seoTitle || '');
-      setFormSeoDescription(data.seoDescription || '');
+      
+      // Initialize translations map
+      const translationsMap: {
+        hy: { title: string; contentHtml: string; excerpt: string; seoTitle: string; seoDescription: string };
+        en: { title: string; contentHtml: string; excerpt: string; seoTitle: string; seoDescription: string };
+        ru: { title: string; contentHtml: string; excerpt: string; seoTitle: string; seoDescription: string };
+      } = {
+        hy: { title: '', contentHtml: '', excerpt: '', seoTitle: '', seoDescription: '' },
+        en: { title: '', contentHtml: '', excerpt: '', seoTitle: '', seoDescription: '' },
+        ru: { title: '', contentHtml: '', excerpt: '', seoTitle: '', seoDescription: '' },
+      };
+
+      // Populate translations from response
+      if (data.translations && Array.isArray(data.translations)) {
+        data.translations.forEach((trans: any) => {
+          const locale = trans.locale as 'hy' | 'en' | 'ru';
+          if (locale && (locale === 'hy' || locale === 'en' || locale === 'ru')) {
+            translationsMap[locale] = {
+              title: trans.title || '',
+              contentHtml: trans.contentHtml || '',
+              excerpt: trans.excerpt || '',
+              seoTitle: trans.seoTitle || '',
+              seoDescription: trans.seoDescription || '',
+            };
+          }
+        });
+      } else {
+        // Fallback: if no translations array, use single locale data
+        const language = getStoredLanguage() as 'hy' | 'en' | 'ru';
+        if (language && (language === 'hy' || language === 'en' || language === 'ru')) {
+          translationsMap[language] = {
+            title: data.title || '',
+            contentHtml: (data as any).contentHtml || '',
+            excerpt: (data as any).excerpt || '',
+            seoTitle: (data as any).seoTitle || '',
+            seoDescription: (data as any).seoDescription || '',
+          };
+        }
+      }
+
+      setFormTranslations(translationsMap);
       setFormFeaturedImage(data.featuredImage || null);
       setFormOgImage(data.ogImage || null);
       setFormPublished(data.published);
@@ -206,7 +247,6 @@ export default function AdminBlogPage() {
       const newStatus = !post.published;
       await apiClient.put(`/api/v1/admin/blog/${post.id}`, {
         published: newStatus,
-        locale: formLocale,
       });
       await fetchPosts();
     } catch (err: any) {
@@ -222,15 +262,42 @@ export default function AdminBlogPage() {
     setError(null);
 
     try {
+      // Collect all filled translations
+      const translations: Array<{
+        locale: string;
+        title: string;
+        contentHtml?: string;
+        excerpt?: string;
+        seoTitle?: string;
+        seoDescription?: string;
+      }> = [];
+
+      // Add translations that have at least a title
+      (['hy', 'en', 'ru'] as const).forEach((locale) => {
+        const trans = formTranslations[locale];
+        if (trans.title.trim()) {
+          translations.push({
+            locale,
+            title: trans.title.trim(),
+            contentHtml: trans.contentHtml?.trim() || undefined,
+            excerpt: trans.excerpt?.trim() || undefined,
+            seoTitle: trans.seoTitle?.trim() || undefined,
+            seoDescription: trans.seoDescription?.trim() || undefined,
+          });
+        }
+      });
+
+      // Validate: at least one translation is required
+      if (translations.length === 0) {
+        setError(t('admin.blog.atLeastOneTranslationRequired') || 'At least one language translation is required');
+        setSaving(false);
+        return;
+      }
+
       const payload = {
         slug: formSlug.trim(),
         published: formPublished,
-        locale: formLocale,
-        title: formTitle.trim(),
-        contentHtml: formContentHtml || undefined,
-        excerpt: formExcerpt.trim() || undefined,
-        seoTitle: formSeoTitle.trim() || undefined,
-        seoDescription: formSeoDescription.trim() || undefined,
+        translations,
         featuredImage: formFeaturedImage || undefined,
         ogImage: formOgImage || undefined,
       };
@@ -276,15 +343,41 @@ export default function AdminBlogPage() {
     return null;
   }
 
-  const handleTitleChange = (value: string) => {
-    setFormTitle(value);
+  const handleTitleChange = (locale: 'hy' | 'en' | 'ru', value: string) => {
+    setFormTranslations(prev => ({
+      ...prev,
+      [locale]: {
+        ...prev[locale],
+        title: value,
+      },
+    }));
     if (!editingPost) {
-      setFormSlug(generateSlug(value));
-      // Auto-generate SEO title if empty
-      if (!formSeoTitle) {
-        setFormSeoTitle(value);
+      // Use English title for slug generation, fallback to first available
+      const slugTitle = formTranslations.en.title.trim() || formTranslations.hy.title.trim() || formTranslations.ru.title.trim() || value;
+      if (locale === 'en' || !formSlug) {
+        setFormSlug(generateSlug(slugTitle));
+      }
+      // Auto-generate SEO title if empty for this locale
+      if (!formTranslations[locale].seoTitle) {
+        setFormTranslations(prev => ({
+          ...prev,
+          [locale]: {
+            ...prev[locale],
+            seoTitle: value,
+          },
+        }));
       }
     }
+  };
+
+  const handleTranslationChange = (locale: 'hy' | 'en' | 'ru', field: 'contentHtml' | 'excerpt' | 'seoTitle' | 'seoDescription', value: string) => {
+    setFormTranslations(prev => ({
+      ...prev,
+      [locale]: {
+        ...prev[locale],
+        [field]: value,
+      },
+    }));
   };
 
   const handleImageUpload = async (
@@ -523,7 +616,7 @@ export default function AdminBlogPage() {
 
       {editorOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-gray-900">
                 {editingPost ? t('admin.blog.editPost') : t('admin.blog.addNewPost')}
@@ -554,78 +647,76 @@ export default function AdminBlogPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('admin.blog.titleLabel')} *
-                  </label>
-                  <input
-                    type="text"
-                    value={formTitle}
-                    onChange={(e) => handleTitleChange(e.target.value)}
-                    placeholder={t('admin.blog.titlePlaceholder')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('admin.blog.slugLabelRequired')}
-                  </label>
-                  <input
-                    type="text"
-                    value={formSlug}
-                    onChange={(e) => setFormSlug(e.target.value)}
-                    placeholder={t('admin.blog.articleSlugPlaceholder')}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-              </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('admin.blog.excerptLabel')}
+                  {t('admin.blog.slugLabelRequired')}
                 </label>
-                <textarea
-                  value={formExcerpt}
-                  onChange={(e) => setFormExcerpt(e.target.value)}
-                  placeholder={t('admin.blog.excerptPlaceholderFull')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[80px] resize-y"
-                  rows={3}
+                <input
+                  type="text"
+                  value={formSlug}
+                  onChange={(e) => setFormSlug(e.target.value)}
+                  placeholder={t('admin.blog.articleSlugPlaceholder')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('admin.blog.localeLabel')}
-                  </label>
-                  <select
-                    value={formLocale}
-                    onChange={(e) =>
-                      setFormLocale(e.target.value as LanguageCode)
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {Object.entries(LANGUAGES).map(([code, lang]) => (
-                      <option key={code} value={code}>
-                        {lang.name}
-                      </option>
-                    ))}
-                  </select>
+              {/* Multi-language Title Inputs */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('admin.blog.titleLabel')} *
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {(['hy', 'en', 'ru'] as const).map((locale) => (
+                    <div key={locale}>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        {LANGUAGES[locale].nativeName}
+                      </label>
+                      <input
+                        type="text"
+                        value={formTranslations[locale].title}
+                        onChange={(e) => handleTitleChange(locale, e.target.value)}
+                        placeholder={`${t('admin.blog.titlePlaceholder')} (${LANGUAGES[locale].nativeName})`}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center mt-4 md:mt-7">
-                  <label className="inline-flex items-center text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      checked={formPublished}
-                      onChange={(e) => setFormPublished(e.target.checked)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                    <span className="ml-2">{t('admin.blog.publishedLabel')}</span>
-                  </label>
+              </div>
+
+              {/* Multi-language Excerpt Inputs */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('admin.blog.excerptLabel')}
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {(['hy', 'en', 'ru'] as const).map((locale) => (
+                    <div key={locale}>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        {LANGUAGES[locale].nativeName}
+                      </label>
+                      <textarea
+                        value={formTranslations[locale].excerpt}
+                        onChange={(e) => handleTranslationChange(locale, 'excerpt', e.target.value)}
+                        placeholder={`${t('admin.blog.excerptPlaceholderFull')} (${LANGUAGES[locale].nativeName})`}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[80px] resize-y"
+                        rows={3}
+                      />
+                    </div>
+                  ))}
                 </div>
+              </div>
+
+              <div className="flex items-center">
+                <label className="inline-flex items-center text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={formPublished}
+                    onChange={(e) => setFormPublished(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="ml-2">{t('admin.blog.publishedLabel')}</span>
+                </label>
               </div>
 
               {/* Featured Image */}
@@ -672,32 +763,52 @@ export default function AdminBlogPage() {
               <div className="border-t border-gray-200 pt-4">
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('admin.blog.seoSettingsTitle')}</h3>
                 <div className="space-y-4">
+                  {/* Multi-language SEO Title Inputs */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       {t('admin.blog.metaTitleLabel')}
                     </label>
-                    <input
-                      type="text"
-                      value={formSeoTitle}
-                      onChange={(e) => setFormSeoTitle(e.target.value)}
-                      placeholder={t('admin.blog.metaTitlePlaceholder')}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {(['hy', 'en', 'ru'] as const).map((locale) => (
+                        <div key={locale}>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {LANGUAGES[locale].nativeName}
+                          </label>
+                          <input
+                            type="text"
+                            value={formTranslations[locale].seoTitle}
+                            onChange={(e) => handleTranslationChange(locale, 'seoTitle', e.target.value)}
+                            placeholder={`${t('admin.blog.metaTitlePlaceholder')} (${LANGUAGES[locale].nativeName})`}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                      ))}
+                    </div>
                     <p className="mt-1 text-xs text-gray-500">
                       {t('admin.blog.metaTitleHint')}
                     </p>
                   </div>
+                  {/* Multi-language SEO Description Inputs */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       {t('admin.blog.metaDescriptionLabel')}
                     </label>
-                    <textarea
-                      value={formSeoDescription}
-                      onChange={(e) => setFormSeoDescription(e.target.value)}
-                      placeholder={t('admin.blog.metaDescriptionPlaceholder')}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[80px] resize-y"
-                      rows={3}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {(['hy', 'en', 'ru'] as const).map((locale) => (
+                        <div key={locale}>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                            {LANGUAGES[locale].nativeName}
+                          </label>
+                          <textarea
+                            value={formTranslations[locale].seoDescription}
+                            onChange={(e) => handleTranslationChange(locale, 'seoDescription', e.target.value)}
+                            placeholder={`${t('admin.blog.metaDescriptionPlaceholder')} (${LANGUAGES[locale].nativeName})`}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[80px] resize-y"
+                            rows={3}
+                          />
+                        </div>
+                      ))}
+                    </div>
                     <p className="mt-1 text-xs text-gray-500">
                       {t('admin.blog.metaDescriptionHint')}
                     </p>
@@ -746,17 +857,26 @@ export default function AdminBlogPage() {
                 </div>
               </div>
 
-              {/* Content */}
+              {/* Multi-language Content Inputs */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('admin.blog.contentLabel')} (HTML)
                 </label>
-                <textarea
-                  value={formContentHtml}
-                  onChange={(e) => setFormContentHtml(e.target.value)}
-                  placeholder={t('admin.blog.contentPlaceholder')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[200px] font-mono resize-y"
-                />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {(['hy', 'en', 'ru'] as const).map((locale) => (
+                    <div key={locale}>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                        {LANGUAGES[locale].nativeName}
+                      </label>
+                      <textarea
+                        value={formTranslations[locale].contentHtml}
+                        onChange={(e) => handleTranslationChange(locale, 'contentHtml', e.target.value)}
+                        placeholder={`${t('admin.blog.contentPlaceholder')} (${LANGUAGES[locale].nativeName})`}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[200px] font-mono resize-y"
+                      />
+                    </div>
+                  ))}
+                </div>
                 <p className="mt-1 text-xs text-gray-500">
                   {t('admin.blog.contentHint')}
                 </p>

@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
 
 /**
  * POST /api/v1/admin/blog
- * Create a new blog post (single locale)
+ * Create a new blog post with multiple translations
  */
 export async function POST(req: NextRequest) {
   try {
@@ -81,19 +81,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!body.title || typeof body.title !== "string" || !body.title.trim()) {
-      return NextResponse.json(
-        {
-          type: "https://api.shop.am/problems/validation-error",
-          title: "Validation Error",
-          status: 400,
-          detail: "Field 'title' is required and must be a non-empty string",
-          instance: req.url,
-        },
-        { status: 400 }
-      );
-    }
-
     if (!body.slug || typeof body.slug !== "string" || !body.slug.trim()) {
       return NextResponse.json(
         {
@@ -120,22 +107,49 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const locale =
-      typeof body.locale === "string" && body.locale.trim()
-        ? body.locale
-        : user.locale || "en";
+    // Validate translations array
+    if (!body.translations || !Array.isArray(body.translations) || body.translations.length === 0) {
+      return NextResponse.json(
+        {
+          type: "https://api.shop.am/problems/validation-error",
+          title: "Validation Error",
+          status: 400,
+          detail: "Field 'translations' is required and must be a non-empty array",
+          instance: req.url,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Validate each translation has at least a title
+    for (const trans of body.translations) {
+      if (!trans.locale || !trans.title || typeof trans.title !== "string" || !trans.title.trim()) {
+        return NextResponse.json(
+          {
+            type: "https://api.shop.am/problems/validation-error",
+            title: "Validation Error",
+            status: 400,
+            detail: `Each translation must have 'locale' and 'title' fields. Translation with locale '${trans.locale || 'unknown'}' is missing required fields.`,
+            instance: req.url,
+          },
+          { status: 400 }
+        );
+      }
+    }
 
     const post = await blogService.createPost({
       slug: body.slug.trim(),
       published: body.published,
-      locale,
-      title: body.title.trim(),
-      contentHtml: body.contentHtml,
-      excerpt: body.excerpt,
-      seoTitle: body.seoTitle,
-      seoDescription: body.seoDescription,
-      featuredImage: body.featuredImage,
-      ogImage: body.ogImage,
+      translations: body.translations.map((t: any) => ({
+        locale: t.locale,
+        title: t.title.trim(),
+        contentHtml: t.contentHtml || null,
+        excerpt: t.excerpt || null,
+        seoTitle: t.seoTitle || null,
+        seoDescription: t.seoDescription || null,
+        featuredImage: body.featuredImage || null,
+        ogImage: body.ogImage || null,
+      })),
     });
 
     return NextResponse.json(post, { status: 201 });
