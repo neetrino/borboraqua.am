@@ -26,35 +26,66 @@ interface BlogPost {
 
 const SETTINGS_KEY = "blog-posts";
 
+// Simple in-memory cache for blog posts (cleared on updates)
+let postsCache: BlogPost[] | null = null;
+let cacheTimestamp: number = 0;
+const CACHE_TTL = 30000; // 30 seconds cache
+
 async function loadAllPosts(): Promise<BlogPost[]> {
-  const setting = await db.settings.findUnique({
-    where: { key: SETTINGS_KEY },
-  });
+  const now = Date.now();
+  
+  // Return cached data if available and fresh
+  if (postsCache && (now - cacheTimestamp) < CACHE_TTL) {
+    return postsCache;
+  }
+  
+  try {
+    const setting = await db.settings.findUnique({
+      where: { key: SETTINGS_KEY },
+    });
 
-  if (!setting) {
+    if (!setting) {
+      postsCache = [];
+      cacheTimestamp = now;
+      return [];
+    }
+
+    const value = setting.value as unknown;
+
+    if (!Array.isArray(value)) {
+      postsCache = [];
+      cacheTimestamp = now;
+      return [];
+    }
+
+    // Basic runtime validation/normalization
+    const posts = value
+      .filter((item): item is BlogPost => {
+        return (
+          item &&
+          typeof item === "object" &&
+          typeof (item as any).id === "string" &&
+          typeof (item as any).slug === "string"
+        );
+      })
+      .map((item) => ({
+        ...item,
+        translations: Array.isArray(item.translations) ? item.translations : [],
+      }));
+    
+    // Update cache
+    postsCache = posts;
+    cacheTimestamp = now;
+    
+    return posts;
+  } catch (error) {
+    console.error('❌ [BLOG SERVICE] Error loading posts:', error);
+    // Return cached data if available, even if stale
+    if (postsCache) {
+      return postsCache;
+    }
     return [];
   }
-
-  const value = setting.value as unknown;
-
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  // Basic runtime validation/normalization
-  return value
-    .filter((item): item is BlogPost => {
-      return (
-        item &&
-        typeof item === "object" &&
-        typeof (item as any).id === "string" &&
-        typeof (item as any).slug === "string"
-      );
-    })
-    .map((item) => ({
-      ...item,
-      translations: Array.isArray(item.translations) ? item.translations : [],
-    }));
 }
 
 async function saveAllPosts(posts: BlogPost[]) {
@@ -69,6 +100,10 @@ async function saveAllPosts(posts: BlogPost[]) {
       description: "Blog posts storage (JSON, per-locale translations)",
     },
   });
+  
+  // Clear cache after save
+  postsCache = null;
+  cacheTimestamp = 0;
 }
 
 function pickTranslation(
@@ -387,14 +422,20 @@ class BlogService {
    * Public: list published posts for locale
    */
   async listPublished(locale: Locale, page: number = 1, limit: number = 10) {
+    const loadStartTime = Date.now();
     const posts = await loadAllPosts();
+    const loadDuration = Date.now() - loadStartTime;
+    console.log(`📝 [BLOG SERVICE] Loaded ${posts.length} posts in ${loadDuration}ms`);
 
+    const filterStartTime = Date.now();
     const published = posts
       .filter((p) => p.published && !p.deletedAt)
       .sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
+    const filterDuration = Date.now() - filterStartTime;
+    console.log(`📝 [BLOG SERVICE] Filtered to ${published.length} published posts in ${filterDuration}ms`);
 
     const total = published.length;
     const totalPages = Math.ceil(total / limit);
@@ -402,7 +443,8 @@ class BlogService {
     const endIndex = startIndex + limit;
     const paginatedPosts = published.slice(startIndex, endIndex);
 
-    return {
+    const mapStartTime = Date.now();
+    const result = {
       data: paginatedPosts.map((post) => {
         const translation = pickTranslation(post, locale);
 
@@ -429,6 +471,10 @@ class BlogService {
         totalPages,
       },
     };
+    const mapDuration = Date.now() - mapStartTime;
+    console.log(`📝 [BLOG SERVICE] Mapped ${result.data.length} posts in ${mapDuration}ms`);
+
+    return result;
   }
 
   /**

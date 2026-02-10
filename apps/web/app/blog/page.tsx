@@ -39,26 +39,50 @@ export default function BlogPage() {
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
 
   useEffect(() => {
+    let cancelled = false;
+    
+    async function loadPosts() {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Use a shorter timeout for blog posts (5 seconds)
+        const startTime = Date.now();
+        const response = await apiClient.get<BlogListResponse>('/api/v1/blog', {
+          params: { lang, page: currentPage, limit: 12 },
+        });
+        const duration = Date.now() - startTime;
+        if (duration > 2000) {
+          console.warn(`⚠️ [BLOG] Slow response: ${duration}ms`);
+        }
+        
+        if (!cancelled) {
+          setPosts(response.data || []);
+          setMeta(response.meta || null);
+        }
+      } catch (err: any) {
+        if (!cancelled) {
+          console.error('❌ [BLOG] Failed to load posts', err);
+          const errorMessage = err?.message?.includes('timeout') 
+            ? 'Request timeout. Please try again.'
+            : t('blog.errorLoading');
+          setError(errorMessage);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+    
     void loadPosts();
+    
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang, currentPage]);
 
-  async function loadPosts() {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await apiClient.get<BlogListResponse>('/api/v1/blog', {
-        params: { lang, page: currentPage, limit: 12 },
-      });
-      setPosts(response.data || []);
-      setMeta(response.meta || null);
-    } catch (err) {
-      console.error('❌ [BLOG] Failed to load posts', err);
-      setError(t('blog.errorLoading'));
-    } finally {
-      setLoading(false);
-    }
-  }
 
   return (
     <div className="min-h-screen">
