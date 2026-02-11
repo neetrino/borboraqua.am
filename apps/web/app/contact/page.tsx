@@ -109,7 +109,7 @@ export default function ContactPage() {
                 <h3 className="text-xl font-semibold text-gray-900">{t('contact.callToUs.title')}</h3>
               </div>
               <p className="text-gray-600 mb-2">{t('contact.callToUs.description')}</p>
-              <a href={`tel:${contactData.phone}`} className="text-orange-500 hover:text-orange-600 font-medium">
+              <a href={`tel:${contactData.phone}`} className="text-black font-bold">
                 {contactData.phone}
               </a>
             </div>
@@ -123,7 +123,7 @@ export default function ContactPage() {
                 <h3 className="text-xl font-semibold text-gray-900">{t('contact.writeToUs.title')}</h3>
               </div>
               <p className="text-gray-600 mb-2">{t('contact.writeToUs.description')}</p>
-              <a href={`mailto:${contactData.email}`} className="text-orange-500 hover:text-orange-600 font-medium">
+              <a href={`mailto:${contactData.email}`} className="text-black font-bold">
                 {t('contact.writeToUs.emailLabel')} {contactData.email}
               </a>
             </div>
@@ -140,7 +140,7 @@ export default function ContactPage() {
                 <p>{t('contact.headquarter.hours.weekdays')}</p>
                 <p>{t('contact.headquarter.hours.saturday')}</p>
               </div>
-              <p className="text-orange-500 hover:text-orange-600 font-medium">
+              <p className="text-black font-bold">
                 {address}
               </p>
             </div>
