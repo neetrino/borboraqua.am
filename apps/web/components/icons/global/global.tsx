@@ -367,7 +367,7 @@ export function Header({
   return (
     <>
       {/* Header Section - Navigation Bar */}
-      <div className={`fixed ${bgClass} backdrop-blur-[15px] content-stretch flex flex-col h-[66px] md:h-[60px] sm:h-[52px] items-center justify-center left-1/2 px-[28px] md:px-[22px] sm:px-[14px] rounded-[64px] md:rounded-[56px] sm:rounded-[40px] ${topPosition} translate-x-[-50%] w-[1200px] xl:w-[1200px] lg:w-[1100px] md:w-[90%] sm:w-[95%] z-50 border ${borderClass} ${shadowClass}`}>
+      <div className={`fixed ${bgClass} backdrop-blur-[15px] content-stretch flex flex-col h-[66px] md:h-[60px] sm:h-[52px] items-center justify-center left-1/2 px-[28px] md:px-[22px] sm:px-[14px] rounded-[64px] md:rounded-[56px] sm:rounded-[40px] ${topPosition} translate-x-[-50%] w-[1200px] xl:w-[1200px] lg:w-[1100px] md:w-[90%] sm:w-[95%] z-[150] border ${borderClass} ${shadowClass}`}>
         <div className="content-stretch flex gap-[110px] lg:gap-[100px] md:gap-[70px] sm:gap-[16px] h-[42px] md:h-[38px] sm:h-[34px] items-center justify-center relative shrink-0">
           {/* Logo */}
           <div

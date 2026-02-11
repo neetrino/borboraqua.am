@@ -1557,7 +1557,7 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[14px] text-center uppercase whitespace-nowrap">
+          <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[14px] text-center  whitespace-nowrap">
             <p className="leading-[16px]">{t('home.trustedBy.subtitle')}</p>
           </div>
           <div className="flex items-center justify-center relative shrink-0 w-full">
@@ -1941,7 +1941,7 @@ export default function HomePage() {
           </div>
 
           {/* Blue Underline */}
-          <div className="absolute content-stretch flex items-start justify-center left-1/2 top-[100px] lg:top-[100px] md:top-[110px] sm:top-[110px] translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
+          <div className="absolute content-stretch flex items-start justify-center left-1/2 top-[50px] lg:top-[67px] md:top-[50px] sm:top-[110px] translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
             <div className="bg-[#00d1ff] h-[4px] lg:h-[4px] md:h-[5px] sm:h-[5px] rounded-[25px] lg:rounded-[25px] md:rounded-[30px] sm:rounded-[30px] shrink-0 w-[80px] lg:w-[80px] md:w-[90px] sm:w-[90px]" />
           </div>
         </div>
@@ -2150,6 +2150,7 @@ export default function HomePage() {
       </div>
 
       {/* Trusted By Section */}
+      
       <div className="absolute content-stretch flex flex-col h-[328px] lg:h-[410px] md:h-[380px] sm:h-[320px] items-start left-1/2 px-[136px] lg:px-[170px] md:px-[48px] sm:px-[24px] py-[56px] lg:py-[70px] md:py-[60px] sm:py-[40px] top-[5050px] lg:top-[5050px] md:top-[4500px] sm:top-[3950px] translate-x-[-50%] w-full max-w-[1920px]">
         <div className="h-[200px] lg:h-[250px] md:h-[240px] sm:h-[200px] max-w-[1536px] relative shrink-0 w-full">
           <div className="absolute content-stretch flex flex-col items-center left-[calc(50%+0.5px)] top-[-24px] lg:top-[-30px] md:top-[-28px] sm:top-[-24px] translate-x-[-50%] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
@@ -2157,8 +2158,12 @@ export default function HomePage() {
               <p className="leading-[21px] lg:leading-[26px] md:leading-[24px] sm:leading-[22px]">{t('home.trustedBy.title')}</p>
             </div>
           </div>
-          <div className="absolute content-stretch flex flex-col items-center left-[calc(50%+1px)] top-[26px] lg:top-[33px] md:top-[30px] sm:top-[24px] translate-x-[-50%] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
-            <div className="flex flex-col font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center uppercase whitespace-nowrap">
+          <div className="absolute content-stretch flex items-start justify-center left-1/2 top-[50px] lg:top-[27px] md:top-[50px] sm:top-[110px] translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
+            <div className="bg-[#00d1ff] h-[4px] lg:h-[4px] md:h-[5px] sm:h-[5px] rounded-[25px] lg:rounded-[25px] md:rounded-[30px] sm:rounded-[30px] shrink-0 w-[80px] lg:w-[80px] md:w-[90px] sm:w-[90px]" />
+          </div>
+        
+          <div className="absolute content-stretch flex flex-col items-center left-[calc(50%+1px)] top-[26px] lg:top-[38px] md:top-[30px] sm:top-[24px] translate-x-[-50%] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
+            <div className="flex flex-col font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center whitespace-nowrap">
               <p className="leading-[14px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">{t('home.trustedBy.subtitle')}</p>
             </div>
           </div>
@@ -2392,31 +2397,6 @@ export default function HomePage() {
         </div>
       </div>
 
-       {/* <div className="absolute flex top-[49.7%] right-[84.95%] bottom-[49.82%] left-0 items-center justify-center overflow-hidden">
-         <div className="relative rounded-[320px] size-[304.957px]">
-           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
-         <div className="absolute inset-0 mix-blend-lighten rounded-[880px]">
-             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[880px]">
-             <img
-                alt="Decorative"
-                className="absolute left-[-14.37%] max-w-none size-[128.74%] top-[-14.67%]"
-                src={img}
-                onError={(e) => {
-                  console.error('❌ [IMAGE] Failed to load decorative image:', img);
-                  console.error('Error target:', e.target);
-                }}
-                onLoad={() => {
-                  console.log('✅ [IMAGE] Decorative image loaded:', img);
-                }}
-              />
-            </div>
-          </div>
-          <div className="absolute bg-[rgba(0,132,255,0.15)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[900px]" />
-        </div>
-      </div> */}
-      
-      {/* // Lower bubble 2 - move a bit further down */}
-      
       <div className="absolute flex top-[52%] right-[-6%] bottom-[41.8%] left-auto items-center justify-center overflow-hidden">
         <div className="relative rounded-[320px] size-[329px]">
           <div className="absolute backdrop-blur-[4px] bg-[rgba(118,179,233,0.1)] inset-[0.83%_1.25%_1.25%_1.25%] mix-blend-darken rounded-[770px]" />
