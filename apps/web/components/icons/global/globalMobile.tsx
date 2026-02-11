@@ -803,7 +803,7 @@ export function TopHeaderBar({
   };
 
   return (
-    <div className="xl:hidden fixed top-0 left-0 right-0 w-full z-50 bg-[rgba(255,255,255,0.32)] backdrop-blur-[15px] border-b border-black shadow-sm rounded-b-3xl overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+    <div className="xl:hidden fixed top-0 left-0 right-0 w-full z-[100] bg-[rgba(255,255,255,0.32)] backdrop-blur-[15px] border-b shadow-sm overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       <div className="flex items-center justify-between pl-4 pr-4 py-3 h-[73px] w-full">
         <div className="flex items-center gap-2">
           {/* Hamburger Menu Button */}
@@ -835,7 +835,7 @@ export function TopHeaderBar({
         </div>
         
         {/* Language & Currency Selector */}
-        <div className="relative" ref={langCurrencyMenuRef}>
+        <div className="relative z-[100]" ref={langCurrencyMenuRef}>
           <button
             onClick={() => setShowLangCurrencyMenu(!showLangCurrencyMenu)}
             className="bg-[#1ac0fd] rounded-[70px] flex items-center gap-2 px-3 py-2 transition-all duration-200 hover:bg-[#6bb8dc] active:scale-95"
@@ -865,7 +865,7 @@ export function TopHeaderBar({
 
           {/* Dropdown Menu */}
           {showLangCurrencyMenu && (
-            <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-[101] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
               {/* Language Section */}
               <div className="px-3 py-2 border-b border-gray-200">
                 <div className="text-xs font-semibold text-gray-500 uppercase mb-2">Language</div>
