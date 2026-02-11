@@ -715,18 +715,51 @@ export default function HomePage() {
         {showMobileMenu && (
           <div className="fixed inset-0 bg-gradient-to-b from-[#62b3e8] to-[rgba(11, 55, 168, 0.75)] backdrop-blur-sm z-[100] xl:hidden flex items-center justify-center" onClick={() => setShowMobileMenu(false)}>
             <div 
-              className="relative bg-white rounded-2xl border border-gray-200/50 shadow-2xl w-[280px] max-w-[90%] p-8 animate-in fade-in zoom-in-95 duration-300"
+              className="relative rounded-2xl border shadow-2xl w-[280px] max-w-[90%] p-8 animate-in fade-in zoom-in-95 duration-300"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15))',
+                backdropFilter: 'blur(40px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                borderColor: 'rgba(255, 255, 255, 0.3)',
+              }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
               <button
                 onClick={() => setShowMobileMenu(false)}
-                className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="absolute top-4 right-4 p-2 rounded-lg transition-colors"
+                style={{
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                }}
               >
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
+
+              {/* Logo - Moved to top */}
+              <div className="flex justify-center mb-6 -mt-2">
+                <div
+                  onClick={() => {
+                    router.push('/');
+                    setShowMobileMenu(false);
+                  }}
+                  className="h-[26px] relative shrink-0 w-[85px] cursor-pointer"
+                >
+                  <img 
+                    alt="Borbor Aqua Logo" 
+                    className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" 
+                    src={imgBorborAguaLogoColorB2024Colored1} 
+                  />
+                </div>
+              </div>
 
               {/* Menu Items */}
               <nav className="flex flex-col gap-6">
@@ -737,7 +770,16 @@ export default function HomePage() {
                   }}
                   className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
                 >
-                  {t('common.navigation.myAccount')}
+                  MY ACCOUNT
+                </button>
+                <button
+                  onClick={() => {
+                    router.push('/');
+                    setShowMobileMenu(false);
+                  }}
+                  className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+                >
+                  HOME
                 </button>
                 <button
                   onClick={() => {
@@ -746,16 +788,7 @@ export default function HomePage() {
                   }}
                   className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
                 >
-                  {t('common.navigation.catalog')}
-                </button>
-                <button
-                  onClick={() => {
-                    router.push('/delivery-terms');
-                    setShowMobileMenu(false);
-                  }}
-                  className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
-                >
-                  {t('common.navigation.delivery')}
+                  SHOP
                 </button>
                 <button
                   onClick={() => {
@@ -764,30 +797,48 @@ export default function HomePage() {
                   }}
                   className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
                 >
-                  {t('common.navigation.cart')}
+                  CART
                 </button>
-                
-                <div className="h-px bg-gray-200 my-2" />
-                
                 <button
                   onClick={() => {
-                    setShowLanguageMenu(!showLanguageMenu);
+                    router.push('/about');
+                    setShowMobileMenu(false);
                   }}
                   className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
                 >
-                  {t('common.navigation.language')}
+                  ABOUT US
                 </button>
-                {isLoggedIn && (
-                  <button
-                    onClick={() => {
+                <button
+                  onClick={() => {
+                    router.push('/contact');
+                    setShowMobileMenu(false);
+                  }}
+                  className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+                >
+                  CONTACT US
+                </button>
+                <button
+                  onClick={() => {
+                    router.push('/blog');
+                    setShowMobileMenu(false);
+                  }}
+                  className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+                >
+                  BLOG
+                </button>
+                <button
+                  onClick={() => {
+                    if (isLoggedIn) {
                       handleLogout();
-                      setShowMobileMenu(false);
-                    }}
-                    className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
-                  >
-                    {t('common.navigation.logout')}
-                  </button>
-                )}
+                    } else {
+                      router.push('/login');
+                    }
+                    setShowMobileMenu(false);
+                  }}
+                  className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+                >
+                  LOGOUT
+                </button>
               </nav>
             </div>
           </div>
