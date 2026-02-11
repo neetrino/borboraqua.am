@@ -25,7 +25,9 @@
     "addToCart": "Ավելացնել զամբյուղ"
   },
   "waterEnergy": {
-    "title": "ՋՐԻ ԷՆԵՐԳԻԱ"
+    "title": "ՋՐԻ ԷՆԵՐԳԻԱ",
+    "orderNow": "Պատվիրել հիմա",
+    "favorite": "Սիրված"
   },
   "waterEnergySection": {
     "pure": "Մաքուր",

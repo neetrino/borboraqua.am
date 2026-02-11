@@ -25,7 +25,9 @@
     "addToCart": "Add to Cart"
   },
   "waterEnergy": {
-    "title": "WATER ENERGY"
+    "title": "WATER ENERGY",
+    "orderNow": "Order Now",
+    "favorite": "Favorite"
   },
   "waterEnergySection": {
     "pure": "Pure",

@@ -139,6 +139,11 @@ export default function HomePage() {
   // State for Trusted By section pagination
   const [trustedByIndex, setTrustedByIndex] = useState(0);
 
+  // State for water energy products (kids products)
+  const [waterEnergyProducts, setWaterEnergyProducts] = useState<Product[]>([]);
+  const [waterEnergyLoading, setWaterEnergyLoading] = useState(true);
+  const [waterEnergyCarouselIndex, setWaterEnergyCarouselIndex] = useState(0);
+
   // Removed scaling logic - using Tailwind responsive classes instead
   // This prevents zoom issues and conflicts with responsive design
 
@@ -201,6 +206,132 @@ export default function HomePage() {
 
     fetchFeaturedProducts();
   }, []);
+
+  // Fetch water energy products (kids products)
+  useEffect(() => {
+    const fetchWaterEnergyProducts = async () => {
+      try {
+        setWaterEnergyLoading(true);
+        console.log('💧 [HOMEPAGE] Fetching water energy (kids) products...');
+
+        const language = getStoredLanguage();
+        
+        // Strategy 1: Try to search for "kids" products first
+        let params: Record<string, string> = {
+          page: '1',
+          limit: '10',
+          lang: language,
+          search: 'kids',
+        };
+
+        let response = await apiClient.get<ProductsResponse>('/api/v1/products', {
+          params,
+        });
+
+        console.log('💧 [HOMEPAGE] Kids search response:', {
+          hasData: !!response.data,
+          dataLength: response.data?.length || 0,
+          dataType: Array.isArray(response.data) ? 'array' : typeof response.data,
+          fullResponse: response
+        });
+
+        // Check if response.data exists and is an array
+        if (!response.data || !Array.isArray(response.data)) {
+          console.warn('⚠️ [HOMEPAGE] Invalid response structure:', response);
+          response = { data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } } as ProductsResponse;
+        }
+
+        console.log(`💧 [HOMEPAGE] Kids search result: ${response.data.length} products`);
+
+        // Strategy 2: If no kids products found, try featured products
+        if (response.data.length === 0) {
+          console.log('⚠️ [HOMEPAGE] No kids products found, trying featured products...');
+          params = {
+            page: '1',
+            limit: '10',
+            lang: language,
+            filter: 'featured',
+          };
+          response = await apiClient.get<ProductsResponse>('/api/v1/products', {
+            params,
+          });
+          
+          // Validate response structure
+          if (!response.data || !Array.isArray(response.data)) {
+            console.warn('⚠️ [HOMEPAGE] Invalid featured response structure:', response);
+            response = { data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } } as ProductsResponse;
+          }
+          
+          console.log(`💧 [HOMEPAGE] Featured products result: ${response.data.length} products`);
+        }
+
+        // Strategy 3: If still no products, get any products
+        if (response.data.length === 0) {
+          console.log('⚠️ [HOMEPAGE] No featured products found, fetching any products...');
+          params = {
+            page: '1',
+            limit: '10',
+            lang: language,
+          };
+          response = await apiClient.get<ProductsResponse>('/api/v1/products', {
+            params,
+          });
+          
+          // Validate response structure
+          if (!response.data || !Array.isArray(response.data)) {
+            console.warn('⚠️ [HOMEPAGE] Invalid any products response structure:', response);
+            response = { data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } } as ProductsResponse;
+          }
+          
+          console.log(`💧 [HOMEPAGE] Any products result: ${response.data.length} products`);
+        }
+
+        if (response.data && response.data.length > 0) {
+          const products = response.data.slice(0, 10);
+          setWaterEnergyProducts(products);
+          console.log(`✅ [HOMEPAGE] Loaded ${products.length} water energy products:`, products.map(p => p.title));
+        } else {
+          console.warn('⚠️ [HOMEPAGE] No products available for water energy section, will use featured products if available');
+          // Don't set empty array yet, wait for featured products to load
+          // This will be handled by a separate useEffect that watches featuredProducts
+        }
+      } catch (err: any) {
+        console.error('❌ [HOMEPAGE] Error fetching water energy products:', err);
+        // Try to get any products as last resort
+        try {
+          const language = getStoredLanguage();
+          const fallbackResponse = await apiClient.get<ProductsResponse>('/api/v1/products', {
+            params: {
+              page: '1',
+              limit: '10',
+              lang: language,
+            },
+          });
+          if (fallbackResponse.data && fallbackResponse.data.length > 0) {
+            setWaterEnergyProducts(fallbackResponse.data.slice(0, 10));
+            console.log('✅ [HOMEPAGE] Fallback: Loaded products after error');
+          } else {
+            setWaterEnergyProducts([]);
+          }
+        } catch (fallbackErr) {
+          console.error('❌ [HOMEPAGE] Fallback also failed:', fallbackErr);
+          setWaterEnergyProducts([]);
+        }
+      } finally {
+        setWaterEnergyLoading(false);
+      }
+    };
+
+    fetchWaterEnergyProducts();
+  }, []);
+
+  // Fallback: Use featured products if water energy products are not available
+  useEffect(() => {
+    if (!waterEnergyLoading && waterEnergyProducts.length === 0 && featuredProducts.length > 0) {
+      console.log('💧 [HOMEPAGE] Using featured products as fallback for water energy section');
+      setWaterEnergyProducts(featuredProducts.slice(0, 10));
+    }
+  }, [waterEnergyLoading, waterEnergyProducts.length, featuredProducts]);
 
   // Handle click outside for search modal
   useEffect(() => {
@@ -903,7 +1034,213 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Mobile Water Energy Content - Removed */} 
+        {/* Mobile Water Energy Content */}
+        {waterEnergyLoading ? (
+          <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-1/2 top-[1900px] w-full max-w-[429px] min-h-[400px] z-10">
+            <div className="text-[#94a3b8] text-[16px]">Loading...</div>
+          </div>
+        ) : waterEnergyProducts.length > 0 ? (
+          <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-1/2 top-[1900px] w-full max-w-[429px] z-10">
+            {/* Product Card Carousel */}
+            <div className="relative w-full max-w-[380px]">
+              {(() => {
+                const currentProduct = waterEnergyProducts[waterEnergyCarouselIndex] || waterEnergyProducts[0];
+                if (!currentProduct) return null;
+
+                // Extract volume from title or subtitle (e.g., "0.5L", "0.33L", "0.25L")
+                const extractVolume = (product: Product): string => {
+                  const title = product.title || '';
+                  const subtitle = product.subtitle || '';
+                  const combined = `${title} ${subtitle}`;
+                  const volumeMatch = combined.match(/(\d+\.?\d*)\s*[Ll]/);
+                  return volumeMatch ? `${volumeMatch[1]}L` : '0.5L';
+                };
+
+                const volume = extractVolume(currentProduct);
+                const currency = getStoredCurrency();
+                // Check if title contains "kids" or "favorite" to show favorite badge
+                const hasFavoriteLabel = currentProduct.title?.toLowerCase().includes('kids') || 
+                                        currentProduct.subtitle?.toLowerCase().includes('kids') ||
+                                        false;
+
+                return (
+                  <div className="bg-[rgba(255,255,255,0.1)] border border-[#f1f5f9] border-solid content-stretch flex flex-col items-center justify-center overflow-clip p-[17px] relative rounded-[42px] shadow-[0px_10px_25px_-5px_rgba(0,0,0,0.05),0px_8px_10px_-6px_rgba(0,0,0,0.05)] w-full">
+                    {/* Product Image Container with Navigation Arrows */}
+                    <div className="relative w-full flex items-center justify-center mb-4">
+                      {/* Left Arrow - Moved to Right */}
+                      {waterEnergyProducts.length > 1 && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setWaterEnergyCarouselIndex((prev) => 
+                              prev === 0 ? waterEnergyProducts.length - 1 : prev - 1
+                            );
+                          }}
+                          className="absolute right-0 z-10 bg-[#1ac0fd] border-[0.5px] border-white/49 border-solid flex items-center justify-center rounded-full size-[40px] cursor-pointer hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:scale-95 transition-all duration-200"
+                          aria-label="Previous product"
+                        >
+                          <svg
+                            width="24"
+                            height="28"
+                            viewBox="0 0 24.02 28"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-[20px] w-[18px] transform scale-y-[-1]"
+                          >
+                            <path
+                              d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
+                              fill="white"
+                            />
+                          </svg>
+                        </button>
+                      )}
+
+                      {/* Product Image */}
+                      <div className="h-[232px] relative shrink-0 w-[183px] flex items-center justify-center">
+                        {currentProduct.image ? (
+                          <img
+                            alt={currentProduct.title}
+                            src={currentProduct.image}
+                            className="h-full w-auto object-contain"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-[#e2e8f0] rounded-lg flex items-center justify-center">
+                            <span className="text-[#94a3b8] text-[12px]">No image</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right Arrow - Moved to Left */}
+                      {waterEnergyProducts.length > 1 && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setWaterEnergyCarouselIndex((prev) => 
+                              prev === waterEnergyProducts.length - 1 ? 0 : prev + 1
+                            );
+                          }}
+                          className="absolute left-0 z-10 bg-[#1ac0fd] border-[0.5px] border-white/49 border-solid flex items-center justify-center rounded-full size-[40px] cursor-pointer hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:scale-95 transition-all duration-200"
+                          aria-label="Next product"
+                        >
+                          <svg
+                            width="24"
+                            height="28"
+                            viewBox="0 0 24.02 28"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-[20px] w-[18px] transform rotate-180 scale-y-[-1]"
+                          >
+                            <path
+                              d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
+                              fill="white"
+                            />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Product Info */}
+                    <div className="w-full">
+                      <div className="content-stretch flex flex-col items-start pb-[28px] pt-[4px] relative shrink-0 w-full">
+                        <div className="h-[71px] mb-[-24px] relative shrink-0 w-full">
+                          {/* Favorite Badge */}
+                          {hasFavoriteLabel && (
+                            <div className="absolute content-stretch flex items-center left-0 right-0 top-0">
+                              <div className="bg-[rgba(255,255,255,0.72)] content-stretch flex flex-col items-start px-[8px] py-[2px] relative rounded-[9999px] shrink-0">
+                                <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#00b7ff] text-[10px] tracking-[0.5px] uppercase whitespace-nowrap">
+                                  <p className="leading-[15px]">{t('home.waterEnergy.favorite')}</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Product Title */}
+                          <div className="absolute content-stretch flex flex-col items-start left-0 right-0 top-[23px]">
+                            <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[16px] w-full">
+                              <p className="leading-[25px] whitespace-pre-wrap">{currentProduct.title}</p>
+                            </div>
+                          </div>
+
+                          {/* Volume */}
+                          <div className="absolute content-stretch flex flex-col items-start left-0 right-0 top-[51px]">
+                            <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[12px] tracking-[1.2px] uppercase whitespace-nowrap">
+                              <p className="leading-[16px]">{volume}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Price and Order Button */}
+                        <div className="content-stretch flex flex-col items-center justify-center mb-[-24px] pt-[16px] relative shrink-0 w-full">
+                          <div className="content-stretch flex gap-[101px] items-center justify-center relative shrink-0 w-full">
+                            {/* Price */}
+                            <div className="content-stretch flex flex-col items-start min-w-[98.28px] relative shrink-0">
+                              <div className="content-stretch flex items-center justify-center relative shrink-0">
+                                <div className="flex flex-col font-['Inter:Black',sans-serif] font-black h-[28px] justify-center leading-[0] not-italic relative shrink-0 text-[20px] text-white w-[92px]">
+                                  <p className="leading-[28px] whitespace-pre-wrap">
+                                    {formatPrice(currentProduct.price, currency)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Order Now Button */}
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleAddToCart(currentProduct);
+                              }}
+                              disabled={addingToCart.has(currentProduct.id) || !currentProduct.inStock}
+                              className="bg-[#1ac0fd] content-stretch cursor-pointer flex h-[56px] items-center justify-center overflow-clip pb-[10.5px] pt-[9.5px] px-[24px] relative rounded-[78px] shrink-0 w-[151px] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#1ac0fd]/50 hover:scale-105 active:scale-95"
+                            >
+                              <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
+                                <p className="leading-[20px]">
+                                  {addingToCart.has(currentProduct.id) 
+                                    ? t('home.featuredProducts.adding') 
+                                    : t('home.waterEnergy.orderNow')}
+                                </p>
+                              </div>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Pagination Dots */}
+            {waterEnergyProducts.length > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-6">
+                {waterEnergyProducts.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setWaterEnergyCarouselIndex(index)}
+                    className={`rounded-full transition-all duration-300 ${
+                      waterEnergyCarouselIndex === index
+                        ? 'bg-[#00d1ff] h-[6px] w-[20px]'
+                        : 'bg-white h-[6px] w-[6px] hover:bg-[#00d1ff]/50'
+                    }`}
+                    aria-label={`Go to product ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          // Fallback: Show message if no products available
+          <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-1/2 top-[1900px] w-full max-w-[429px] min-h-[400px] z-10">
+            <div className="bg-[rgba(255,255,255,0.1)] border border-[#f1f5f9] border-solid content-stretch flex flex-col items-center justify-center overflow-clip p-[40px] relative rounded-[42px] shadow-[0px_10px_25px_-5px_rgba(0,0,0,0.05),0px_8px_10px_-6px_rgba(0,0,0,0.05)] w-full">
+              <div className="text-[#94a3b8] text-[14px] text-center">
+                {t('home.waterEnergy.title')} - {t('home.featuredProducts.viewAllProducts')}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Stats Cards */}
         <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-[calc(50%+3px)] top-[2462px]">
@@ -1070,7 +1407,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Trusted By Section */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-center justify-center left-[calc(50%+0.5px)] top-[3800px] w-full max-w-[429px]">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-center justify-center left-[calc(50%+0.5px)] top-[4187px] w-full max-w-[429px]">
           <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
             <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
               <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[40px] text-center tracking-[-0.9px] uppercase w-full">
@@ -1091,7 +1428,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Trusted By Logo - uses same 3 logos as desktop via trustedByIndex */}
-        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[3930px] w-full">
+        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[4359px] w-full z-0">
           <div className="h-[72px] relative shrink-0 w-[260px]">
             <img
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
@@ -1102,7 +1439,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Trusted By Navigation - same handlers as desktop */}
-        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-1/2 top-[4374px] w-full max-w-[470px] px-4">
+        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-1/2 top-[4359px] w-full max-w-[470px] px-4 z-20">
           <FeaturedProductsNavigationArrow
             direction="prev"
             onClick={handlePreviousTrustedBy}
@@ -1120,7 +1457,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Trusted By Pagination Dots */}
-        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[4450px]">
+        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[4500px]">
           <button
             type="button"
             onClick={() => setTrustedByIndex(0)}
@@ -1152,6 +1489,8 @@ export default function HomePage() {
             aria-label={t('home.trustedBy.showThirdPartner')}
           />
         </div>
+
+     
 
         {/* Mobile Footer - Removed from all pages */}
       </div>
@@ -1673,7 +2012,7 @@ export default function HomePage() {
       </div>
 
       {/* Trusted By Section */}
-      <div className="absolute content-stretch flex flex-col h-[328px] lg:h-[410px] md:h-[380px] sm:h-[320px] items-start left-1/2 px-[136px] lg:px-[170px] md:px-[48px] sm:px-[24px] py-[56px] lg:py-[70px] md:py-[60px] sm:py-[40px] top-[5050px] lg:top-[5050px] md:top-[4500px] sm:top-[3800px] translate-x-[-50%] w-full max-w-[1920px]">
+      <div className="absolute content-stretch flex flex-col h-[328px] lg:h-[410px] md:h-[380px] sm:h-[320px] items-start left-1/2 px-[136px] lg:px-[170px] md:px-[48px] sm:px-[24px] py-[56px] lg:py-[70px] md:py-[60px] sm:py-[40px] top-[5050px] lg:top-[5050px] md:top-[4500px] sm:top-[3950px] translate-x-[-50%] w-full max-w-[1920px]">
         <div className="h-[200px] lg:h-[250px] md:h-[240px] sm:h-[200px] max-w-[1536px] relative shrink-0 w-full">
           <div className="absolute content-stretch flex flex-col items-center left-[calc(50%+0.5px)] top-[-24px] lg:top-[-30px] md:top-[-28px] sm:top-[-24px] translate-x-[-50%] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
             <div className="flex flex-col font-['Montserrat',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[48px] lg:text-[60px] md:text-[48px] sm:text-[32px] text-center uppercase whitespace-nowrap">
