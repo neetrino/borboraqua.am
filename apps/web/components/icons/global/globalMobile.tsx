@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } from '../../../lib/language';
+import { type CurrencyCode, getStoredCurrency, setStoredCurrency } from '../../../lib/currency';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { useTranslation } from '../../../lib/i18n-client';
 import { apiClient } from '../../../lib/api-client';
@@ -36,6 +37,81 @@ export function MobileHeader({
   isLoggedIn,
   isAdmin,
 }: MobileHeaderProps) {
+  const [language, setLanguage] = useState<LanguageCode>('en');
+  const [currency, setCurrency] = useState<CurrencyCode>('AMD');
+  const [showLangCurrencyMenu, setShowLangCurrencyMenu] = useState(false);
+  const langCurrencyMenuRef = useRef<HTMLDivElement | null>(null);
+  const imgLanguageIcon = "/assets/home/Vector.svg";
+
+  // Initialize language and currency from storage
+  useEffect(() => {
+    setLanguage(getStoredLanguage());
+    setCurrency(getStoredCurrency());
+
+    // Listen for updates
+    const handleLanguageUpdate = () => {
+      setLanguage(getStoredLanguage());
+    };
+    const handleCurrencyUpdate = () => {
+      setCurrency(getStoredCurrency());
+    };
+
+    window.addEventListener('language-updated', handleLanguageUpdate);
+    window.addEventListener('currency-updated', handleCurrencyUpdate);
+
+    return () => {
+      window.removeEventListener('language-updated', handleLanguageUpdate);
+      window.removeEventListener('currency-updated', handleCurrencyUpdate);
+    };
+  }, []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langCurrencyMenuRef.current && !langCurrencyMenuRef.current.contains(event.target as Node)) {
+        setShowLangCurrencyMenu(false);
+      }
+    };
+
+    if (showLangCurrencyMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showLangCurrencyMenu]);
+
+  const handleLanguageChange = (code: LanguageCode) => {
+    if (code === language) {
+      setShowLangCurrencyMenu(false);
+      return;
+    }
+    setLanguage(code);
+    setStoredLanguage(code, { skipReload: false });
+    setShowLangCurrencyMenu(false);
+  };
+
+  const handleCurrencyChange = (code: CurrencyCode) => {
+    if (code === currency) {
+      setShowLangCurrencyMenu(false);
+      return;
+    }
+    setCurrency(code);
+    setStoredCurrency(code);
+    setShowLangCurrencyMenu(false);
+  };
+
+  // Get language code for display (EN, HY, RU)
+  const getLanguageDisplayCode = (code: LanguageCode): string => {
+    const codes: Record<LanguageCode, string> = {
+      en: 'EN',
+      hy: 'HY',
+      ru: 'RU',
+    };
+    return codes[code] || 'EN';
+  };
+
   return (
     <div className="xl:hidden absolute content-stretch flex items-center justify-between left-[17px] right-[17px] top-[35px] z-50">
       <div className="content-stretch flex gap-[6px] items-center relative shrink-0">
@@ -66,8 +142,75 @@ export function MobileHeader({
           </div>
         </button>
       </div>
-      <div className="h-[31px] relative shrink-0 w-[101px] cursor-pointer ml-4 md:ml-6" onClick={() => router.push('/')}>
-        <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgBorborAguaLogoColorB2024Colored1} />
+      
+      {/* Language & Currency Selector */}
+      <div className="relative" ref={langCurrencyMenuRef}>
+        <button
+          onClick={() => setShowLangCurrencyMenu(!showLangCurrencyMenu)}
+          className="bg-[#1ac0fd] rounded-[70px] flex items-center gap-2 px-3 py-2 transition-all duration-200 hover:bg-[#6bb8dc] active:scale-95"
+          aria-expanded={showLangCurrencyMenu}
+        >
+          {/* Globe Icon */}
+          <img 
+            src={imgLanguageIcon} 
+            alt="Language" 
+            className="w-4 h-4 block"
+            style={{ filter: 'brightness(0) invert(1)' }}
+          />
+          {/* Language / Currency Text */}
+          <span className="text-white text-sm font-medium whitespace-nowrap">
+            {getLanguageDisplayCode(language)} / {currency}
+          </span>
+          {/* Dropdown Arrow */}
+          <svg 
+            className={`w-3 h-3 text-white transition-transform duration-200 ${showLangCurrencyMenu ? 'rotate-180' : ''}`}
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {/* Dropdown Menu */}
+        {showLangCurrencyMenu && (
+          <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            {/* Language Section */}
+            <div className="px-3 py-2 border-b border-gray-200">
+              <div className="text-xs font-semibold text-gray-500 uppercase mb-2">Language</div>
+              {Object.entries(LANGUAGES).map(([code, lang]) => (
+                <button
+                  key={code}
+                  onClick={() => handleLanguageChange(code as LanguageCode)}
+                  className={`w-full text-left px-3 py-2 text-sm rounded transition-all duration-150 ${
+                    language === code
+                      ? 'bg-gray-100 text-gray-900 font-semibold'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {lang.name}
+                </button>
+              ))}
+            </div>
+            {/* Currency Section */}
+            <div className="px-3 py-2">
+              <div className="text-xs font-semibold text-gray-500 uppercase mb-2">Currency</div>
+              {(['USD', 'AMD', 'EUR', 'RUB', 'GEL'] as CurrencyCode[]).map((code) => (
+                <button
+                  key={code}
+                  onClick={() => handleCurrencyChange(code)}
+                  className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                    currency === code
+                      ? 'bg-gray-100 text-gray-900 font-semibold cursor-default'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {code}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -565,7 +708,7 @@ export function MobileFooter({ router, t }: MobileFooterProps) {
 // Mobile Bottom Navigation Images
 const imgEllipse2 = "/assets/home/imgEllipse2.svg";
 const imgHomeVector = "/assets/home/Vector1.svg";
-const imgVector1 = "/assets/home/imgVector1.svg";
+const imgVector1 = "/assets/home/1254.svg";
 const imgGroup2148 = "/assets/home/Cart.svg";
 const imgGroup2149 = "/assets/home/imgGroup2149.svg";
 
@@ -584,6 +727,81 @@ export function TopHeaderBar({
   setShowSearchModal,
   setShowMobileMenu,
 }: TopHeaderBarProps) {
+  const [language, setLanguage] = useState<LanguageCode>('en');
+  const [currency, setCurrency] = useState<CurrencyCode>('AMD');
+  const [showLangCurrencyMenu, setShowLangCurrencyMenu] = useState(false);
+  const langCurrencyMenuRef = useRef<HTMLDivElement | null>(null);
+  const imgLanguageIcon = "/assets/home/Vector.svg";
+
+  // Initialize language and currency from storage
+  useEffect(() => {
+    setLanguage(getStoredLanguage());
+    setCurrency(getStoredCurrency());
+
+    // Listen for updates
+    const handleLanguageUpdate = () => {
+      setLanguage(getStoredLanguage());
+    };
+    const handleCurrencyUpdate = () => {
+      setCurrency(getStoredCurrency());
+    };
+
+    window.addEventListener('language-updated', handleLanguageUpdate);
+    window.addEventListener('currency-updated', handleCurrencyUpdate);
+
+    return () => {
+      window.removeEventListener('language-updated', handleLanguageUpdate);
+      window.removeEventListener('currency-updated', handleCurrencyUpdate);
+    };
+  }, []);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langCurrencyMenuRef.current && !langCurrencyMenuRef.current.contains(event.target as Node)) {
+        setShowLangCurrencyMenu(false);
+      }
+    };
+
+    if (showLangCurrencyMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showLangCurrencyMenu]);
+
+  const handleLanguageChange = (code: LanguageCode) => {
+    if (code === language) {
+      setShowLangCurrencyMenu(false);
+      return;
+    }
+    setLanguage(code);
+    setStoredLanguage(code, { skipReload: false });
+    setShowLangCurrencyMenu(false);
+  };
+
+  const handleCurrencyChange = (code: CurrencyCode) => {
+    if (code === currency) {
+      setShowLangCurrencyMenu(false);
+      return;
+    }
+    setCurrency(code);
+    setStoredCurrency(code);
+    setShowLangCurrencyMenu(false);
+  };
+
+  // Get language code for display (EN, HY, RU)
+  const getLanguageDisplayCode = (code: LanguageCode): string => {
+    const codes: Record<LanguageCode, string> = {
+      en: 'EN',
+      hy: 'HY',
+      ru: 'RU',
+    };
+    return codes[code] || 'EN';
+  };
+
   return (
     <div className="xl:hidden fixed top-0 left-0 right-0 w-full z-50 bg-[rgba(255,255,255,0.32)] backdrop-blur-[15px] border-b border-black shadow-sm rounded-b-3xl overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       <div className="flex items-center justify-between pl-4 pr-4 py-3 h-[73px] w-full">
@@ -615,9 +833,75 @@ export function TopHeaderBar({
             </div>
           </button>
         </div>
-        {/* Borbor Logo - Right aligned, touching border */}
-        <div className="h-[31px] relative shrink-0 w-[101px] cursor-pointer" onClick={() => router.push('/')}>
-          <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full" src={imgBorborAguaLogoColorB2024Colored1} />
+        
+        {/* Language & Currency Selector */}
+        <div className="relative" ref={langCurrencyMenuRef}>
+          <button
+            onClick={() => setShowLangCurrencyMenu(!showLangCurrencyMenu)}
+            className="bg-[#1ac0fd] rounded-[70px] flex items-center gap-2 px-3 py-2 transition-all duration-200 hover:bg-[#6bb8dc] active:scale-95"
+            aria-expanded={showLangCurrencyMenu}
+          >
+            {/* Globe Icon */}
+            <img 
+              src={imgLanguageIcon} 
+              alt="Language" 
+              className="w-4 h-4 block"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
+            {/* Language / Currency Text */}
+            <span className="text-white text-sm font-medium whitespace-nowrap">
+              {getLanguageDisplayCode(language)} / {currency}
+            </span>
+            {/* Dropdown Arrow */}
+            <svg 
+              className={`w-3 h-3 text-white transition-transform duration-200 ${showLangCurrencyMenu ? 'rotate-180' : ''}`}
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {/* Dropdown Menu */}
+          {showLangCurrencyMenu && (
+            <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+              {/* Language Section */}
+              <div className="px-3 py-2 border-b border-gray-200">
+                <div className="text-xs font-semibold text-gray-500 uppercase mb-2">Language</div>
+                {Object.entries(LANGUAGES).map(([code, lang]) => (
+                  <button
+                    key={code}
+                    onClick={() => handleLanguageChange(code as LanguageCode)}
+                    className={`w-full text-left px-3 py-2 text-sm rounded transition-all duration-150 ${
+                      language === code
+                        ? 'bg-gray-100 text-gray-900 font-semibold'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {lang.name}
+                  </button>
+                ))}
+              </div>
+              {/* Currency Section */}
+              <div className="px-3 py-2">
+                <div className="text-xs font-semibold text-gray-500 uppercase mb-2">Currency</div>
+                {(['USD', 'AMD', 'EUR', 'RUB', 'GEL'] as CurrencyCode[]).map((code) => (
+                  <button
+                    key={code}
+                    onClick={() => handleCurrencyChange(code)}
+                    className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                      currency === code
+                        ? 'bg-gray-100 text-gray-900 font-semibold cursor-default'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {code}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -724,7 +1008,7 @@ export function MobileBottomNavigation() {
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
-              <img className="relative block max-w-none size-[20px]" alt="" src={imgVector1} />
+              <img className="relative block max-w-none size-[28px]" alt="" src={imgVector1} />
             </button>
             {/* Cart */}
             <button
