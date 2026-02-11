@@ -428,11 +428,16 @@ export default function HomePage() {
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      // Move to previous mode (3 products back)
-      const newIndex = prevIndex - 3;
-      // If we go below 0, loop to the last mode (6 for products 6-8)
+      // Move to previous mode (2 products back for mobile, 3 for desktop)
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      const step = isMobile ? 2 : 3;
+      const newIndex = prevIndex - step;
+      // If we go below 0, loop to the last valid index
       if (newIndex < 0) {
-        return 6; // Last mode
+        const maxIndex = isMobile 
+          ? Math.max(0, Math.floor((featuredProducts.length - 2) / 2) * 2) 
+          : Math.max(0, Math.floor((featuredProducts.length - 3) / 3) * 3);
+        return maxIndex;
       }
       return newIndex;
     });
@@ -469,10 +474,15 @@ export default function HomePage() {
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      // Move to next mode (3 products forward)
-      const newIndex = prevIndex + 3;
-      // If we exceed 6 (last mode), loop back to start (0)
-      if (newIndex > 6) {
+      // Move to next mode (2 products forward for mobile, 3 for desktop)
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      const step = isMobile ? 2 : 3;
+      const newIndex = prevIndex + step;
+      // If we exceed the max, loop back to start (0)
+      const maxIndex = isMobile 
+        ? Math.max(0, Math.floor((featuredProducts.length - 2) / 2) * 2) 
+        : Math.max(0, Math.floor((featuredProducts.length - 3) / 3) * 3);
+      if (newIndex > maxIndex) {
         return 0; // First mode
       }
       return newIndex;
@@ -918,28 +928,32 @@ export default function HomePage() {
           <div className="bg-[#00d1ff] h-[4px] rounded-[30px] shrink-0 w-[80px]" />
         </div>
 
-        {/* Mobile Featured Product Card */}
+        {/* Mobile Featured Products - 2 products side by side */}
         {featuredProducts.length > 0 && (() => {
-          const currentProduct = featuredProducts[carouselIndex] || featuredProducts[0];
+          const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 2);
           return (
-            <FeaturedProductCard
-              key={currentProduct.id}
-              product={currentProduct}
-              router={router}
-              t={t}
-              isLoggedIn={isLoggedIn}
-              isAddingToCart={addingToCart.has(currentProduct.id)}
-              onAddToCart={handleAddToCart}
-              onProductClick={handleOpenProduct}
-              formatPrice={formatPrice}
-              currency={getStoredCurrency()}
-              isMobile={true}
-            />
+            <div className="-translate-x-1/2 absolute content-stretch flex gap-[16px] items-center justify-center left-1/2 top-[1088px] w-full max-w-[400px] px-4">
+              {visibleProducts.map((product) => (
+                <FeaturedProductCard
+                  key={product.id}
+                  product={product}
+                  router={router}
+                  t={t}
+                  isLoggedIn={isLoggedIn}
+                  isAddingToCart={addingToCart.has(product.id)}
+                  onAddToCart={handleAddToCart}
+                  onProductClick={handleOpenProduct}
+                  formatPrice={formatPrice}
+                  currency={getStoredCurrency()}
+                  isMobile={true}
+                />
+              ))}
+            </div>
           );
         })()}
 
         {/* Mobile Carousel Navigation */}
-        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-between left-1/2 top-[1285px] w-full max-w-[500px] px-4">
+        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-between left-1/2 top-[1180px] w-full max-w-[500px] px-4">
           <FeaturedProductsNavigationArrow
             direction="prev"
             onClick={handlePreviousProducts}
@@ -956,44 +970,31 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Mobile Pagination Dots (interactive, synced with featured products carousel) */}
-        {featuredProducts.length > 3 && (
-          <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[1666px]">
-            {/* Dot 1 - First mode (products 0-2) */}
-            <button
-              type="button"
-              onClick={() => setCarouselIndex(0)}
-              className={`rounded-full transition-all duration-300 ${
-                carouselIndex === 0
-                  ? 'bg-[#00d1ff] h-[8px] w-[20px]'
-                  : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
-              }`}
-              aria-label={t('home.trustedBy.showFirstFeaturedProducts')}
-            />
-            {/* Dot 2 - Second mode (products 3-5) */}
-            <button
-              type="button"
-              onClick={() => setCarouselIndex(3)}
-              className={`rounded-full transition-all duration-300 ${
-                carouselIndex === 3
-                  ? 'bg-[#00d1ff] h-[8px] w-[20px]'
-                  : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
-              }`}
-              aria-label={t('home.trustedBy.showMiddleFeaturedProducts')}
-            />
-            {/* Dot 3 - Third mode (products 6-8) */}
-            <button
-              type="button"
-              onClick={() => setCarouselIndex(6)}
-              className={`rounded-full transition-all duration-300 ${
-                carouselIndex === 6
-                  ? 'bg-[#00d1ff] h-[8px] w-[20px]'
-                  : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
-              }`}
-              aria-label={t('home.trustedBy.showLastFeaturedProducts')}
-            />
-          </div>
-        )}
+        {/* Mobile Pagination Dots (interactive, synced with featured products carousel) - 2 products per page */}
+        {featuredProducts.length > 2 && (() => {
+          const totalPages = Math.ceil(featuredProducts.length / 2);
+          const currentPage = Math.floor(carouselIndex / 2);
+          return (
+            <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[1666px]">
+              {Array.from({ length: totalPages }).map((_, index) => {
+                const pageIndex = index * 2;
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setCarouselIndex(pageIndex)}
+                    className={`rounded-full transition-all duration-300 ${
+                      carouselIndex === pageIndex || (carouselIndex >= pageIndex && carouselIndex < pageIndex + 2)
+                        ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                        : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
+                    }`}
+                    aria-label={t(`home.trustedBy.showFeaturedProductsPage${index + 1}`)}
+                  />
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {/* Mobile View All Products Button */}
         <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1708px] w-[241px]">

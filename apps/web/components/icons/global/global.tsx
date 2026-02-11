@@ -957,12 +957,24 @@ export function FeaturedProductCard({
   compact = false,
 }: FeaturedProductCardProps) {
   if (isMobile) {
+    // Extract volume from title or subtitle (e.g., "0.5L", "0.33L", "0.25L")
+    const extractVolume = (product: FeaturedProduct): string => {
+      const title = product.title || '';
+      const subtitle = product.subtitle || '';
+      const combined = `${title} ${subtitle}`;
+      const volumeMatch = combined.match(/(\d+\.?\d*)\s*[Ll]/);
+      return volumeMatch ? `${volumeMatch[1]}L` : '0.5L';
+    };
+
+    const volume = extractVolume(product);
+
     return (
       <div
-        className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[40px] items-center left-1/2 px-[16px] top-[1088px] w-full max-w-[371px] cursor-pointer"
+        className="h-[293px] relative w-[187px] cursor-pointer"
         onClick={() => onProductClick(product)}
       >
-        <div className="h-[435px] relative shrink-0 w-[155px]">
+        {/* Product Image */}
+        <div className="absolute aspect-[305/854] left-[27.27%] right-[30.48%] top-0">
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <img
               alt={product.title}
@@ -971,44 +983,36 @@ export function FeaturedProductCard({
             />
           </div>
         </div>
-        <div className="content-stretch flex flex-col gap-[6px] items-start py-px relative shrink-0 w-full">
-          <div className="content-stretch flex h-[24px] items-end justify-between relative shrink-0 w-full gap-2">
-            <div className="content-stretch flex flex-col items-start relative shrink-0 flex-1 min-w-0 max-w-[calc(100%-100px)]">
-              <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-                <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[28px] relative shrink-0 text-[18px] text-black">
-                  <p className="mb-0 truncate w-full">{product.title}</p>
-                </div>
-              </div>
-              {(product.subtitle || product.description) && (
-                <div className="content-stretch flex flex-col items-start relative shrink-0 w-full mt-1">
-                  <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[12px] tracking-[1.2px] uppercase whitespace-nowrap">
-                    <p className="leading-[16px]">{product.subtitle || product.description}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="content-stretch flex flex-col items-start relative shrink-0 flex-shrink-0">
-              <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[20px] whitespace-nowrap">
-                <p className="leading-[28px]">
-                  {formatPrice(product.price, currency)}
-                </p>
-              </div>
-            </div>
+
+        {/* Rounded Card with Price, Volume, and Add Button */}
+        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[59.39%_0_21.5%_0] rounded-[9999px]">
+          {/* Price */}
+          <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] left-[15px] not-italic text-[16px] text-white top-[22px] whitespace-nowrap">
+            <p className="leading-[28px]">{formatPrice(product.price, currency)}</p>
           </div>
+          {/* Volume */}
+          <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[15px] not-italic text-[#9f9f9f] text-[12px] top-[41px] tracking-[1.2px] uppercase whitespace-nowrap">
+            <p className="leading-[16px]">{volume}</p>
+          </div>
+          {/* Add to Cart Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               onAddToCart(product);
             }}
             disabled={isAddingToCart || !product.inStock}
-            className="bg-[#00d1ff] content-stretch cursor-pointer flex h-[48px] items-center justify-center py-[12px] relative rounded-[34px] shrink-0 w-[339px] disabled:opacity-50"
+            className="absolute block cursor-pointer left-[120px] size-[45px] top-[5px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+            aria-label={t('home.featuredProducts.addToCart')}
           >
-            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
-              <p className="leading-[24px]">
-                {isAddingToCart ? t('home.featuredProducts.adding') : t('home.featuredProducts.addToCart')}
-              </p>
+            <div className="flex flex-col font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] justify-center leading-[0] not-italic text-[30px] text-center text-white">
+              <p className="leading-[24px] whitespace-pre-wrap">+</p>
             </div>
           </button>
+        </div>
+
+        {/* Product Title */}
+        <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[84.64%_3.21%_0_3.21%] justify-center leading-[0] text-[16px] text-center text-white">
+          <p className="leading-[25px] whitespace-pre-wrap">{product.title}</p>
         </div>
       </div>
     );
