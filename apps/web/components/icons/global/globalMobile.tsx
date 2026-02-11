@@ -111,7 +111,17 @@ export function MobileHeader({
   };
 
   return (
-    <div className="xl:hidden absolute content-stretch flex items-center justify-between left-[17px] right-[17px] top-[35px] z-50">
+    <div 
+      className="xl:hidden absolute content-stretch flex items-center justify-between left-[17px] right-[17px] top-[35px] z-50"
+      style={{
+        background: 'linear-gradient(135deg, rgba(55, 105, 205, 0.3), rgba(75, 135, 225, 0.3))',
+        backdropFilter: 'blur(40px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+        borderRadius: '9999px',
+        padding: '8px 12px',
+        border: '1px solid rgba(255, 255, 255, 0.5)',
+      }}
+    >
       <div className="content-stretch flex gap-[6px] items-center relative shrink-0">
         {/* Mobile Menu Button (Hamburger) */}
         <button
@@ -749,6 +759,10 @@ export function MobileBottomNavigation() {
   const pathname = usePathname();
   const { isLoggedIn } = useAuth();
   const [cartCount, setCartCount] = useState<number>(0);
+  const [scrollProgress, setScrollProgress] = useState<number>(0);
+  const navRef = useRef<HTMLDivElement>(null);
+  const rafId = useRef<number | null>(null);
+  const iconRefs = useRef<(HTMLImageElement | null)[]>([]);
 
   // Fetch cart count
   useEffect(() => {
@@ -799,6 +813,72 @@ export function MobileBottomNavigation() {
     };
   }, [isLoggedIn]);
 
+  // Smooth scroll tracking with requestAnimationFrame for 60fps
+  // Apple-style color transition: white -> light blue gradient on scroll
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    let ticking = false;
+    const DEBUG = false; // Set to true for scroll progress debugging
+
+    const updateScrollProgress = () => {
+      // Background is always blue gradient, icons are always white
+      // No scroll-based transitions needed
+      if (navRef.current) {
+        // Always use blue gradient colors (fixed)
+        const bgOpacity = 0.3; // Fixed opacity for blue gradient
+        const borderOpacity = 0.5; // Fixed border opacity
+        
+        // Blue gradient colors (Apple-style)
+        const r1 = 55;  // Light blue
+        const g1 = 105;
+        const b1 = 205;
+        
+        const r2 = 75;  // Lighter blue
+        const g2 = 135;
+        const b2 = 225;
+        
+        navRef.current.style.background = `linear-gradient(135deg, 
+          rgba(${r1}, ${g1}, ${b1}, ${bgOpacity}),
+          rgba(${r2}, ${g2}, ${b2}, ${bgOpacity})
+        )`;
+        navRef.current.style.borderColor = `rgba(255, 255, 255, ${borderOpacity})`;
+      }
+      
+      // Update icon colors - always white icons
+      iconRefs.current.forEach((iconRef) => {
+        if (iconRef) {
+          // Icons should always be white (invert = 1)
+          iconRef.style.filter = `brightness(0) invert(1)`;
+        }
+      });
+      
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(updateScrollProgress);
+        ticking = true;
+      }
+    };
+
+    // Initial update
+    updateScrollProgress();
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
+    };
+  }, []);
+
   // Determine active navigation index based on current pathname
   const getActiveIndex = () => {
     if (pathname === '/') return 0;
@@ -811,8 +891,24 @@ export function MobileBottomNavigation() {
   const activeIndex = getActiveIndex();
 
   return (
-    <div className="-translate-x-1/2 fixed xl:hidden left-1/2 bottom-0 w-full max-w-[500px] px-4 pb-5 z-50">
-      <div className="relative bg-white/5 backdrop-blur-3xl h-[72px] rounded-[999px] shadow-[0_20px_55px_rgba(0,0,0,0.25)] border border-white/10 overflow-hidden">
+    <div 
+      className="-translate-x-1/2 fixed xl:hidden left-1/2 bottom-0 w-full max-w-[500px] px-4 z-50"
+      style={{ 
+        paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))',
+      }}
+    >
+      <div 
+        ref={navRef}
+        className="relative h-[72px] rounded-[999px] shadow-[0_20px_55px_rgba(0,0,0,0.25)] border overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, rgba(55, 105, 205, 0.3), rgba(75, 135, 225, 0.3))',
+          backdropFilter: 'blur(40px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+          borderColor: 'rgba(255, 255, 255, 0.5)',
+          willChange: 'background, border-color',
+          transition: 'none', // Disable CSS transitions, we use RAF for smooth 60fps
+        }}
+      >
         <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-1/2 w-[420px]">
           <div className="content-stretch flex items-center justify-center gap-10 relative shrink-0 w-[360px]">
             {/* Home */}
@@ -826,7 +922,13 @@ export function MobileBottomNavigation() {
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
-              <img className="relative block max-w-none size-[19px]" alt="" src={imgHomeVector} />
+              <img 
+                ref={(el) => { iconRefs.current[0] = el; }}
+                className="relative block max-w-none size-[19px]" 
+                alt="" 
+                src={imgHomeVector}
+                style={{ filter: 'brightness(0) invert(1)', willChange: 'filter' }}
+              />
             </button>
             {/* Shop */}
             <button
@@ -839,7 +941,13 @@ export function MobileBottomNavigation() {
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
-              <img className="relative block max-w-none size-[28px]" alt="" src={imgVector1} />
+              <img 
+                ref={(el) => { iconRefs.current[1] = el; }}
+                className="relative block max-w-none size-[28px]" 
+                alt="" 
+                src={imgVector1}
+                style={{ filter: 'brightness(0) invert(1)', willChange: 'filter' }}
+              />
             </button>
             {/* Cart */}
             <button
@@ -852,7 +960,13 @@ export function MobileBottomNavigation() {
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
-              <img className="relative block max-w-none h-[22.312px] w-[25px]" alt="" src={imgGroup2148} />
+              <img 
+                ref={(el) => { iconRefs.current[2] = el; }}
+                className="relative block max-w-none h-[22.312px] w-[25px]" 
+                alt="" 
+                src={imgGroup2148}
+                style={{ filter: 'brightness(0) invert(1)', willChange: 'filter' }}
+              />
               {/* Cart Count Badge */}
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#00d1ff] text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1.5 flex items-center justify-center border-2 border-white">
@@ -871,7 +985,13 @@ export function MobileBottomNavigation() {
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
-              <img className="relative block max-w-none h-[22px] w-[18.526px]" alt="" src={imgGroup2149} />
+              <img 
+                ref={(el) => { iconRefs.current[3] = el; }}
+                className="relative block max-w-none h-[22px] w-[18.526px]" 
+                alt="" 
+                src={imgGroup2149}
+                style={{ filter: 'brightness(0) invert(1)', willChange: 'filter' }}
+              />
             </button>
           </div>
         </div>
