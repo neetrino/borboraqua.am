@@ -118,6 +118,7 @@
     "deletedSuccess": "Ատրիբուտը հաջողությամբ ջնջվեց",
     "errorCreating": "Սխալ: {message}",
     "errorDeleting": "Սխալ: {message}",
+    "errorUsedInProducts": "Չի կարելի ջնջել ատրիբուտը: Այս ատրիբուտը օգտագործվում է {count} ապրանք(ներ)ում: Նախ հեռացրեք այն բոլոր ապրանքներից:",
     "errorAddingValue": "Սխալ: {message}",
     "errorDeletingValue": "Սխալ: {message}",
     "errorUpdatingValue": "Սխալ: {message}",

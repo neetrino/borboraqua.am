@@ -119,6 +119,7 @@
     "deletedSuccess": "Attribute deleted successfully",
     "errorCreating": "Error: {message}",
     "errorDeleting": "Error: {message}",
+    "errorUsedInProducts": "Cannot delete attribute. This attribute is used in {count} product(s). Please remove it from all products first.",
     "errorAddingValue": "Error: {message}",
     "errorDeletingValue": "Error: {message}",
     "errorUpdatingValue": "Error: {message}",

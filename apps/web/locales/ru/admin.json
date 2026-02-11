@@ -119,6 +119,7 @@
     "deletedSuccess": "Атрибут успешно удален",
     "errorCreating": "Ошибка: {message}",
     "errorDeleting": "Ошибка: {message}",
+    "errorUsedInProducts": "Невозможно удалить атрибут. Этот атрибут используется в {count} товаре(ах). Сначала удалите его из всех товаров.",
     "errorAddingValue": "Ошибка: {message}",
     "errorDeletingValue": "Ошибка: {message}",
     "errorUpdatingValue": "Ошибка: {message}",

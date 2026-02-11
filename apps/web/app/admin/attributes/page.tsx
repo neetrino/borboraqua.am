@@ -175,8 +175,44 @@ function AttributesPageContent() {
       showToast(t('admin.attributes.deletedSuccess'), 'success');
     } catch (err: any) {
       console.error('❌ [ADMIN] Error deleting attribute:', err);
-      const errorMessage = err?.data?.detail || err?.message || 'Failed to delete attribute';
-      showToast(t('admin.attributes.errorDeleting').replace('{message}', errorMessage), 'error');
+      
+      // Извлекаем сообщение об ошибке из разных возможных мест
+      let errorMessage = 'Failed to delete attribute';
+      
+      if (err?.data?.detail) {
+        errorMessage = err.data.detail;
+      } else if (err?.data?.message) {
+        errorMessage = err.data.message;
+      } else if (err?.message) {
+        errorMessage = err.message;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      }
+      
+      // Проверяем, содержит ли ошибка информацию об использовании в продуктах
+      const isUsedInProducts = errorMessage.toLowerCase().includes('used in') || 
+                               errorMessage.toLowerCase().includes('product');
+      
+      // Показываем более длительное сообщение для важных ошибок
+      const toastDuration = isUsedInProducts ? 8000 : 5000;
+      
+      // Форматируем сообщение для пользователя
+      let userMessage = errorMessage;
+      if (isUsedInProducts) {
+        // Извлекаем количество продуктов из сообщения, если есть
+        const productCountMatch = errorMessage.match(/(\d+)\s+product/i);
+        if (productCountMatch) {
+          const count = productCountMatch[1];
+          const translatedMessage = t('admin.attributes.errorUsedInProducts');
+          userMessage = translatedMessage ? translatedMessage.replace('{count}', count) : errorMessage;
+        }
+      }
+      
+      showToast(
+        t('admin.attributes.errorDeleting')?.replace('{message}', userMessage) || userMessage, 
+        'error',
+        toastDuration
+      );
     }
   };
 

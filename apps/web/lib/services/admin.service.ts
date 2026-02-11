@@ -4321,18 +4321,25 @@ class AdminService {
         key: attribute.key,
       });
 
-      // Ստուգում ենք, արդյոք attribute-ը օգտագործվում է արտադրանքներում
-      console.log('🔍 [ADMIN SERVICE] Ստուգվում է, արդյոք attribute-ը օգտագործվում է արտադրանքներում...');
+      // Ստուգում ենք, արդյոք attribute-ը օգտագործվում է ակտիվ արտադրանքներում
+      // Հաշվի ենք առնում միայն չջնջված (deletedAt IS NULL) ապրանքները
+      console.log('🔍 [ADMIN SERVICE] Ստուգվում է, արդյոք attribute-ը օգտագործվում է ակտիվ արտադրանքներում...');
       
       let productAttributesCount = 0;
       
       // Ստուգում ենք, արդյոք db.productAttribute գոյություն ունի
       if (db.productAttribute) {
         try {
+          // Հաշվում ենք միայն ակտիվ (չջնջված) ապրանքների հետ կապված productAttributes
           productAttributesCount = await db.productAttribute.count({
-            where: { attributeId },
+            where: { 
+              attributeId,
+              product: {
+                deletedAt: null, // Միայն չջնջված ապրանքներ
+              },
+            },
           });
-          console.log('📊 [ADMIN SERVICE] Product attributes count:', productAttributesCount);
+          console.log('📊 [ADMIN SERVICE] Active product attributes count (not deleted):', productAttributesCount);
         } catch (countError: any) {
           console.error('❌ [ADMIN SERVICE] Product attributes count սխալ:', {
             error: countError,
@@ -4342,11 +4349,25 @@ class AdminService {
           // Եթե count-ը չի աշխատում, փորձում ենք findMany-ով
           try {
             const productAttributes = await db.productAttribute.findMany({
-              where: { attributeId },
-              select: { id: true },
+              where: { 
+                attributeId,
+                product: {
+                  deletedAt: null, // Միայն չջնջված ապրանքներ
+                },
+              },
+              select: { 
+                id: true,
+                productId: true,
+              },
             });
             productAttributesCount = productAttributes.length;
-            console.log('📊 [ADMIN SERVICE] Product attributes count (via findMany):', productAttributesCount);
+            console.log('📊 [ADMIN SERVICE] Active product attributes count (via findMany, not deleted):', productAttributesCount);
+            
+            // Լոգավորում ենք, թե որ ապրանքներում է օգտագործվում
+            if (productAttributesCount > 0) {
+              const productIds = productAttributes.map(pa => pa.productId);
+              console.log('📋 [ADMIN SERVICE] Attribute-ը օգտագործվում է այս ակտիվ ապրանքներում:', productIds);
+            }
           } catch (findError: any) {
             console.warn('⚠️ [ADMIN SERVICE] Product attributes findMany-ը նույնպես չի աշխատում, skip անում ենք ստուգումը');
             productAttributesCount = 0;
@@ -4357,12 +4378,42 @@ class AdminService {
       }
 
       if (productAttributesCount > 0) {
-        console.log('⚠️ [ADMIN SERVICE] Attribute-ը օգտագործվում է արտադրանքներում:', productAttributesCount);
+        console.log('⚠️ [ADMIN SERVICE] Attribute-ը օգտագործվում է ակտիվ արտադրանքներում:', productAttributesCount);
+        
+        // Լրացուցիչ տեղեկություն ստուգման համար
+        try {
+          const allProductAttributes = await db.productAttribute.findMany({
+            where: { attributeId },
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  deletedAt: true,
+                  published: true,
+                },
+              },
+            },
+          });
+          
+          const activeProducts = allProductAttributes.filter(pa => pa.product.deletedAt === null);
+          const deletedProducts = allProductAttributes.filter(pa => pa.product.deletedAt !== null);
+          
+          console.log('📊 [ADMIN SERVICE] Մանրամասն վիճակագրություն:', {
+            total: allProductAttributes.length,
+            active: activeProducts.length,
+            deleted: deletedProducts.length,
+            activeProductIds: activeProducts.map(pa => pa.productId),
+            deletedProductIds: deletedProducts.map(pa => pa.productId),
+          });
+        } catch (debugError: any) {
+          console.warn('⚠️ [ADMIN SERVICE] Չհաջողվեց ստանալ մանրամասն տեղեկություն:', debugError?.message);
+        }
+        
         throw {
           status: 400,
           type: "https://api.shop.am/problems/validation-error",
           title: "Cannot delete attribute",
-          detail: `Attribute is used in ${productAttributesCount} product(s). Please remove it from products first.`,
+          detail: `Attribute is used in ${productAttributesCount} active product(s). Please remove it from products first.`,
         };
       }
 
@@ -4377,16 +4428,22 @@ class AdminService {
 
       if (attributeValues.length > 0) {
         const valueIds = attributeValues.map((v: { id: string }) => v.id);
-        console.log('🔍 [ADMIN SERVICE] Ստուգվում է variant options...');
+        console.log('🔍 [ADMIN SERVICE] Ստուգվում է variant options (միայն ակտիվ ապրանքների)...');
         
         let variantOptionsCount = 0;
         try {
+          // Հաշվում ենք միայն ակտիվ (չջնջված) ապրանքների variant options-ները
           variantOptionsCount = await db.productVariantOption.count({
             where: {
               valueId: { in: valueIds },
+              variant: {
+                product: {
+                  deletedAt: null, // Միայն չջնջված ապրանքներ
+                },
+              },
             },
           });
-          console.log('📊 [ADMIN SERVICE] Variant options count:', variantOptionsCount);
+          console.log('📊 [ADMIN SERVICE] Active variant options count (not deleted products):', variantOptionsCount);
         } catch (countError: any) {
           console.error('❌ [ADMIN SERVICE] Variant options count սխալ:', {
             error: countError,
@@ -4394,14 +4451,33 @@ class AdminService {
             code: countError?.code,
           });
           // Եթե count-ը չի աշխատում, փորձում ենք findMany-ով
-          const variantOptions = await db.productVariantOption.findMany({
-            where: {
-              valueId: { in: valueIds },
-            },
-            select: { id: true },
-          });
-          variantOptionsCount = variantOptions.length;
-          console.log('📊 [ADMIN SERVICE] Variant options count (via findMany):', variantOptionsCount);
+          try {
+            const variantOptions = await db.productVariantOption.findMany({
+              where: {
+                valueId: { in: valueIds },
+                variant: {
+                  product: {
+                    deletedAt: null, // Միայն չջնջված ապրանքներ
+                  },
+                },
+              },
+              select: { 
+                id: true,
+                variantId: true,
+              },
+            });
+            variantOptionsCount = variantOptions.length;
+            console.log('📊 [ADMIN SERVICE] Active variant options count (via findMany, not deleted products):', variantOptionsCount);
+            
+            // Լոգավորում ենք, թե որ variant-ներում է օգտագործվում
+            if (variantOptionsCount > 0) {
+              const variantIds = variantOptions.map(vo => vo.variantId);
+              console.log('📋 [ADMIN SERVICE] Attribute values-ները օգտագործվում են այս ակտիվ variant-ներում:', variantIds);
+            }
+          } catch (findError: any) {
+            console.warn('⚠️ [ADMIN SERVICE] Variant options findMany-ը նույնպես չի աշխատում, skip անում ենք ստուգումը');
+            variantOptionsCount = 0;
+          }
         }
 
         if (variantOptionsCount > 0) {
