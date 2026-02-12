@@ -51,15 +51,27 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     setCurrency(getStoredCurrency());
   }, []);
 
-  // Detect mobile screen size
+  // Detect mobile screen size using matchMedia for accurate responsive detection even with zoom
   useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 1279px)'); // xl breakpoint (1280px)
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
+      setIsMobile(mediaQuery.matches);
     };
     
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    // Use addEventListener for matchMedia (modern browsers)
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', checkMobile);
+      return () => mediaQuery.removeEventListener('change', checkMobile);
+    } else {
+      // Fallback for older browsers
+      mediaQuery.addListener(checkMobile);
+      window.addEventListener('resize', checkMobile);
+      return () => {
+        mediaQuery.removeListener(checkMobile);
+        window.removeEventListener('resize', checkMobile);
+      };
+    }
   }, []);
 
 

@@ -166,6 +166,27 @@ export default function HomePage() {
   const languageMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
+  // State to track if device is desktop (based on screen width, not viewport - zoom-independent)
+  const [isDesktopScreen, setIsDesktopScreen] = useState(false);
+
+  // Check if screen is desktop size (zoom-independent check)
+  useEffect(() => {
+    const checkDesktopScreen = () => {
+      // Use screen.width instead of window.innerWidth to be zoom-independent
+      // Desktop screens are typically 1280px or wider
+      setIsDesktopScreen(typeof window !== 'undefined' && window.screen.width >= 1280);
+    };
+    
+    checkDesktopScreen();
+    // Listen to orientation changes and window resize (but use screen.width which doesn't change with zoom)
+    window.addEventListener('resize', checkDesktopScreen);
+    window.addEventListener('orientationchange', checkDesktopScreen);
+    return () => {
+      window.removeEventListener('resize', checkDesktopScreen);
+      window.removeEventListener('orientationchange', checkDesktopScreen);
+    };
+  }, []);
+
   // Fetch featured products from backend
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
@@ -499,7 +520,8 @@ export default function HomePage() {
     }
     setCarouselIndex((prevIndex) => {
       // Move to previous mode (2 products back for mobile, 3 for desktop)
-      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      // Use matchMedia for accurate responsive detection even with zoom
+      const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches;
       const step = isMobile ? 2 : 3;
       const newIndex = prevIndex - step;
       // If we go below 0, loop to the last valid index
@@ -545,7 +567,8 @@ export default function HomePage() {
     }
     setCarouselIndex((prevIndex) => {
       // Move to next mode (2 products forward for mobile, 3 for desktop)
-      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      // Use matchMedia for accurate responsive detection even with zoom
+      const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches;
       const step = isMobile ? 2 : 3;
       const newIndex = prevIndex + step;
       // If we exceed the max, loop back to start (0)
@@ -605,8 +628,8 @@ export default function HomePage() {
 
   return (
     <div className="w-full bg-white overflow-x-hidden">
-      {/* Mobile / Tablet Version - Visible up to xl */}
-      <div className="xl:hidden bg-white relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden">
+      {/* Mobile / Tablet Version - Visible up to xl, but hidden on desktop screens (zoom-independent) */}
+      <div className={`${isDesktopScreen ? 'hidden' : 'xl:hidden'} bg-white relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden`}>
         {/* Mobile Header (hidden when menu/search popups are open) */}
         {!showMobileMenu && !showSearchModal && (
         <div className="absolute content-stretch flex items-center justify-between left-[17px] right-[17px] top-[35px] z-50">
@@ -713,7 +736,7 @@ export default function HomePage() {
 
         {/* Mobile Menu Overlay */}
         {showMobileMenu && (
-          <div className="fixed inset-0 bg-gradient-to-b from-[#62b3e8] to-[rgba(11, 55, 168, 0.75)] backdrop-blur-sm z-[100] xl:hidden flex items-center justify-center" onClick={() => setShowMobileMenu(false)}>
+          <div className={`fixed inset-0 bg-gradient-to-b from-[#62b3e8] to-[rgba(11, 55, 168, 0.75)] backdrop-blur-sm z-[100] ${isDesktopScreen ? 'hidden' : 'xl:hidden'} flex items-center justify-center`} onClick={() => setShowMobileMenu(false)}>
             <div 
               className="relative rounded-2xl border shadow-2xl w-[280px] max-w-[90%] p-8 animate-in fade-in zoom-in-95 duration-300"
               style={{
@@ -1557,10 +1580,10 @@ export default function HomePage() {
         {/* Mobile Footer - Removed from all pages */}
       </div>
 
-      {/* Desktop Version - Only for extra large screens */}
+      {/* Desktop Version - Only for extra large screens (zoom-independent) */}
       <div
         ref={containerRef}
-        className="hidden xl:block bg-white relative w-full mx-auto h-[6170px] home-page-container overflow-x-hidden overflow-y-hidden"
+        className={`${isDesktopScreen ? 'block' : 'hidden xl:block'} bg-white relative w-full mx-auto h-[6170px] home-page-container overflow-x-hidden overflow-y-hidden`}
       >
       <Header
         router={router}
