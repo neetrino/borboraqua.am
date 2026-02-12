@@ -1023,8 +1023,8 @@ export default function HomePage() {
        
 
         {/* Mobile Hero Image */}
-        <div className="-translate-x-1/2 absolute bottom-[88.94%] flex items-center justify-center left-1/2 top-[48%] w-full max-w-[440px]">
-          <div className="flex-none rotate-[100.79deg] size-[360px]">
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-1/2 top-[200px] sm:top-[220px] md:top-[240px] w-full max-w-[440px] z-0">
+          <div className="flex-none rotate-[100.79deg] size-[280px] sm:size-[320px] md:size-[360px]">
             <div className="relative rounded-[320px] size-full">
               {/* Soft blue glow behind the bottle without darkening artifacts */}
               <div className="absolute inset-0 backdrop-blur-[4px] bg-[rgba(118,179,233,0.42)] rounded-full" />
@@ -1039,7 +1039,7 @@ export default function HomePage() {
 
 
         {/* Mobile Hero Text */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-start justify-center left-1/2 top-[331px] w-full max-w-[380px] px-6 z-10">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-start justify-center left-1/2 top-[281px] w-full max-w-[380px] px-6 z-10">
           <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center text-left leading-[40px] relative shrink-0 text-[34px] text-white w-full whitespace-pre-wrap break-words">
             <p className="mb-0">{t('home.hero.your')}</p>
             <p className="mb-0 font-['Montserrat:Light',sans-serif] font-light">{t('home.hero.dailyDose')}</p>
@@ -1052,7 +1052,7 @@ export default function HomePage() {
         <div className="absolute bg-gradient-to-b blur-[40px] from-[rgba(98,179,232,0.85)] h-[150px] left-0 right-0 opacity-75 to-[rgba(221,216,216,0.6)] top-[520px] z-0" />
 
         {/* Mobile Experience Purity Label */}
-        <div className="absolute content-stretch flex gap-[12px] items-center left-[32px] right-4 top-[311px] max-w-[calc(100%-32px)]">
+        <div className="absolute content-stretch flex gap-[12px] items-center left-[32px] right-4 top-[261px] max-w-[calc(100%-32px)]">
           <div className="bg-white h-[2px] shrink-0 w-[48px]" />
           <div className="content-stretch flex flex-col items-start relative shrink-0">
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase whitespace-nowrap">
@@ -1062,7 +1062,7 @@ export default function HomePage() {
         </div>
 
         {/* Mobile Subtitle */}
-        <div className="absolute content-stretch flex flex-col items-center justify-center left-[32px] right-[32px] top-[564px]">
+        <div className="absolute content-stretch flex flex-col items-center justify-center left-[32px] right-[32px] top-[494px]">
           <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white text-center break-words">
             <p className="leading-[26px]">{t('home.hero.subtitle')}</p>
           </div>
