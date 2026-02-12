@@ -128,6 +128,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [showZoom, setShowZoom] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState<Array<{ rating: number }>>([]);
+  const [isVariantInCart, setIsVariantInCart] = useState(false);
   const thumbnailsPerView = 3; // Show 3 thumbnails at a time
 
   // Use unified image utilities (imported from image-utils.ts)
@@ -1242,6 +1243,62 @@ export default function ProductPage({ params }: ProductPageProps) {
   }
 
   const currentVariant = selectedVariant || findVariantByColorAndSize(selectedColor, selectedSize) || product?.variants?.[0] || null;
+  
+  // Ստուգում ենք, արդյոք variant-ը արդեն cart-ում է
+  useEffect(() => {
+    if (!currentVariant) {
+      setIsVariantInCart(false);
+      return;
+    }
+
+    const checkCart = async () => {
+      try {
+        if (!isLoggedIn) {
+          // Guest cart - check localStorage
+          if (typeof window === 'undefined') {
+            setIsVariantInCart(false);
+            return;
+          }
+          
+          const stored = localStorage.getItem('shop_cart_guest');
+          if (stored) {
+            const guestCart: Array<{ variantId: string }> = JSON.parse(stored);
+            const isInCart = guestCart.some((item) => item.variantId === currentVariant.id);
+            setIsVariantInCart(isInCart);
+            console.log('🛒 [CART CHECK] Guest cart - variant in cart:', isInCart, currentVariant.id);
+          } else {
+            setIsVariantInCart(false);
+          }
+        } else {
+          // Logged-in user - check API
+          const currentLang = getStoredLanguage();
+          const response = await apiClient.get<{ cart: { items: Array<{ variant: { id: string } }> } }>('/api/v1/cart', {
+            params: { lang: currentLang }
+          });
+          
+          const isInCart = response.cart?.items?.some((item) => item.variant?.id === currentVariant.id) || false;
+          setIsVariantInCart(isInCart);
+          console.log('🛒 [CART CHECK] Logged-in cart - variant in cart:', isInCart, currentVariant.id);
+        }
+      } catch (error) {
+        console.error('❌ [CART CHECK] Error checking cart:', error);
+        setIsVariantInCart(false);
+      }
+    };
+
+    checkCart();
+
+    // Listen for cart updates
+    const handleCartUpdate = () => {
+      checkCart();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('cart-updated', handleCartUpdate);
+      return () => window.removeEventListener('cart-updated', handleCartUpdate);
+    }
+  }, [currentVariant?.id, isLoggedIn]);
+  
   const price = currentVariant?.price || 0;
   const originalPrice = currentVariant?.originalPrice;
   const compareAtPrice = currentVariant?.compareAtPrice;
@@ -1321,8 +1378,10 @@ export default function ProductPage({ params }: ProductPageProps) {
   
   const canAddToCart = !isOutOfStock && !isVariationRequired && !hasUnavailableAttributes;
 
-  const minimumOrderQuantity = product?.minimumOrderQuantity || 1;
+  // Եթե variant-ը արդեն cart-ում է, minimumOrderQuantity-ը դառնում է orderQuantityIncrement-ի չափով
+  // (այսպես նվազումը կլինի նույն քանակով, ինչ ավելացումը)
   const orderQuantityIncrement = product?.orderQuantityIncrement || 1;
+  const minimumOrderQuantity = (isVariantInCart ? orderQuantityIncrement : (product?.minimumOrderQuantity || 1));
 
   // Set initial quantity to minimumOrderQuantity when product loads
   useEffect(() => {
