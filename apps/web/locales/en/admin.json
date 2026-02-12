@@ -439,6 +439,10 @@
       "enterDefaultPrice": "Enter default price for all variants:",
       "enterDefaultStock": "Enter default stock for all variants:",
       "enterSkuPrefix": "Enter SKU prefix (will add -color-size if applicable):",
+      "minimumOrderQuantity": "Minimum Order Quantity",
+      "minimumOrderQuantityHint": "Customer must order at least this quantity",
+      "orderQuantityIncrement": "Order Quantity Increment (block)",
+      "orderQuantityIncrementHint": "Order quantity will increase by this amount (e.g., 12 units)",
       "actions": "Actions",
       "delete": "Delete",
       "deleteVariant": "Delete variant"

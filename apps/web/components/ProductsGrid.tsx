@@ -15,6 +15,8 @@ interface Product {
   compareAtPrice: number | null;
   image: string | null;
   inStock: boolean;
+  minimumOrderQuantity?: number;
+  orderQuantityIncrement?: number;
   brand: {
     id: string;
     name: string;
@@ -106,9 +108,11 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
   const handleAddToCart = async (product: FeaturedProduct) => {
     setAddingToCart(prev => new Set(prev).add(product.id));
 
+    const quantity = product.minimumOrderQuantity || 1;
+
     const success = await addToCart({
       product,
-      quantity: 1,
+      quantity,
       isLoggedIn,
       router,
       t,
@@ -184,6 +188,8 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     id: product.id,
     slug: product.slug,
     title: product.title,
+    minimumOrderQuantity: product.minimumOrderQuantity,
+    orderQuantityIncrement: product.orderQuantityIncrement,
     price: product.price,
     image: product.image,
     inStock: product.inStock,

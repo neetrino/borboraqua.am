@@ -108,6 +108,8 @@ interface Product {
   price: number;
   image: string | null;
   inStock: boolean;
+  minimumOrderQuantity?: number;
+  orderQuantityIncrement?: number;
   brand: {
     id: string;
     name: string;
@@ -600,9 +602,11 @@ export default function HomePage() {
   const handleAddToCart = async (product: Product) => {
     setAddingToCart(prev => new Set(prev).add(product.id));
 
+    const quantity = product.minimumOrderQuantity || 1;
+
     const success = await addToCart({
       product,
-      quantity: 1,
+      quantity,
       isLoggedIn,
       router,
       t,

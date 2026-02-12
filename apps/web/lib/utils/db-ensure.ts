@@ -12,6 +12,10 @@ let reviewsTableExists = false;
 let attributesColumnChecked = false;
 let attributesColumnExists = false;
 
+// Cache for products order quantity columns
+let orderQuantityColumnsChecked = false;
+let orderQuantityColumnsExist = false;
+
 /**
  * Ensures the product_attributes table exists in the database
  * This is a fallback mechanism for Vercel deployments where migrations might not run automatically
@@ -368,6 +372,106 @@ export async function ensureProductVariantAttributesColumn(): Promise<boolean> {
     });
     attributesColumnChecked = true;
     attributesColumnExists = false;
+    return false;
+  }
+}
+
+/**
+ * Ensures the minimumOrderQuantity and orderQuantityIncrement columns exist in the products table
+ * This is a fallback mechanism for deployments where migrations might not run automatically
+ * Uses lazy initialization - checks only once per process
+ * 
+ * @returns Promise<boolean> - true if columns exist or were created, false if creation failed
+ */
+export async function ensureProductOrderQuantityColumns(): Promise<boolean> {
+  // If already checked and exists, return immediately
+  if (orderQuantityColumnsChecked && orderQuantityColumnsExist) {
+    return true;
+  }
+  
+  try {
+    // Try to query the columns to check if they exist
+    await db.$queryRaw`SELECT "minimumOrderQuantity", "orderQuantityIncrement" FROM "products" LIMIT 1`;
+    orderQuantityColumnsChecked = true;
+    orderQuantityColumnsExist = true;
+    return true;
+  } catch (error: any) {
+    // If columns don't exist, create them
+    if (
+      error?.code === 'P2022' || 
+      error?.message?.includes('does not exist') ||
+      error?.message?.includes('minimumOrderQuantity') ||
+      error?.message?.includes('orderQuantityIncrement') ||
+      (error?.message?.includes('column') && (error?.message?.includes('minimumOrderQuantity') || error?.message?.includes('orderQuantityIncrement')))
+    ) {
+      console.log('🔧 [DB UTILS] products order quantity columns not found, creating...');
+      
+      try {
+        // Check if minimumOrderQuantity column exists
+        const minOrderCheck = await db.$queryRaw<Array<{ exists: boolean }>>`
+          SELECT EXISTS (
+            SELECT 1 
+            FROM information_schema.columns 
+            WHERE table_schema = 'public'
+            AND table_name = 'products' 
+            AND column_name = 'minimumOrderQuantity'
+          ) as exists
+        `;
+
+        const minOrderExists = minOrderCheck[0]?.exists || false;
+
+        // Check if orderQuantityIncrement column exists
+        const incrementCheck = await db.$queryRaw<Array<{ exists: boolean }>>`
+          SELECT EXISTS (
+            SELECT 1 
+            FROM information_schema.columns 
+            WHERE table_schema = 'public'
+            AND table_name = 'products' 
+            AND column_name = 'orderQuantityIncrement'
+          ) as exists
+        `;
+
+        const incrementExists = incrementCheck[0]?.exists || false;
+
+        // Add minimumOrderQuantity column if it doesn't exist
+        if (!minOrderExists) {
+          await db.$executeRaw`
+            ALTER TABLE "products" 
+            ADD COLUMN IF NOT EXISTS "minimumOrderQuantity" INTEGER NOT NULL DEFAULT 1
+          `;
+          console.log('✅ [DB UTILS] products.minimumOrderQuantity column created successfully');
+        }
+
+        // Add orderQuantityIncrement column if it doesn't exist
+        if (!incrementExists) {
+          await db.$executeRaw`
+            ALTER TABLE "products" 
+            ADD COLUMN IF NOT EXISTS "orderQuantityIncrement" INTEGER NOT NULL DEFAULT 1
+          `;
+          console.log('✅ [DB UTILS] products.orderQuantityIncrement column created successfully');
+        }
+        
+        orderQuantityColumnsChecked = true;
+        orderQuantityColumnsExist = true;
+        return true;
+      } catch (createError: any) {
+        console.error('❌ [DB UTILS] Failed to create products order quantity columns:', {
+          message: createError?.message,
+          code: createError?.code,
+        });
+        orderQuantityColumnsChecked = true;
+        orderQuantityColumnsExist = false;
+        return false;
+      }
+    }
+    
+    // Other errors - log and return false
+    console.error('❌ [DB UTILS] Unexpected error checking products order quantity columns:', {
+      message: error?.message,
+      code: error?.code,
+    });
+    orderQuantityColumnsChecked = true;
+    orderQuantityColumnsExist = false;
     return false;
   }
 }

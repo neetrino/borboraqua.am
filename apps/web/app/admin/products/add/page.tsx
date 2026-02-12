@@ -134,6 +134,8 @@ function AddProductPageContent() {
     categoryIds: [] as string[],
     published: false,
     featured: false,
+    minimumOrderQuantity: 1,
+    orderQuantityIncrement: 1,
     imageUrls: [] as string[],
     featuredImageIndex: 0,
     mainProductImage: '' as string, // Main product image (base64)
@@ -804,6 +806,8 @@ function AddProductPageContent() {
             categoryIds: product.categoryIds || [],
             published: product.published || false,
             featured: product.featured || false,
+            minimumOrderQuantity: (product as any).minimumOrderQuantity || 1,
+            orderQuantityIncrement: (product as any).orderQuantityIncrement || 1,
             imageUrls: normalizedMedia,
             featuredImageIndex:
               featuredIndexFromApi >= 0 && featuredIndexFromApi < normalizedMedia.length
@@ -3026,6 +3030,8 @@ function AddProductPageContent() {
         // При редактировании используем значение из формы
         published: isEditMode ? formData.published : true,
         featured: formData.featured,
+        minimumOrderQuantity: formData.minimumOrderQuantity || 1,
+        orderQuantityIncrement: formData.orderQuantityIncrement || 1,
         variants: variants,
         attributeIds: attributeIds.length > 0 ? attributeIds : undefined,
       };
@@ -4606,6 +4612,42 @@ function AddProductPageContent() {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Order Quantity Settings */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('admin.products.add.minimumOrderQuantity')}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.minimumOrderQuantity}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, minimumOrderQuantity: parseInt(e.target.value) || 1 }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="1"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {t('admin.products.add.minimumOrderQuantityHint')}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('admin.products.add.orderQuantityIncrement')}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.orderQuantityIncrement}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, orderQuantityIncrement: parseInt(e.target.value) || 1 }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="1"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {t('admin.products.add.orderQuantityIncrementHint')}
+                </p>
+              </div>
             </div>
 
             {/* Publishing */}

@@ -27,6 +27,8 @@ interface CartItem {
   price: number;
   originalPrice?: number | null;
   total: number;
+  minimumOrderQuantity?: number;
+  orderQuantityIncrement?: number;
 }
 
 interface Cart {
@@ -132,6 +134,8 @@ export default function CartPage() {
                 const productData = await apiClient.get<{
                   id: string;
                   slug: string;
+                  minimumOrderQuantity?: number;
+                  orderQuantityIncrement?: number;
                   translations?: Array<{ title: string; locale: string }>;
                   media?: Array<{ url?: string; src?: string } | string>;
                   variants?: Array<{
@@ -182,6 +186,8 @@ export default function CartPage() {
                     price: variant.price,
                     originalPrice: variant.originalPrice || null,
                     total: variant.price * item.quantity,
+                    minimumOrderQuantity: productData.minimumOrderQuantity || 1,
+                    orderQuantityIncrement: productData.orderQuantityIncrement || 1,
                   },
                   shouldRemove: false,
                 };
@@ -331,10 +337,40 @@ export default function CartPage() {
     const cartItem = cart?.items.find(item => item.id === itemId);
     if (!cartItem) return;
 
+    // Validate quantity against minimumOrderQuantity and orderQuantityIncrement
+    const minimumOrderQuantity = cartItem.minimumOrderQuantity || 1;
+    const orderQuantityIncrement = cartItem.orderQuantityIncrement || 1;
+    
+    // Ensure quantity is at least minimumOrderQuantity
+    if (quantity < minimumOrderQuantity) {
+      quantity = minimumOrderQuantity;
+    }
+    
+    // Round quantity to nearest valid increment
+    const remainder = quantity % orderQuantityIncrement;
+    if (remainder !== 0) {
+      // Round to nearest valid increment
+      quantity = Math.floor(quantity / orderQuantityIncrement) * orderQuantityIncrement;
+      // Ensure it's still at least minimumOrderQuantity
+      if (quantity < minimumOrderQuantity) {
+        quantity = minimumOrderQuantity;
+      }
+    }
+
     if (cartItem.variant.stock !== undefined) {
       if (quantity > cartItem.variant.stock) {
-        alert(`Մատչելի քանակը ${cartItem.variant.stock} հատ է: Դուք չեք կարող ավելացնել ավելի շատ քանակ:`);
-        return;
+        // If stock is less than minimumOrderQuantity, show error
+        if (cartItem.variant.stock < minimumOrderQuantity) {
+          alert(`Մատչելի քանակը ${cartItem.variant.stock} հատ է, բայց նվազագույն պատվերի քանակը ${minimumOrderQuantity} հատ է:`);
+          return;
+        }
+        // Round down to nearest valid quantity that fits in stock
+        const maxValidQuantity = Math.floor(cartItem.variant.stock / orderQuantityIncrement) * orderQuantityIncrement;
+        quantity = Math.max(maxValidQuantity, minimumOrderQuantity);
+        if (quantity > cartItem.variant.stock) {
+          alert(`Մատչելի քանակը ${cartItem.variant.stock} հատ է: Դուք չեք կարող ավելացնել ավելի շատ քանակ:`);
+          return;
+        }
       }
     }
 
@@ -563,7 +599,14 @@ export default function CartPage() {
                 </p>
                 <div className="flex items-center justify-center gap-2 w-full md:w-auto">
                   <button
-                    onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                    onClick={() => {
+                      const increment = item.orderQuantityIncrement || 1;
+                      const newQuantity = Math.max(
+                        item.minimumOrderQuantity || 1,
+                        item.quantity - increment
+                      );
+                      handleUpdateQuantity(item.id, newQuantity);
+                    }}
                     disabled={updatingItems.has(item.id)}
                     className="w-9 h-9 flex-shrink-0 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label={t('common.ariaLabels.decreaseQuantity')}
@@ -574,11 +617,12 @@ export default function CartPage() {
                   </button>
                   <input
                     type="number"
-                    min="1"
+                    min={item.minimumOrderQuantity || 1}
                     max={item.variant.stock !== undefined ? item.variant.stock : undefined}
+                    step={item.orderQuantityIncrement || 1}
                     value={item.quantity}
                     onChange={(e) => {
-                      const newQuantity = parseInt(e.target.value) || 1;
+                      const newQuantity = parseInt(e.target.value) || (item.minimumOrderQuantity || 1);
                       handleUpdateQuantity(item.id, newQuantity);
                     }}
                     disabled={updatingItems.has(item.id)}
@@ -586,7 +630,14 @@ export default function CartPage() {
                     title={item.variant.stock !== undefined ? t('common.messages.availableQuantity').replace('{stock}', item.variant.stock.toString()) : ''}
                   />
                   <button
-                    onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                    onClick={() => {
+                      const increment = item.orderQuantityIncrement || 1;
+                      const newQuantity = item.quantity + increment;
+                      const maxQuantity = item.variant.stock !== undefined ? item.variant.stock : Infinity;
+                      if (newQuantity <= maxQuantity) {
+                        handleUpdateQuantity(item.id, newQuantity);
+                      }
+                    }}
                     disabled={updatingItems.has(item.id) || (item.variant.stock !== undefined && item.quantity >= item.variant.stock)}
                     className="w-9 h-9 flex-shrink-0 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label={t('common.ariaLabels.increaseQuantity')}

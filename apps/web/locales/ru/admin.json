@@ -434,6 +434,10 @@
       "enterDefaultPrice": "Введите цену по умолчанию для всех вариантов:",
       "enterDefaultStock": "Введите наличие по умолчанию для всех вариантов:",
       "enterSkuPrefix": "Введите префикс SKU (будет добавлено -color-size, если применимо):",
+      "minimumOrderQuantity": "Минимальное количество заказа",
+      "minimumOrderQuantityHint": "Клиент должен заказать минимум это количество",
+      "orderQuantityIncrement": "Шаг увеличения количества заказа (блок)",
+      "orderQuantityIncrementHint": "Количество заказа будет увеличиваться на эту величину (например, 12 единиц)",
       "actions": "Действия",
       "delete": "Удалить",
       "deleteVariant": "Удалить вариант"

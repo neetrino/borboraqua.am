@@ -911,6 +911,8 @@ export interface FeaturedProduct {
   price: number;
   image: string | null;
   inStock: boolean;
+  minimumOrderQuantity?: number;
+  orderQuantityIncrement?: number;
   brand: {
     id: string;
     name: string;

@@ -20,6 +20,8 @@ interface RelatedProduct {
   discountPercent?: number | null;
   image: string | null;
   inStock: boolean;
+  minimumOrderQuantity?: number;
+  orderQuantityIncrement?: number;
   brand?: {
     id: string;
     name: string;
@@ -383,9 +385,11 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
   const handleAddToCart = async (product: FeaturedProduct) => {
     setAddingToCart(prev => new Set(prev).add(product.id));
 
+    const quantity = product.minimumOrderQuantity || 1;
+
     const success = await addToCart({
       product,
-      quantity: 1,
+      quantity,
       isLoggedIn,
       router,
       t: tClient,
@@ -417,6 +421,8 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     price: product.price,
     image: product.image,
     inStock: product.inStock,
+    minimumOrderQuantity: product.minimumOrderQuantity,
+    orderQuantityIncrement: product.orderQuantityIncrement,
     brand: product.brand || null,
   });
 

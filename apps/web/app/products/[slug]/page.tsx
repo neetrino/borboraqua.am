@@ -98,6 +98,8 @@ interface Product {
   productAttributes?: ProductAttribute[];
   productDiscount?: number | null;
   globalDiscount?: number | null;
+  minimumOrderQuantity?: number;
+  orderQuantityIncrement?: number;
 }
 
 
@@ -1319,22 +1321,61 @@ export default function ProductPage({ params }: ProductPageProps) {
   
   const canAddToCart = !isOutOfStock && !isVariationRequired && !hasUnavailableAttributes;
 
+  const minimumOrderQuantity = product?.minimumOrderQuantity || 1;
+  const orderQuantityIncrement = product?.orderQuantityIncrement || 1;
+
+  // Set initial quantity to minimumOrderQuantity when product loads
   useEffect(() => {
-    if (!currentVariant || currentVariant.stock <= 0) { setQuantity(0); return; }
+    if (product && currentVariant && currentVariant.stock > 0) {
+      setQuantity(minimumOrderQuantity);
+    }
+  }, [product?.id, minimumOrderQuantity]);
+
+  useEffect(() => {
+    if (!currentVariant || currentVariant.stock <= 0) { 
+      setQuantity(0); 
+      return; 
+    }
     setQuantity(prev => {
       const currentStock = currentVariant.stock;
-      if (prev > currentStock) return currentStock;
-      if (prev <= 0 && currentStock > 0) return 1;
-      return prev;
+      if (prev > currentStock) {
+        // Round down to nearest valid quantity
+        const rounded = Math.floor(currentStock / orderQuantityIncrement) * orderQuantityIncrement;
+        return Math.max(rounded, minimumOrderQuantity);
+      }
+      if (prev <= 0 && currentStock > 0) {
+        // Set to minimum order quantity
+        return minimumOrderQuantity;
+      }
+      // Ensure quantity is a multiple of increment and at least minimum
+      const rounded = Math.max(
+        Math.floor(prev / orderQuantityIncrement) * orderQuantityIncrement,
+        minimumOrderQuantity
+      );
+      return rounded > currentStock ? Math.max(Math.floor(currentStock / orderQuantityIncrement) * orderQuantityIncrement, minimumOrderQuantity) : rounded;
     });
-  }, [currentVariant?.id, currentVariant?.stock]);
+  }, [currentVariant?.id, currentVariant?.stock, minimumOrderQuantity, orderQuantityIncrement]);
 
   const adjustQuantity = (delta: number) => {
     if (isOutOfStock || isVariationRequired) return;
     setQuantity(prev => {
-      const next = prev + delta;
-      if (next < 1) return currentVariant && currentVariant.stock > 0 ? 1 : 0;
-      return next > maxQuantity ? maxQuantity : next;
+      // Calculate next quantity based on increment
+      const increment = delta > 0 ? orderQuantityIncrement : -orderQuantityIncrement;
+      const next = prev + increment;
+      
+      // Ensure minimum order quantity
+      if (next < minimumOrderQuantity) {
+        return currentVariant && currentVariant.stock > 0 ? minimumOrderQuantity : 0;
+      }
+      
+      // Ensure doesn't exceed max quantity
+      if (next > maxQuantity) {
+        // Round down to nearest valid quantity
+        const rounded = Math.floor(maxQuantity / orderQuantityIncrement) * orderQuantityIncrement;
+        return Math.max(rounded, minimumOrderQuantity);
+      }
+      
+      return next;
     });
   };
 

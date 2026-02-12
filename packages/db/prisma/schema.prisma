@@ -211,10 +211,12 @@ model Product {
   variants          ProductVariant[]
   labels            ProductLabel[]
   productAttributes ProductAttribute[]
-  discountPercent   Int                  @default(0)
-  deletedAt         DateTime?
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
+  discountPercent        Int                  @default(0)
+  minimumOrderQuantity   Int                  @default(1)
+  orderQuantityIncrement Int                  @default(1)
+  deletedAt              DateTime?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
 
   // Relations
   brand      Brand?         @relation(fields: [brandId], references: [id])

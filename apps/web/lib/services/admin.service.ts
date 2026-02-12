@@ -2,7 +2,7 @@
 import { db } from "@white-shop/db";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { findOrCreateAttributeValue } from "../utils/variant-generator";
-import { ensureProductAttributesTable, ensureProductVariantAttributesColumn } from "../utils/db-ensure";
+import { ensureProductAttributesTable, ensureProductVariantAttributesColumn, ensureProductOrderQuantityColumns } from "../utils/db-ensure";
 import {
   processImageUrl,
   smartSplitUrls,
@@ -877,6 +877,9 @@ class AdminService {
     console.log("📦 [ADMIN SERVICE] getProducts called with filters:", filters);
     const startTime = Date.now();
     
+    // Ensure order quantity columns exist before querying
+    await ensureProductOrderQuantityColumns();
+    
     const page = filters.page || 1;
     const limit = filters.limit || 20;
     const skip = (page - 1) * limit;
@@ -1451,6 +1454,8 @@ class AdminService {
     categoryIds?: string[];
     published: boolean;
     featured?: boolean;
+    minimumOrderQuantity?: number;
+    orderQuantityIncrement?: number;
     media?: any[];
     mainProductImage?: string;
     labels?: Array<{
@@ -1483,6 +1488,15 @@ class AdminService {
       });
 
       const result = await db.$transaction(async (tx: any) => {
+        // Set UTF-8 encoding at the start of transaction to prevent encoding errors
+        // This is critical for Armenian and other Unicode characters
+        try {
+          await tx.$executeRaw`SET client_encoding TO 'UTF8'`;
+        } catch (encodingError: any) {
+          // Log but continue - encoding might already be set
+          console.warn('⚠️ [ADMIN SERVICE] Could not set client encoding in transaction:', encodingError?.message);
+        }
+
         // Track used SKUs within this transaction to ensure uniqueness
         const usedSkus = new Set<string>();
         
@@ -1702,6 +1716,8 @@ class AdminService {
             media: finalMedia,
             published: data.published,
             featured: data.featured ?? false,
+            minimumOrderQuantity: data.minimumOrderQuantity ?? 1,
+            orderQuantityIncrement: data.orderQuantityIncrement ?? 1,
             publishedAt: data.published ? new Date() : undefined,
             translations: {
               create: translationsToCreate,
@@ -1896,6 +1912,8 @@ class AdminService {
       categoryIds?: string[];
       published?: boolean;
       featured?: boolean;
+      minimumOrderQuantity?: number;
+      orderQuantityIncrement?: number;
       media?: any[];
       labels?: Array<{
         id?: string;
@@ -1947,6 +1965,15 @@ class AdminService {
 
       // Execute everything in a transaction for atomicity and speed
       const result = await db.$transaction(async (tx: any) => {
+        // Set UTF-8 encoding at the start of transaction to prevent encoding errors
+        // This is critical for Armenian and other Unicode characters
+        try {
+          await tx.$executeRaw`SET client_encoding TO 'UTF8'`;
+        } catch (encodingError: any) {
+          // Log but continue - encoding might already be set
+          console.warn('⚠️ [ADMIN SERVICE] Could not set client encoding in transaction:', encodingError?.message);
+        }
+
         // Collect all variant images to exclude from main media (if media is being updated)
         let allVariantImages: any[] = [];
         if (data.variants !== undefined) {
@@ -1984,11 +2011,24 @@ class AdminService {
         }
         if (data.published !== undefined) {
           updateData.published = data.published;
+        }
+        if (data.featured !== undefined) {
+          updateData.featured = data.featured;
+        }
+        if (data.minimumOrderQuantity !== undefined) {
+          updateData.minimumOrderQuantity = data.minimumOrderQuantity;
+        }
+        if (data.orderQuantityIncrement !== undefined) {
+          updateData.orderQuantityIncrement = data.orderQuantityIncrement;
+        }
+        if (data.published !== undefined && data.published) {
           if (data.published && !existing.publishedAt) {
             updateData.publishedAt = new Date();
           }
         }
         if (data.featured !== undefined) updateData.featured = data.featured;
+        if (data.minimumOrderQuantity !== undefined) updateData.minimumOrderQuantity = data.minimumOrderQuantity;
+        if (data.orderQuantityIncrement !== undefined) updateData.orderQuantityIncrement = data.orderQuantityIncrement;
 
         // 2. Update translations
         if (data.translations && data.translations.length > 0) {

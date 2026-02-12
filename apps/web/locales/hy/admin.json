@@ -431,7 +431,11 @@
       "failedToProcessImage": "Չհաջողվեց մշակել ընտրված պատկերը",
       "enterDefaultPrice": "Մուտքագրել լռելյայն գին բոլոր տարբերակների համար:",
       "enterDefaultStock": "Մուտքագրել լռելյայն պաշար բոլոր տարբերակների համար:",
-      "enterSkuPrefix": "Մուտքագրել SKU նախածանց (կավտոմատ կավելացվի -color-size, եթե կիրառելի է):"
+      "enterSkuPrefix": "Մուտքագրել SKU նախածանց (կավտոմատ կավելացվի -color-size, եթե կիրառելի է):",
+      "minimumOrderQuantity": "Նվազագույն պատվերի քանակ",
+      "minimumOrderQuantityHint": "Հաճախորդը պետք է պատվիրի առնվազն այս քանակով",
+      "orderQuantityIncrement": "Պատվերի քանակի ավելացում (բլոկ)",
+      "orderQuantityIncrementHint": "Պատվերի քանակը կավելանա այս քանակով (օրինակ՝ 12 հատ)"
     }
   },
   "blog": {

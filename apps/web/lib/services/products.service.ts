@@ -2,7 +2,7 @@ import { db } from "@white-shop/db";
 import { Prisma } from "@prisma/client";
 import { adminService } from "./admin.service";
 import { t } from "../i18n";
-import { ensureProductVariantAttributesColumn } from "../utils/db-ensure";
+import { ensureProductVariantAttributesColumn, ensureProductOrderQuantityColumns } from "../utils/db-ensure";
 import {
   processImageUrl,
   smartSplitUrls,
@@ -73,6 +73,9 @@ class ProductsService {
       limit = 24,
       lang = "en",
     } = filters;
+
+    // Ensure order quantity columns exist before querying
+    await ensureProductOrderQuantityColumns();
 
     // Don't use skip here - we'll fetch all products, filter in memory, then paginate
     // This ensures accurate total count for pagination
@@ -384,6 +387,23 @@ class ProductsService {
                 throw attributesError;
               }
             }
+          } else if (retryError?.code === 'P2022' && (retryError?.message?.includes('minimumOrderQuantity') || retryError?.message?.includes('orderQuantityIncrement'))) {
+            // If order quantity columns don't exist, try to create them and retry
+            console.warn('⚠️ [PRODUCTS SERVICE] products order quantity columns not found, attempting to create them...');
+            try {
+              await ensureProductOrderQuantityColumns();
+              // Retry the query after creating the columns
+              products = await db.product.findMany({
+                where,
+                include: baseInclude,
+                // Fetch all products for filtering (no skip - we'll paginate after filtering)
+                take: 10000,
+              });
+              console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (after creating order quantity columns)`);
+            } catch (orderQuantityError: any) {
+              // If still fails, throw the error
+              throw orderQuantityError;
+            }
           } else if (retryError?.code === 'P2022' || retryError?.message?.includes('attribute_values.colors') || retryError?.message?.includes('does not exist')) {
             // If attribute_values.colors column doesn't exist, retry without attributeValue include
             console.warn('⚠️ [PRODUCTS SERVICE] attribute_values.colors column not found, fetching without attributeValue:', retryError.message);
@@ -405,6 +425,49 @@ class ProductsService {
             console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without attributeValue relation)`);
           } else {
             throw retryError;
+          }
+        }
+      } else if (error?.code === 'P2022' && (error?.message?.includes('minimumOrderQuantity') || error?.message?.includes('orderQuantityIncrement'))) {
+        // If order quantity columns don't exist, try to create them and retry
+        console.warn('⚠️ [PRODUCTS SERVICE] products order quantity columns not found, attempting to create them...');
+        try {
+          await ensureProductOrderQuantityColumns();
+          // Retry the query after creating the columns
+          products = await db.product.findMany({
+            where,
+            include: {
+              ...baseInclude,
+              productAttributes: {
+                include: {
+                  attribute: {
+                    include: {
+                      translations: true,
+                      values: {
+                        include: {
+                          translations: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            // Fetch all products for filtering (no skip - we'll paginate after filtering)
+            take: 10000,
+          });
+          console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (after creating order quantity columns)`);
+        } catch (orderQuantityError: any) {
+          // If still fails, try without productAttributes
+          if (orderQuantityError?.code === 'P2021' || orderQuantityError?.message?.includes('product_attributes')) {
+            products = await db.product.findMany({
+              where,
+              include: baseInclude,
+              // Fetch all products for filtering (no skip - we'll paginate after filtering)
+              take: 10000,
+            });
+            console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (after creating order quantity columns, without productAttributes)`);
+          } else {
+            throw orderQuantityError;
           }
         }
       } else if (error?.code === 'P2022' || error?.message?.includes('attribute_values.colors') || error?.message?.includes('does not exist')) {
@@ -765,6 +828,8 @@ class ProductsService {
           return existingLabels;
         })(),
         colors: availableColors, // Add available colors array
+        minimumOrderQuantity: (product as any).minimumOrderQuantity || 1,
+        orderQuantityIncrement: (product as any).orderQuantityIncrement || 1,
       };
     });
 
@@ -1386,6 +1451,8 @@ class ProductsService {
         }) : [],
       globalDiscount: globalDiscount > 0 ? globalDiscount : null,
       productDiscount: productDiscount > 0 ? productDiscount : null,
+      minimumOrderQuantity: product.minimumOrderQuantity || 1,
+      orderQuantityIncrement: product.orderQuantityIncrement || 1,
       seo: {
         title: translation?.seoTitle || translation?.title,
         description: translation?.seoDescription || null,

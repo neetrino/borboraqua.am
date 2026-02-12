@@ -221,6 +221,8 @@ class CartService {
           price: finalPrice,
           originalPrice: originalPrice,
           total: finalPrice * item.quantity,
+          minimumOrderQuantity: (product as any)?.minimumOrderQuantity || 1,
+          orderQuantityIncrement: (product as any)?.orderQuantityIncrement || 1,
         };
     });
 
