@@ -848,7 +848,7 @@ export function ViewAllProductsButton({ router, t, isMobile = false }: ViewAllPr
     return (
       <>
         {/* Mobile View All Products Button */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1708px] w-[241px]">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1400px] w-[241px]">
           <button
             onClick={() => router.push('/products')}
             className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] items-center px-[34px] py-[12px] relative rounded-[9999px] shrink-0 transition-all duration-300 hover:border-[#1ac0fd] hover:bg-[#1ac0fd]/5 hover:shadow-md hover:shadow-[#1ac0fd]/20 hover:scale-105 active:scale-95"
