@@ -1,7 +1,9 @@
 {
   "callToUs": {
     "title": "Call to Us:",
-    "description": "We're available 24/7, 7 days a week."
+    "description": "We're available 24/7, 7 days a week.",
+    "office": "Office:",
+    "delivery": "Delivery:"
   },
   "writeToUs": {
     "title": "Write to Us:",

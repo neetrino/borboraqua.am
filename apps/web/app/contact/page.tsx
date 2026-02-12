@@ -109,9 +109,20 @@ export default function ContactPage() {
                 <h3 className="text-xl font-semibold text-gray-900">{t('contact.callToUs.title')}</h3>
               </div>
               <p className="text-gray-600 mb-2">{t('contact.callToUs.description')}</p>
-              <a href={`tel:${contactData.phone}`} className="text-black font-bold">
-                {contactData.phone}
-              </a>
+              <div className="space-y-2">
+                <div>
+                  <span className="text-gray-600">{t('contact.callToUs.office')} </span>
+                  <a href="tel:0037433000401" className="text-black font-bold hover:text-blue-600 transition-colors">
+                    +374 33 000401
+                  </a>
+                </div>
+                <div>
+                  <span className="text-gray-600">{t('contact.callToUs.delivery')} </span>
+                  <a href="tel:0037441012004" className="text-black font-bold hover:text-blue-600 transition-colors">
+                    +374 41 012004
+                  </a>
+                </div>
+              </div>
             </div>
 
             {/* Write to Us */}

@@ -1,10 +1,10 @@
 {
   "phone": "+374 XX XXX XXX",
-  "email": "info@shop.am",
+  "email": "info@borboraqua.am",
   "address": {
-    "en": "Yerevan, Abovyan 10",
-    "ru": "г. Ереван, ул. Абовяна 10",
-    "am": "Երևան, Աբովյան 10"
+    "en": "1412. Gegharkunik, v. Dzoragyugh, Armenia",
+    "ru": "1412. Гэгаркуник, в. Дзорагюг, Армения",
+    "am": "1412, Գեղարքունիք, գ․ Ձորագյուղ,Հայաստան"
   },
   "workingHours": {
     "en": "Mon-Fri 10:00-19:00",
