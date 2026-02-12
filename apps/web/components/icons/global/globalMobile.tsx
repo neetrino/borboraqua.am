@@ -962,7 +962,7 @@ export function MobileBottomNavigation() {
     >
       <div 
         ref={navRef}
-        className="relative h-[72px] rounded-[999px] shadow-[0_20px_55px_rgba(0,0,0,0.25)] border overflow-hidden w-full"
+        className="relative h-[72px] rounded-[999px] border overflow-hidden w-full"
         style={{
           background: 'linear-gradient(135deg, rgba(55, 105, 205, 0.3), rgba(75, 135, 225, 0.3))',
           backdropFilter: 'blur(40px) saturate(180%)',
@@ -970,6 +970,7 @@ export function MobileBottomNavigation() {
           borderColor: 'rgba(255, 255, 255, 0.5)',
           willChange: 'background, border-color',
           transition: 'none', // Disable CSS transitions, we use RAF for smooth 60fps
+          boxShadow: 'none', // Remove any box shadow
         }}
       >
         <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-1/2 w-full max-w-[320px] sm:max-w-[340px] px-1">
