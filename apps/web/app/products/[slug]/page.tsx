@@ -1384,11 +1384,18 @@ export default function ProductPage({ params }: ProductPageProps) {
   const minimumOrderQuantity = (isVariantInCart ? orderQuantityIncrement : (product?.minimumOrderQuantity || 1));
 
   // Set initial quantity to minimumOrderQuantity when product loads
+  // Բայց մի փոխենք քանակը, եթե այն արդեն վավեր է (cart-ում ավելացումից հետո)
   useEffect(() => {
     if (product && currentVariant && currentVariant.stock > 0) {
-      setQuantity(minimumOrderQuantity);
+      setQuantity(prev => {
+        // Եթե քանակը արդեն վավեր է, չփոխենք այն
+        if (prev >= minimumOrderQuantity && prev % orderQuantityIncrement === 0 && prev <= currentVariant.stock) {
+          return prev;
+        }
+        return minimumOrderQuantity;
+      });
     }
-  }, [product?.id, minimumOrderQuantity]);
+  }, [product?.id, minimumOrderQuantity, orderQuantityIncrement, currentVariant]);
 
   useEffect(() => {
     if (!currentVariant || currentVariant.stock <= 0) { 
@@ -1397,6 +1404,13 @@ export default function ProductPage({ params }: ProductPageProps) {
     }
     setQuantity(prev => {
       const currentStock = currentVariant.stock;
+      
+      // Եթե քանակը արդեն մեծ է կամ հավասար է minimumOrderQuantity-ին և բազմապատիկ է increment-ին,
+      // չփոխենք այն (հատկապես cart-ում ավելացումից հետո)
+      if (prev >= minimumOrderQuantity && prev % orderQuantityIncrement === 0 && prev <= currentStock) {
+        return prev;
+      }
+      
       if (prev > currentStock) {
         // Round down to nearest valid quantity
         const rounded = Math.floor(currentStock / orderQuantityIncrement) * orderQuantityIncrement;
