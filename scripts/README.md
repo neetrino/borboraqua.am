@@ -9,6 +9,7 @@
 | `setup-neon-db.ts`          | Первичная настройка БД Neon   |
 | `test-api-routes.js`        | Проверка API-маршрутов        |
 | `validate-routes.js`        | Валидация роутов              |
+| `server-setup.sh`          | Установка на Linux-сервере (npm install). Из корня: `bash scripts/server-setup.sh` |
 
 Запуск (из корня): `npx tsx scripts/<имя>.ts` или через `package.json` (см. `migrate:mongo-to-postgres`, `create-admin`, `deploy:neon-migrations`, `setup:neon-db`).
 
