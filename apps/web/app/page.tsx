@@ -1570,9 +1570,9 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Hero decorative ball (bulb.svg) — drag to move a little; hover = slight "run away" */}
+      {/* Hero decorative ball (bulb.svg) — drag to move a little */}
       <div
-        className="group/hero-bulb absolute left-1/2 top-[315px] flex size-[606px] -translate-x-1/2 items-center justify-center pointer-events-auto md:top-[315px] sm:top-[252px] cursor-grab active:cursor-grabbing"
+        className="absolute left-1/2 top-[315px] flex size-[606px] -translate-x-1/2 items-center justify-center pointer-events-auto md:top-[315px] sm:top-[252px] cursor-grab active:cursor-grabbing"
         onPointerDown={onHeroBulbPointerDown}
         onPointerMove={onHeroBulbPointerMove}
         onPointerUp={onHeroBulbPointerUp}
@@ -1580,7 +1580,7 @@ export default function HomePage() {
       >
         <div className="figma-float-active size-full flex items-center justify-center">
           <div
-            className="hero-bulb-on-hover size-full flex items-center justify-center transition-transform duration-300 ease-out"
+            className="size-full flex items-center justify-center transition-transform duration-300 ease-out"
             style={heroBulbDrag.x !== 0 || heroBulbDrag.y !== 0 ? { transform: `translate(${heroBulbDrag.x}px, ${heroBulbDrag.y}px)` } : undefined}
           >
             <img

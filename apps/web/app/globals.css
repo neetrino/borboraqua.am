@@ -148,11 +148,6 @@
     animation: figma-float-active 6s ease-in-out infinite;
   }
 
-  /* Hero bulb: on hover "runs away" slightly (minimal, nice) */
-  .group\/hero-bulb:hover .hero-bulb-on-hover {
-    transform: translateY(-48px) translateX(28px);
-  }
-
   /* Out-of-sync active float for all bubbles */
   .figma-float-active-0 { animation: figma-float-active 6s ease-in-out 0s infinite; }
   .figma-float-active-1 { animation: figma-float-active 6s ease-in-out 0.8s infinite; }
