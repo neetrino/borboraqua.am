@@ -873,9 +873,9 @@ export default function HomePage() {
         {/* Mobile Background Gradient */}
         <div className="absolute bg-gradient-to-b blur-[50px] from-[#62b3e8] h-[850px] left-0 right-0 to-[rgba(221,216,216,0.75)] top-0 w-full" />
 
-        {/* Mobile Hero Section Decorative Group */}
-        <div className="absolute inset-[15%_10%_70%_10%] sm:inset-[12%_10%_70%_10%] md:inset-[10%_10%_70%_10%] z-0">
-          <img alt="Decorative Group" className="block max-w-none size-full figma-fade-in" src={imgGroup2105} />
+        {/* Mobile Hero Section Decorative Group — 50% larger */}
+        <div className="absolute inset-[15%_10%_70%_10%] sm:inset-[12%_10%_70%_10%] md:inset-[10%_10%_70%_10%] z-0 overflow-visible flex items-center justify-center">
+          <img alt="Decorative Group" className="block size-full object-contain object-center figma-fade-in scale-150" src={imgGroup2105} />
         </div>
 
         {/* Mobile Decorative Background Images */}
@@ -1535,9 +1535,9 @@ export default function HomePage() {
       {/* Background Gradient */}
       <div className="absolute bg-gradient-to-b blur-[50px] from-[#62b3e8] h-[1075px] left-1/2 to-[rgba(221,216,216,0.75)] top-0 translate-x-[-50%] w-full max-w-[1920px]" />
 
-      {/* Hero Section Decorative Group */}
-      <div className="absolute inset-[4.14%_16.2%_92%_14.64%]">
-        <img alt="Decorative Group" className="block max-w-none size-full figma-fade-in" src={imgGroup2105} />
+      {/* Hero Section Decorative Group — 50% larger */}
+      <div className="absolute inset-[4.14%_16.2%_92%_14.64%] overflow-visible flex items-center justify-center">
+        <img alt="Decorative Group" className="block size-full object-contain object-center figma-fade-in scale-150" src={imgGroup2105} />
 
       </div>
 
@@ -1590,7 +1590,7 @@ export default function HomePage() {
       </div>
 
       {/* Water Wave Graphic */}
-      <div className="absolute h-[527px] left-1/2 top-[1050px] translate-x-[-50%] w-full max-w-[1920px] z-0">
+      <div className="absolute left-0 right-0 h-[527px] top-[1050px] w-full z-0">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <img alt="Water Wave" className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash1} />
         </div>
@@ -1656,7 +1656,7 @@ export default function HomePage() {
       </div>
 
       {/* Featured Products Section */}
-      <div className="absolute h-[1050px] lg:h-[1050px] md:h-[900px] sm:h-[700px] left-1/2 top-[1150px] lg:top-[1150px] md:top-[1000px] sm:top-[800px] translate-x-[-50%] w-full max-w-[1920px] overflow-hidden">
+      <div className="absolute left-0 right-0 h-[1050px] lg:h-[1050px] md:h-[900px] sm:h-[700px] top-[1150px] lg:top-[1150px] md:top-[1000px] sm:top-[800px] w-full overflow-hidden">
         {/* Background Image - Daniel Sianca Flipped */}
         <div
           className="absolute w-full h-full"
@@ -2172,7 +2172,7 @@ export default function HomePage() {
         <img alt="" className="size-[102px] object-contain" src={imgBulb} />
       </div>
 
-      <div className="absolute flex top-[44%] right-[1%] bottom-[50.88%] left-auto items-center justify-center overflow-hidden pointer-events-none">
+      <div className="absolute flex top-[44%] right-[1%] bottom-[50.88%] left-auto items-center justify-center overflow-visible pointer-events-none">
         <img alt="" className="size-[339px] object-contain" src={imgBulb} />
       </div>
 
