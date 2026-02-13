@@ -139,11 +139,9 @@ export async function ensureProductAttributesTable(): Promise<boolean> {
         tableChecked = true;
         tableExists = true;
         return true;
-      } catch (createError: any) {
-        console.error('❌ [DB UTILS] Failed to create product_attributes table:', {
-          message: createError?.message,
-          code: createError?.code,
-        });
+      } catch (createError: unknown) {
+        const err = createError instanceof Error ? createError : new Error(String(createError));
+        console.error('❌ [DB UTILS] Failed to create product_attributes table:', err.message, (createError as { code?: string })?.code ?? '');
         tableChecked = true;
         tableExists = false;
         return false;
@@ -151,10 +149,8 @@ export async function ensureProductAttributesTable(): Promise<boolean> {
     }
     
     // Other errors - log and return false
-    console.error('❌ [DB UTILS] Unexpected error checking product_attributes table:', {
-      message: error?.message,
-      code: error?.code,
-    });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('❌ [DB UTILS] Unexpected error checking product_attributes table:', errMsg, (error as { code?: string })?.code ?? '');
     tableChecked = true;
     tableExists = false;
     return false;
@@ -292,11 +288,9 @@ export async function ensureProductReviewsTable(): Promise<boolean> {
         reviewsTableChecked = true;
         reviewsTableExists = true;
         return true;
-      } catch (createError: any) {
-        console.error('❌ [DB UTILS] Failed to create product_reviews table:', {
-          message: createError?.message,
-          code: createError?.code,
-        });
+      } catch (createError: unknown) {
+        const err = createError instanceof Error ? createError : new Error(String(createError));
+        console.error('❌ [DB UTILS] Failed to create product_reviews table:', err.message, (createError as { code?: string })?.code ?? '');
         reviewsTableChecked = true;
         reviewsTableExists = false;
         return false;
@@ -304,10 +298,8 @@ export async function ensureProductReviewsTable(): Promise<boolean> {
     }
     
     // Other errors - log and return false
-    console.error('❌ [DB UTILS] Unexpected error checking product_reviews table:', {
-      message: error?.message,
-      code: error?.code,
-    });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('❌ [DB UTILS] Unexpected error checking product_reviews table:', errMsg, (error as { code?: string })?.code ?? '');
     reviewsTableChecked = true;
     reviewsTableExists = false;
     return false;
@@ -354,11 +346,9 @@ export async function ensureProductVariantAttributesColumn(): Promise<boolean> {
         attributesColumnChecked = true;
         attributesColumnExists = true;
         return true;
-      } catch (createError: any) {
-        console.error('❌ [DB UTILS] Failed to create product_variants.attributes column:', {
-          message: createError?.message,
-          code: createError?.code,
-        });
+      } catch (createError: unknown) {
+        const err = createError instanceof Error ? createError : new Error(String(createError));
+        console.error('❌ [DB UTILS] Failed to create product_variants.attributes column:', err.message, (createError as { code?: string })?.code ?? '');
         attributesColumnChecked = true;
         attributesColumnExists = false;
         return false;
@@ -366,10 +356,8 @@ export async function ensureProductVariantAttributesColumn(): Promise<boolean> {
     }
     
     // Other errors - log and return false
-    console.error('❌ [DB UTILS] Unexpected error checking product_variants.attributes column:', {
-      message: error?.message,
-      code: error?.code,
-    });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('❌ [DB UTILS] Unexpected error checking product_variants.attributes column:', errMsg, (error as { code?: string })?.code ?? '');
     attributesColumnChecked = true;
     attributesColumnExists = false;
     return false;
@@ -454,11 +442,9 @@ export async function ensureProductOrderQuantityColumns(): Promise<boolean> {
         orderQuantityColumnsChecked = true;
         orderQuantityColumnsExist = true;
         return true;
-      } catch (createError: any) {
-        console.error('❌ [DB UTILS] Failed to create products order quantity columns:', {
-          message: createError?.message,
-          code: createError?.code,
-        });
+      } catch (createError: unknown) {
+        const err = createError instanceof Error ? createError : new Error(String(createError));
+        console.error('❌ [DB UTILS] Failed to create products order quantity columns:', err.message, (createError as { code?: string })?.code ?? '');
         orderQuantityColumnsChecked = true;
         orderQuantityColumnsExist = false;
         return false;
@@ -466,10 +452,8 @@ export async function ensureProductOrderQuantityColumns(): Promise<boolean> {
     }
     
     // Other errors - log and return false
-    console.error('❌ [DB UTILS] Unexpected error checking products order quantity columns:', {
-      message: error?.message,
-      code: error?.code,
-    });
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('❌ [DB UTILS] Unexpected error checking products order quantity columns:', errMsg, (error as { code?: string })?.code ?? '');
     orderQuantityColumnsChecked = true;
     orderQuantityColumnsExist = false;
     return false;

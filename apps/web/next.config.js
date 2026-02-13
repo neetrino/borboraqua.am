@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
 
+// Load root .env so DATABASE_URL and other vars are available (monorepo: app runs from apps/web)
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@shop/ui', '@shop/design-tokens'],
