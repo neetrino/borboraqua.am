@@ -872,9 +872,11 @@ export default function HomePage() {
         {/* Mobile Background Gradient */}
         <div className="absolute bg-gradient-to-b blur-[50px] from-[#62b3e8] h-[850px] left-0 right-0 to-[rgba(221,216,216,0.75)] top-0 w-full" />
 
-        {/* Mobile Hero Section Decorative Group — 50% larger */}
+        {/* Mobile Hero Section Decorative Group — 140% size */}
         <div className="absolute inset-[15%_10%_70%_10%] sm:inset-[12%_10%_70%_10%] md:inset-[10%_10%_70%_10%] z-0 overflow-visible flex items-center justify-center">
-          <img alt="Decorative Group" className="block size-full object-contain object-center figma-fade-in scale-150" src={imgGroup2105} />
+          <div className="absolute left-1/2 top-1/2 w-[140%] h-[140%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+            <img alt="Decorative Group" className="block size-full object-contain object-center figma-fade-in" src={imgGroup2105} />
+          </div>
         </div>
 
         {/* Mobile Decorative Background Images */}
@@ -1531,14 +1533,15 @@ export default function HomePage() {
       {/* Background Gradient */}
       <div className="absolute bg-gradient-to-b blur-[50px] from-[#62b3e8] h-[1075px] left-1/2 to-[rgba(221,216,216,0.75)] top-0 translate-x-[-50%] w-full max-w-[1920px]" />
 
-      {/* Hero Section Decorative Group — 50% larger */}
+      {/* Hero Section Decorative Group — 140% size */}
       <div className="absolute inset-[4.14%_16.2%_92%_14.64%] overflow-visible flex items-center justify-center">
-        <img alt="Decorative Group" className="block size-full object-contain object-center figma-fade-in scale-150" src={imgGroup2105} />
-
+        <div className="absolute left-1/2 top-1/2 w-[140%] h-[140%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+          <img alt="Decorative Group" className="block size-full object-contain object-center figma-fade-in" src={imgGroup2105} />
+        </div>
       </div>
 
       {/* Hero decorative ball (bulb.svg) — centered, no matte/blur, gentle float */}
-      <div className="absolute left-1/2 top-[350px] flex size-[606px] -translate-x-1/2 items-center justify-center pointer-events-none md:top-[350px] sm:top-[280px]">
+      <div className="absolute left-1/2 top-[315px] flex size-[606px] -translate-x-1/2 items-center justify-center pointer-events-none md:top-[315px] sm:top-[252px]">
         <div className="figma-float-active size-full flex items-center justify-center">
           <img
             alt=""
