@@ -136,6 +136,36 @@ export default function HomePage() {
   // State for Trusted By section pagination
   const [trustedByIndex, setTrustedByIndex] = useState(0);
 
+  // Hero bulb drag (grab and move a little)
+  const [heroBulbDrag, setHeroBulbDrag] = useState({ x: 0, y: 0 });
+  const heroBulbDragStart = useRef<{ clientX: number; clientY: number; offsetX: number; offsetY: number } | null>(null);
+  const HERO_BULB_DRAG_MAX = 90;
+
+  const onHeroBulbPointerDown = (e: React.PointerEvent) => {
+    heroBulbDragStart.current = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+      offsetX: heroBulbDrag.x,
+      offsetY: heroBulbDrag.y,
+    };
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+  };
+
+  const onHeroBulbPointerMove = (e: React.PointerEvent) => {
+    const start = heroBulbDragStart.current;
+    if (!start) return;
+    const dx = e.clientX - start.clientX;
+    const dy = e.clientY - start.clientY;
+    const x = Math.max(-HERO_BULB_DRAG_MAX, Math.min(HERO_BULB_DRAG_MAX, start.offsetX + dx));
+    const y = Math.max(-HERO_BULB_DRAG_MAX, Math.min(HERO_BULB_DRAG_MAX, start.offsetY + dy));
+    setHeroBulbDrag({ x, y });
+  };
+
+  const onHeroBulbPointerUp = (e: React.PointerEvent) => {
+    heroBulbDragStart.current = null;
+    (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
+  };
+
   // State for water energy products (kids products)
   const [waterEnergyProducts, setWaterEnergyProducts] = useState<Product[]>([]);
   const [waterEnergyLoading, setWaterEnergyLoading] = useState(true);
@@ -1540,14 +1570,26 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Hero decorative ball (bulb.svg) — centered, no matte/blur, gentle float */}
-      <div className="absolute left-1/2 top-[315px] flex size-[606px] -translate-x-1/2 items-center justify-center pointer-events-none md:top-[315px] sm:top-[252px]">
+      {/* Hero decorative ball (bulb.svg) — drag to move a little; hover = slight "run away" */}
+      <div
+        className="group/hero-bulb absolute left-1/2 top-[315px] flex size-[606px] -translate-x-1/2 items-center justify-center pointer-events-auto md:top-[315px] sm:top-[252px] cursor-grab active:cursor-grabbing"
+        onPointerDown={onHeroBulbPointerDown}
+        onPointerMove={onHeroBulbPointerMove}
+        onPointerUp={onHeroBulbPointerUp}
+        onPointerLeave={onHeroBulbPointerUp}
+      >
         <div className="figma-float-active size-full flex items-center justify-center">
-          <img
-            alt=""
-            className="block h-full w-full max-w-full object-contain"
-            src={imgBulb}
-          />
+          <div
+            className="hero-bulb-on-hover size-full flex items-center justify-center transition-transform duration-300 ease-out"
+            style={heroBulbDrag.x !== 0 || heroBulbDrag.y !== 0 ? { transform: `translate(${heroBulbDrag.x}px, ${heroBulbDrag.y}px)` } : undefined}
+          >
+            <img
+              alt=""
+              className="block h-full w-full max-w-full object-contain select-none pointer-events-none"
+              src={imgBulb}
+              draggable={false}
+            />
+          </div>
         </div>
       </div>
 
