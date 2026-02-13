@@ -403,9 +403,9 @@
   }
 }
 
-/* Shape images color change to #75D2EC */
+/* imgShape.svg — forced color #19C1FE (your specified color) */
 img[src*="imgShape"] {
-  filter: brightness(0) saturate(100%) invert(88%) sepia(55%) saturate(800%) hue-rotate(165deg) brightness(1.15) contrast(1.05);
+  filter: brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(2476%) hue-rotate(166deg) brightness(102%) contrast(101%);
   animation: rotate-360 30s linear infinite;
 }
 
