@@ -1070,19 +1070,19 @@ export function FeaturedProductCard({
     );
   }
 
-  // Full size version for home page
+  // Full size version for home page — bottle extends beyond card, standing effect
   return (
     <div
       key={product.id}
       onClick={() => onProductClick(product)}
-      className="flex flex-col items-center gap-[20px] lg:gap-[20px] md:gap-[24px] sm:gap-[24px] w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2"
+      className="flex flex-col items-center gap-[20px] lg:gap-[20px] md:gap-[24px] sm:gap-[24px] w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2 overflow-visible"
     >
-      {/* Image Container - Uniform size with overflow hidden */}
-      <div className="h-[280px] lg:h-[280px] md:h-[280px] sm:h-[240px] w-full relative product-image-container flex items-center justify-center bg-transparent">
+      {/* Image area: overflow visible so bottle can extend beyond card; bottle stands with shadow */}
+      <div className="h-[200px] lg:h-[200px] md:h-[200px] sm:h-[180px] w-full relative product-image-container product-image-container-home flex items-end justify-center bg-transparent overflow-visible min-h-0">
         {product.image ? (
           <img
             alt={product.title}
-            className="h-full w-full object-contain product-image-hover"
+            className="product-image-bottle-standing w-full max-w-[85%] h-auto object-contain object-bottom"
             src={product.image}
             style={{ backgroundColor: 'transparent' }}
           />

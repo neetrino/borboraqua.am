@@ -1682,8 +1682,8 @@ export default function HomePage() {
 
           
 
-          {/* Products Grid - Uniform Layout */}
-          <div className="absolute h-[390px] lg:h-[390px] md:h-[330px] sm:h-[270px] left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[140px] lg:top-[140px] md:top-[110px] sm:top-[80px] z-[10]">
+          {/* Products Grid - Uniform Layout (lowered so bottles don't cover section header) */}
+          <div className="absolute h-[390px] lg:h-[390px] md:h-[330px] sm:h-[270px] left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[270px] lg:top-[270px] md:top-[240px] sm:top-[195px] z-[10]">
             {productsLoading ? (
               // Loading state - show placeholder with uniform grid
               <div className="flex gap-[32px] lg:gap-[32px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
