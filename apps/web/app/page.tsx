@@ -13,6 +13,7 @@ import { HeaderCartIcon } from '../components/icons/HeaderCartIcon';
 import { LanguageIcon } from '../components/icons/LanguageIcon';
 import { ExitIcon } from '../components/icons/ExitIcon';
 import { Header, Footer, Button, addToCart, FeaturedProductCard, type FeaturedProduct, FeaturedProductsNavigationArrow } from '../components/icons/global/global';
+import { DraggableBulb } from '../components/DraggableBulb';
 
 // Local image paths - Images stored in public/assets/home/
 const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
@@ -135,36 +136,6 @@ export default function HomePage() {
   
   // State for Trusted By section pagination
   const [trustedByIndex, setTrustedByIndex] = useState(0);
-
-  // Hero bulb drag (grab and move a little)
-  const [heroBulbDrag, setHeroBulbDrag] = useState({ x: 0, y: 0 });
-  const heroBulbDragStart = useRef<{ clientX: number; clientY: number; offsetX: number; offsetY: number } | null>(null);
-  const HERO_BULB_DRAG_MAX = 90;
-
-  const onHeroBulbPointerDown = (e: React.PointerEvent) => {
-    heroBulbDragStart.current = {
-      clientX: e.clientX,
-      clientY: e.clientY,
-      offsetX: heroBulbDrag.x,
-      offsetY: heroBulbDrag.y,
-    };
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
-  };
-
-  const onHeroBulbPointerMove = (e: React.PointerEvent) => {
-    const start = heroBulbDragStart.current;
-    if (!start) return;
-    const dx = e.clientX - start.clientX;
-    const dy = e.clientY - start.clientY;
-    const x = Math.max(-HERO_BULB_DRAG_MAX, Math.min(HERO_BULB_DRAG_MAX, start.offsetX + dx));
-    const y = Math.max(-HERO_BULB_DRAG_MAX, Math.min(HERO_BULB_DRAG_MAX, start.offsetY + dy));
-    setHeroBulbDrag({ x, y });
-  };
-
-  const onHeroBulbPointerUp = (e: React.PointerEvent) => {
-    heroBulbDragStart.current = null;
-    (e.target as HTMLElement).releasePointerCapture?.(e.pointerId);
-  };
 
   // State for water energy products (kids products)
   const [waterEnergyProducts, setWaterEnergyProducts] = useState<Product[]>([]);
@@ -965,31 +936,21 @@ export default function HomePage() {
         </div>
 
 
-        {/* Mobile Featured Products — bulb.svg (medium, small, medium), float */}
+        {/* Mobile Featured Products — bulb.svg (medium, small, medium), float + drag */}
         <div className="absolute flex items-center justify-center left-[67.21%] right-[-23.97%] top-[calc(.09%+958px)] bottom-[calc(100%-82.65%)]">
-          <div className="figma-float-active-0 flex-none rotate-[100.79deg] size-[130px]">
-            <img alt="" className="block size-full object-contain" src={imgBulb} />
-          </div>
+          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-0 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} />
         </div>
         <div className="absolute flex items-center justify-center left-[47.67%] right-[4.12%] top-[calc(13.72%+958px)] bottom-[calc(100%-81.17%)]">
-          <div className="figma-float-active-3 flex-none rotate-[100.79deg] size-[50px]">
-            <img alt="" className="block size-full object-contain" src={imgBulb} />
-          </div>
+          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 flex-none rotate-[100.79deg] size-[50px]" maxDrag={50} />
         </div>
         {/* Left decorative bubble near Featured Products - fixed 200px from left on all mobile widths */}
        
 
        
 
-        {/* Mobile Hero — bulb.svg centered, no matte, float */}
+        {/* Mobile Hero — bulb.svg centered, float + drag */}
         <div className="-translate-x-1/2 absolute flex items-center justify-center left-1/2 top-[190px] sm:top-[220px] md:top-[240px] w-full max-w-[440px] z-[2]">
-          <div className="figma-float-active-1 size-[320px] sm:size-[360px] md:size-[400px] flex items-center justify-center">
-            <img
-              alt=""
-              className="size-full object-contain"
-              src={imgBulb}
-            />
-          </div>
+          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-1 size-[320px] sm:size-[360px] md:size-[400px] flex items-center justify-center" maxDrag={110} />
         </div>
 
 
@@ -1065,11 +1026,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Left bulb — after Featured title so it paints on top (same as other bulbs) */}
+        {/* Left bulb — after Featured title, float + drag */}
         <div className="absolute flex items-center justify-center -left-20 right-auto top-[calc(0%+965px)] bottom-auto z-10 max-w-[130px] overflow-visible">
-          <div className="figma-float-active-7 flex-none rotate-[100.79deg] size-[130px]">
-            <img alt="" className="block size-full object-contain" src={imgBulb} />
-          </div>
+          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-7 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} />
         </div>
 
         {/* Mobile Featured Products - 2 products side by side */}
@@ -1571,26 +1530,8 @@ export default function HomePage() {
       </div>
 
       {/* Hero decorative ball (bulb.svg) — drag to move a little */}
-      <div
-        className="absolute left-1/2 top-[315px] flex size-[606px] -translate-x-1/2 items-center justify-center pointer-events-auto md:top-[315px] sm:top-[252px] cursor-grab active:cursor-grabbing"
-        onPointerDown={onHeroBulbPointerDown}
-        onPointerMove={onHeroBulbPointerMove}
-        onPointerUp={onHeroBulbPointerUp}
-        onPointerLeave={onHeroBulbPointerUp}
-      >
-        <div className="figma-float-active size-full flex items-center justify-center">
-          <div
-            className="size-full flex items-center justify-center transition-transform duration-300 ease-out"
-            style={heroBulbDrag.x !== 0 || heroBulbDrag.y !== 0 ? { transform: `translate(${heroBulbDrag.x}px, ${heroBulbDrag.y}px)` } : undefined}
-          >
-            <img
-              alt=""
-              className="block h-full w-full max-w-full object-contain select-none pointer-events-none"
-              src={imgBulb}
-              draggable={false}
-            />
-          </div>
-        </div>
+      <div className="absolute left-1/2 top-[315px] flex size-[606px] -translate-x-1/2 items-center justify-center pointer-events-auto md:top-[315px] sm:top-[252px]">
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active size-full flex items-center justify-center" maxDrag={140} />
       </div>
 
        
@@ -2181,47 +2122,33 @@ export default function HomePage() {
         <img alt="Background Ellipse" className="block max-w-none size-full" src={imgEllipse41} />
       </div>
 
-      {/* Decorative bubbles — bulb.svg (medium/small), no matte, float */}
+      {/* Decorative bubbles — bulb.svg, float + drag */}
       <div className="absolute flex top-[43.44%] right-[71%] bottom-[43.57%] left-0 items-center justify-center overflow-hidden pointer-events-none">
-        <div className="figma-float-active-2 size-[385px] flex items-center justify-center">
-          <img alt="" className="size-full object-contain" src={imgBulb} />
-        </div>
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-2 size-[385px] flex items-center justify-center" maxDrag={110} />
       </div>
 
       <div className="absolute flex items-center justify-center left-[1394px] top-[1190px] size-[300px] pointer-events-none">
-        <div className="figma-float-active-5 size-full flex items-center justify-center">
-          <img alt="" className="block size-full object-contain" src={imgBulb} />
-        </div>
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-5 size-full flex items-center justify-center" maxDrag={95} />
       </div>
 
       <div className="absolute flex items-center justify-center left-[203px] top-[1433px] size-[100px] pointer-events-none">
-        <div className="figma-float-active-9 size-full flex items-center justify-center">
-          <img alt="" className="block size-full object-contain" src={imgBulb} />
-        </div>
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-9 size-full flex items-center justify-center" maxDrag={65} />
       </div>
 
       <div className="absolute flex inset-[22%_0.5%_77.5%_76.61%] items-center justify-center pointer-events-none">
-        <div className="figma-float-active-6 size-[102px] flex items-center justify-center">
-          <img alt="" className="size-full object-contain" src={imgBulb} />
-        </div>
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-6 size-[102px] flex items-center justify-center" maxDrag={65} />
       </div>
 
       <div className="absolute flex top-[44%] right-[1%] bottom-[50.88%] left-auto items-center justify-center overflow-visible pointer-events-none">
-        <div className="figma-float-active-8 size-[339px] flex items-center justify-center">
-          <img alt="" className="size-full object-contain" src={imgBulb} />
-        </div>
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-8 size-[339px] flex items-center justify-center" maxDrag={110} />
       </div>
 
       <div className="absolute flex top-[52%] right-[1%] bottom-[35.23%] left-auto items-center justify-center overflow-hidden pointer-events-none">
-        <div className="figma-float-active-3 size-[228px] flex items-center justify-center">
-          <img alt="" className="size-full object-contain" src={imgBulb} />
-        </div>
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 size-[228px] flex items-center justify-center" maxDrag={95} />
       </div>
 
       <div className="absolute flex top-[1%] right-[75.18%] bottom-[55.65%] left-[-9.5%] items-center justify-center overflow-hidden pointer-events-none">
-        <div className="figma-float-active-0 size-[156px] flex items-center justify-center">
-          <img alt="" className="size-full object-contain" src={imgBulb} />
-        </div>
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-0 size-[156px] flex items-center justify-center" maxDrag={80} />
       </div>
 
       {/* Water Energy Section Main Graphic */}
