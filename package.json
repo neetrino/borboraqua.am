@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "description": "Professional e-commerce platform",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
@@ -12,7 +15,9 @@
     "deploy:neon-migrations": "tsx scripts/deploy-neon-migrations.ts",
     "setup:neon-db": "tsx scripts/setup-neon-db.ts"
   },
-  "dependencies": { "bcryptjs": "^2.4.3" },
+  "dependencies": {
+    "bcryptjs": "^2.4.3"
+  },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "dotenv": "^16.3.1",
@@ -21,5 +26,9 @@
     "eslint": "^9.0.0",
     "prettier": "^3.1.0"
   },
-  "engines": { "node": ">=18.20.0", "npm": ">=10.0.0" }
+  "engines": {
+    "node": ">=18.20.0",
+    "npm": ">=10.0.0"
+  },
+  "packageManager": "npm@10.0.0"
 }
