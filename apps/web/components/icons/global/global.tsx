@@ -195,6 +195,7 @@ const imgCurrencyArrow = "http://localhost:3845/assets/1df18b1c925444bdbdca1d804
 interface HeaderProps {
   router: ReturnType<typeof useRouter>;
   t: (key: string) => string;
+  pathname: string;
   setShowSearchModal: (show: boolean) => void;
   isLoggedIn: boolean;
   isAdmin: boolean;
@@ -208,6 +209,7 @@ interface HeaderProps {
 export function Header({
   router,
   t,
+  pathname,
   setShowSearchModal,
   isLoggedIn,
   isAdmin,
@@ -377,35 +379,35 @@ export function Header({
             <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={imgBorborAguaLogoColorB2024Colored1} />
           </div>
 
-          {/* Navigation Menu */}
+          {/* Navigation Menu - active item highlighted */}
           <div className={`content-stretch flex font-['Inter:Bold',sans-serif] font-bold gap-[60px] lg:gap-[60px] md:gap-[24px] sm:gap-[12px] items-end justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-[#151e21] uppercase whitespace-nowrap sm:hidden md:flex`}>
             <div
               onClick={() => router.push('/')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname === '/' ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.home')}</p>
             </div>
             <div
               onClick={() => router.push('/products')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/products') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.shop')}</p>
             </div>
             <div
               onClick={() => router.push('/about')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/about') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.aboutUs')}</p>
             </div>
             <div
               onClick={() => router.push('/blog')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/blog') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.blog')}</p>
             </div>
             <div
               onClick={() => router.push('/contact')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/contact') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.contactUs')}</p>
             </div>

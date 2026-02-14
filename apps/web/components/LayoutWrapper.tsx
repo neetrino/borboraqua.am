@@ -138,6 +138,8 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       {!showMobileMenu && !showSearchModal && !globalModalOpen && (
         <TopHeaderBar
           router={router}
+          pathname={pathname}
+          t={t}
           setShowSearchModal={setShowSearchModal}
           setShowMobileMenu={setShowMobileMenu}
         />
@@ -174,6 +176,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
           <Header
             router={router}
             t={t}
+            pathname={pathname}
             setShowSearchModal={setShowSearchModal}
             isLoggedIn={isLoggedIn}
             isAdmin={isAdmin}

@@ -569,18 +569,34 @@ const imgVector1 = "/assets/home/1254.svg";
 const imgGroup2148 = "/assets/home/Cart.svg";
 const imgGroup2149 = "/assets/home/imgGroup2149.svg";
 
+/** Pathname to header page title translation key (home.navigation.* or common.navigation.*) */
+function getPageTitleKey(pathname: string): string {
+  if (pathname === '/') return 'home.navigation.home';
+  if (pathname.startsWith('/products')) return 'home.navigation.shop';
+  if (pathname.startsWith('/about')) return 'home.navigation.aboutUs';
+  if (pathname.startsWith('/blog')) return 'home.navigation.blog';
+  if (pathname.startsWith('/contact')) return 'home.navigation.contactUs';
+  if (pathname.startsWith('/profile')) return 'common.navigation.profile';
+  if (pathname.startsWith('/admin')) return 'common.navigation.admin';
+  return 'home.navigation.home';
+}
+
 /**
  * Top Header Bar for all pages (except home page)
- * Contains search, logo, and hamburger menu with white background
+ * Contains search, current page title, and hamburger menu with white background
  */
 interface TopHeaderBarProps {
   router: ReturnType<typeof useRouter>;
+  pathname: string;
+  t: (key: string) => string;
   setShowSearchModal: (show: boolean) => void;
   setShowMobileMenu: (show: boolean) => void;
 }
 
 export function TopHeaderBar({
   router,
+  pathname,
+  t,
   setShowSearchModal,
   setShowMobileMenu,
 }: TopHeaderBarProps) {
@@ -691,8 +707,8 @@ export function TopHeaderBar({
         borderColor: 'rgba(255, 255, 255, 0.5)',
       }}
     >
-      <div className="flex items-center justify-between pl-4 pr-4 py-3 h-[73px] w-full">
-        <div className="flex items-center gap-2">
+      <div className="relative flex items-center justify-between pl-4 pr-4 py-3 h-[73px] w-full">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Hamburger Menu Button */}
           <button
             onClick={() => setShowMobileMenu(true)}
@@ -720,9 +736,16 @@ export function TopHeaderBar({
             </div>
           </button>
         </div>
-        
+
+        {/* Current page title - centered */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+          <span className="text-base font-bold text-gray-900 uppercase tracking-wide">
+            {t(getPageTitleKey(pathname))}
+          </span>
+        </div>
+
         {/* Language & Currency Selector */}
-        <div className="relative z-[200]" ref={langCurrencyMenuRef}>
+        <div className="relative z-[200] flex-shrink-0" ref={langCurrencyMenuRef}>
           <button
             ref={buttonRef}
             onClick={() => setShowLangCurrencyMenu(!showLangCurrencyMenu)}

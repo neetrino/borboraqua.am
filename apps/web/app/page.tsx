@@ -1508,6 +1508,7 @@ export default function HomePage() {
       <Header
         router={router}
         t={t}
+        pathname="/"
         setShowSearchModal={setShowSearchModal}
         isLoggedIn={isLoggedIn}
         isAdmin={isAdmin}
