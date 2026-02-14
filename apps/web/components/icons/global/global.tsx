@@ -1024,14 +1024,14 @@ export function FeaturedProductCard({
       <div
         key={product.id}
         onClick={() => onProductClick(product)}
-        className="flex flex-col items-center gap-[12px] w-full cursor-pointer product-card-hover product-card-compact  z-[11] isolate rounded-[45px] p-2"
+        className="flex flex-col items-center gap-0 w-full cursor-pointer product-card-hover product-card-compact  z-[11] isolate rounded-[45px] p-2"
       >
-        {/* Image Container - Smaller for shop */}
-        <div className="h-[200px] w-full relative product-image-container flex items-center justify-center bg-transparent rounded-lg">
+        {/* Image Container - Same bottom alignment as home page card, -10% overlap */}
+        <div className="h-[300px] w-full relative product-image-container flex items-end justify-center bg-transparent rounded-lg overflow-visible min-h-0 -mb-[10%]">
           {product.image ? (
             <img
               alt={product.title}
-              className="h-full w-full object-contain product-image-hover"
+              className="w-full max-w-[85%] h-auto object-contain object-bottom product-image-hover"
               src={product.image}
               style={{ backgroundColor: 'transparent' }}
             />
@@ -1077,10 +1077,10 @@ export function FeaturedProductCard({
     <div
       key={product.id}
       onClick={() => onProductClick(product)}
-      className="flex flex-col items-center gap-[20px] lg:gap-[20px] md:gap-[24px] sm:gap-[24px] w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2 overflow-visible"
+      className="flex flex-col items-center gap-0 w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2 overflow-visible"
     >
-      {/* Image area: overflow visible so bottle can extend beyond card; bottle stands with shadow */}
-      <div className="h-[200px] lg:h-[200px] md:h-[200px] sm:h-[180px] w-full relative product-image-container product-image-container-home flex items-end justify-center bg-transparent overflow-visible min-h-0">
+      {/* Image area: overflow visible so bottle can extend beyond card; bottle stands with shadow (300/270 = 200/180 * 1.5) */}
+      <div className="h-[300px] lg:h-[300px] md:h-[300px] sm:h-[270px] w-full relative product-image-container product-image-container-home flex items-end justify-center bg-transparent overflow-visible min-h-0">
         {product.image ? (
           <img
             alt={product.title}
