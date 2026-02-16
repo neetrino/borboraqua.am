@@ -24,7 +24,6 @@
     "@white-shop/db": "*",
     "bcryptjs": "^2.4.3",
     "browser-image-compression": "^2.0.2",
-    "ioredis": "^5.3.2",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.555.0",
     "meilisearch": "^0.38.0",
