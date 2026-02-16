@@ -2,7 +2,7 @@ import { db } from "@white-shop/db";
 import { Prisma } from "@prisma/client";
 import { adminService } from "./admin.service";
 import { t } from "../i18n";
-import { ensureProductVariantAttributesColumn, ensureProductOrderQuantityColumns } from "../utils/db-ensure";
+import { ensureProductVariantAttributesColumn } from "../utils/db-ensure";
 import {
   processImageUrl,
   smartSplitUrls,
@@ -74,18 +74,22 @@ class ProductsService {
       lang = "en",
     } = filters;
 
-    // Ensure order quantity columns exist before querying
-    await ensureProductOrderQuantityColumns();
-
-    // Don't use skip here - we'll fetch all products, filter in memory, then paginate
-    // This ensures accurate total count for pagination
     const bestsellerProductIds: string[] = [];
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       published: true,
       deletedAt: null,
     };
+
+    // Price filter at DB level
+    if (minPrice != null || maxPrice != null) {
+      const priceFilter: { gte?: number; lte?: number } = {};
+      if (minPrice != null) priceFilter.gte = minPrice;
+      if (maxPrice != null) priceFilter.lte = maxPrice;
+      const existingAnd = Array.isArray(where.AND) ? where.AND : [];
+      where.AND = [...existingAnd, { variants: { some: { price: priceFilter } } }];
+    }
 
     // Add search filter
     if (search && search.trim()) {
@@ -273,305 +277,51 @@ class ProductsService {
       }
     }
 
-    // Get products
-    console.log('🔍 [PRODUCTS SERVICE] Fetching products with where clause:', JSON.stringify(where, null, 2));
-    
-    // Base include without productAttributes (for backward compatibility)
-    const baseInclude = {
+    const skip = (page - 1) * limit;
+
+    // Minimal include for list: no productAttributes, no variant options/attributeValue
+    const listInclude = {
       translations: true,
-      brand: {
-        include: {
-          translations: true,
-        },
-      },
+      brand: { include: { translations: true } },
       variants: {
-        where: {
-          published: true,
-        },
-        include: {
-          options: {
-            include: {
-              attributeValue: {
-                include: {
-                  attribute: true,
-                  translations: true,
-                },
-              },
-            },
-          },
-        },
+        where: { published: true },
+        select: { price: true, compareAtPrice: true, stock: true },
       },
       labels: true,
-      categories: {
-        include: {
-          translations: true,
-        },
-      },
+      categories: { include: { translations: true } },
     };
 
-    // Try to include productAttributes, but fallback if table doesn't exist
-    // Also handle case when attribute_values.colors column doesn't exist
-    let products;
-    try {
+    let products: ProductWithRelations[];
+    let total: number;
+
+    if (filter === "bestseller" && bestsellerProductIds.length > 0) {
+      total = bestsellerProductIds.length;
+      const pageIds = bestsellerProductIds.slice(skip, skip + limit);
+      if (pageIds.length === 0) {
+        products = [];
+      } else {
+        const whereBestseller = { ...where, id: { in: pageIds } };
+        products = await db.product.findMany({
+          where: whereBestseller,
+          include: listInclude,
+        });
+        const rank = new Map(pageIds.map((id, i) => [id, i]));
+        products.sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
+      }
+    } else {
+      total = await db.product.count({ where });
+      const orderBy =
+        sort === "price"
+          ? ({ variants: { _min: { price: "desc" as const } } } as const)
+          : ({ createdAt: "desc" as const } as const);
       products = await db.product.findMany({
         where,
-        include: {
-          ...baseInclude,
-          productAttributes: {
-            include: {
-              attribute: {
-                include: {
-                  translations: true,
-                  values: {
-                    include: {
-                      translations: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        // Fetch all products for filtering (no skip - we'll paginate after filtering)
-        take: 10000, // Fetch a large batch to ensure we get all products for accurate total count
-      });
-      console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (with productAttributes)`);
-    } catch (error: any) {
-      // If productAttributes table doesn't exist, retry without it
-      if (error?.code === 'P2021' || error?.message?.includes('product_attributes') || error?.message?.includes('does not exist')) {
-        console.warn('⚠️ [PRODUCTS SERVICE] product_attributes table not found, fetching without it:', error.message);
-        try {
-          products = await db.product.findMany({
-            where,
-            include: baseInclude,
-            // Fetch all products for filtering (no skip - we'll paginate after filtering)
-            take: 10000,
-          });
-          console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without productAttributes)`);
-        } catch (retryError: any) {
-          // If product_variants.attributes column doesn't exist, try to create it and retry
-          if (retryError?.message?.includes('product_variants.attributes') || 
-              (retryError?.message?.includes('attributes') && retryError?.message?.includes('does not exist'))) {
-            console.warn('⚠️ [PRODUCTS SERVICE] product_variants.attributes column not found, attempting to create it...');
-            try {
-              await ensureProductVariantAttributesColumn();
-              // Retry the query after creating the column
-              products = await db.product.findMany({
-                where,
-                include: baseInclude,
-                // Fetch all products for filtering (no skip - we'll paginate after filtering)
-                take: 10000,
-              });
-              console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (after creating attributes column)`);
-            } catch (attributesError: any) {
-              // If still fails, try without attributeValue include
-              if (attributesError?.code === 'P2022' || attributesError?.message?.includes('attribute_values.colors') || attributesError?.message?.includes('does not exist')) {
-                console.warn('⚠️ [PRODUCTS SERVICE] attribute_values.colors column not found, fetching without attributeValue:', attributesError.message);
-                const baseIncludeWithoutAttributeValue = {
-                  ...baseInclude,
-                  variants: {
-                    ...baseInclude.variants,
-                    include: {
-                      options: true, // Include options without attributeValue relation
-                    },
-                  },
-                };
-                products = await db.product.findMany({
-                  where,
-                  include: baseIncludeWithoutAttributeValue,
-                  // Fetch all products for filtering (no skip - we'll paginate after filtering)
-                  take: 10000,
-                });
-                console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without attributeValue relation)`);
-              } else {
-                throw attributesError;
-              }
-            }
-          } else if (retryError?.code === 'P2022' && (retryError?.message?.includes('minimumOrderQuantity') || retryError?.message?.includes('orderQuantityIncrement'))) {
-            // If order quantity columns don't exist, try to create them and retry
-            console.warn('⚠️ [PRODUCTS SERVICE] products order quantity columns not found, attempting to create them...');
-            try {
-              await ensureProductOrderQuantityColumns();
-              // Retry the query after creating the columns
-              products = await db.product.findMany({
-                where,
-                include: baseInclude,
-                // Fetch all products for filtering (no skip - we'll paginate after filtering)
-                take: 10000,
-              });
-              console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (after creating order quantity columns)`);
-            } catch (orderQuantityError: any) {
-              // If still fails, throw the error
-              throw orderQuantityError;
-            }
-          } else if (retryError?.code === 'P2022' || retryError?.message?.includes('attribute_values.colors') || retryError?.message?.includes('does not exist')) {
-            // If attribute_values.colors column doesn't exist, retry without attributeValue include
-            console.warn('⚠️ [PRODUCTS SERVICE] attribute_values.colors column not found, fetching without attributeValue:', retryError.message);
-            const baseIncludeWithoutAttributeValue = {
-              ...baseInclude,
-              variants: {
-                ...baseInclude.variants,
-                include: {
-                  options: true, // Include options without attributeValue relation
-                },
-              },
-            };
-            products = await db.product.findMany({
-              where,
-              include: baseIncludeWithoutAttributeValue,
-              // Fetch all products for filtering (no skip - we'll paginate after filtering)
-              take: 10000,
-            });
-            console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without attributeValue relation)`);
-          } else {
-            throw retryError;
-          }
-        }
-      } else if (error?.code === 'P2022' && (error?.message?.includes('minimumOrderQuantity') || error?.message?.includes('orderQuantityIncrement'))) {
-        // If order quantity columns don't exist, try to create them and retry
-        console.warn('⚠️ [PRODUCTS SERVICE] products order quantity columns not found, attempting to create them...');
-        try {
-          await ensureProductOrderQuantityColumns();
-          // Retry the query after creating the columns
-          products = await db.product.findMany({
-            where,
-            include: {
-              ...baseInclude,
-              productAttributes: {
-                include: {
-                  attribute: {
-                    include: {
-                      translations: true,
-                      values: {
-                        include: {
-                          translations: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            // Fetch all products for filtering (no skip - we'll paginate after filtering)
-            take: 10000,
-          });
-          console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (after creating order quantity columns)`);
-        } catch (orderQuantityError: any) {
-          // If still fails, try without productAttributes
-          if (orderQuantityError?.code === 'P2021' || orderQuantityError?.message?.includes('product_attributes')) {
-            products = await db.product.findMany({
-              where,
-              include: baseInclude,
-              // Fetch all products for filtering (no skip - we'll paginate after filtering)
-              take: 10000,
-            });
-            console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (after creating order quantity columns, without productAttributes)`);
-          } else {
-            throw orderQuantityError;
-          }
-        }
-      } else if (error?.code === 'P2022' || error?.message?.includes('attribute_values.colors') || error?.message?.includes('does not exist')) {
-        // If attribute_values.colors column doesn't exist, retry without attributeValue include
-        console.warn('⚠️ [PRODUCTS SERVICE] attribute_values.colors column not found, fetching without attributeValue:', error.message);
-        const baseIncludeWithoutAttributeValue = {
-          ...baseInclude,
-          variants: {
-            ...baseInclude.variants,
-            include: {
-              options: true, // Include options without attributeValue relation
-            },
-          },
-        };
-        try {
-          products = await db.product.findMany({
-              where,
-              include: {
-                ...baseIncludeWithoutAttributeValue,
-                productAttributes: {
-                  include: {
-                    attribute: {
-                      include: {
-                        translations: true,
-                        values: {
-                          include: {
-                            translations: true,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            // Fetch all products for filtering (no skip - we'll paginate after filtering)
-            take: 10000,
-          });
-          console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without attributeValue, with productAttributes)`);
-        } catch (retryError: any) {
-          // If productAttributes also fails, try without it
-          if (retryError?.code === 'P2021' || retryError?.message?.includes('product_attributes')) {
-            products = await db.product.findMany({
-              where,
-              include: baseIncludeWithoutAttributeValue,
-              // Fetch all products for filtering (no skip - we'll paginate after filtering)
-              take: 10000,
-            });
-            console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without attributeValue and productAttributes)`);
-          } else {
-            throw retryError;
-          }
-        }
-      } else {
-        // Re-throw if it's a different error
-        throw error;
-      }
-    }
-
-    // Filter by price, colors, sizes, brand in memory
-    if (minPrice || maxPrice) {
-      const min = minPrice || 0;
-      const max = maxPrice || Infinity;
-      products = products.filter((product: ProductWithRelations) => {
-        const variants = Array.isArray(product.variants) ? product.variants : [];
-        if (variants.length === 0) return false;
-        const prices = variants.map((v: { price: number }) => v.price).filter((p: number | undefined) => p !== undefined);
-        if (prices.length === 0) return false;
-        const minPrice = Math.min(...prices);
-        return minPrice >= min && minPrice <= max;
+        orderBy,
+        skip,
+        take: limit,
+        include: listInclude,
       });
     }
-
-
-    // Sort
-    if (filter === "bestseller" && bestsellerProductIds.length > 0) {
-      const rank = new Map<string, number>();
-      bestsellerProductIds.forEach((id, index) => rank.set(id, index));
-      products.sort((a: ProductWithRelations, b: ProductWithRelations) => {
-        const aRank = rank.get(a.id) ?? Number.MAX_SAFE_INTEGER;
-        const bRank = rank.get(b.id) ?? Number.MAX_SAFE_INTEGER;
-        return aRank - bRank;
-      });
-    } else if (sort === "price") {
-      products.sort((a: ProductWithRelations, b: ProductWithRelations) => {
-        const aVariants = Array.isArray(a.variants) ? a.variants : [];
-        const bVariants = Array.isArray(b.variants) ? b.variants : [];
-        const aPrice = aVariants.length > 0 ? Math.min(...aVariants.map((v: { price: number }) => v.price)) : 0;
-        const bPrice = bVariants.length > 0 ? Math.min(...bVariants.map((v: { price: number }) => v.price)) : 0;
-        return bPrice - aPrice;
-      });
-    } else {
-      products.sort((a: ProductWithRelations, b: ProductWithRelations) => {
-        const aValue = a[sort as keyof typeof a] as Date;
-        const bValue = b[sort as keyof typeof b] as Date;
-        return new Date(bValue).getTime() - new Date(aValue).getTime();
-      });
-    }
-
-    // Calculate total from filtered products (before pagination)
-    const total = products.length;
-    
-    // Apply pagination after filtering
-    const skip = (page - 1) * limit;
-    products = products.slice(skip, skip + limit);
 
     // Get discount settings
     const discountSettings = await db.settings.findMany({

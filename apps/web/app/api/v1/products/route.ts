@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
 import { productsService } from "@/lib/services/products.service";
+
+const PRODUCTS_LIST_CACHE_REVALIDATE = 60;
 
 const isDbUnavailableError = (error: unknown): boolean => {
   if (!error || typeof error !== "object") return false;
@@ -39,8 +42,23 @@ export async function GET(req: NextRequest) {
       lang: searchParams.get("lang") || "en",
     };
 
-    console.log('🔍 [PRODUCTS API] Filters received:', filters);
-    const result = await productsService.findAll(filters);
+    const cacheKey = [
+      "products-list",
+      filters.lang ?? "en",
+      String(filters.page),
+      String(filters.limit),
+      filters.search ?? "",
+      filters.filter ?? "",
+      filters.category ?? "",
+      String(filters.minPrice ?? ""),
+      String(filters.maxPrice ?? ""),
+      filters.sort ?? "createdAt",
+    ];
+    const result = await unstable_cache(
+      () => productsService.findAll(filters),
+      cacheKey,
+      { revalidate: PRODUCTS_LIST_CACHE_REVALIDATE }
+    )();
     console.log('✅ [PRODUCTS API] Result:', {
       dataLength: result.data?.length || 0,
       total: result.meta?.total || 0,

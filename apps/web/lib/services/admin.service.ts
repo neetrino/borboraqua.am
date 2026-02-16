@@ -2,7 +2,7 @@
 import { db } from "@white-shop/db";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { findOrCreateAttributeValue } from "../utils/variant-generator";
-import { ensureProductAttributesTable, ensureProductVariantAttributesColumn, ensureProductOrderQuantityColumns } from "../utils/db-ensure";
+import { ensureProductAttributesTable, ensureProductVariantAttributesColumn } from "../utils/db-ensure";
 import {
   processImageUrl,
   smartSplitUrls,
@@ -876,10 +876,7 @@ class AdminService {
   }) {
     console.log("📦 [ADMIN SERVICE] getProducts called with filters:", filters);
     const startTime = Date.now();
-    
-    // Ensure order quantity columns exist before querying
-    await ensureProductOrderQuantityColumns();
-    
+
     const page = filters.page || 1;
     const limit = filters.limit || 20;
     const skip = (page - 1) * limit;
