@@ -1650,13 +1650,17 @@ export default function ProductPage({ params }: ProductPageProps) {
           
           {/* Right Column - Main Image */}
           <div className="flex-1">
-            <div className="relative aspect-square product-card-glass overflow-hidden group">
+            <div className="relative aspect-square product-card-glass overflow-visible group flex items-center justify-center min-h-0">
             {images.length > 0 ? (
-              <img 
-                src={images[currentImageIndex]} 
-                alt={product.title} 
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
-              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-full h-[115%] flex items-center justify-center">
+                  <img 
+                    src={images[currentImageIndex]} 
+                    alt={product.title} 
+                    className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105" 
+                  />
+                </div>
+              </div>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">{t(language, 'common.messages.noImage')}</div>
             )}
