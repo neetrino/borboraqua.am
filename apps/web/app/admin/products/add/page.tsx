@@ -14,7 +14,7 @@ import {
   smartSplitUrls,
   cleanImageUrls,
   separateMainAndVariantImages,
-  processImageFile,
+  processProductImageFile,
 } from '../../../../lib/utils/image-utils';
 
 interface Brand {
@@ -1612,16 +1612,9 @@ function AddProductPageContent() {
           
           console.log(`📸 [UPLOAD] Processing file ${index + 1}/${files.length}:`, file.name, `(${Math.round(file.size / 1024)}KB)`);
           
-          // Process image with compression, EXIF orientation correction, and resize
-          // Preserve PNG format and transparency - don't force JPEG conversion
-          const base64 = await processImageFile(file, {
-            maxSizeMB: 2,
-            maxWidthOrHeight: 1920,
-            useWebWorker: true,
-            // fileType is not specified - will preserve original format (PNG stays PNG, others become JPEG)
-            initialQuality: 0.8
-          });
-          
+          // Product images: WebP, max 200KB (skip re-encode if already WebP and ≤200KB)
+          const base64 = await processProductImageFile(file);
+
           if (base64 && base64.trim()) {
             console.log(`✅ [UPLOAD] Successfully processed file ${index + 1}/${files.length}:`, file.name);
             return { success: true, base64, index };
@@ -1725,15 +1718,8 @@ function AddProductPageContent() {
         originalSize: `${Math.round(file.size / 1024)}KB`
       });
 
-      // Process image with compression, EXIF orientation correction, and resize
-      // Preserve PNG format and transparency - don't force JPEG conversion
-      const base64 = await processImageFile(file, {
-        maxSizeMB: 2,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-        // fileType is not specified - will preserve original format (PNG stays PNG, others become JPEG)
-        initialQuality: 0.8
-      });
+      // Product images: WebP, max 200KB (skip re-encode if already WebP and ≤200KB)
+      const base64 = await processProductImageFile(file);
 
       // R2 only: variant image must be stored on R2
       const r2Urls = await uploadImagesToR2([base64]);
@@ -1790,15 +1776,8 @@ function AddProductPageContent() {
             originalSize: `${Math.round(file.size / 1024)}KB`
           });
 
-          // Process image with compression, EXIF orientation correction, and resize
-          // Preserve PNG format and transparency - don't force JPEG conversion
-          const base64 = await processImageFile(file, {
-            maxSizeMB: 2,
-            maxWidthOrHeight: 1920,
-            useWebWorker: true,
-            // fileType is not specified - will preserve original format (PNG stays PNG, others become JPEG)
-            initialQuality: 0.8
-          });
+          // Product images: WebP, max 200KB (skip re-encode if already WebP and ≤200KB)
+          const base64 = await processProductImageFile(file);
 
           console.log(`✅ [COLOR IMAGE] Image ${index + 1}/${imageFiles.length} processed, base64 length:`, base64.length);
           return base64;
@@ -3530,6 +3509,7 @@ function AddProductPageContent() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t('admin.products.add.productImages')}
                     <span className="text-xs text-gray-500 ml-2">({t('admin.products.add.uploadMultipleImages')})</span>
+                    <span className="text-xs text-gray-500 block mt-1">{t('admin.products.add.imageFormatHint')}</span>
                   </label>
                   
                   {/* Upload Button */}

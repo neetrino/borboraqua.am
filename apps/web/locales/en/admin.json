@@ -437,6 +437,7 @@
       "failedToProcessImages": "Failed to process selected images",
       "failedToProcessImage": "Failed to process selected image",
       "r2Required": "Product images must be uploaded to R2. Please check R2 configuration and try again.",
+      "imageFormatHint": "Images are converted to WebP, max 200 KB each.",
       "enterDefaultPrice": "Enter default price for all variants:",
       "enterDefaultStock": "Enter default stock for all variants:",
       "enterSkuPrefix": "Enter SKU prefix (will add -color-size if applicable):",

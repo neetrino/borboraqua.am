@@ -4,6 +4,33 @@
 
 import imageCompression from 'browser-image-compression';
 
+/** Product image upload: WebP only, max 200KB */
+export const PRODUCT_IMAGE_MAX_SIZE_MB = 0.2;
+export const PRODUCT_IMAGE_MAX_BYTES = 200 * 1024;
+export const PRODUCT_IMAGE_FORMAT = 'image/webp' as const;
+
+/**
+ * Process image for product upload: WebP, max 200KB.
+ * If file is already WebP and ≤200KB, returns as-is (no re-encode). Otherwise compresses/converts.
+ */
+export async function processProductImageFile(file: File): Promise<string> {
+  if (file.type === 'image/webp' && file.size <= PRODUCT_IMAGE_MAX_BYTES) {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  }
+  return processImageFile(file, {
+    maxSizeMB: PRODUCT_IMAGE_MAX_SIZE_MB,
+    maxWidthOrHeight: 1920,
+    useWebWorker: true,
+    fileType: PRODUCT_IMAGE_FORMAT,
+    initialQuality: 0.8,
+  });
+}
+
 /**
  * Validates if a URL is a valid image URL
  */
