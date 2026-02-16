@@ -60,7 +60,7 @@ const TRUSTED_BY_LOGOS = [
 const img15 = "/assets/home/img15.svg";
 const img16 = "/assets/home/img16.svg";
 const img18 = "/assets/home/img18.svg";
-const imgBulb = "/assets/home/bulb.svg";
+const imgBulb = "/assets/home/bulb.webp";
 // Mobile-specific images from Figma
 const imgBorborAquaProductKids033L2 = "/assets/home/imgBorborAquaProductKids033L2.png";
 const imgSqawdef1 = "/assets/home/imgSqawdef1.png";
