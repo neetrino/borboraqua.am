@@ -27,17 +27,9 @@ const img6 = "/assets/home/img6.png";
 const img17 = "/assets/home/img17.png";
 const imgEllipse41 = "/assets/home/imgEllipse41.svg";
 const imgShape = "/assets/home/imgShape.svg";
-const imgEllipse44 = "/assets/home/imgEllipse44.svg";
-const imgShape1 = "/assets/home/imgShape1.svg";
-const imgShape2 = "/assets/home/imgShape2.svg";
-const imgEllipse42 = "/assets/home/imgEllipse42.svg";
-const imgEllipse43 = "/assets/home/imgEllipse43.svg";
 const imgGroup2105 = "/assets/home/21056.png";
 const img4 = "/assets/home/img4.svg";
 const imgVector4 = "/assets/home/imgVector4.svg";
-const imgVector5 = "/assets/home/imgVector5.svg";
-const imgVector6 = "/assets/home/imgVector6.svg";
-const imgVector7 = "/assets/home/imgVector7.svg";
 const imgVector = "/assets/home/imgVector.svg";
 const imgVector1 = "/assets/home/imgVector1.svg";
 const imgIcon2 = "/assets/home/imgIcon2.svg";
@@ -72,9 +64,6 @@ const imgBulb = "/assets/home/bulb.svg";
 // Mobile-specific images from Figma
 const imgBorborAquaProductKids033L2 = "/assets/home/imgBorborAquaProductKids033L2.png";
 const imgSqawdef1 = "/assets/home/imgSqawdef1.png";
-const imgScreenshot20260114At0835551 = "/assets/home/imgScreenshot20260114At0835551.png";
-const imgScreenshot20260112At1535403 = "/assets/home/imgScreenshot20260112At1535403.png";
-const imgEllipse2 = "/assets/home/imgEllipse2.svg";
 const imgVector2 = "/assets/home/imgVector2.svg";
 const imgVector3 = "/assets/home/imgVector3.svg";
 const imgGroup2148 = "/assets/home/Cart.svg";
@@ -90,7 +79,6 @@ const imgGlass1 = "/assets/home/imgGlass1.svg";
 const imgGlass2 = "/assets/home/imgGlass2.svg";
 const imgIcon = "/assets/home/imgIcon.svg";
 const imgDanielSinocaAancLsb0SU0Unsplash3 = "/assets/home/imgDanielWave.png";
-const imgEllipse45 = "/assets/home/imgEllipse45.svg";
 const imgHomeVector = "/assets/home/Vector.svg";
 
 // Product interface for featured products
@@ -915,7 +903,7 @@ export function HomePageClient({
         {/* Mobile Decorative Ellipses and Shapes */}
         <div className="-translate-x-1/2 absolute h-[311px] left-[calc(50%+303.5px)] top-[2839px] w-[329px]">
           <div className="absolute inset-[-91.64%_-86.63%]">
-            <img alt="" className="block max-w-none size-full" src={imgEllipse45} />
+            <img alt="" className="block max-w-none size-full" src={imgEllipse41} />
           </div>
         </div>
         <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(50%+296.32px)] mix-blend-luminosity size-[537.421px] top-[2691px]">
@@ -929,7 +917,7 @@ export function HomePageClient({
        
         <div className="-translate-x-1/2 absolute h-[777px] left-[calc(50%+397.5px)] top-[1819px] w-[823px]">
           <div className="absolute inset-[-59.85%_-56.5%]">
-            <img alt="" className="block max-w-none size-full" src={imgEllipse42} />
+            <img alt="" className="block max-w-none size-full" src={imgEllipse41} />
           </div>
         </div>
         <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(50%+290.32px)] mix-blend-luminosity size-[537.421px] top-[2031.61px]">
@@ -1367,7 +1355,7 @@ export function HomePageClient({
             <img
               alt=""
               className="absolute h-[149.05%] left-[-49.49%] max-w-none top-[-32.36%] w-[149.49%]"
-              src={imgScreenshot20260114At0835551}
+              src={img5}
             />
           </div>
           <div className="h-[227px] relative shrink-0 w-[calc(50%-4px)] min-w-0">
@@ -1408,7 +1396,7 @@ export function HomePageClient({
             <img
               alt=""
               className="absolute h-[101.64%] left-[-13.07%] max-w-none top-[-1.52%] w-[126.15%]"
-              src={imgScreenshot20260112At1535403}
+              src={img6}
             />
           </div>
         </div>
@@ -1601,19 +1589,19 @@ export function HomePageClient({
 
       <div className="absolute h-[1051px] left-1/2 top-[4100px] translate-x-[-50%] w-[2808px] overflow-hidden "  >
         <div className="absolute inset-0 figma-float">
-          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse44} />
+          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse41} />
         </div>
       </div>
 
       <div className="absolute h-[1124px] left-[calc(50%-1113.5px)] top-[3102px] translate-x-[-50%] w-[1191px] overflow-hidden">
         <div className="absolute inset-0 figma-float">
-          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse42} />
+          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse41} />
         </div>
       </div>
 
       <div className="absolute h-[1124px] left-[calc(50%+986px)] top-[3116px] translate-x-[-50%] w-[1422px] overflow-hidden">
         <div className="absolute inset-0 figma-float">
-          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse43} />
+          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse41} />
         </div>
       </div>
 
@@ -2230,21 +2218,21 @@ export function HomePageClient({
         <div className="absolute flex h-[551.999px] items-center justify-center left-[20px] top-[80px] w-[325px]">
           <div className="flex-none rotate-[-90deg]">
             <div className="h-[285px] relative w-[521.999px]">
-              <img alt="Vector" className="block max-w-none size-full" src={imgVector5} />
+              <img alt="Vector" className="block max-w-none size-full" src={imgVector4} />
             </div>
           </div>
         </div>
         <div className="absolute flex h-[325px] items-center justify-center right-[35px] mix-blend-lighten top-[380px] w-[461px]">
           <div className="flex-none scale-y-[-100%]">
             <div className="h-[285px] relative w-[461px]">
-              <img alt="Vector" className="block max-w-none size-full" src={imgVector6} />
+              <img alt="Vector" className="block max-w-none size-full" src={imgVector4} />
             </div>
           </div>
         </div>
         <div className="absolute flex h-[325px] items-center justify-center left-[0px] mix-blend-lighten top-[380px] w-[526px]">
           <div className="flex-none rotate-[180deg]">
             <div className="h-[285px] relative w-[526px]">
-              <img alt="Vector" className="block max-w-none size-full" src={imgVector7} />
+              <img alt="Vector" className="block max-w-none size-full" src={imgVector4} />
             </div>
           </div>
         </div>

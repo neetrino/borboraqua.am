@@ -563,7 +563,7 @@ export function ProfileMenuDrawer({ tabs, activeTab, onSelect }: ProfileMenuDraw
 }
 
 // Mobile Bottom Navigation Images
-const imgEllipse2 = "/assets/home/imgEllipse2.svg";
+const imgEllipse41 = "/assets/home/imgEllipse41.svg";
 const imgHomeVector = "/assets/home/Vector1.svg";
 const imgVector1 = "/assets/home/1254.svg";
 const imgGroup2148 = "/assets/home/Cart.svg";
@@ -1005,7 +1005,7 @@ export function MobileBottomNavigation() {
             >
               {activeIndex === 0 && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse2} />
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
@@ -1024,7 +1024,7 @@ export function MobileBottomNavigation() {
             >
               {activeIndex === 1 && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse2} />
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
@@ -1043,7 +1043,7 @@ export function MobileBottomNavigation() {
             >
               {activeIndex === 2 && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse2} />
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
@@ -1068,7 +1068,7 @@ export function MobileBottomNavigation() {
             >
               {activeIndex === 3 && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse2} />
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
