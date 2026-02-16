@@ -277,7 +277,7 @@ export function MobileMenu({
             e.currentTarget.style.background = 'transparent';
           }}
         >
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -303,30 +303,48 @@ export function MobileMenu({
         <nav className="flex flex-col gap-6">
           <button
             onClick={() => {
-              router.push('/about');
+              router.push('/');
               setShowMobileMenu(false);
             }}
-            className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            {t('home.navigation.aboutUs')}
+            HOME
           </button>
           <button
             onClick={() => {
-              router.push('/contact');
+              router.push('/products');
               setShowMobileMenu(false);
             }}
-            className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            {t('home.navigation.contactUs')}
+            SHOP
+          </button>
+          <button
+            onClick={() => {
+              router.push('/about');
+              setShowMobileMenu(false);
+            }}
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
+          >
+            ABOUT US
           </button>
           <button
             onClick={() => {
               router.push('/blog');
               setShowMobileMenu(false);
             }}
-            className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            {t('home.navigation.blog')}
+            BLOG
+          </button>
+          <button
+            onClick={() => {
+              router.push('/contact');
+              setShowMobileMenu(false);
+            }}
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
+          >
+            CONTACT
           </button>
           <button
             onClick={() => {
@@ -337,9 +355,9 @@ export function MobileMenu({
               }
               setShowMobileMenu(false);
             }}
-            className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            {t('common.navigation.logout').toUpperCase()}
+            {isLoggedIn ? 'LOGOUT' : 'LOG IN'}
           </button>
         </nav>
       </div>
@@ -569,18 +587,6 @@ const imgVector1 = "/assets/home/1254.svg";
 const imgGroup2148 = "/assets/home/Cart.svg";
 const imgGroup2149 = "/assets/home/imgGroup2149.svg";
 
-/** Pathname to header page title translation key (home.navigation.* or common.navigation.*) */
-function getPageTitleKey(pathname: string): string {
-  if (pathname === '/') return 'home.navigation.home';
-  if (pathname.startsWith('/products')) return 'home.navigation.shop';
-  if (pathname.startsWith('/about')) return 'home.navigation.aboutUs';
-  if (pathname.startsWith('/blog')) return 'home.navigation.blog';
-  if (pathname.startsWith('/contact')) return 'home.navigation.contactUs';
-  if (pathname.startsWith('/profile')) return 'common.navigation.profile';
-  if (pathname.startsWith('/admin')) return 'common.navigation.admin';
-  return 'home.navigation.home';
-}
-
 /**
  * Top Header Bar for all pages (except home page)
  * Contains search, current page title, and hamburger menu with white background
@@ -735,13 +741,6 @@ export function TopHeaderBar({
               </div>
             </div>
           </button>
-        </div>
-
-        {/* Current page title - centered */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-          <span className="text-base font-bold text-gray-900 uppercase tracking-wide">
-            {t(getPageTitleKey(pathname))}
-          </span>
         </div>
 
         {/* Language & Currency Selector */}

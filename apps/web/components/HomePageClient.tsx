@@ -1,17 +1,13 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '../lib/api-client';
 import { formatPrice, getStoredCurrency, setStoredCurrency, type CurrencyCode } from '../lib/currency';
 import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } from '../lib/language';
 import { useAuth } from '../lib/auth/AuthContext';
 import { useTranslation } from '../lib/i18n-client';
-import { CartIcon } from '../components/icons/CartIcon';
-import { SearchIcon } from '../components/icons/SearchIcon';
-import { HeaderCartIcon } from '../components/icons/HeaderCartIcon';
-import { LanguageIcon } from '../components/icons/LanguageIcon';
-import { ExitIcon } from '../components/icons/ExitIcon';
+
 import { Header, Footer, Button, addToCart, FeaturedProductCard, type FeaturedProduct, FeaturedProductsNavigationArrow } from '../components/icons/global/global';
 import { DraggableBulb } from '../components/DraggableBulb';
 
@@ -26,21 +22,12 @@ const img5 = "/assets/home/banner/img5.webp";
 const img6 = "/assets/home/banner/img6.webp";
 const img17 = "/assets/home/banner/img17.webp";
 const imgEllipse41 = "/assets/home/imgEllipse41.svg";
-const imgShape = "/assets/home/imgShape.svg";
+const imgShape = "/assets/home/imgShape3.svg";
 const imgGroup2105 = "/assets/home/21056.png";
 const img4 = "/assets/home/img4.svg";
 const imgVector4 = "/assets/home/imgVector4.svg";
 const imgVector = "/assets/home/imgVector.svg";
-const imgVector1 = "/assets/home/imgVector1.svg";
-const imgIcon2 = "/assets/home/imgIcon2.svg";
-const imgSvg = "/assets/home/imgSvg.svg";
-const imgSvg1 = "/assets/home/imgSvg1.svg";
-const imgGroup = "/assets/home/imgGroup.svg";
-const imgLink = "/assets/home/imgLink.svg";
-const imgGroup2122 = "/assets/home/imgGroup2122.svg";
-const imgGroup2121 = "/assets/home/imgGroup2121.svg";
-const imgGroup2124 = "/assets/home/imgGroup2124.svg";
-const imgGroup2123 = "/assets/home/imgGroup2123.svg";
+
 const img7 = "/assets/home/img7.svg";
 const img8 = "/assets/home/img8.svg";
 const img9 = "/assets/home/img9.svg";
@@ -48,7 +35,7 @@ const img10 = "/assets/home/img10.svg";
 const img11 = "/assets/home/img11.svg";
 const img12 = "/assets/home/img12.svg";
 const img13 = "/assets/home/img13.svg";
-const img13Decorative = "/assets/home/img13Decorative.png";
+
 const img14 = "/assets/home/img14.svg";
 
 // Shared configuration for "Trusted By" logos (used on both desktop and mobile)
@@ -62,24 +49,14 @@ const img16 = "/assets/home/img16.svg";
 const img18 = "/assets/home/img18.svg";
 const imgBulb = "/assets/home/bulb.webp";
 // Mobile-specific images from Figma
-const imgBorborAquaProductKids033L2 = "/assets/home/imgBorborAquaProductKids033L2.png";
-const imgSqawdef1 = "/assets/home/imgSqawdef1.png";
+
 const imgVector2 = "/assets/home/imgVector2.svg";
 const imgVector3 = "/assets/home/imgVector3.svg";
-const imgGroup2148 = "/assets/home/Cart.svg";
-const imgGroup2149 = "/assets/home/imgGroup2149.svg";
-const imgVector8 = "/assets/home/imgVector8.svg";
-const imgGlass3 = "/assets/home/imgGlass3.svg";
-const imgGlass4 = "/assets/home/imgGlass4.svg";
-const imgBg = "/assets/home/imgBg.svg";
-const imgGlass = "/assets/home/imgGlass.svg";
-const imgTop = "/assets/home/imgTop.svg";
-const imgTop1 = "/assets/home/imgTop1.svg";
-const imgGlass1 = "/assets/home/imgGlass1.svg";
-const imgGlass2 = "/assets/home/imgGlass2.svg";
-const imgIcon = "/assets/home/imgIcon.svg";
+
+
+
 const imgDanielSinocaAancLsb0SU0Unsplash3 = "/assets/home/banner/imgDanielWave.webp";
-const imgHomeVector = "/assets/home/Vector.svg";
+
 
 // Product interface for featured products
 interface Product {
@@ -113,13 +90,11 @@ interface ProductsResponse {
 export interface HomePageClientProps {
   serverDataProvided?: boolean;
   initialFeaturedProducts?: Product[];
-  initialWaterEnergyProducts?: Product[];
 }
 
 export function HomePageClient({
   serverDataProvided = false,
   initialFeaturedProducts = [],
-  initialWaterEnergyProducts = [],
 }: HomePageClientProps = {}) {
   const router = useRouter();
   const { isLoggedIn, logout, isAdmin } = useAuth();
@@ -132,13 +107,9 @@ export function HomePageClient({
   const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set());
   const [carouselIndex, setCarouselIndex] = useState(0);
   
+
   // State for Trusted By section pagination
   const [trustedByIndex, setTrustedByIndex] = useState(0);
-
-  // State for water energy products (kids products) (use server data when provided)
-  const [waterEnergyProducts, setWaterEnergyProducts] = useState<Product[]>(initialWaterEnergyProducts);
-  const [waterEnergyLoading, setWaterEnergyLoading] = useState(!serverDataProvided);
-  const [waterEnergyCarouselIndex, setWaterEnergyCarouselIndex] = useState(0);
 
   // Removed scaling logic - using Tailwind responsive classes instead
   // This prevents zoom issues and conflicts with responsive design
@@ -230,133 +201,6 @@ export function HomePageClient({
 
     fetchFeaturedProducts();
   }, [serverDataProvided]);
-
-  // Fetch water energy products (kids products) (skip when server already provided data)
-  useEffect(() => {
-    if (serverDataProvided) return;
-    const fetchWaterEnergyProducts = async () => {
-      try {
-        setWaterEnergyLoading(true);
-        console.log('💧 [HOMEPAGE] Fetching water energy (kids) products...');
-
-        const language = getStoredLanguage();
-        
-        // Strategy 1: Try to search for "kids" products first
-        let params: Record<string, string> = {
-          page: '1',
-          limit: '10',
-          lang: language,
-          search: 'kids',
-        };
-
-        let response = await apiClient.get<ProductsResponse>('/api/v1/products', {
-          params,
-        });
-
-        console.log('💧 [HOMEPAGE] Kids search response:', {
-          hasData: !!response.data,
-          dataLength: response.data?.length || 0,
-          dataType: Array.isArray(response.data) ? 'array' : typeof response.data,
-          fullResponse: response
-        });
-
-        // Check if response.data exists and is an array
-        if (!response.data || !Array.isArray(response.data)) {
-          console.warn('⚠️ [HOMEPAGE] Invalid response structure:', response);
-          response = { data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } } as ProductsResponse;
-        }
-
-        console.log(`💧 [HOMEPAGE] Kids search result: ${response.data.length} products`);
-
-        // Strategy 2: If no kids products found, try featured products
-        if (response.data.length === 0) {
-          console.log('⚠️ [HOMEPAGE] No kids products found, trying featured products...');
-          params = {
-            page: '1',
-            limit: '10',
-            lang: language,
-            filter: 'featured',
-          };
-          response = await apiClient.get<ProductsResponse>('/api/v1/products', {
-            params,
-          });
-          
-          // Validate response structure
-          if (!response.data || !Array.isArray(response.data)) {
-            console.warn('⚠️ [HOMEPAGE] Invalid featured response structure:', response);
-            response = { data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } } as ProductsResponse;
-          }
-          
-          console.log(`💧 [HOMEPAGE] Featured products result: ${response.data.length} products`);
-        }
-
-        // Strategy 3: If still no products, get any products
-        if (response.data.length === 0) {
-          console.log('⚠️ [HOMEPAGE] No featured products found, fetching any products...');
-          params = {
-            page: '1',
-            limit: '10',
-            lang: language,
-          };
-          response = await apiClient.get<ProductsResponse>('/api/v1/products', {
-            params,
-          });
-          
-          // Validate response structure
-          if (!response.data || !Array.isArray(response.data)) {
-            console.warn('⚠️ [HOMEPAGE] Invalid any products response structure:', response);
-            response = { data: [], meta: { total: 0, page: 1, limit: 10, totalPages: 0 } } as ProductsResponse;
-          }
-          
-          console.log(`💧 [HOMEPAGE] Any products result: ${response.data.length} products`);
-        }
-
-        if (response.data && response.data.length > 0) {
-          const products = response.data.slice(0, 10);
-          setWaterEnergyProducts(products);
-          console.log(`✅ [HOMEPAGE] Loaded ${products.length} water energy products:`, products.map(p => p.title));
-        } else {
-          console.warn('⚠️ [HOMEPAGE] No products available for water energy section, will use featured products if available');
-          // Don't set empty array yet, wait for featured products to load
-          // This will be handled by a separate useEffect that watches featuredProducts
-        }
-      } catch (err: any) {
-        console.error('❌ [HOMEPAGE] Error fetching water energy products:', err);
-        // Try to get any products as last resort
-        try {
-          const language = getStoredLanguage();
-          const fallbackResponse = await apiClient.get<ProductsResponse>('/api/v1/products', {
-            params: {
-              page: '1',
-              limit: '10',
-              lang: language,
-            },
-          });
-          if (fallbackResponse.data && fallbackResponse.data.length > 0) {
-            setWaterEnergyProducts(fallbackResponse.data.slice(0, 10));
-            console.log('✅ [HOMEPAGE] Fallback: Loaded products after error');
-          } else {
-            setWaterEnergyProducts([]);
-          }
-        } catch (fallbackErr) {
-          console.error('❌ [HOMEPAGE] Fallback also failed:', fallbackErr);
-          setWaterEnergyProducts([]);
-        }
-      } finally {
-        setWaterEnergyLoading(false);
-      }
-    };
-
-    fetchWaterEnergyProducts();
-  }, [serverDataProvided]);
-
-  // Fallback: Use featured products if water energy products are not available
-  useEffect(() => {
-    if (!waterEnergyLoading && waterEnergyProducts.length === 0 && featuredProducts.length > 0) {
-      console.log('💧 [HOMEPAGE] Using featured products as fallback for water energy section');
-      setWaterEnergyProducts(featuredProducts.slice(0, 10));
-    }
-  }, [waterEnergyLoading, waterEnergyProducts.length, featuredProducts]);
 
   // Handle click outside for search modal
   useEffect(() => {
@@ -520,12 +364,12 @@ export function HomePageClient({
       // Move to previous mode (2 products back for mobile, 3 for desktop)
       // Use matchMedia for accurate responsive detection even with zoom
       const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches;
-      const step = isMobile ? 2 : 3;
+      const step = isMobile ? 4 : 3;
       const newIndex = prevIndex - step;
       // If we go below 0, loop to the last valid index
       if (newIndex < 0) {
         const maxIndex = isMobile 
-          ? Math.max(0, Math.floor((featuredProducts.length - 2) / 2) * 2) 
+          ? Math.max(0, Math.floor((featuredProducts.length - 4) / 4) * 4) 
           : Math.max(0, Math.floor((featuredProducts.length - 3) / 3) * 3);
         return maxIndex;
       }
@@ -564,14 +408,14 @@ export function HomePageClient({
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      // Move to next mode (2 products forward for mobile, 3 for desktop)
+      // Move to next mode (4 products forward for mobile, 3 for desktop)
       // Use matchMedia for accurate responsive detection even with zoom
       const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches;
-      const step = isMobile ? 2 : 3;
+      const step = isMobile ? 4 : 3;
       const newIndex = prevIndex + step;
       // If we exceed the max, loop back to start (0)
       const maxIndex = isMobile 
-        ? Math.max(0, Math.floor((featuredProducts.length - 2) / 2) * 2) 
+        ? Math.max(0, Math.floor((featuredProducts.length - 4) / 4) * 4) 
         : Math.max(0, Math.floor((featuredProducts.length - 3) / 3) * 3);
       if (newIndex > maxIndex) {
         return 0; // First mode
@@ -763,7 +607,7 @@ export function HomePageClient({
                   e.currentTarget.style.background = 'transparent';
                 }}
               >
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -789,30 +633,48 @@ export function HomePageClient({
               <nav className="flex flex-col gap-6">
                 <button
                   onClick={() => {
-                    router.push('/about');
+                    router.push('/');
                     setShowMobileMenu(false);
                   }}
-                  className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+                  className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
                 >
-                  {t('home.navigation.aboutUs')}
+                  HOME
                 </button>
                 <button
                   onClick={() => {
-                    router.push('/contact');
+                    router.push('/products');
                     setShowMobileMenu(false);
                   }}
-                  className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+                  className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
                 >
-                  {t('home.navigation.contactUs')}
+                  SHOP
+                </button>
+                <button
+                  onClick={() => {
+                    router.push('/about');
+                    setShowMobileMenu(false);
+                  }}
+                  className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
+                >
+                  ABOUT US
                 </button>
                 <button
                   onClick={() => {
                     router.push('/blog');
                     setShowMobileMenu(false);
                   }}
-                  className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+                  className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
                 >
-                  {t('home.navigation.blog')}
+                  BLOG
+                </button>
+                <button
+                  onClick={() => {
+                    router.push('/contact');
+                    setShowMobileMenu(false);
+                  }}
+                  className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
+                >
+                  CONTACT
                 </button>
                 <button
                   onClick={() => {
@@ -823,9 +685,9 @@ export function HomePageClient({
                     }
                     setShowMobileMenu(false);
                   }}
-                  className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+                  className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
                 >
-                  {t('common.navigation.logout').toUpperCase()}
+                  {isLoggedIn ? 'LOGOUT' : 'LOG IN'}
                 </button>
               </nav>
             </div>
@@ -872,11 +734,11 @@ export function HomePageClient({
         )}
 
         {/* Mobile Background Gradient */}
-        <div className="absolute bg-gradient-to-b blur-[50px] from-[#62b3e8] h-[850px] left-0 right-0 to-[rgba(221,216,216,0.75)] top-0 w-full" />
+       <div className="absolute bg-gradient-to-b blur-[50px] from-[#62b3e8] h-[850px] left-0 right-0 to-[rgba(221,216,216,0.75)] top-0 w-full" />
 
-        {/* Mobile Hero Section Decorative Group — 140% size */}
+        {/* Mobile Hero Section Decorative Group — 110% size */}
         <div className="absolute inset-[15%_10%_70%_10%] sm:inset-[12%_10%_70%_10%] md:inset-[10%_10%_70%_10%] z-0 overflow-visible flex items-center justify-center">
-          <div className="absolute left-1/2 top-1/2 w-[140%] h-[140%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+          <div className="absolute left-1/2 top-1/2 w-[110%] h-[110%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
             <img alt="Decorative Group" className="block size-full object-contain object-center figma-fade-in" src={imgGroup2105} />
           </div>
         </div>
@@ -903,12 +765,12 @@ export function HomePageClient({
         {/* Mobile Footer Background Images - Removed */}
 
         {/* Mobile Decorative Ellipses and Shapes */}
-        <div className="-translate-x-1/2 absolute h-[311px] left-[calc(50%+303.5px)] top-[2839px] w-[329px]">
+        <div className="-translate-x-1/2 absolute h-[311px] left-[calc(50%+303.5px)] top-[2200px] w-[329px]">
           <div className="absolute inset-[-91.64%_-86.63%]">
             <img alt="" className="block max-w-none size-full" src={imgEllipse41} />
           </div>
         </div>
-        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(50%+296.32px)] mix-blend-luminosity size-[537.421px] top-[2691px]">
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(20%+296.32px)] mix-blend-luminosity size-[537.421px] top-[2350px]">
           <div className="flex-none rotate-[55.86deg]">
             <div className="relative size-[386.94px]">
               <img alt="" className="block max-w-none size-full" src={imgShape} />
@@ -916,21 +778,24 @@ export function HomePageClient({
           </div>
         </div>
       
-       
-        <div className="-translate-x-1/2 absolute h-[777px] left-[calc(50%+397.5px)] top-[1819px] w-[823px]">
-          <div className="absolute inset-[-59.85%_-56.5%]">
-            <img alt="" className="block max-w-none size-full" src={imgEllipse41} />
+        
+          <div className="-translate-x-1/2 absolute h-[777px] left-[calc(50%+397.5px)] top-[1200px] w-[823px]">
+            <div className="absolute inset-[-59.85%_-56.5%]">
+              <img alt="" className="block max-w-none size-full" src={imgEllipse41} />
+            </div>
           </div>
-        </div>
-        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(50%+290.32px)] mix-blend-luminosity size-[537.421px] top-[2031.61px]">
-          <div className="flex-none rotate-[55.86deg]">
-            <div className="relative size-[386.94px]">
+      
+        
+        {/* Third Mobile Shape */}
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(50%-200px)] mix-blend-luminosity size-[400px] top-[1580px]">
+          <div className="flex-none rotate-[-120deg]">
+            <div className="relative size-[300px]">
               <img alt="" className="block max-w-none size-full" src={imgShape} />
             </div>
           </div>
         </div>
         
-        <div className="-translate-x-1/2 absolute h-[438px] left-[calc(50%-302px)] top-[1251px] w-[464px]">
+        <div className="-translate-x-1/2 absolute h-[438px] left-[calc(50%-302px)] top-[650px] w-[464px]">
           <div className="absolute inset-[-83.33%_-78.66%]">
             <img alt="" className="block max-w-none size-full" src={imgEllipse41} />
           </div>
@@ -938,12 +803,12 @@ export function HomePageClient({
 
 
         {/* Mobile Featured Products — bulb.svg (medium, small, medium), float + drag */}
-        <div className="absolute flex items-center justify-center left-[67.21%] right-[-23.97%] top-[calc(.09%+958px)] bottom-[calc(100%-82.65%)]">
-          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-0 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} />
-        </div>
-        <div className="absolute flex items-center justify-center left-[47.67%] right-[4.12%] top-[calc(13.72%+958px)] bottom-[calc(100%-81.17%)]">
-          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 flex-none rotate-[100.79deg] size-[50px]" maxDrag={50} />
-        </div>
+          <div className="absolute flex items-center justify-center left-[67.21%] right-[-23.97%] top-[calc(.09%+958px)] bottom-[calc(100%-82.65%)]">
+            <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-0 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} />
+          </div>
+          <div className="absolute flex items-center justify-center left-[47.67%] right-[4.12%] top-[calc(13.72%+958px)] bottom-[calc(100%-81.17%)]">
+            <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 flex-none rotate-[100.79deg] size-[50px]" maxDrag={50} />
+          </div>
         {/* Left decorative bubble near Featured Products - fixed 200px from left on all mobile widths */}
        
 
@@ -1032,11 +897,11 @@ export function HomePageClient({
           <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-7 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} />
         </div>
 
-        {/* Mobile Featured Products - 2 products side by side */}
+        {/* Mobile Featured Products - 4 products in 2x2 grid */}
         {featuredProducts.length > 0 && (() => {
-          const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 2);
+          const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 4);
           return (
-            <div className="-translate-x-1/2 absolute content-stretch flex gap-[16px] items-center justify-center left-1/2 top-[1088px] w-full max-w-[400px] px-4">
+            <div className="-translate-x-1/2 absolute content-stretch grid grid-cols-2 gap-[16px] items-center justify-center left-1/2 top-[1088px] w-full max-w-[400px] px-4">
               {visibleProducts.map((product) => (
                 <FeaturedProductCard
                   key={product.id}
@@ -1055,55 +920,8 @@ export function HomePageClient({
             </div>
           );
         })()}
-
-        {/* Mobile Carousel Navigation - Only show if 3 or more products */}
-        {featuredProducts.length >= 3 && (
-          <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-between left-1/2 top-[1180px] w-full max-w-[500px] px-4">
-            <FeaturedProductsNavigationArrow
-              direction="prev"
-              onClick={handlePreviousProducts}
-              isMobile={true}
-              className="bg-[#00d1ff]/90"
-              ariaLabel={t('home.trustedBy.previousProducts')}
-            />
-            <FeaturedProductsNavigationArrow
-              direction="next"
-              onClick={handleNextProducts}
-              isMobile={true}
-              className="bg-[#00d1ff]/90"
-              ariaLabel={t('home.trustedBy.nextProducts')}
-            />
-          </div>
-        )}
-
-        {/* Mobile Pagination Dots (interactive, synced with featured products carousel) - 2 products per page */}
-        {featuredProducts.length > 2 && (() => {
-          const totalPages = Math.ceil(featuredProducts.length / 2);
-          const currentPage = Math.floor(carouselIndex / 2);
-          return (
-            <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[1420px]">
-              {Array.from({ length: totalPages }).map((_, index) => {
-                const pageIndex = index * 2;
-                return (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setCarouselIndex(pageIndex)}
-                    className={`rounded-full transition-all duration-300 ${
-                      carouselIndex === pageIndex || (carouselIndex >= pageIndex && carouselIndex < pageIndex + 2)
-                        ? 'bg-[#00d1ff] h-[8px] w-[20px]'
-                        : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
-                    }`}
-                    aria-label={t(`home.trustedBy.showFeaturedProductsPage${index + 1}`)}
-                  />
-                );
-              })}
-            </div>
-          );
-        })()}
-
         {/* Mobile View All Products Button */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1500px] w-[241px]">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1750px] w-[241px]">
           <button
             onClick={() => router.push('/products')}
             className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] items-center px-[34px] py-[12px] relative rounded-[9999px] shrink-0 transition-all duration-300 hover:border-[#1ac0fd] hover:bg-[#1ac0fd]/5 hover:shadow-md hover:shadow-[#1ac0fd]/20 hover:scale-105 active:scale-95"
@@ -1124,235 +942,8 @@ export function HomePageClient({
             </div>
           </button>
         </div>
-
-        {/* Mobile Water Energy Section */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-start left-[calc(50%+1.5px)] top-[1740px] lg:top-[1835px] w-full max-w-[429px] px-4">
-          <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
-            <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[40px] text-center tracking-[-0.9px] uppercase w-[641px]">
-            <p className="leading-[40px] whitespace-pre-wrap">{t('home.waterEnergy.title')}</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center justify-center relative shrink-0 w-full">
-            <div className="flex items-center justify-center gap-2">
-              <div className="bg-[#00d1ff] h-[6px] w-[6px] rounded-full transition-all duration-300" />
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Water Energy Content */}
-        {waterEnergyLoading ? (
-          <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-1/2 top-[1900px] w-full max-w-[429px] min-h-[400px] z-10">
-            <div className="text-[#94a3b8] text-[16px]">Loading...</div>
-          </div>
-        ) : waterEnergyProducts.length > 0 ? (
-          <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-1/2 top-[1900px] w-full max-w-[429px] z-10">
-            {/* Product Card Carousel */}
-            <div className="relative w-full max-w-[380px]">
-              {(() => {
-                const currentProduct = waterEnergyProducts[waterEnergyCarouselIndex] || waterEnergyProducts[0];
-                if (!currentProduct) return null;
-
-                // Extract volume from title or subtitle (e.g., "0.5L", "0.33L", "0.25L")
-                const extractVolume = (product: Product): string | null => {
-                  const title = product.title || '';
-                  const subtitle = product.subtitle || '';
-                  const combined = `${title} ${subtitle}`;
-                  const volumeMatch = combined.match(/(\d+\.?\d*)\s*[Ll]/);
-                  return volumeMatch ? `${volumeMatch[1]}L` : null;
-                };
-
-                const volume = extractVolume(currentProduct);
-                const currency = getStoredCurrency();
-                // Check if title contains "kids" or "favorite" to show favorite badge
-                const hasFavoriteLabel = currentProduct.title?.toLowerCase().includes('kids') || 
-                                        currentProduct.subtitle?.toLowerCase().includes('kids') ||
-                                        false;
-
-                return (
-                  <div className="bg-[rgba(255,255,255,0.1)] border border-[#f1f5f9] border-solid content-stretch flex flex-col items-center justify-center overflow-clip p-[17px] relative rounded-[42px] shadow-[0px_10px_25px_-5px_rgba(0,0,0,0.05),0px_8px_10px_-6px_rgba(0,0,0,0.05)] w-full">
-                    {/* Product Image Container with Navigation Arrows */}
-                    <div className="relative w-full flex items-center justify-center mb-4">
-                      {/* Left Arrow - Moved to Right */}
-                      {waterEnergyProducts.length > 1 && (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setWaterEnergyCarouselIndex((prev) => 
-                              prev === 0 ? waterEnergyProducts.length - 1 : prev - 1
-                            );
-                          }}
-                          className="absolute right-0 z-10 bg-[#1ac0fd] border-[0.5px] border-white/49 border-solid flex items-center justify-center rounded-full size-[40px] cursor-pointer hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:scale-95 transition-all duration-200"
-                          aria-label="Previous product"
-                        >
-                          <svg
-                            width="24"
-                            height="28"
-                            viewBox="0 0 24.02 28"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-[20px] w-[18px] transform scale-y-[-1]"
-                          >
-                            <path
-                              d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
-                              fill="white"
-                            />
-                          </svg>
-                        </button>
-                      )}
-
-                      {/* Product Image */}
-                      <div className="h-[232px] relative shrink-0 w-[183px] flex items-center justify-center">
-                        {currentProduct.image ? (
-                          <img
-                            alt={currentProduct.title}
-                            src={currentProduct.image}
-                            className="h-full w-auto object-contain"
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-[#e2e8f0] rounded-lg flex items-center justify-center">
-                            <span className="text-[#94a3b8] text-[12px]">No image</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Right Arrow - Moved to Left */}
-                      {waterEnergyProducts.length > 1 && (
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setWaterEnergyCarouselIndex((prev) => 
-                              prev === waterEnergyProducts.length - 1 ? 0 : prev + 1
-                            );
-                          }}
-                          className="absolute left-0 z-10 bg-[#1ac0fd] border-[0.5px] border-white/49 border-solid flex items-center justify-center rounded-full size-[40px] cursor-pointer hover:border-white/80 hover:shadow-lg hover:shadow-[#00d1ff]/50 active:scale-95 transition-all duration-200"
-                          aria-label="Next product"
-                        >
-                          <svg
-                            width="24"
-                            height="28"
-                            viewBox="0 0 24.02 28"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-[20px] w-[18px] transform rotate-180 scale-y-[-1]"
-                          >
-                            <path
-                              d="M16.0692 13.0282H4.23242V14.9727H16.0692L10.6248 20.4171L12.0102 21.7782L19.788 14.0004L12.0102 6.22266L10.6248 7.58377L16.0692 13.0282Z"
-                              fill="white"
-                            />
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="w-full">
-                      <div className="content-stretch flex flex-col items-start pb-[28px] pt-[4px] relative shrink-0 w-full">
-                        <div className="h-[71px] mb-[-24px] relative shrink-0 w-full">
-                          {/* Favorite Badge */}
-                          {hasFavoriteLabel && (
-                            <div className="absolute content-stretch flex items-center left-0 right-0 top-0">
-                              <div className="bg-[rgba(255,255,255,0.72)] content-stretch flex flex-col items-start px-[8px] py-[2px] relative rounded-[9999px] shrink-0">
-                                <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#00b7ff] text-[10px] tracking-[0.5px] uppercase whitespace-nowrap">
-                                  <p className="leading-[15px]">{t('home.waterEnergy.favorite')}</p>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Product Title */}
-                          <div className="absolute content-stretch flex flex-col items-start left-0 right-0 top-[23px]">
-                            <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[16px] w-full">
-                              <p className="leading-[25px] whitespace-pre-wrap">{currentProduct.title}</p>
-                            </div>
-                          </div>
-
-                          {/* Volume */}
-                          {volume && (
-                            <div className="absolute content-stretch flex flex-col items-start left-0 right-0 top-[51px]">
-                              <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[12px] tracking-[1.2px] uppercase whitespace-nowrap">
-                                <p className="leading-[16px]">{volume}</p>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Price and Order Button */}
-                        <div className="content-stretch flex flex-col items-center justify-center mb-[-24px] pt-[16px] relative shrink-0 w-full">
-                        <div className="content-stretch flex gap-[101px] items-center justify-center relative shrink-0 w-full">
-                            {/* Price */}
-                            <div className="content-stretch flex flex-col items-start min-w-[98.28px] relative shrink-0">
-                              <div className="content-stretch flex items-center justify-center relative shrink-0">
-                                <div className="flex flex-col font-['Inter:Black',sans-serif] font-black h-[28px] justify-center leading-[0] not-italic relative shrink-0 text-[20px] text-white w-[92px]">
-                                  <p className="leading-[28px] whitespace-pre-wrap">
-                                    {formatPrice(currentProduct.price, currency)}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Order Now Button */}
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleAddToCart(currentProduct);
-                              }}
-                              disabled={addingToCart.has(currentProduct.id) || !currentProduct.inStock}
-                              className="bg-[#1ac0fd] content-stretch cursor-pointer flex h-[56px] items-center justify-center overflow-clip pb-[10.5px] pt-[9.5px] px-[24px] relative rounded-[78px] shrink-0 w-[151px] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#1ac0fd]/50 hover:scale-105 active:scale-95"
-                            >
-                              <div className="flex flex-col font-['Manrope:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] text-center text-white whitespace-nowrap">
-                                <p className="leading-[20px]">
-                                  {addingToCart.has(currentProduct.id) 
-                                    ? t('home.featuredProducts.adding') 
-                                    : t('home.waterEnergy.orderNow')}
-                                </p>
-                              </div>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Pagination Dots */}
-            {waterEnergyProducts.length > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-6">
-                {waterEnergyProducts.map((_, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setWaterEnergyCarouselIndex(index)}
-                    className={`rounded-full transition-all duration-300 ${
-                      waterEnergyCarouselIndex === index
-                        ? 'bg-[#00d1ff] h-[6px] w-[20px]'
-                        : 'bg-white h-[6px] w-[6px] hover:bg-[#00d1ff]/50'
-                    }`}
-                    aria-label={`Go to product ${index + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          // Fallback: Show message if no products available
-          <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-1/2 top-[1900px] w-full max-w-[429px] min-h-[400px] z-10">
-            <div className="bg-[rgba(255,255,255,0.1)] border border-[#f1f5f9] border-solid content-stretch flex flex-col items-center justify-center overflow-clip p-[40px] relative rounded-[42px] shadow-[0px_10px_25px_-5px_rgba(0,0,0,0.05),0px_8px_10px_-6px_rgba(0,0,0,0.05)] w-full">
-              <div className="text-[#94a3b8] text-[14px] text-center">
-                {t('home.waterEnergy.title')} - {t('home.featuredProducts.viewAllProducts')}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Mobile Stats Cards */}
-        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[2462px] w-full max-w-[400px] px-4">
+        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[1900px] w-full max-w-[400px] px-4">
           <div className="h-[227px] relative rounded-[30px] shrink-0 w-[calc(50%-4px)] min-w-0 overflow-hidden">
             <img
               alt=""
@@ -1377,8 +968,7 @@ export function HomePageClient({
             </div>
           </div>
         </div>
-
-        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[2708px] w-full max-w-[400px] px-4">
+        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[2150px] w-full max-w-[400px] px-4">
           <div className="h-[227px] relative shrink-0 w-[calc(50%-4px)] min-w-0">
             <div className="absolute bg-white inset-0 rounded-[30px]" />
             <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[65%_6%_18%_26%] justify-center leading-[0] text-[#0f172a] text-[40px] text-center tracking-[-0.9px] uppercase">
@@ -1404,14 +994,14 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Trusted By Background Ellipse */}
-        <div className="-translate-x-1/2 absolute flex items-center justify-center left-1/2 top-[3100px] w-full h-[500px] z-0 overflow-hidden">
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-1/2 top-[2450px] w-full h-[500px] z-0 overflow-hidden">
           <div className="absolute inset-0 flex items-center justify-center">
             <img alt="Trusted By Background" className="block max-w-none w-[150%] h-[150%] object-cover opacity-30" src={imgEllipse41} />
           </div>
         </div>
 
         {/* Mobile Trusted By Section */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-center justify-center left-[calc(50%+0.5px)] top-[3113px] w-full max-w-[429px] z-10">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-center justify-center left-[calc(50%+0.5px)] top-[2463px] w-full max-w-[429px] z-10">
           <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
             <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
               <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[40px] text-center tracking-[-0.9px] uppercase w-full">
@@ -1432,7 +1022,7 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Trusted By Logo - uses same 3 logos as desktop via trustedByIndex */}
-        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[3285px] w-full z-0">
+        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[2600px] w-full z-0">
           <div className="h-[72px] relative shrink-0 w-[260px]">
             <img
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
@@ -1443,7 +1033,7 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Trusted By Navigation - same handlers as desktop */}
-        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-1/2 top-[3285px] w-full max-w-[470px] px-4 z-20">
+        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-1/2 top-[2600px] w-full max-w-[470px] px-4 z-20">
           <FeaturedProductsNavigationArrow
             direction="prev"
             onClick={handlePreviousTrustedBy}
@@ -1461,7 +1051,7 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Trusted By Pagination Dots */}
-        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[3426px]">
+        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[2700px]">
           <button
             type="button"
             onClick={() => setTrustedByIndex(0)}
@@ -1495,7 +1085,7 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Spacer Block - Reduces scroll */}
-        <div className="-translate-x-1/2 absolute left-1/2 top-[3500px] w-full h-[50px]" />
+        <div className="-translate-x-1/2 absolute left-1/2 top-[2750px] w-full h-[50px]" />
 
      
 
@@ -1645,7 +1235,6 @@ export function HomePageClient({
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            
             background: "linear-gradient(to bottom, transparent 0%, transparent 10%, rgba(255, 255, 255, 0.1) 45%, rgba(255, 255, 255, 0) 65%, rgba(255, 255, 255, 0.3) 80%, white 100%)"
           }}
         />
@@ -1663,12 +1252,8 @@ export function HomePageClient({
               </div>
             </div>
           </div>
-
-
-          
-
           {/* Products Grid - Uniform Layout (raised 30% more) */}
-          <div className="absolute h-[390px] lg:h-[390px] md:h-[330px] sm:h-[270px] left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[161px] lg:top-[161px] md:top-[140px] sm:top-[108px] z-[10]">
+          <div className="absolute h-[390px] lg:h-[390px] md:h-[330px] sm:h-[270px] left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[100px] lg:top-[100px] md:top-[90px] sm:top-[80px] z-[10]">
             {productsLoading ? (
               // Loading state - show placeholder with uniform grid
               <div className="flex gap-[32px] lg:gap-[32px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
@@ -1706,16 +1291,14 @@ export function HomePageClient({
               </div>
             ) : null}
           </div>
-
-
           {/* Pagination Dots - Show 3 dots for 3 carousel modes (positioned above "View All Products" on non-mobile) */}
           {featuredProducts.length > 3 && (
-            <div className="absolute contents left-1/2 top-[580px] lg:top-[580px] md:top-[380px] sm:top-[330px] translate-x-[-50%]">
+            <div className="absolute contents left-1/2 top-[520px] lg:top-[520px] md:top-[350px] sm:top-[300px] translate-x-[-50%]">
               {/* Dot 1 - First mode (products 0-2) */}
               <button
                 type="button"
                 onClick={() => setCarouselIndex(0)}
-                className={`absolute rounded-full top-[580px] lg:top-[580px] md:top-[380px] sm:top-[330px] translate-x-[-50%] transition-all duration-300 ${
+                className={`absolute rounded-full top-[520px] lg:top-[520px] md:top-[350px] sm:top-[300px] translate-x-[-50%] transition-all duration-300 ${
                   carouselIndex === 0
                     ? 'bg-[#00d1ff] h-[6px] w-[16px] left-[calc(50%-17px)]'
                     : 'bg-[#e2e8f0] size-[6px] left-[calc(50%-17px)] hover:bg-[#00d1ff]/50'
@@ -1746,7 +1329,6 @@ export function HomePageClient({
               />
             </div>
           )}
-
           {/* View All Products Button */}
           <div className="absolute content-stretch flex flex-col items-center left-[20px] lg:left-[20px] md:left-[16px] sm:left-[12px] right-[20px] lg:right-[20px] md:right-[16px] sm:right-[12px] top-[620px] lg:top-[620px] md:top-[420px] sm:top-[370px]">
             <div
@@ -1769,14 +1351,12 @@ export function HomePageClient({
               </div>
             </div>
           </div>
-
           {/* Blue Underline */}
           <div className="absolute content-stretch flex items-start justify-center left-1/2 top-[50px] lg:top-[67px] md:top-[50px] sm:top-[110px] translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
             <div className="bg-[#00d1ff] h-[4px] lg:h-[4px] md:h-[5px] sm:h-[5px] rounded-[25px] lg:rounded-[25px] md:rounded-[30px] sm:rounded-[30px] shrink-0 w-[80px] lg:w-[80px] md:w-[90px] sm:w-[90px]" />
           </div>
         </div>
       </div>
-
       {/* Navigation Arrows - Only show if we have more than 3 products - Outside overflow-hidden container */}
       {featuredProducts.length > 3 && (
         <>
@@ -1886,7 +1466,7 @@ export function HomePageClient({
       </div>
 
       {/* Why Choose Us Section */}
-      <div className="absolute content-stretch flex flex-col gap-[22px] lg:gap-[28px] md:gap-[24px] sm:gap-[20px] items-start left-1/2 translate-x-[-50%] top-[3950px] lg:top-[3950px] md:top-[3500px] sm:top-[2800px] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
+      <div className="hidden sm:flex absolute content-stretch flex-col gap-[22px] lg:gap-[28px] md:gap-[24px] sm:gap-[20px] items-start left-1/2 translate-x-[-50%] top-[3950px] lg:top-[3950px] md:top-[3500px] sm:top-[2800px] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
         <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
           <div className="content-stretch flex flex-col items-center relative shrink-0 w-full mt-8 lg:mt-14 md:mt-8 sm:mt-6">
             <div className="flex flex-col font-['Montserrat',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[48px] lg:text-[60px] md:text-[48px] sm:text-[32px] text-center tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
