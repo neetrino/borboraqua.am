@@ -1,10 +1,12 @@
 import { cookies } from "next/headers";
+import { unstable_cache } from "next/cache";
 import { productsService } from "../lib/services/products.service";
 import { HomePageClient } from "../components/HomePageClient";
 
+const HOME_PRODUCTS_REVALIDATE = 60;
+
 /**
- * Home page: server-fetches featured and kids products, then renders client UI with initial data.
- * This avoids client-side fetch delay and duplicate requests.
+ * Home page: server-fetches featured and kids products (cached), then renders client UI.
  */
 export default async function HomePage() {
   let lang = "en";
@@ -18,9 +20,18 @@ export default async function HomePage() {
     lang = "en";
   }
 
+  const getFeatured = () =>
+    productsService.findAll({ filter: "featured", limit: 9, page: 1, lang });
+  const getKids = () =>
+    productsService.findAll({ search: "kids", limit: 10, page: 1, lang });
+
   const [featuredRes, kidsRes] = await Promise.all([
-    productsService.findAll({ filter: "featured", limit: 9, page: 1, lang }),
-    productsService.findAll({ search: "kids", limit: 10, page: 1, lang }),
+    unstable_cache(getFeatured, ["home-featured", lang], {
+      revalidate: HOME_PRODUCTS_REVALIDATE,
+    })(),
+    unstable_cache(getKids, ["home-kids", lang], {
+      revalidate: HOME_PRODUCTS_REVALIDATE,
+    })(),
   ]);
 
   const featured = featuredRes.data ?? [];
