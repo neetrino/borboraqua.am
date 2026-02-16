@@ -13,7 +13,7 @@ import { ExitIcon } from './icons/ExitIcon';
 // Image paths
 const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
 // Footer/background wave PNG from Figma, saved locally in public/assets/home
-const imgDanielSinocaAancLsb0SU0Unsplash1 = "/assets/home/imgDanielWave.png";
+const imgDanielSinocaAancLsb0SU0Unsplash1 = "/assets/home/banner/imgDanielWave.webp";
 const imgIcon2 = "/assets/home/imgIcon2.svg";
 const imgSvg = "/assets/home/imgSvg.svg";
 const imgSvg1 = "/assets/home/imgSvg1.svg";

@@ -18,13 +18,13 @@ import { DraggableBulb } from '../components/DraggableBulb';
 // Local image paths - Images stored in public/assets/home/
 const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
 // Wave background PNG from Figma, saved locally in public/assets/home
-const imgDanielSinocaAancLsb0SU0Unsplash1 = "/assets/home/imgDanielWave.png";
-const img6Eb12990A37F43358E368Af827A9C8A5Png1 = "/assets/home/img6Eb12990A37F43358E368Af827A9C8A5Png1.png";
+const imgDanielSinocaAancLsb0SU0Unsplash1 = "/assets/home/banner/imgDanielWave.webp";
+const kaiserLogo = "/assets/home/kaiser-logo.png";
 const imgLogo1 = "/assets/home/imgLogo1.png";
 const imgSas20Logo1 = "/assets/home/imgSas20Logo1.png";
-const img5 = "/assets/home/img5.png";
-const img6 = "/assets/home/img6.png";
-const img17 = "/assets/home/img17.png";
+const img5 = "/assets/home/banner/img5.webp";
+const img6 = "/assets/home/banner/img6.webp";
+const img17 = "/assets/home/banner/img17.webp";
 const imgEllipse41 = "/assets/home/imgEllipse41.svg";
 const imgShape = "/assets/home/imgShape.svg";
 const imgGroup2105 = "/assets/home/21056.png";
@@ -54,7 +54,7 @@ const img14 = "/assets/home/img14.svg";
 // Shared configuration for "Trusted By" logos (used on both desktop and mobile)
 const TRUSTED_BY_LOGOS = [
   { src: imgSas20Logo1, alt: 'Partner Logo 1' },
-  { src: img6Eb12990A37F43358E368Af827A9C8A5Png1, alt: 'Partner Logo 2' },
+  { src: kaiserLogo, alt: 'Partner Logo 2' },
   { src: imgLogo1, alt: 'Partner Logo 3' },
 ];
 const img15 = "/assets/home/img15.svg";
@@ -78,7 +78,7 @@ const imgTop1 = "/assets/home/imgTop1.svg";
 const imgGlass1 = "/assets/home/imgGlass1.svg";
 const imgGlass2 = "/assets/home/imgGlass2.svg";
 const imgIcon = "/assets/home/imgIcon.svg";
-const imgDanielSinocaAancLsb0SU0Unsplash3 = "/assets/home/imgDanielWave.png";
+const imgDanielSinocaAancLsb0SU0Unsplash3 = "/assets/home/banner/imgDanielWave.webp";
 const imgHomeVector = "/assets/home/Vector.svg";
 
 // Product interface for featured products
@@ -2024,7 +2024,7 @@ export function HomePageClient({
               <img 
                 alt="Partner Logo" 
                 className="absolute inset-0 max-w-none object-contain pointer-events-none size-full" 
-                src={img6Eb12990A37F43358E368Af827A9C8A5Png1} 
+                src={kaiserLogo} 
               />
             </div>
             {/* Logo 2 - logo 1 */}
