@@ -103,4 +103,7 @@ export const figmaImages = {
   img18: `${basePath}/img-18.png`,
 };
 
+/** Design image: products hero (from public/assets/products/) */
+export const productsHeroDesignImage = '/assets/products/products-hero-design.png';
+
 
