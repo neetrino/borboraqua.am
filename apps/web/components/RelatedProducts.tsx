@@ -22,6 +22,7 @@ interface RelatedProduct {
   inStock: boolean;
   minimumOrderQuantity?: number;
   orderQuantityIncrement?: number;
+  defaultVariantId?: string | null;
   brand?: {
     id: string;
     name: string;
@@ -389,6 +390,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
 
     const success = await addToCart({
       product,
+      variantId: product.defaultVariantId || undefined,
       quantity,
       isLoggedIn,
       router,
@@ -423,6 +425,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     inStock: product.inStock,
     minimumOrderQuantity: product.minimumOrderQuantity,
     orderQuantityIncrement: product.orderQuantityIncrement,
+    defaultVariantId: product.defaultVariantId || null,
     brand: product.brand || null,
   });
 

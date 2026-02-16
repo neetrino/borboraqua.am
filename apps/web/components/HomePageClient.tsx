@@ -93,6 +93,7 @@ interface Product {
   inStock: boolean;
   minimumOrderQuantity?: number;
   orderQuantityIncrement?: number;
+  defaultVariantId?: string | null;
   brand: {
     id: string;
     name: string;
@@ -601,6 +602,7 @@ export function HomePageClient({
 
     const success = await addToCart({
       product,
+      variantId: product.defaultVariantId || undefined,
       quantity,
       isLoggedIn,
       router,

@@ -251,7 +251,11 @@ export function HomePageHeader() {
                 onClick={() => router.push('/login')}
                 className="h-[20px] md:h-[18px] sm:h-[16px] w-[20px] md:w-[18px] sm:w-[16px] relative shrink-0 cursor-pointer flex items-center justify-center"
               >
-                <ExitIcon size={20} className="brightness-0" />
+                <img 
+                  src="/assets/home/VectorHeader.svg" 
+                  alt="Login" 
+                  className="w-full h-full brightness-0"
+                />
               </div>
             )}
           </div>

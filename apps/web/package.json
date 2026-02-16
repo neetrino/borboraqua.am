@@ -6,6 +6,7 @@
     "dev": "next dev",
     "dev:webpack": "next dev --no-turbo",
     "dev:clean": "node -e \"require('fs').rmSync('.next', {recursive: true, force: true})\" && next dev",
+    "tunnel": "node scripts/tunnel.js",
     "prebuild": "cd ../../packages/db && npm run db:generate",
     "prebuild:migrate": "node scripts/check-db-and-migrate.js",
     "build": "npm run prebuild:migrate && next build",

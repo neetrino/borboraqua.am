@@ -103,7 +103,7 @@ export default function ContactPage() {
             {/* Call to Us */}
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700">
+                <div className="w-12 h-12 rounded-full bg-[#00D1FF] flex items-center justify-center text-white">
                   <PhoneIcon />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900">{t('contact.callToUs.title')}</h3>
@@ -128,7 +128,7 @@ export default function ContactPage() {
             {/* Write to Us */}
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700">
+                <div className="w-12 h-12 rounded-full bg-[#00D1FF] flex items-center justify-center text-white">
                   <EnvelopeIcon />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900">{t('contact.writeToUs.title')}</h3>
@@ -142,7 +142,7 @@ export default function ContactPage() {
             {/* Headquarter */}
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-700">
+                <div className="w-12 h-12 rounded-full bg-[#00D1FF] flex items-center justify-center text-white">
                   <MapPinIcon />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900">{t('contact.headquarter.title')}</h3>

@@ -17,6 +17,7 @@ interface Product {
   inStock: boolean;
   minimumOrderQuantity?: number;
   orderQuantityIncrement?: number;
+  defaultVariantId?: string | null;
   brand: {
     id: string;
     name: string;
@@ -112,6 +113,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
 
     const success = await addToCart({
       product,
+      variantId: product.defaultVariantId || undefined,
       quantity,
       isLoggedIn,
       router,

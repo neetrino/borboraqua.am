@@ -295,7 +295,9 @@ class ProductsService {
       },
       variants: {
         where: { published: true },
-        select: { price: true, compareAtPrice: true, stock: true },
+        select: { id: true, price: true, compareAtPrice: true, stock: true },
+        orderBy: { price: 'asc' as const },
+        take: 1,
       },
       labels: {
         select: { id: true, type: true, value: true, position: true, color: true },
@@ -423,6 +425,7 @@ class ProductsService {
           inStock: (variant?.stock || 0) > 0,
           minimumOrderQuantity: (product as any).minimumOrderQuantity || 1,
           orderQuantityIncrement: (product as any).orderQuantityIncrement || 1,
+          defaultVariantId: (variant as any)?.id || null,
         };
       }
 
@@ -555,6 +558,7 @@ class ProductsService {
         discountPercent: appliedDiscount > 0 ? appliedDiscount : null,
         image,
         inStock: (variant?.stock || 0) > 0,
+        defaultVariantId: (variant as any)?.id || null,
         labels: (() => {
           // Map existing labels
           const existingLabels = Array.isArray(product.labels) ? product.labels.map((label: { id: string; type: string; value: string; position: string; color: string | null }) => ({

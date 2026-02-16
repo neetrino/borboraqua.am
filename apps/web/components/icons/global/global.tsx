@@ -22,6 +22,7 @@ export interface AddToCartProduct {
   id: string;
   slug: string;
   inStock?: boolean;
+  defaultVariantId?: string | null;
 }
 
 export interface AddToCartOptions {
@@ -56,8 +57,8 @@ export async function addToCart({
       const stored = localStorage.getItem('shop_cart_guest');
       const cart = stored ? JSON.parse(stored) : [];
       
-      // If we have variantId, use it, otherwise get from product details
-      let finalVariantId = variantId;
+      // If we have variantId, use it, otherwise try defaultVariantId, otherwise get from product details
+      let finalVariantId = variantId || product.defaultVariantId || undefined;
       
       if (!finalVariantId) {
         // Get product details to get variant ID
@@ -108,7 +109,8 @@ export async function addToCart({
 
   // Logged in user - use API
   try {
-    let finalVariantId = variantId;
+    // If we have variantId, use it, otherwise try defaultVariantId, otherwise get from product details
+    let finalVariantId = variantId || product.defaultVariantId || undefined;
 
     // If no variantId provided, get from product details
     if (!finalVariantId) {
@@ -555,7 +557,11 @@ export function Header({
                 onClick={() => router.push('/login')}
                 className="h-[26px] md:h-[24px] sm:h-[20px] w-[26px] md:w-[22px] sm:w-[20px] relative shrink-0 cursor-pointer flex items-center justify-center"
               >
-                <ExitIcon size={26} className="brightness-0" />
+                <img 
+                  src="/assets/home/VectorHeader.svg" 
+                  alt="Login" 
+                  className="w-full h-full brightness-0"
+                />
               </div>
             )}
           </div>
@@ -576,7 +582,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
   return (
     <>
       {/* Footer */}
-      <div className={`relative h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 w-full ${isHomePage ? 'overflow-hidden mt-[5550px] lg:mt-[5550px] md:mt-[5000px] sm:mt-[4000px]' : 'overflow-visible'}`}>
+      <div className={` z-[9999] relative h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 w-full ${isHomePage ? 'overflow-hidden mt-[5550px] lg:mt-[5550px] md:mt-[5000px] sm:mt-[4000px]' : 'overflow-visible'}`}>
         {/* Footer transition gradient - seamless blend with page background (only for non-home pages) */}
         {!isHomePage && (
           <div className="absolute top-0 left-0 right-0 h-[250px] z-[1]"/>
@@ -915,6 +921,7 @@ export interface FeaturedProduct {
   inStock: boolean;
   minimumOrderQuantity?: number;
   orderQuantityIncrement?: number;
+  defaultVariantId?: string | null;
   brand: {
     id: string;
     name: string;
@@ -996,11 +1003,12 @@ export function FeaturedProductCard({
           {/* Add to Cart Button */}
           <button
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onAddToCart(product);
             }}
             disabled={isAddingToCart || !product.inStock}
-            className="absolute block cursor-pointer left-[120px] size-[45px] top-[5px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+            className="absolute z-20 block cursor-pointer left-[120px] size-[45px] top-[5px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
             aria-label={t('home.featuredProducts.addToCart')}
           >
             <div className="flex flex-col font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] justify-center leading-[0] not-italic text-[30px] text-center text-white -mt-[2px]">
@@ -1055,11 +1063,12 @@ export function FeaturedProductCard({
           </div>
           <button
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onAddToCart(product);
             }}
             disabled={!product.inStock || isAddingToCart}
-            className="bg-[#00d1ff] content-stretch flex h-[36px] items-center justify-center py-[8px] relative rounded-[20px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer"
+            className="bg-[#00d1ff] content-stretch flex h-[36px] items-center justify-center py-[8px] relative z-10 rounded-[20px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-center text-white whitespace-nowrap">
               <p className="leading-[18px]">
@@ -1108,11 +1117,12 @@ export function FeaturedProductCard({
         </div>
         <button
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             onAddToCart(product);
           }}
           disabled={!product.inStock || isAddingToCart}
-          className="bg-[#00d1ff] content-stretch flex h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center justify-center py-[10px] lg:py-[10px] md:py-[12px] sm:py-[12px] relative rounded-[30px] lg:rounded-[30px] md:rounded-[34px] sm:rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer"
+          className="bg-[#00d1ff] content-stretch flex h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center justify-center py-[10px] lg:py-[10px] md:py-[12px] sm:py-[12px] relative z-10 rounded-[30px] lg:rounded-[30px] md:rounded-[34px] sm:rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer"
         >
           <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
             <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">
