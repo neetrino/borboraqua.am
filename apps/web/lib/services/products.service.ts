@@ -20,6 +20,8 @@ interface ProductFilters {
   page?: number;
   limit?: number;
   lang?: string;
+  /** When true, returns minimal fields for listing (e.g. home page). Keeps payload under Next.js cache limit. */
+  listOnly?: boolean;
 }
 
 // Типы для продуктов с включенными отношениями
@@ -72,6 +74,7 @@ class ProductsService {
       page = 1,
       limit = 24,
       lang = "en",
+      listOnly = false,
     } = filters;
 
     const bestsellerProductIds: string[] = [];
@@ -282,7 +285,7 @@ class ProductsService {
     // List query: only fields needed for listing (pagination + minimal payload)
     const listInclude = {
       translations: {
-        select: { locale: true, slug: true, title: true },
+        select: { locale: true, slug: true, title: true, subtitle: true },
       },
       brand: {
         select: {
@@ -376,6 +379,52 @@ class ProductsService {
       const variant = variants.length > 0
         ? variants.sort((a: { price: number }, b: { price: number }) => a.price - b.price)[0]
         : null;
+
+      const originalPrice = variant?.price || 0;
+      let finalPrice = originalPrice;
+      const productDiscount = product.discountPercent || 0;
+      let appliedDiscount = 0;
+      if (productDiscount > 0) {
+        appliedDiscount = productDiscount;
+      } else {
+        const primaryCategoryId = product.primaryCategoryId;
+        if (primaryCategoryId && categoryDiscounts[primaryCategoryId]) {
+          appliedDiscount = categoryDiscounts[primaryCategoryId];
+        } else {
+          const brandId = product.brandId;
+          if (brandId && brandDiscounts[brandId]) {
+            appliedDiscount = brandDiscounts[brandId];
+          } else if (globalDiscount > 0) {
+            appliedDiscount = globalDiscount;
+          }
+        }
+      }
+      if (appliedDiscount > 0 && originalPrice > 0) {
+        finalPrice = originalPrice * (1 - appliedDiscount / 100);
+      }
+
+      const image = (() => {
+        if (!Array.isArray(product.media) || product.media.length === 0) return null;
+        const firstImage = processImageUrl(product.media[0]);
+        return firstImage || null;
+      })();
+
+      if (listOnly) {
+        return {
+          id: product.id,
+          slug: translation?.slug || "",
+          title: translation?.title || "",
+          subtitle: translation?.subtitle || null,
+          brand: product.brand
+            ? { id: product.brand.id, name: brandTranslation?.name || "" }
+            : null,
+          price: finalPrice,
+          image,
+          inStock: (variant?.stock || 0) > 0,
+          minimumOrderQuantity: (product as any).minimumOrderQuantity || 1,
+          orderQuantityIncrement: (product as any).orderQuantityIncrement || 1,
+        };
+      }
 
       // Get all unique colors from ALL variants with imageUrl and colors hex (support both new and old format)
       // IMPORTANT: Only collect colors that actually exist in variants
@@ -478,34 +527,6 @@ class ProductsService {
       
       const availableColors = Array.from(colorMap.values());
 
-      const originalPrice = variant?.price || 0;
-      let finalPrice = originalPrice;
-      const productDiscount = product.discountPercent || 0;
-      
-      // Calculate applied discount with priority: productDiscount > categoryDiscount > brandDiscount > globalDiscount
-      let appliedDiscount = 0;
-      if (productDiscount > 0) {
-        appliedDiscount = productDiscount;
-      } else {
-        // Check category discounts
-        const primaryCategoryId = product.primaryCategoryId;
-        if (primaryCategoryId && categoryDiscounts[primaryCategoryId]) {
-          appliedDiscount = categoryDiscounts[primaryCategoryId];
-        } else {
-          // Check brand discounts
-          const brandId = product.brandId;
-          if (brandId && brandDiscounts[brandId]) {
-            appliedDiscount = brandDiscounts[brandId];
-          } else if (globalDiscount > 0) {
-            appliedDiscount = globalDiscount;
-          }
-        }
-      }
-
-      if (appliedDiscount > 0 && originalPrice > 0) {
-        finalPrice = originalPrice * (1 - appliedDiscount / 100);
-      }
-
       // Get categories with translations
       const categories = Array.isArray(product.categories) ? product.categories.map((cat: { id: string; translations?: Array<{ locale: string; slug: string; title: string }> }) => {
         const catTranslations = Array.isArray(cat.translations) ? cat.translations : [];
@@ -532,16 +553,7 @@ class ProductsService {
         originalPrice: appliedDiscount > 0 ? originalPrice : variant?.compareAtPrice || null,
         compareAtPrice: variant?.compareAtPrice || null,
         discountPercent: appliedDiscount > 0 ? appliedDiscount : null,
-        image: (() => {
-          // Use unified image utilities to get first valid main image
-          if (!Array.isArray(product.media) || product.media.length === 0) {
-            return null;
-          }
-          
-          // Process first image
-          const firstImage = processImageUrl(product.media[0]);
-          return firstImage || null;
-        })(),
+        image,
         inStock: (variant?.stock || 0) > 0,
         labels: (() => {
           // Map existing labels

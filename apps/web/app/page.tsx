@@ -7,6 +7,7 @@ const HOME_PRODUCTS_REVALIDATE = 60;
 
 /**
  * Home page: server-fetches featured and kids products (cached), then renders client UI.
+ * Uses listOnly: true so payload stays under Next.js data cache limit (2MB).
  */
 export default async function HomePage() {
   let lang = "en";
@@ -21,9 +22,9 @@ export default async function HomePage() {
   }
 
   const getFeatured = () =>
-    productsService.findAll({ filter: "featured", limit: 9, page: 1, lang });
+    productsService.findAll({ filter: "featured", limit: 9, page: 1, lang, listOnly: true });
   const getKids = () =>
-    productsService.findAll({ search: "kids", limit: 10, page: 1, lang });
+    productsService.findAll({ search: "kids", limit: 10, page: 1, lang, listOnly: true });
 
   const [featuredRes, kidsRes] = await Promise.all([
     unstable_cache(getFeatured, ["home-featured", lang], {

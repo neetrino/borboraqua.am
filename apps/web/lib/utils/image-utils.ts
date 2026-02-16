@@ -313,7 +313,7 @@ export function separateMainAndVariantImages(
  * 
  * @param file - The image file to process
  * @param options - Processing options
- * @returns Promise<string> - Base64 data URL of processed image
+ * @returns Promise<string> - Base64 data URL of processed image (format preserved: PNG, WebP, or JPEG)
  */
 export async function processImageFile(
   file: File,
@@ -321,7 +321,7 @@ export async function processImageFile(
     maxSizeMB?: number; // Maximum file size in MB (default: 2)
     maxWidthOrHeight?: number; // Maximum width or height in pixels (default: 1920)
     useWebWorker?: boolean; // Use web worker for processing (default: true)
-    fileType?: string; // Output file type (default: preserves original format, or 'image/jpeg' if not specified)
+    fileType?: string; // Output file type (default: preserves original - PNG, WebP, or JPEG)
     initialQuality?: number; // Initial quality 0-1 (default: 0.8)
   }
 ): Promise<string> {
@@ -340,9 +340,10 @@ export async function processImageFile(
       initialQuality = 0.8
     } = options || {};
 
-    // Preserve PNG format and transparency - if original is PNG, keep it as PNG
-    // If fileType is explicitly provided, use it; otherwise preserve original format
-    const outputFileType = fileType || (file.type === 'image/png' ? 'image/png' : 'image/jpeg');
+    // Preserve original format: PNG, WebP, or JPEG for the rest (no conversion to JPEG unless original is not PNG/WebP)
+    const outputFileType =
+      fileType ||
+      (file.type === 'image/png' ? 'image/png' : file.type === 'image/webp' ? 'image/webp' : 'image/jpeg');
 
     // Process image with compression and EXIF orientation correction
     // browser-image-compression automatically handles EXIF orientation

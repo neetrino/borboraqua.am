@@ -436,6 +436,7 @@
       "categoryCreatedSuccessSizes": "Category \"{name}\" successfully created (sizes required)",
       "failedToProcessImages": "Failed to process selected images",
       "failedToProcessImage": "Failed to process selected image",
+      "r2Required": "Product images must be uploaded to R2. Please check R2 configuration and try again.",
       "enterDefaultPrice": "Enter default price for all variants:",
       "enterDefaultStock": "Enter default stock for all variants:",
       "enterSkuPrefix": "Enter SKU prefix (will add -color-size if applicable):",
