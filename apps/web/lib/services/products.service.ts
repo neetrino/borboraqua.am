@@ -279,16 +279,30 @@ class ProductsService {
 
     const skip = (page - 1) * limit;
 
-    // Minimal include for list: no productAttributes, no variant options/attributeValue
+    // List query: only fields needed for listing (pagination + minimal payload)
     const listInclude = {
-      translations: true,
-      brand: { include: { translations: true } },
+      translations: {
+        select: { locale: true, slug: true, title: true },
+      },
+      brand: {
+        select: {
+          id: true,
+          translations: { select: { locale: true, name: true } },
+        },
+      },
       variants: {
         where: { published: true },
         select: { price: true, compareAtPrice: true, stock: true },
       },
-      labels: true,
-      categories: { include: { translations: true } },
+      labels: {
+        select: { id: true, type: true, value: true, position: true, color: true },
+      },
+      categories: {
+        select: {
+          id: true,
+          translations: { select: { locale: true, slug: true, title: true } },
+        },
+      },
     };
 
     let products: ProductWithRelations[];
@@ -367,9 +381,7 @@ class ProductsService {
       // IMPORTANT: Only collect colors that actually exist in variants
       // IMPORTANT: Process ALL variants to get ALL colors, not just the first variant
       const colorMap = new Map<string, { value: string; imageUrl?: string | null; colors?: string[] | null }>();
-      
-      console.log(`🎨 [PRODUCTS SERVICE] Processing ${variants.length} variants for product ${product.id} to collect colors`);
-      
+
       // Process all variants to collect all unique colors
       variants.forEach((v: any) => {
         // First, try to get ALL color options from variant.options (not just the first one)
@@ -433,9 +445,7 @@ class ProductsService {
           });
         }
       });
-      
-      console.log(`🎨 [PRODUCTS SERVICE] Collected ${colorMap.size} unique colors from ${variants.length} variants for product ${product.id}`);
-      
+
       // Also check productAttributes for color attribute values with imageUrl and colors
       // IMPORTANT: Only update colors that already exist in variants (already in colorMap)
       // Do not add new colors that don't exist in variants
@@ -570,14 +580,12 @@ class ProductsService {
                 position: position as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
                 color: '#6B7280', // Gray color for out of stock
               });
-              
-              console.log(`🏷️ [PRODUCTS SERVICE] Added "Out of Stock" label to product ${product.id} (${lang})`);
             }
           }
-          
+
           return existingLabels;
         })(),
-        colors: availableColors, // Add available colors array
+        colors: availableColors,
         minimumOrderQuantity: (product as any).minimumOrderQuantity || 1,
         orderQuantityIncrement: (product as any).orderQuantityIncrement || 1,
       };
@@ -1128,11 +1136,9 @@ class ProductsService {
               position: position as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
               color: '#6B7280', // Gray color for out of stock
             });
-            
-            console.log(`🏷️ [PRODUCTS SERVICE] Added "Out of Stock" label to product ${product.id} (${lang})`);
           }
         }
-        
+
         return existingLabels;
       })(),
       variants: Array.isArray(product.variants) ? product.variants
