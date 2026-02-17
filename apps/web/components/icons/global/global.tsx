@@ -777,7 +777,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
             <div className="relative shrink-0">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center justify-center relative">
                 <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[12px] lg:text-[12px] md:text-[11px] sm:text-[10px] text-white whitespace-nowrap">
-                  <p className="leading-[16px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">{t('home.footer.copyright')}</p>
+                  <p className="leading-[16px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">Copyright © 2024 | New Aqua LLC | All Rights Reserved</p>
                 </div>
               </div>
             </div>
@@ -940,6 +940,7 @@ interface FeaturedProductCardProps {
   currency?: CurrencyCode;
   isMobile?: boolean;
   compact?: boolean; // For shop page - smaller cards
+  isRelated?: boolean; // For related products carousel
 }
 
 /**
@@ -959,6 +960,7 @@ export function FeaturedProductCard({
   currency,
   isMobile = false,
   compact = false,
+  isRelated = false,
 }: FeaturedProductCardProps) {
   if (isMobile) {
     // Extract volume from title or subtitle (e.g., "0.5L", "0.33L", "0.25L")
@@ -989,11 +991,12 @@ export function FeaturedProductCard({
         </div>
 
         {/* Rounded Card with Price, Volume, and Add Button */}
-        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[59.39%_0_21.5%_0] rounded-[9999px]">
+        <div className="absolute bg-[rgba(123,201,236,0.6)] inset-[59.39%_0_21.5%_0] rounded-2xl h-[30%] w-[90%] left-[0%]">
           {/* Price */}
-          <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] left-[15px] not-italic text-[16px] text-white top-[22px] whitespace-nowrap">
+          <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] right-[5px] not-italic text-[16px] text-white top-[62px] whitespace-nowrap">
             <p className="leading-[28px]">{formatPrice(product.price, currency)}</p>
           </div>
+          
           {/* Volume */}
           {volume && (
             <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[15px] not-italic text-[#9f9f9f] text-[12px] top-[41px] tracking-[1.2px] uppercase whitespace-nowrap">
@@ -1017,10 +1020,16 @@ export function FeaturedProductCard({
           </button>
         </div>
 
-        {/* Product Title */}
-        <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[84.64%_3.21%_0_3.21%] justify-center leading-[0] text-[16px] text-center text-white">
+        <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[30.64%_3.41%_5_%] justify-center leading-[0] text-[16px] text-left text-white">
           <p className="leading-[25px] whitespace-pre-wrap">{product.title}</p>
+            
         </div>
+        {/* Product Title and Description */}
+        {product.description && (
+          <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[72.64%_5.41%_5_%] justify-center leading-[0] text-[16px] text-left text-gray-500 overflow-hidden">
+            <p className="leading-[25px] break-words">{product.description}</p>
+          </div>
+        )}
       </div>
     );
   }
@@ -1035,30 +1044,37 @@ export function FeaturedProductCard({
         className="flex flex-col items-center gap-0 w-full cursor-pointer product-card-hover product-card-compact  z-[11] isolate rounded-[45px] p-2"
       >
         {/* Image Container - Same bottom alignment as home page card, -10% overlap */}
-        <div className="h-[300px] w-full relative product-image-container flex items-end justify-center bg-transparent rounded-lg overflow-visible min-h-0 -mb-[10%]">
+        <div className={`${isMobile ? 'h-[220px]' : 'md:h-[440px]'}   w-full relative product-image-container flex items-end justify-center bg-transparent rounded-lg overflow-visible min-h-0 -mb-[10%]`}>
           {product.image ? (
             <img
+              
               alt={product.title}
               className="w-full max-w-[85%] h-auto object-contain object-bottom product-image-hover"
               src={product.image}
               style={{ backgroundColor: 'transparent' }}
             />
+            
           ) : (
             <div className="w-full h-full bg-gray-300 rounded-lg" />
           )}
         </div>
         {/* Content Section - Compact layout */}
-        <div className="w-full flex flex-col gap-[10px] px-[8px] pb-[8px]">
+        <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative">
+          <div className="absolute top-6 right-[8px]">
+            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[16px] whitespace-nowrap">
+              <p className="leading-[22px]">{formatPrice(product.price, currency)}</p>
+            </div>
+          </div>
           <div className="flex items-end justify-between w-full gap-2">
             <div className="flex flex-col items-start flex-1 min-w-0 max-w-[calc(100%-90px)]">
               <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-black">
                 <p className="leading-[20px] truncate w-full">{product.title}</p>
               </div>
-            </div>
-            <div className="flex flex-col items-start flex-shrink-0">
-              <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[16px] whitespace-nowrap">
-                <p className="leading-[22px]">{formatPrice(product.price, currency)}</p>
-              </div>
+              {product.description && (
+                <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-gray-500 mt-1">
+                  <p className="leading-[20px] break-words">{product.description}</p>
+                </div>
+              )}
             </div>
           </div>
           <button

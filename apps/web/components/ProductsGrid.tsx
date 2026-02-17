@@ -11,6 +11,7 @@ interface Product {
   id: string;
   slug: string;
   title: string;
+  description?: string | null;
   price: number;
   compareAtPrice: number | null;
   image: string | null;
@@ -171,9 +172,9 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
       case 'grid-2':
         return 'grid grid-cols-2 gap-12 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2';
       case 'grid-3':
-        return 'grid grid-cols-2 gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
+        return 'grid grid-cols-2 gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3';
       default:
-        return 'grid grid-cols-2 gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
+        return 'grid grid-cols-2 gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3';
     }
   };
 
@@ -190,6 +191,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     id: product.id,
     slug: product.slug,
     title: product.title,
+    description: product.description ?? undefined,
     minimumOrderQuantity: product.minimumOrderQuantity,
     orderQuantityIncrement: product.orderQuantityIncrement,
     price: product.price,

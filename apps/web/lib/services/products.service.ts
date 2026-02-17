@@ -285,7 +285,7 @@ class ProductsService {
     // List query: only fields needed for listing (pagination + minimal payload)
     const listInclude = {
       translations: {
-        select: { locale: true, slug: true, title: true, subtitle: true },
+        select: { locale: true, slug: true, title: true, subtitle: true, descriptionHtml: true },
       },
       brand: {
         select: {
@@ -308,6 +308,7 @@ class ProductsService {
           translations: { select: { locale: true, slug: true, title: true } },
         },
       },
+      // Note: media is a scalar field (Json[]), so it's automatically included, no need to add it to include
     };
 
     let products: ProductWithRelations[];
@@ -417,6 +418,7 @@ class ProductsService {
           slug: translation?.slug || "",
           title: translation?.title || "",
           subtitle: translation?.subtitle || null,
+          description: translation?.descriptionHtml || null,
           brand: product.brand
             ? { id: product.brand.id, name: brandTranslation?.name || "" }
             : null,
@@ -545,6 +547,7 @@ class ProductsService {
         id: product.id,
         slug: translation?.slug || "",
         title: translation?.title || "",
+        description: translation?.descriptionHtml || null,
         brand: product.brand
           ? {
               id: product.brand.id,

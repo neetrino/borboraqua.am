@@ -17,6 +17,7 @@ interface Product {
   id: string;
   slug: string;
   title: string;
+  description?: string | null;
   price: number;
   compareAtPrice: number | null;
   image: string | null;
@@ -52,6 +53,7 @@ function trimProductForGrid(p: {
   id: string;
   slug?: string | null;
   title?: string | null;
+  description?: string | null;
   price?: number;
   compareAtPrice?: number | null;
   originalPrice?: number | null;
@@ -66,6 +68,7 @@ function trimProductForGrid(p: {
     id: p.id,
     slug: p.slug ?? '',
     title: p.title ?? '',
+    description: p.description ?? null,
     price: p.price ?? 0,
     compareAtPrice: p.compareAtPrice ?? p.originalPrice ?? null,
     image: p.image ?? null,

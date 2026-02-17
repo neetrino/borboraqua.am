@@ -14,6 +14,7 @@ interface RelatedProduct {
   id: string;
   slug: string;
   title: string;
+  description?: string | null;
   price: number;
   originalPrice?: number | null;
   compareAtPrice: number | null;
@@ -420,6 +421,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     id: product.id,
     slug: product.slug,
     title: product.title,
+    description: product.description || undefined,
     price: product.price,
     image: product.image,
     inStock: product.inStock,
@@ -507,6 +509,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                         formatPrice={(price: number, curr?: any) => formatPrice(price, curr || currency)}
                         currency={currency}
                         compact={true}
+                        isRelated={true}
                       />
                     </div>
                   );

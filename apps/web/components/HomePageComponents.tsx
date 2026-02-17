@@ -502,7 +502,7 @@ export function HomePageFooter() {
           <div className="relative shrink-0">
             <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center justify-center relative">
               <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[12px] lg:text-[12px] md:text-[11px] sm:text-[10px] text-white whitespace-nowrap">
-                <p className="leading-[16px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">{t('home.footer.copyright')}</p>
+                <p className="leading-[16px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">Copyright © 2024 | New Aqua LLC | All Rights Reserved</p>
               </div>
             </div>
           </div>
