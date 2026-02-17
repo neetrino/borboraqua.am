@@ -420,157 +420,164 @@ class OrdersService {
       const orderNumber = generateOrderNumber();
 
       // Create order with items in a transaction
-      const order = await db.$transaction(async (tx: any) => {
-        // Create order
-        const newOrder = await tx.order.create({
-          data: {
-            number: orderNumber,
-            userId: userId || null,
-            status: 'pending',
-            paymentStatus: 'pending',
-            fulfillmentStatus: 'unfulfilled',
-            subtotal,
-            discountAmount,
-            shippingAmount,
-            taxAmount,
-            total,
-            currency: 'AMD',
-            customerEmail: email,
-            customerPhone: phone,
-            customerLocale: locale || 'en',
-            shippingMethod,
-            shippingAddress: shippingAddress ? JSON.parse(JSON.stringify(shippingAddress)) : null,
-            billingAddress: shippingAddress ? JSON.parse(JSON.stringify(shippingAddress)) : null,
-            items: {
-              create: cartItems.map((item) => ({
-                variantId: item.variantId,
-                productTitle: item.productTitle,
-                variantTitle: item.variantTitle,
-                sku: item.sku,
-                quantity: item.quantity,
-                price: item.price,
-                total: item.price * item.quantity,
-                imageUrl: item.imageUrl,
-              })),
-            },
-            events: {
-              create: {
-                type: 'order_created',
-                data: {
-                  source: userId ? 'user' : 'guest',
-                  paymentMethod,
-                  shippingMethod,
+      // Set timeout to 30s for payment processing (critical operation)
+      const order = await db.$transaction(
+        async (tx: any) => {
+          // Create order
+          const newOrder = await tx.order.create({
+            data: {
+              number: orderNumber,
+              userId: userId || null,
+              status: 'pending',
+              paymentStatus: 'pending',
+              fulfillmentStatus: 'unfulfilled',
+              subtotal,
+              discountAmount,
+              shippingAmount,
+              taxAmount,
+              total,
+              currency: 'AMD',
+              customerEmail: email,
+              customerPhone: phone,
+              customerLocale: locale || 'en',
+              shippingMethod,
+              shippingAddress: shippingAddress ? JSON.parse(JSON.stringify(shippingAddress)) : null,
+              billingAddress: shippingAddress ? JSON.parse(JSON.stringify(shippingAddress)) : null,
+              items: {
+                create: cartItems.map((item) => ({
+                  variantId: item.variantId,
+                  productTitle: item.productTitle,
+                  variantTitle: item.variantTitle,
+                  sku: item.sku,
+                  quantity: item.quantity,
+                  price: item.price,
+                  total: item.price * item.quantity,
+                  imageUrl: item.imageUrl,
+                })),
+              },
+              events: {
+                create: {
+                  type: 'order_created',
+                  data: {
+                    source: userId ? 'user' : 'guest',
+                    paymentMethod,
+                    shippingMethod,
+                  },
                 },
               },
             },
-          },
-          include: {
-            items: true,
-          },
-        });
+            include: {
+              items: true,
+            },
+          });
 
-        // Update stock for all variants
-        console.log('📦 [ORDERS SERVICE] Updating stock for variants:', cartItems.map(item => ({
-          variantId: item.variantId,
-          quantity: item.quantity,
-          sku: item.sku,
-        })));
-        
-        try {
-          for (const item of cartItems) {
-            if (!item.variantId) {
-              console.error('❌ [ORDERS SERVICE] Missing variantId for item:', item);
-              throw {
-                status: 400,
-                type: "https://api.shop.am/problems/validation-error",
-                title: "Validation Error",
-                detail: `Missing variantId for item with SKU: ${item.sku}`,
-              };
-            }
-
-            // Get current stock before update for logging
-            const variantBefore = await tx.productVariant.findUnique({
-              where: { id: item.variantId },
-              select: { stock: true, sku: true },
-            });
-
-            if (!variantBefore) {
-              console.error('❌ [ORDERS SERVICE] Variant not found:', item.variantId);
-              throw {
-                status: 404,
-                type: "https://api.shop.am/problems/not-found",
-                title: "Variant not found",
-                detail: `Variant with id '${item.variantId}' not found`,
-              };
-            }
-
-            console.log(`📦 [ORDERS SERVICE] Updating stock for variant ${item.variantId} (SKU: ${variantBefore.sku}):`, {
-              currentStock: variantBefore.stock,
-              quantityToDecrement: item.quantity,
-              newStock: variantBefore.stock - item.quantity,
-            });
-
-            // Update stock with decrement
-            const updatedVariant = await tx.productVariant.update({
-              where: { id: item.variantId },
-              data: {
-                stock: {
-                  decrement: item.quantity,
-                },
-              },
-              select: { stock: true, sku: true },
-            });
-
-            console.log(`✅ [ORDERS SERVICE] Stock updated for variant ${item.variantId} (SKU: ${updatedVariant.sku}):`, {
-              newStock: updatedVariant.stock,
-              expectedStock: variantBefore.stock - item.quantity,
-              match: updatedVariant.stock === (variantBefore.stock - item.quantity),
-            });
-
-            // Verify stock was actually decremented
-            if (updatedVariant.stock !== (variantBefore.stock - item.quantity)) {
-              console.error('❌ [ORDERS SERVICE] Stock update mismatch!', {
-                variantId: item.variantId,
-                expectedStock: variantBefore.stock - item.quantity,
-                actualStock: updatedVariant.stock,
-                quantity: item.quantity,
-              });
-              // Don't throw here - transaction will rollback if needed
-            }
-          }
+          // Update stock for all variants
+          console.log('📦 [ORDERS SERVICE] Updating stock for variants:', cartItems.map(item => ({
+            variantId: item.variantId,
+            quantity: item.quantity,
+            sku: item.sku,
+          })));
           
-          console.log('✅ [ORDERS SERVICE] All variant stocks updated successfully');
-        } catch (stockError: any) {
-          console.error('❌ [ORDERS SERVICE] Error updating stock:', {
-            error: stockError,
-            message: stockError?.message,
-            detail: stockError?.detail,
+          try {
+            for (const item of cartItems) {
+              if (!item.variantId) {
+                console.error('❌ [ORDERS SERVICE] Missing variantId for item:', item);
+                throw {
+                  status: 400,
+                  type: "https://api.shop.am/problems/validation-error",
+                  title: "Validation Error",
+                  detail: `Missing variantId for item with SKU: ${item.sku}`,
+                };
+              }
+
+              // Get current stock before update for logging
+              const variantBefore = await tx.productVariant.findUnique({
+                where: { id: item.variantId },
+                select: { stock: true, sku: true },
+              });
+
+              if (!variantBefore) {
+                console.error('❌ [ORDERS SERVICE] Variant not found:', item.variantId);
+                throw {
+                  status: 404,
+                  type: "https://api.shop.am/problems/not-found",
+                  title: "Variant not found",
+                  detail: `Variant with id '${item.variantId}' not found`,
+                };
+              }
+
+              console.log(`📦 [ORDERS SERVICE] Updating stock for variant ${item.variantId} (SKU: ${variantBefore.sku}):`, {
+                currentStock: variantBefore.stock,
+                quantityToDecrement: item.quantity,
+                newStock: variantBefore.stock - item.quantity,
+              });
+
+              // Update stock with decrement
+              const updatedVariant = await tx.productVariant.update({
+                where: { id: item.variantId },
+                data: {
+                  stock: {
+                    decrement: item.quantity,
+                  },
+                },
+                select: { stock: true, sku: true },
+              });
+
+              console.log(`✅ [ORDERS SERVICE] Stock updated for variant ${item.variantId} (SKU: ${updatedVariant.sku}):`, {
+                newStock: updatedVariant.stock,
+                expectedStock: variantBefore.stock - item.quantity,
+                match: updatedVariant.stock === (variantBefore.stock - item.quantity),
+              });
+
+              // Verify stock was actually decremented
+              if (updatedVariant.stock !== (variantBefore.stock - item.quantity)) {
+                console.error('❌ [ORDERS SERVICE] Stock update mismatch!', {
+                  variantId: item.variantId,
+                  expectedStock: variantBefore.stock - item.quantity,
+                  actualStock: updatedVariant.stock,
+                  quantity: item.quantity,
+                });
+                // Don't throw here - transaction will rollback if needed
+              }
+            }
+            
+            console.log('✅ [ORDERS SERVICE] All variant stocks updated successfully');
+          } catch (stockError: any) {
+            console.error('❌ [ORDERS SERVICE] Error updating stock:', {
+              error: stockError,
+              message: stockError?.message,
+              detail: stockError?.detail,
+            });
+            // Re-throw to rollback transaction
+            throw stockError;
+          }
+
+          // Create payment record
+          const payment = await tx.payment.create({
+            data: {
+              orderId: newOrder.id,
+              provider: paymentMethod,
+              method: paymentMethod,
+              amount: total,
+              currency: 'AMD',
+              status: 'pending',
+            },
           });
-          // Re-throw to rollback transaction
-          throw stockError;
+
+          // If user cart, delete cart after successful checkout
+          if (userId && cartId && cartId !== 'guest-cart') {
+            await tx.cart.delete({
+              where: { id: cartId },
+            });
+          }
+
+          return { order: newOrder, payment };
+        },
+        {
+          maxWait: 10000,  // Wait up to 10s for transaction to start
+          timeout: 30000, // Transaction timeout: 30s (payment processing is critical)
         }
-
-        // Create payment record
-        const payment = await tx.payment.create({
-          data: {
-            orderId: newOrder.id,
-            provider: paymentMethod,
-            method: paymentMethod,
-            amount: total,
-            currency: 'AMD',
-            status: 'pending',
-          },
-        });
-
-        // If user cart, delete cart after successful checkout
-        if (userId && cartId && cartId !== 'guest-cart') {
-          await tx.cart.delete({
-            where: { id: cartId },
-          });
-        }
-
-        return { order: newOrder, payment };
-      });
+      );
 
       // Return order and payment info
       return {

@@ -1,12 +1,10 @@
 'use client';
 
-import { Input } from '@shop/ui';
 import { useState, useEffect } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
 import { getStoredLanguage } from '@/lib/language';
 import { useTranslation } from '../../lib/i18n-client';
 import contactData from '../../../../config/contact.json';
-import { ProductPageButton } from '../../components/icons/global/globalMobile';
 import { apiClient } from '../../lib/api-client';
 import { showToast } from '../../components/Toast';
 
@@ -54,7 +52,7 @@ export default function ContactPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
+    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim()) {
       showToast(t('contact.form.allFieldsRequired'), 'warning');
       return;
     }
@@ -158,76 +156,90 @@ export default function ContactPage() {
           </div>
 
           {/* Right Side: Contact Form */}
-          <div>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-900 mb-2">
-                  {t('contact.form.name')}
-                </label>
-                <Input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full"
-                  placeholder={t('contact.form.namePlaceholder')}
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-2">
-                  {t('contact.form.email')}
-                </label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full"
-                  placeholder={t('contact.form.emailPlaceholder')}
-                />
-              </div>
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-900 mb-2">
-                  {t('contact.form.subject')}
-                </label>
-                <Input
-                  id="subject"
-                  name="subject"
-                  type="text"
-                  required
-                  value={formData.subject}
-                  onChange={handleChange}
-                  className="w-full"
-                  placeholder={t('contact.form.subjectPlaceholder')}
-                />
-              </div>
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-900 mb-2">
-                  {t('contact.form.message')}
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={6}
-                  value={formData.message}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-                  placeholder={t('contact.form.messagePlaceholder')}
-                />
-              </div>
-              <ProductPageButton
-                type="submit"
-                variant="primary"
-                className="w-full py-3"
-                disabled={submitting}
-              >
-                {submitting ? t('contact.form.submitting') : t('contact.form.submit')}
-              </ProductPageButton>
-            </form>
+          <div className="relative max-w-lg mx-auto lg:mx-0">
+            {/* Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+            
+            {/* Form Container with Glassmorphism */}
+            <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-5 sm:p-4 border border-[rgba(255,255,255,0)]  overflow-clip">
+              <form onSubmit={handleSubmit} className="space-y-3">
+                {/* Name Field */}
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
+                    {t('contact.form.name')}
+                  </label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all"
+                    placeholder={t('contact.form.namePlaceholder')}
+                  />
+                </div>
+
+                {/* Email Field */}
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+                    {t('contact.form.email')}
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all"
+                    placeholder={t('contact.form.emailPlaceholder')}
+                  />
+                </div>
+
+                {/* Subject Field */}
+                <div>
+                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1.5">
+                    {t('contact.form.subject')}
+                  </label>
+                  <input
+                    id="subject"
+                    name="subject"
+                    type="text"
+                    required
+                    value={formData.subject}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all"
+                    placeholder={t('contact.form.subjectPlaceholder')}
+                  />
+                </div>
+
+                {/* Message Field */}
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1.5">
+                    {t('contact.form.message')}
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    rows={4}
+                    value={formData.message}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all resize-none"
+                    placeholder={t('contact.form.messagePlaceholder')}
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {submitting ? t('contact.form.submitting') : t('contact.form.submit')}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>

@@ -49,18 +49,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!body.message || typeof body.message !== 'string' || body.message.trim().length === 0) {
-      return NextResponse.json(
-        {
-          type: "https://api.shop.am/problems/validation-error",
-          title: "Validation Error",
-          status: 400,
-          detail: "Field 'message' is required and must be a non-empty string",
-          instance: req.url,
-        },
-        { status: 400 }
-      );
-    }
+    // Message is optional, use empty string if not provided
+    const message = body.message && typeof body.message === 'string' 
+      ? body.message.trim() 
+      : '';
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -81,7 +73,7 @@ export async function POST(req: NextRequest) {
       name: body.name,
       email: body.email,
       subject: body.subject,
-      message: body.message,
+      message: message,
     });
 
     return NextResponse.json(result, { status: 201 });
