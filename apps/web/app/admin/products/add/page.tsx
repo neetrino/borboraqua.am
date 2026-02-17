@@ -14,7 +14,7 @@ import {
   smartSplitUrls,
   cleanImageUrls,
   separateMainAndVariantImages,
-  processImageFile,
+  processProductImageFile,
 } from '../../../../lib/utils/image-utils';
 
 interface Brand {
@@ -108,6 +108,11 @@ interface ProductData {
     imageUrl?: string;
     published?: boolean;
   }>;
+}
+
+/** Response from POST /api/v1/admin/products/upload-images — product images stored only on R2. */
+interface UploadImagesResponse {
+  urls: string[];
 }
 
 function AddProductPageContent() {
@@ -1564,6 +1569,23 @@ function AddProductPageContent() {
       reader.readAsDataURL(file);
     });
 
+  /** Upload product images to R2 only. Returns R2 public URLs on success, null on failure. No local/base64 fallback. */
+  const uploadImagesToR2 = async (base64Images: string[]): Promise<string[] | null> => {
+    if (base64Images.length === 0) return null;
+    try {
+      const res = await apiClient.post<UploadImagesResponse>('/api/v1/admin/products/upload-images', {
+        images: base64Images,
+      });
+      if (res?.urls?.length && res.urls.every((u): u is string => typeof u === 'string' && u.startsWith('http'))) {
+        return res.urls;
+      }
+      return null;
+    } catch (e) {
+      console.warn('⚠️ [UPLOAD] R2 upload failed:', (e as Error)?.message);
+      return null;
+    }
+  };
+
   const handleUploadImages = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     if (files.length === 0) {
@@ -1590,16 +1612,9 @@ function AddProductPageContent() {
           
           console.log(`📸 [UPLOAD] Processing file ${index + 1}/${files.length}:`, file.name, `(${Math.round(file.size / 1024)}KB)`);
           
-          // Process image with compression, EXIF orientation correction, and resize
-          // Preserve PNG format and transparency - don't force JPEG conversion
-          const base64 = await processImageFile(file, {
-            maxSizeMB: 2,
-            maxWidthOrHeight: 1920,
-            useWebWorker: true,
-            // fileType is not specified - will preserve original format (PNG stays PNG, others become JPEG)
-            initialQuality: 0.8
-          });
-          
+          // Product images: WebP, max 200KB (skip re-encode if already WebP and ≤200KB)
+          const base64 = await processProductImageFile(file);
+
           if (base64 && base64.trim()) {
             console.log(`✅ [UPLOAD] Successfully processed file ${index + 1}/${files.length}:`, file.name);
             return { success: true, base64, index };
@@ -1645,9 +1660,18 @@ function AddProductPageContent() {
         return;
       }
 
+      // Product images: R2 only (no local/base64 fallback)
+      const r2Urls = await uploadImagesToR2(uploadedImages);
+      if (!r2Urls || r2Urls.length !== uploadedImages.length) {
+        setImageUploadError(
+          t('admin.products.add.r2Required') || 'Product images must be uploaded to R2. Please check R2 configuration and try again.'
+        );
+        return;
+      }
+
       setFormData((prev) => {
-        const newImageUrls = [...prev.imageUrls, ...uploadedImages];
-        console.log('📸 [UPLOAD] Total images after upload:', newImageUrls.length, '(was', prev.imageUrls.length, ', added', uploadedImages.length, ')');
+        const newImageUrls = [...prev.imageUrls, ...r2Urls];
+        console.log('📸 [UPLOAD] Total images after upload (R2):', newImageUrls.length, '(was', prev.imageUrls.length, ', added', r2Urls.length);
         // If this is the first image, set it as main automatically
         const newFeaturedIndex = prev.imageUrls.length === 0 ? 0 : prev.featuredImageIndex;
         return {
@@ -1694,20 +1718,23 @@ function AddProductPageContent() {
         originalSize: `${Math.round(file.size / 1024)}KB`
       });
 
-      // Process image with compression, EXIF orientation correction, and resize
-      // Preserve PNG format and transparency - don't force JPEG conversion
-      const base64 = await processImageFile(file, {
-        maxSizeMB: 2,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true,
-        // fileType is not specified - will preserve original format (PNG stays PNG, others become JPEG)
-        initialQuality: 0.8
-      });
+      // Product images: WebP, max 200KB (skip re-encode if already WebP and ≤200KB)
+      const base64 = await processProductImageFile(file);
 
-      setGeneratedVariants(prev => prev.map(v => 
-        v.id === variantId ? { ...v, image: base64 } : v
+      // R2 only: variant image must be stored on R2
+      const r2Urls = await uploadImagesToR2([base64]);
+      const r2Url = r2Urls?.[0];
+      if (!r2Url) {
+        setImageUploadError(
+          t('admin.products.add.r2Required') || 'Variant image must be uploaded to R2. Please check R2 configuration and try again.'
+        );
+        return;
+      }
+
+      setGeneratedVariants(prev => prev.map(v =>
+        v.id === variantId ? { ...v, image: r2Url } : v
       ));
-      console.log('✅ [VARIANT BUILDER] Variant image uploaded and processed for variant:', variantId);
+      console.log('✅ [VARIANT BUILDER] Variant image uploaded to R2 for variant:', variantId);
     } catch (error: any) {
       console.error('❌ [VARIANT IMAGE] Error processing variant image:', error);
       setImageUploadError(error?.message || t('admin.products.add.failedToProcessImage'));
@@ -1742,36 +1769,38 @@ function AddProductPageContent() {
       setImageUploadLoading(true);
       console.log('📤 [ADMIN] Starting upload for color:', colorImageTarget.colorValue, 'Files:', imageFiles.length);
       
-      const uploadedImages = await Promise.all(
+      const base64Images = await Promise.all(
         imageFiles.map(async (file, index) => {
           console.log(`🖼️ [COLOR IMAGE] Processing image ${index + 1}/${imageFiles.length}:`, {
             fileName: file.name,
             originalSize: `${Math.round(file.size / 1024)}KB`
           });
 
-          // Process image with compression, EXIF orientation correction, and resize
-          // Preserve PNG format and transparency - don't force JPEG conversion
-          const base64 = await processImageFile(file, {
-            maxSizeMB: 2,
-            maxWidthOrHeight: 1920,
-            useWebWorker: true,
-            // fileType is not specified - will preserve original format (PNG stays PNG, others become JPEG)
-            initialQuality: 0.8
-          });
+          // Product images: WebP, max 200KB (skip re-encode if already WebP and ≤200KB)
+          const base64 = await processProductImageFile(file);
 
           console.log(`✅ [COLOR IMAGE] Image ${index + 1}/${imageFiles.length} processed, base64 length:`, base64.length);
           return base64;
         })
       );
 
-      console.log('📥 [ADMIN] All images processed, adding to variant:', {
+      // R2 only: color images must be stored on R2
+      const r2Urls = await uploadImagesToR2(base64Images);
+      if (!r2Urls || r2Urls.length !== base64Images.length) {
+        setImageUploadError(
+          t('admin.products.add.r2Required') || 'Color images must be uploaded to R2. Please check R2 configuration and try again.'
+        );
+        return;
+      }
+
+      console.log('📥 [ADMIN] Color images uploaded to R2, adding to variant:', {
         variantId: colorImageTarget.variantId,
         colorValue: colorImageTarget.colorValue,
-        imagesCount: uploadedImages.length
+        imagesCount: r2Urls.length,
       });
-      
-      addColorImages(colorImageTarget.variantId, colorImageTarget.colorValue, uploadedImages);
-      console.log('✅ [ADMIN] Color images added to state:', uploadedImages.length);
+
+      addColorImages(colorImageTarget.variantId, colorImageTarget.colorValue, r2Urls);
+      console.log('✅ [ADMIN] Color images added to state:', r2Urls.length);
     } catch (error: any) {
       console.error('❌ [ADMIN] Error uploading color images:', error);
       setImageUploadError(error?.message || t('admin.products.add.failedToProcessImages'));
@@ -3480,6 +3509,7 @@ function AddProductPageContent() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t('admin.products.add.productImages')}
                     <span className="text-xs text-gray-500 ml-2">({t('admin.products.add.uploadMultipleImages')})</span>
+                    <span className="text-xs text-gray-500 block mt-1">{t('admin.products.add.imageFormatHint')}</span>
                   </label>
                   
                   {/* Upload Button */}

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Card, Input } from '@shop/ui';
 import { apiClient, ApiError } from '../../lib/api-client';
 import { formatPrice, formatPriceInCurrency, getStoredCurrency, convertPrice, type CurrencyCode } from '../../lib/currency';
 import { getStoredLanguage } from '../../lib/language';
@@ -611,7 +610,7 @@ export default function CheckoutPage() {
             }
 
             // Get translation for current language, fallback to first available
-            const translation = productData.translations?.find((t: { locale: string }) => t.locale === currentLang) 
+            const translation = productData.translations?.find((t: { locale: string }) => t.locale === language) 
               || productData.translations?.[0];
             const imageUrl = productData.media?.[0] 
               ? (typeof productData.media[0] === 'string' 
@@ -875,12 +874,18 @@ export default function CheckoutPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('checkout.title')}</h1>
-        <Card className="p-6 text-center">
-          <p className="text-gray-600 mb-4">{t('checkout.errors.cartEmpty')}</p>
-          <ProductPageButton variant="primary" onClick={() => router.push('/products')} className="py-3">
-            {t('checkout.buttons.continueShopping')}
-          </ProductPageButton>
-        </Card>
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+          <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-6 border border-[rgba(255,255,255,0)] overflow-clip text-center">
+            <p className="text-gray-600 mb-4">{t('checkout.errors.cartEmpty')}</p>
+            <button
+              onClick={() => router.push('/products')}
+              className="py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300"
+            >
+              {t('checkout.buttons.continueShopping')}
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -894,50 +899,83 @@ export default function CheckoutPage() {
           {/* Checkout Form */}
           <div className="lg:col-span-2 space-y-6">
             {/* Contact Information */}
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.contactInformation')}</h2>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label={t('checkout.form.firstName')}
-                    type="text"
-                    {...register('firstName')}
-                    error={errors.firstName?.message}
-                    disabled={isSubmitting}
-                  />
-                  <Input
-                    label={t('checkout.form.lastName')}
-                    type="text"
-                    {...register('lastName')}
-                    error={errors.lastName?.message}
-                    disabled={isSubmitting}
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input
-                    label={t('checkout.form.email')}
-                    type="email"
-                    {...register('email')}
-                    error={errors.email?.message}
-                    disabled={isSubmitting}
-                  />
-                  <Input
-                    label={t('checkout.form.phone')}
-                    type="tel"
-                    placeholder={t('checkout.placeholders.phone')}
-                    {...register('phone')}
-                    error={errors.phone?.message}
-                    disabled={isSubmitting}
-                  />
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+              <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.contactInformation')}</h2>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        {t('checkout.form.firstName')}
+                      </label>
+                      <input
+                        type="text"
+                        {...register('firstName')}
+                        disabled={isSubmitting}
+                        className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
+                      />
+                      {errors.firstName?.message && (
+                        <p className="mt-1 text-xs text-red-600">{errors.firstName.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        {t('checkout.form.lastName')}
+                      </label>
+                      <input
+                        type="text"
+                        {...register('lastName')}
+                        disabled={isSubmitting}
+                        className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
+                      />
+                      {errors.lastName?.message && (
+                        <p className="mt-1 text-xs text-red-600">{errors.lastName.message}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        {t('checkout.form.email')}
+                      </label>
+                      <input
+                        type="email"
+                        {...register('email')}
+                        disabled={isSubmitting}
+                        className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
+                      />
+                      {errors.email?.message && (
+                        <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        {t('checkout.form.phone')}
+                      </label>
+                      <input
+                        type="tel"
+                        placeholder={t('checkout.placeholders.phone')}
+                        {...register('phone')}
+                        disabled={isSubmitting}
+                        className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
+                      />
+                      {errors.phone?.message && (
+                        <p className="mt-1 text-xs text-red-600">{errors.phone.message}</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </Card>
+            </div>
 
             {/* Shipping Address - Always show (delivery is always selected) */}
-            <Card className="p-6" data-shipping-section>
+            <div className="relative" data-shipping-section>
+              <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+              <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.shippingAddress')}</h2>
                 {(error && error.includes('shipping address')) || (errors.shippingAddress || errors.shippingCity) ? (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-[12px]">
                     <p className="text-sm text-red-600">
                       {error && error.includes('shipping address') 
                         ? error 
@@ -948,8 +986,10 @@ export default function CheckoutPage() {
                 ) : null}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Input
-                      label={t('checkout.form.address')}
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      {t('checkout.form.address')}
+                    </label>
+                    <input
                       type="text"
                       placeholder={t('checkout.placeholders.address')}
                       {...register('shippingAddress', {
@@ -959,13 +999,18 @@ export default function CheckoutPage() {
                           }
                         }
                       })}
-                      error={errors.shippingAddress?.message}
                       disabled={isSubmitting}
+                      className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
                     />
+                    {errors.shippingAddress?.message && (
+                      <p className="mt-1 text-xs text-red-600">{errors.shippingAddress.message}</p>
+                    )}
                   </div>
                   <div>
-                    <Input
-                      label={t('checkout.form.city')}
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                      {t('checkout.form.city')}
+                    </label>
+                    <input
                       type="text"
                       placeholder={t('checkout.placeholders.city')}
                       {...register('shippingCity', {
@@ -975,9 +1020,12 @@ export default function CheckoutPage() {
                           }
                         }
                       })}
-                      error={errors.shippingCity?.message}
                       disabled={isSubmitting}
+                      className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
                     />
+                    {errors.shippingCity?.message && (
+                      <p className="mt-1 text-xs text-red-600">{errors.shippingCity.message}</p>
+                    )}
                   </div>
                 </div>
 
@@ -989,7 +1037,7 @@ export default function CheckoutPage() {
                     </h3>
 
                     {/* Calendar-style month selector */}
-                    <div className="border border-gray-200 rounded-lg p-4 inline-block">
+                    <div className="border border-gray-200 rounded-[12px] p-4 inline-block">
                       <div className="flex items-center justify-between mb-3">
                         <button
                           type="button"
@@ -1114,7 +1162,7 @@ export default function CheckoutPage() {
                           return (
                             <label
                               key={slot.id}
-                              className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                              className={`flex items-center p-3 border-2 rounded-[12px] cursor-pointer transition-all ${
                                 deliveryTimeSlot === slot.id
                                   ? 'border-purple-600 bg-purple-50'
                                   : 'border-gray-300 hover:bg-gray-50'
@@ -1153,21 +1201,24 @@ export default function CheckoutPage() {
                     )}
                   </div>
                 </div>
-              </Card>
+              </div>
+            </div>
 
             {/* Payment Method */}
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.paymentMethod')}</h2>
-              {errors.paymentMethod && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-600">{errors.paymentMethod.message}</p>
-                </div>
-              )}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+              <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.paymentMethod')}</h2>
+                {errors.paymentMethod && (
+                  <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-[12px]">
+                    <p className="text-sm text-red-600">{errors.paymentMethod.message}</p>
+                  </div>
+                )}
               <div className="space-y-3">
                 {paymentMethods.map((method) => (
                   <label
                     key={method.id}
-                    className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                    className={`flex items-center p-4 border-2 rounded-[12px] cursor-pointer transition-all ${
                       paymentMethod === method.id
                         ? 'border-purple-600 bg-purple-50'
                         : 'border-gray-300 hover:bg-gray-50'
@@ -1208,57 +1259,60 @@ export default function CheckoutPage() {
                   </label>
                 ))}
               </div>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* Order Summary */}
           <div>
-            <Card className="p-6 sticky top-4">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.orderSummary')}</h2>
-              <div className="space-y-4 mb-6">
-                <div className="flex justify-between text-gray-600">
-                  <span>{t('checkout.summary.subtotal')}</span>
-                  <span>{formatPrice(cart.totals.subtotal, currency)}</span>
-                </div>
-                <div className="flex justify-between text-gray-600">
-                  <span>{t('checkout.summary.shipping')}</span>
-                  <span>
-                    {loadingDeliveryPrice
-                      ? t('checkout.shipping.loading')
-                      : deliveryPrice !== null
-                        ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ` (${t('checkout.shipping.delivery')})`)
-                        : t('checkout.shipping.enterCity')}
-                  </span>
-                </div>
-                <div className="border-t border-gray-200 pt-4">
-                  <div className="flex justify-between text-lg font-bold text-gray-900">
-                    <span>{t('checkout.summary.total')}</span>
+            <div className="relative sticky top-4">
+              <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+              <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.orderSummary')}</h2>
+                <div className="space-y-4 mb-6">
+                  <div className="flex justify-between text-gray-600">
+                    <span>{t('checkout.summary.subtotal')}</span>
+                    <span>{formatPrice(cart.totals.subtotal, currency)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>{t('checkout.summary.shipping')}</span>
                     <span>
-                      {formatPrice(
-                        cart.totals.subtotal + 
-                        (deliveryPrice !== null ? deliveryPrice : 0),
-                        currency
-                      )}
+                      {loadingDeliveryPrice
+                        ? t('checkout.shipping.loading')
+                        : deliveryPrice !== null
+                          ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ` (${t('checkout.shipping.delivery')})`)
+                          : t('checkout.shipping.enterCity')}
                     </span>
                   </div>
+                  <div className="border-t border-white/20 pt-4">
+                    <div className="flex justify-between text-lg font-bold text-gray-900">
+                      <span>{t('checkout.summary.total')}</span>
+                      <span>
+                        {formatPrice(
+                          cart.totals.subtotal + 
+                          (deliveryPrice !== null ? deliveryPrice : 0),
+                          currency
+                        )}
+                      </span>
+                    </div>
+                  </div>
                 </div>
+
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-[12px]">
+                    <p className="text-sm text-red-600">{error}</p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? t('checkout.buttons.processing') : t('checkout.buttons.placeOrder')}
+                </button>
               </div>
-
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-sm text-red-600">{error}</p>
-                </div>
-              )}
-
-              <ProductPageButton
-                type="submit"
-                variant="primary"
-                className="w-full py-3"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? t('checkout.buttons.processing') : t('checkout.buttons.placeOrder')}
-              </ProductPageButton>
-            </Card>
+            </div>
           </div>
         </div>
       </form>
@@ -1273,13 +1327,15 @@ export default function CheckoutPage() {
           }}
         >
           <div 
-            className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto"
+            className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => {
               e.stopPropagation();
               console.log('[Checkout] Card modal content clicked');
             }}
             style={{ zIndex: 10000 }}
           >
+            <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+            <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
                 {t('checkout.modals.cardDetails').replace('{method}', paymentMethod === 'arca' ? t('checkout.payment.arca') : t('checkout.payment.idram'))}
@@ -1326,30 +1382,36 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <Input
-                  label={t('checkout.form.cardNumber')}
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {t('checkout.form.cardNumber')}
+                </label>
+                <input
                   type="text"
                   placeholder={t('checkout.placeholders.cardNumber')}
                   maxLength={19}
                   {...register('cardNumber')}
-                  error={errors.cardNumber?.message}
                   disabled={isSubmitting}
                   onChange={(e) => {
                     let value = e.target.value.replace(/\s/g, '');
                     value = value.replace(/(.{4})/g, '$1 ').trim();
                     setValue('cardNumber', value);
                   }}
+                  className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
                 />
+                {errors.cardNumber?.message && (
+                  <p className="mt-1 text-xs text-red-600">{errors.cardNumber.message}</p>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Input
-                    label={t('checkout.form.expiryDate')}
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    {t('checkout.form.expiryDate')}
+                  </label>
+                  <input
                     type="text"
                     placeholder={t('checkout.placeholders.expiryDate')}
                     maxLength={5}
                     {...register('cardExpiry')}
-                    error={errors.cardExpiry?.message}
                     disabled={isSubmitting}
                     onChange={(e) => {
                       let value = e.target.value.replace(/\D/g, '');
@@ -1358,39 +1420,53 @@ export default function CheckoutPage() {
                       }
                       setValue('cardExpiry', value);
                     }}
+                    className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
                   />
+                  {errors.cardExpiry?.message && (
+                    <p className="mt-1 text-xs text-red-600">{errors.cardExpiry.message}</p>
+                  )}
                 </div>
                 <div>
-                  <Input
-                    label={t('checkout.form.cvv')}
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    {t('checkout.form.cvv')}
+                  </label>
+                  <input
                     type="text"
                     placeholder={t('checkout.placeholders.cvv')}
                     maxLength={4}
                     {...register('cardCvv')}
-                    error={errors.cardCvv?.message}
                     disabled={isSubmitting}
                     onChange={(e) => {
                       const value = e.target.value.replace(/\D/g, '');
                       setValue('cardCvv', value);
                     }}
+                    className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
                   />
+                  {errors.cardCvv?.message && (
+                    <p className="mt-1 text-xs text-red-600">{errors.cardCvv.message}</p>
+                  )}
                 </div>
               </div>
               <div>
-                <Input
-                  label={t('checkout.form.cardHolderName')}
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  {t('checkout.form.cardHolderName')}
+                </label>
+                <input
                   type="text"
                   placeholder={t('checkout.placeholders.cardHolderName')}
                   {...register('cardHolderName')}
-                  error={errors.cardHolderName?.message}
                   disabled={isSubmitting}
+                  className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
                 />
+                {errors.cardHolderName?.message && (
+                  <p className="mt-1 text-xs text-red-600">{errors.cardHolderName.message}</p>
+                )}
               </div>
             </div>
 
             {/* Error messages for card details */}
             {(errors.cardNumber || errors.cardExpiry || errors.cardCvv || errors.cardHolderName) && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-[12px]">
                 <p className="text-sm text-red-600">
                   {errors.cardNumber?.message || 
                    errors.cardExpiry?.message || 
@@ -1402,7 +1478,7 @@ export default function CheckoutPage() {
 
             {/* Order Summary */}
             {cart && (
-              <div className="bg-gray-50 rounded-lg p-4 space-y-2 mb-6">
+              <div className="bg-white/50 backdrop-blur-sm rounded-[12px] border border-white/30 p-4 space-y-2 mb-6">
                 <h3 className="font-semibold text-gray-900 mb-3">{t('checkout.orderSummary')}</h3>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">{t('checkout.summary.items')}:</span>
@@ -1422,7 +1498,7 @@ export default function CheckoutPage() {
                             : t('checkout.shipping.enterCity')}
                       </span>
                     </div>
-                    <div className="border-t border-gray-200 pt-2 mt-2">
+                    <div className="border-t border-white/20 pt-2 mt-2">
                       <div className="flex justify-between">
                         <span className="font-semibold text-gray-900">{t('checkout.summary.total')}:</span>
                         <span className="font-bold text-gray-900">
@@ -1438,19 +1514,16 @@ export default function CheckoutPage() {
             )}
 
             <div className="flex gap-3">
-              <ProductPageButton
+              <button
                 type="button"
-                variant="outline"
-                className="flex-1 py-3"
                 onClick={() => setShowCardModal(false)}
                 disabled={isSubmitting}
+                className="flex-1 py-2.5 px-6 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 text-gray-900 font-semibold text-base shadow-inner hover:bg-white/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t('checkout.buttons.cancel')}
-              </ProductPageButton>
-              <ProductPageButton
+              </button>
+              <button
                 type="button"
-                variant="primary"
-                className="flex-1 py-3"
                 onClick={handleSubmit(
                   (data) => {
                     setShowCardModal(false);
@@ -1469,9 +1542,11 @@ export default function CheckoutPage() {
                   }
                 )}
                 disabled={isSubmitting}
+                className="flex-1 py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? t('checkout.buttons.processing') : t('checkout.buttons.continueToPayment')}
-              </ProductPageButton>
+              </button>
+            </div>
             </div>
           </div>
         </div>

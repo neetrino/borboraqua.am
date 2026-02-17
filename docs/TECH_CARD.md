@@ -61,7 +61,7 @@
 | 4.2 | ORM        | Prisma 5.x             | ✅      |
 | 4.3 | Migrations | Prisma migrations only | ✅      |
 | 4.4 | Seed       | prisma db seed         | ✅      |
-| 4.5 | Cache      | ioredis (optional)     | 🔄      |
+| 4.5 | Cache      | Next.js (unstable_cache) | ✅      |
 
 ---
 

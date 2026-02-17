@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
 import { productsService } from "@/lib/services/products.service";
+
+const PRODUCTS_LIST_CACHE_REVALIDATE = 60;
 
 const isDbUnavailableError = (error: unknown): boolean => {
   if (!error || typeof error !== "object") return false;
@@ -14,10 +17,13 @@ const isDbUnavailableError = (error: unknown): boolean => {
   );
 };
 
+const MAX_PAGE_SIZE = 100;
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const page = searchParams.get("page") ? parseInt(searchParams.get("page")!, 10) : 1;
-  const limit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!, 10) : 24;
+  const page = Math.max(1, searchParams.get("page") ? parseInt(searchParams.get("page")!, 10) : 1);
+  const requestedLimit = searchParams.get("limit") ? parseInt(searchParams.get("limit")!, 10) : 24;
+  const limit = Math.min(MAX_PAGE_SIZE, Math.max(1, requestedLimit));
 
   try {
     const filters = {
@@ -39,14 +45,23 @@ export async function GET(req: NextRequest) {
       lang: searchParams.get("lang") || "en",
     };
 
-    console.log('🔍 [PRODUCTS API] Filters received:', filters);
-    const result = await productsService.findAll(filters);
-    console.log('✅ [PRODUCTS API] Result:', {
-      dataLength: result.data?.length || 0,
-      total: result.meta?.total || 0,
-      page: result.meta?.page || 0,
-      totalPages: result.meta?.totalPages || 0
-    });
+    const cacheKey = [
+      "products-list",
+      filters.lang ?? "en",
+      String(filters.page),
+      String(filters.limit),
+      filters.search ?? "",
+      filters.filter ?? "",
+      filters.category ?? "",
+      String(filters.minPrice ?? ""),
+      String(filters.maxPrice ?? ""),
+      filters.sort ?? "createdAt",
+    ];
+    const result = await unstable_cache(
+      () => productsService.findAll(filters),
+      cacheKey,
+      { revalidate: PRODUCTS_LIST_CACHE_REVALIDATE }
+    )();
     return NextResponse.json(result);
   } catch (error: unknown) {
     if (isDbUnavailableError(error)) {

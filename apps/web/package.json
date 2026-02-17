@@ -6,6 +6,7 @@
     "dev": "next dev",
     "dev:webpack": "next dev --no-turbo",
     "dev:clean": "node -e \"require('fs').rmSync('.next', {recursive: true, force: true})\" && next dev",
+    "tunnel": "node scripts/tunnel.js",
     "prebuild": "cd ../../packages/db && npm run db:generate",
     "prebuild:migrate": "node scripts/check-db-and-migrate.js",
     "build": "npm run prebuild:migrate && next build",
@@ -16,6 +17,7 @@
     "reset": "node -e \"require('fs').rmSync('.next', {recursive: true, force: true})\" && cd ../../packages/db && npm run db:generate"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.990.0",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^5.9.0",
     "@shop/design-tokens": "*",
@@ -23,7 +25,6 @@
     "@white-shop/db": "*",
     "bcryptjs": "^2.4.3",
     "browser-image-compression": "^2.0.2",
-    "ioredis": "^5.3.2",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.555.0",
     "meilisearch": "^0.38.0",
@@ -34,7 +35,6 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "dotenv": "^16.3.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/browser-image-compression": "^1.0.1",
     "@types/jsonwebtoken": "^9.0.5",
@@ -42,6 +42,7 @@
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.0",
+    "dotenv": "^16.3.1",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.0.7",
     "postcss": "^8.4.0",

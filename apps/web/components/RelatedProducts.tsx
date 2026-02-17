@@ -14,6 +14,7 @@ interface RelatedProduct {
   id: string;
   slug: string;
   title: string;
+  description?: string | null;
   price: number;
   originalPrice?: number | null;
   compareAtPrice: number | null;
@@ -22,6 +23,7 @@ interface RelatedProduct {
   inStock: boolean;
   minimumOrderQuantity?: number;
   orderQuantityIncrement?: number;
+  defaultVariantId?: string | null;
   brand?: {
     id: string;
     name: string;
@@ -389,6 +391,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
 
     const success = await addToCart({
       product,
+      variantId: product.defaultVariantId || undefined,
       quantity,
       isLoggedIn,
       router,
@@ -418,11 +421,13 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     id: product.id,
     slug: product.slug,
     title: product.title,
+    description: product.description || undefined,
     price: product.price,
     image: product.image,
     inStock: product.inStock,
     minimumOrderQuantity: product.minimumOrderQuantity,
     orderQuantityIncrement: product.orderQuantityIncrement,
+    defaultVariantId: product.defaultVariantId || null,
     brand: product.brand || null,
   });
 
@@ -504,6 +509,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                         formatPrice={(price: number, curr?: any) => formatPrice(price, curr || currency)}
                         currency={currency}
                         compact={true}
+                        isRelated={true}
                       />
                     </div>
                   );

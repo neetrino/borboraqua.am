@@ -2,7 +2,7 @@ import { db } from "@white-shop/db";
 import { Prisma } from "@prisma/client";
 import { adminService } from "./admin.service";
 import { t } from "../i18n";
-import { ensureProductVariantAttributesColumn, ensureProductOrderQuantityColumns } from "../utils/db-ensure";
+import { ensureProductVariantAttributesColumn } from "../utils/db-ensure";
 import {
   processImageUrl,
   smartSplitUrls,
@@ -20,6 +20,8 @@ interface ProductFilters {
   page?: number;
   limit?: number;
   lang?: string;
+  /** When true, returns minimal fields for listing (e.g. home page). Keeps payload under Next.js cache limit. */
+  listOnly?: boolean;
 }
 
 // Типы для продуктов с включенными отношениями
@@ -72,20 +74,25 @@ class ProductsService {
       page = 1,
       limit = 24,
       lang = "en",
+      listOnly = false,
     } = filters;
 
-    // Ensure order quantity columns exist before querying
-    await ensureProductOrderQuantityColumns();
-
-    // Don't use skip here - we'll fetch all products, filter in memory, then paginate
-    // This ensures accurate total count for pagination
     const bestsellerProductIds: string[] = [];
 
     // Build where clause
-    const where: any = {
+    const where: Record<string, unknown> = {
       published: true,
       deletedAt: null,
     };
+
+    // Price filter at DB level
+    if (minPrice != null || maxPrice != null) {
+      const priceFilter: { gte?: number; lte?: number } = {};
+      if (minPrice != null) priceFilter.gte = minPrice;
+      if (maxPrice != null) priceFilter.lte = maxPrice;
+      const existingAnd = Array.isArray(where.AND) ? where.AND : [];
+      where.AND = [...existingAnd, { variants: { some: { price: priceFilter } } }];
+    }
 
     // Add search filter
     if (search && search.trim()) {
@@ -273,305 +280,68 @@ class ProductsService {
       }
     }
 
-    // Get products
-    console.log('🔍 [PRODUCTS SERVICE] Fetching products with where clause:', JSON.stringify(where, null, 2));
-    
-    // Base include without productAttributes (for backward compatibility)
-    const baseInclude = {
-      translations: true,
+    const skip = (page - 1) * limit;
+
+    // List query: only fields needed for listing (pagination + minimal payload)
+    const listInclude = {
+      translations: {
+        select: { locale: true, slug: true, title: true, subtitle: true, descriptionHtml: true },
+      },
       brand: {
-        include: {
-          translations: true,
+        select: {
+          id: true,
+          translations: { select: { locale: true, name: true } },
         },
       },
       variants: {
-        where: {
-          published: true,
-        },
-        include: {
-          options: {
-            include: {
-              attributeValue: {
-                include: {
-                  attribute: true,
-                  translations: true,
-                },
-              },
-            },
-          },
-        },
+        where: { published: true },
+        select: { id: true, price: true, compareAtPrice: true, stock: true },
+        orderBy: { price: 'asc' as const },
+        take: 1,
       },
-      labels: true,
+      labels: {
+        select: { id: true, type: true, value: true, position: true, color: true },
+      },
       categories: {
-        include: {
-          translations: true,
+        select: {
+          id: true,
+          translations: { select: { locale: true, slug: true, title: true } },
         },
       },
+      // Note: media is a scalar field (Json[]), so it's automatically included, no need to add it to include
     };
 
-    // Try to include productAttributes, but fallback if table doesn't exist
-    // Also handle case when attribute_values.colors column doesn't exist
-    let products;
-    try {
+    let products: ProductWithRelations[];
+    let total: number;
+
+    if (filter === "bestseller" && bestsellerProductIds.length > 0) {
+      total = bestsellerProductIds.length;
+      const pageIds = bestsellerProductIds.slice(skip, skip + limit);
+      if (pageIds.length === 0) {
+        products = [];
+      } else {
+        const whereBestseller = { ...where, id: { in: pageIds } };
+        products = await db.product.findMany({
+          where: whereBestseller,
+          include: listInclude,
+        });
+        const rank = new Map(pageIds.map((id, i) => [id, i]));
+        products.sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
+      }
+    } else {
+      total = await db.product.count({ where });
+      const orderBy =
+        sort === "price"
+          ? ({ variants: { _min: { price: "desc" as const } } } as const)
+          : ({ createdAt: "desc" as const } as const);
       products = await db.product.findMany({
         where,
-        include: {
-          ...baseInclude,
-          productAttributes: {
-            include: {
-              attribute: {
-                include: {
-                  translations: true,
-                  values: {
-                    include: {
-                      translations: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        // Fetch all products for filtering (no skip - we'll paginate after filtering)
-        take: 10000, // Fetch a large batch to ensure we get all products for accurate total count
-      });
-      console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (with productAttributes)`);
-    } catch (error: any) {
-      // If productAttributes table doesn't exist, retry without it
-      if (error?.code === 'P2021' || error?.message?.includes('product_attributes') || error?.message?.includes('does not exist')) {
-        console.warn('⚠️ [PRODUCTS SERVICE] product_attributes table not found, fetching without it:', error.message);
-        try {
-          products = await db.product.findMany({
-            where,
-            include: baseInclude,
-            // Fetch all products for filtering (no skip - we'll paginate after filtering)
-            take: 10000,
-          });
-          console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without productAttributes)`);
-        } catch (retryError: any) {
-          // If product_variants.attributes column doesn't exist, try to create it and retry
-          if (retryError?.message?.includes('product_variants.attributes') || 
-              (retryError?.message?.includes('attributes') && retryError?.message?.includes('does not exist'))) {
-            console.warn('⚠️ [PRODUCTS SERVICE] product_variants.attributes column not found, attempting to create it...');
-            try {
-              await ensureProductVariantAttributesColumn();
-              // Retry the query after creating the column
-              products = await db.product.findMany({
-                where,
-                include: baseInclude,
-                // Fetch all products for filtering (no skip - we'll paginate after filtering)
-                take: 10000,
-              });
-              console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (after creating attributes column)`);
-            } catch (attributesError: any) {
-              // If still fails, try without attributeValue include
-              if (attributesError?.code === 'P2022' || attributesError?.message?.includes('attribute_values.colors') || attributesError?.message?.includes('does not exist')) {
-                console.warn('⚠️ [PRODUCTS SERVICE] attribute_values.colors column not found, fetching without attributeValue:', attributesError.message);
-                const baseIncludeWithoutAttributeValue = {
-                  ...baseInclude,
-                  variants: {
-                    ...baseInclude.variants,
-                    include: {
-                      options: true, // Include options without attributeValue relation
-                    },
-                  },
-                };
-                products = await db.product.findMany({
-                  where,
-                  include: baseIncludeWithoutAttributeValue,
-                  // Fetch all products for filtering (no skip - we'll paginate after filtering)
-                  take: 10000,
-                });
-                console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without attributeValue relation)`);
-              } else {
-                throw attributesError;
-              }
-            }
-          } else if (retryError?.code === 'P2022' && (retryError?.message?.includes('minimumOrderQuantity') || retryError?.message?.includes('orderQuantityIncrement'))) {
-            // If order quantity columns don't exist, try to create them and retry
-            console.warn('⚠️ [PRODUCTS SERVICE] products order quantity columns not found, attempting to create them...');
-            try {
-              await ensureProductOrderQuantityColumns();
-              // Retry the query after creating the columns
-              products = await db.product.findMany({
-                where,
-                include: baseInclude,
-                // Fetch all products for filtering (no skip - we'll paginate after filtering)
-                take: 10000,
-              });
-              console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (after creating order quantity columns)`);
-            } catch (orderQuantityError: any) {
-              // If still fails, throw the error
-              throw orderQuantityError;
-            }
-          } else if (retryError?.code === 'P2022' || retryError?.message?.includes('attribute_values.colors') || retryError?.message?.includes('does not exist')) {
-            // If attribute_values.colors column doesn't exist, retry without attributeValue include
-            console.warn('⚠️ [PRODUCTS SERVICE] attribute_values.colors column not found, fetching without attributeValue:', retryError.message);
-            const baseIncludeWithoutAttributeValue = {
-              ...baseInclude,
-              variants: {
-                ...baseInclude.variants,
-                include: {
-                  options: true, // Include options without attributeValue relation
-                },
-              },
-            };
-            products = await db.product.findMany({
-              where,
-              include: baseIncludeWithoutAttributeValue,
-              // Fetch all products for filtering (no skip - we'll paginate after filtering)
-              take: 10000,
-            });
-            console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without attributeValue relation)`);
-          } else {
-            throw retryError;
-          }
-        }
-      } else if (error?.code === 'P2022' && (error?.message?.includes('minimumOrderQuantity') || error?.message?.includes('orderQuantityIncrement'))) {
-        // If order quantity columns don't exist, try to create them and retry
-        console.warn('⚠️ [PRODUCTS SERVICE] products order quantity columns not found, attempting to create them...');
-        try {
-          await ensureProductOrderQuantityColumns();
-          // Retry the query after creating the columns
-          products = await db.product.findMany({
-            where,
-            include: {
-              ...baseInclude,
-              productAttributes: {
-                include: {
-                  attribute: {
-                    include: {
-                      translations: true,
-                      values: {
-                        include: {
-                          translations: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-            // Fetch all products for filtering (no skip - we'll paginate after filtering)
-            take: 10000,
-          });
-          console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (after creating order quantity columns)`);
-        } catch (orderQuantityError: any) {
-          // If still fails, try without productAttributes
-          if (orderQuantityError?.code === 'P2021' || orderQuantityError?.message?.includes('product_attributes')) {
-            products = await db.product.findMany({
-              where,
-              include: baseInclude,
-              // Fetch all products for filtering (no skip - we'll paginate after filtering)
-              take: 10000,
-            });
-            console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (after creating order quantity columns, without productAttributes)`);
-          } else {
-            throw orderQuantityError;
-          }
-        }
-      } else if (error?.code === 'P2022' || error?.message?.includes('attribute_values.colors') || error?.message?.includes('does not exist')) {
-        // If attribute_values.colors column doesn't exist, retry without attributeValue include
-        console.warn('⚠️ [PRODUCTS SERVICE] attribute_values.colors column not found, fetching without attributeValue:', error.message);
-        const baseIncludeWithoutAttributeValue = {
-          ...baseInclude,
-          variants: {
-            ...baseInclude.variants,
-            include: {
-              options: true, // Include options without attributeValue relation
-            },
-          },
-        };
-        try {
-          products = await db.product.findMany({
-              where,
-              include: {
-                ...baseIncludeWithoutAttributeValue,
-                productAttributes: {
-                  include: {
-                    attribute: {
-                      include: {
-                        translations: true,
-                        values: {
-                          include: {
-                            translations: true,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            // Fetch all products for filtering (no skip - we'll paginate after filtering)
-            take: 10000,
-          });
-          console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without attributeValue, with productAttributes)`);
-        } catch (retryError: any) {
-          // If productAttributes also fails, try without it
-          if (retryError?.code === 'P2021' || retryError?.message?.includes('product_attributes')) {
-            products = await db.product.findMany({
-              where,
-              include: baseIncludeWithoutAttributeValue,
-              // Fetch all products for filtering (no skip - we'll paginate after filtering)
-              take: 10000,
-            });
-            console.log(`✅ [PRODUCTS SERVICE] Found ${products.length} products from database (without attributeValue and productAttributes)`);
-          } else {
-            throw retryError;
-          }
-        }
-      } else {
-        // Re-throw if it's a different error
-        throw error;
-      }
-    }
-
-    // Filter by price, colors, sizes, brand in memory
-    if (minPrice || maxPrice) {
-      const min = minPrice || 0;
-      const max = maxPrice || Infinity;
-      products = products.filter((product: ProductWithRelations) => {
-        const variants = Array.isArray(product.variants) ? product.variants : [];
-        if (variants.length === 0) return false;
-        const prices = variants.map((v: { price: number }) => v.price).filter((p: number | undefined) => p !== undefined);
-        if (prices.length === 0) return false;
-        const minPrice = Math.min(...prices);
-        return minPrice >= min && minPrice <= max;
+        orderBy,
+        skip,
+        take: limit,
+        include: listInclude,
       });
     }
-
-
-    // Sort
-    if (filter === "bestseller" && bestsellerProductIds.length > 0) {
-      const rank = new Map<string, number>();
-      bestsellerProductIds.forEach((id, index) => rank.set(id, index));
-      products.sort((a: ProductWithRelations, b: ProductWithRelations) => {
-        const aRank = rank.get(a.id) ?? Number.MAX_SAFE_INTEGER;
-        const bRank = rank.get(b.id) ?? Number.MAX_SAFE_INTEGER;
-        return aRank - bRank;
-      });
-    } else if (sort === "price") {
-      products.sort((a: ProductWithRelations, b: ProductWithRelations) => {
-        const aVariants = Array.isArray(a.variants) ? a.variants : [];
-        const bVariants = Array.isArray(b.variants) ? b.variants : [];
-        const aPrice = aVariants.length > 0 ? Math.min(...aVariants.map((v: { price: number }) => v.price)) : 0;
-        const bPrice = bVariants.length > 0 ? Math.min(...bVariants.map((v: { price: number }) => v.price)) : 0;
-        return bPrice - aPrice;
-      });
-    } else {
-      products.sort((a: ProductWithRelations, b: ProductWithRelations) => {
-        const aValue = a[sort as keyof typeof a] as Date;
-        const bValue = b[sort as keyof typeof b] as Date;
-        return new Date(bValue).getTime() - new Date(aValue).getTime();
-      });
-    }
-
-    // Calculate total from filtered products (before pagination)
-    const total = products.length;
-    
-    // Apply pagination after filtering
-    const skip = (page - 1) * limit;
-    products = products.slice(skip, skip + limit);
 
     // Get discount settings
     const discountSettings = await db.settings.findMany({
@@ -613,13 +383,59 @@ class ProductsService {
         ? variants.sort((a: { price: number }, b: { price: number }) => a.price - b.price)[0]
         : null;
 
+      const originalPrice = variant?.price || 0;
+      let finalPrice = originalPrice;
+      const productDiscount = product.discountPercent || 0;
+      let appliedDiscount = 0;
+      if (productDiscount > 0) {
+        appliedDiscount = productDiscount;
+      } else {
+        const primaryCategoryId = product.primaryCategoryId;
+        if (primaryCategoryId && categoryDiscounts[primaryCategoryId]) {
+          appliedDiscount = categoryDiscounts[primaryCategoryId];
+        } else {
+          const brandId = product.brandId;
+          if (brandId && brandDiscounts[brandId]) {
+            appliedDiscount = brandDiscounts[brandId];
+          } else if (globalDiscount > 0) {
+            appliedDiscount = globalDiscount;
+          }
+        }
+      }
+      if (appliedDiscount > 0 && originalPrice > 0) {
+        finalPrice = originalPrice * (1 - appliedDiscount / 100);
+      }
+
+      const image = (() => {
+        if (!Array.isArray(product.media) || product.media.length === 0) return null;
+        const firstImage = processImageUrl(product.media[0]);
+        return firstImage || null;
+      })();
+
+      if (listOnly) {
+        return {
+          id: product.id,
+          slug: translation?.slug || "",
+          title: translation?.title || "",
+          subtitle: translation?.subtitle || null,
+          description: translation?.descriptionHtml || null,
+          brand: product.brand
+            ? { id: product.brand.id, name: brandTranslation?.name || "" }
+            : null,
+          price: finalPrice,
+          image,
+          inStock: (variant?.stock || 0) > 0,
+          minimumOrderQuantity: (product as any).minimumOrderQuantity || 1,
+          orderQuantityIncrement: (product as any).orderQuantityIncrement || 1,
+          defaultVariantId: (variant as any)?.id || null,
+        };
+      }
+
       // Get all unique colors from ALL variants with imageUrl and colors hex (support both new and old format)
       // IMPORTANT: Only collect colors that actually exist in variants
       // IMPORTANT: Process ALL variants to get ALL colors, not just the first variant
       const colorMap = new Map<string, { value: string; imageUrl?: string | null; colors?: string[] | null }>();
-      
-      console.log(`🎨 [PRODUCTS SERVICE] Processing ${variants.length} variants for product ${product.id} to collect colors`);
-      
+
       // Process all variants to collect all unique colors
       variants.forEach((v: any) => {
         // First, try to get ALL color options from variant.options (not just the first one)
@@ -683,9 +499,7 @@ class ProductsService {
           });
         }
       });
-      
-      console.log(`🎨 [PRODUCTS SERVICE] Collected ${colorMap.size} unique colors from ${variants.length} variants for product ${product.id}`);
-      
+
       // Also check productAttributes for color attribute values with imageUrl and colors
       // IMPORTANT: Only update colors that already exist in variants (already in colorMap)
       // Do not add new colors that don't exist in variants
@@ -718,34 +532,6 @@ class ProductsService {
       
       const availableColors = Array.from(colorMap.values());
 
-      const originalPrice = variant?.price || 0;
-      let finalPrice = originalPrice;
-      const productDiscount = product.discountPercent || 0;
-      
-      // Calculate applied discount with priority: productDiscount > categoryDiscount > brandDiscount > globalDiscount
-      let appliedDiscount = 0;
-      if (productDiscount > 0) {
-        appliedDiscount = productDiscount;
-      } else {
-        // Check category discounts
-        const primaryCategoryId = product.primaryCategoryId;
-        if (primaryCategoryId && categoryDiscounts[primaryCategoryId]) {
-          appliedDiscount = categoryDiscounts[primaryCategoryId];
-        } else {
-          // Check brand discounts
-          const brandId = product.brandId;
-          if (brandId && brandDiscounts[brandId]) {
-            appliedDiscount = brandDiscounts[brandId];
-          } else if (globalDiscount > 0) {
-            appliedDiscount = globalDiscount;
-          }
-        }
-      }
-
-      if (appliedDiscount > 0 && originalPrice > 0) {
-        finalPrice = originalPrice * (1 - appliedDiscount / 100);
-      }
-
       // Get categories with translations
       const categories = Array.isArray(product.categories) ? product.categories.map((cat: { id: string; translations?: Array<{ locale: string; slug: string; title: string }> }) => {
         const catTranslations = Array.isArray(cat.translations) ? cat.translations : [];
@@ -761,6 +547,7 @@ class ProductsService {
         id: product.id,
         slug: translation?.slug || "",
         title: translation?.title || "",
+        description: translation?.descriptionHtml || null,
         brand: product.brand
           ? {
               id: product.brand.id,
@@ -772,17 +559,9 @@ class ProductsService {
         originalPrice: appliedDiscount > 0 ? originalPrice : variant?.compareAtPrice || null,
         compareAtPrice: variant?.compareAtPrice || null,
         discountPercent: appliedDiscount > 0 ? appliedDiscount : null,
-        image: (() => {
-          // Use unified image utilities to get first valid main image
-          if (!Array.isArray(product.media) || product.media.length === 0) {
-            return null;
-          }
-          
-          // Process first image
-          const firstImage = processImageUrl(product.media[0]);
-          return firstImage || null;
-        })(),
+        image,
         inStock: (variant?.stock || 0) > 0,
+        defaultVariantId: (variant as any)?.id || null,
         labels: (() => {
           // Map existing labels
           const existingLabels = Array.isArray(product.labels) ? product.labels.map((label: { id: string; type: string; value: string; position: string; color: string | null }) => ({
@@ -820,14 +599,12 @@ class ProductsService {
                 position: position as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
                 color: '#6B7280', // Gray color for out of stock
               });
-              
-              console.log(`🏷️ [PRODUCTS SERVICE] Added "Out of Stock" label to product ${product.id} (${lang})`);
             }
           }
-          
+
           return existingLabels;
         })(),
-        colors: availableColors, // Add available colors array
+        colors: availableColors,
         minimumOrderQuantity: (product as any).minimumOrderQuantity || 1,
         orderQuantityIncrement: (product as any).orderQuantityIncrement || 1,
       };
@@ -1378,11 +1155,9 @@ class ProductsService {
               position: position as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
               color: '#6B7280', // Gray color for out of stock
             });
-            
-            console.log(`🏷️ [PRODUCTS SERVICE] Added "Out of Stock" label to product ${product.id} (${lang})`);
           }
         }
-        
+
         return existingLabels;
       })(),
       variants: Array.isArray(product.variants) ? product.variants

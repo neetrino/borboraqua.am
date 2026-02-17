@@ -129,8 +129,7 @@
       "aboutUs": "About Us",
       "contact": "Contact",
       "shop": "Shop"
-    },
-    "copyright": "Copyright © 2024 | New Aqua LLC | All Rights Reserved"
+    }
   },
   "search": {
     "placeholder": "Search products..."

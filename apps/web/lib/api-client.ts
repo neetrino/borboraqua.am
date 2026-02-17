@@ -200,7 +200,8 @@ class ApiClient {
     const url = this.buildUrl(endpoint, options?.params);
     const maxRetries = 3;
     const retryDelay = 1000; // 1 second
-    const timeout = 30000; // 30 seconds timeout
+    // Reduced timeout for faster failure - 10 seconds for product details, 15 seconds for other requests
+    const timeout = endpoint.includes('/products/') ? 10000 : 15000;
     
     console.log('🌐 [API CLIENT] GET request:', { url, endpoint, baseUrl: this.baseUrl });
     
@@ -388,12 +389,28 @@ class ApiClient {
       
       console.log('📤 [API CLIENT] POST request:', { url, data: data ? 'provided' : 'none' });
       
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: this.getHeaders(options),
-        body: data ? JSON.stringify(data) : undefined,
-        ...options,
-      });
+      // Add timeout for POST requests - 10 seconds for cart operations, 15 seconds for others
+      const timeout = endpoint.includes('/cart/') ? 10000 : 15000;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+      
+      let response: Response;
+      try {
+        response = await fetch(url, {
+          method: 'POST',
+          headers: this.getHeaders(options),
+          body: data ? JSON.stringify(data) : undefined,
+          signal: controller.signal,
+          ...options,
+        });
+        clearTimeout(timeoutId);
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          throw new Error(`Request timeout: API server did not respond within ${timeout / 1000} seconds. URL: ${url}`);
+        }
+        throw fetchError;
+      }
 
       console.log('📥 [API CLIENT] Response status:', response.status, response.statusText);
 

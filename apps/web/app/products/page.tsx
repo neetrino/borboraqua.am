@@ -1,18 +1,23 @@
 import { getStoredLanguage } from '../../lib/language';
 import { t } from '../../lib/i18n';
 import { cookies } from 'next/headers';
+import { unstable_cache } from 'next/cache';
 
 import { ProductsGrid } from '../../components/ProductsGrid';
 import { ProductsHero } from '../../components/ProductsHero';
 import { ProductsPagination } from '../../components/ProductsPagination';
 import { productsService } from '../../lib/services/products.service';
 
-const PAGE_CONTAINER = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8';
+/** Cache revalidate (seconds). */
+const PRODUCTS_PAGE_REVALIDATE = 60;
+
+const MAX_COLORS_PER_PRODUCT = 20;
 
 interface Product {
   id: string;
   slug: string;
   title: string;
+  description?: string | null;
   price: number;
   compareAtPrice: number | null;
   image: string | null;
@@ -28,6 +33,7 @@ interface Product {
     position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
     color: string | null;
   }>;
+  colors?: Array<{ value: string; imageUrl?: string | null; colors?: string[] | null }>;
 }
 
 interface ProductsResponse {
@@ -41,8 +47,40 @@ interface ProductsResponse {
 }
 
 /**
- * Fetch products (PRODUCTION SAFE)
- * Directly calls the service instead of HTTP fetch for better reliability on Vercel
+ * Trim product to grid-only fields so cached payload stays under Next.js 2MB limit.
+ */
+function trimProductForGrid(p: {
+  id: string;
+  slug?: string | null;
+  title?: string | null;
+  description?: string | null;
+  price?: number;
+  compareAtPrice?: number | null;
+  originalPrice?: number | null;
+  image?: string | null;
+  inStock?: boolean;
+  brand?: { id: string; name: string } | null;
+  colors?: Array<{ value: string; imageUrl?: string | null; colors?: string[] | null }>;
+  labels?: unknown[];
+}): Product {
+  const colors = Array.isArray(p.colors) ? p.colors.slice(0, MAX_COLORS_PER_PRODUCT) : [];
+  return {
+    id: p.id,
+    slug: p.slug ?? '',
+    title: p.title ?? '',
+    description: p.description ?? null,
+    price: p.price ?? 0,
+    compareAtPrice: p.compareAtPrice ?? p.originalPrice ?? null,
+    image: p.image ?? null,
+    inStock: p.inStock ?? true,
+    brand: p.brand ?? null,
+    labels: (p.labels ?? []) as Product['labels'],
+    colors,
+  };
+}
+
+/**
+ * Fetch products with cache. We cache only the trimmed response (grid fields) to stay under 2MB.
  */
 async function getProducts(
   page: number = 1,
@@ -50,22 +88,19 @@ async function getProducts(
   limit: number = 24
 ): Promise<ProductsResponse> {
   try {
-    // Try to get language from cookies (server-side) first, then fallback to getStoredLanguage
     let language: string = 'en';
     try {
       const cookieStore = await cookies();
       const langCookie = cookieStore.get('shop_language');
-      if (langCookie && langCookie.value && ['hy', 'en', 'ru'].includes(langCookie.value)) {
+      if (langCookie?.value && ['hy', 'en', 'ru'].includes(langCookie.value)) {
         language = langCookie.value;
       } else {
         language = getStoredLanguage();
       }
     } catch {
-      // If cookies() fails, use getStoredLanguage (will return 'en' on server-side)
       language = getStoredLanguage();
     }
-    
-    // Build filters object for productsService
+
     const filters = {
       page,
       limit,
@@ -73,26 +108,30 @@ async function getProducts(
       search: search?.trim() || undefined,
     };
 
-    console.log("🌐 [PRODUCTS] Fetch products directly from service", { filters });
-
-    // Directly call the service instead of HTTP fetch
-    // This works better on Vercel since we're already on the server side
-    const result = await productsService.findAll(filters);
+    const result = await unstable_cache(
+      async () => {
+        const raw = await productsService.findAll(filters);
+        if (!raw.data || !Array.isArray(raw.data)) {
+          return { data: [], meta: { total: 0, page: 1, limit: 24, totalPages: 0 } };
+        }
+        return {
+          data: raw.data.map(trimProductForGrid),
+          meta: raw.meta,
+        };
+      },
+      ['products-page', language, String(page), String(limit), search?.trim() ?? ''],
+      { revalidate: PRODUCTS_PAGE_REVALIDATE }
+    )();
 
     if (!result.data || !Array.isArray(result.data)) {
-      return {
-        data: [],
-        meta: { total: 0, page: 1, limit: 24, totalPages: 0 }
-      };
+      return { data: [], meta: { total: 0, page: 1, limit: 24, totalPages: 0 } };
     }
-
     return result;
-
   } catch (e) {
-    console.error("❌ PRODUCT ERROR", e);
+    console.error('❌ PRODUCT ERROR', e);
     return {
       data: [],
-      meta: { total: 0, page: 1, limit: 24, totalPages: 0 }
+      meta: { total: 0, page: 1, limit: 24, totalPages: 0 },
     };
   }
 }
@@ -106,28 +145,8 @@ export default async function ProductsPage({ searchParams }: any) {
   // Show 9 products per page on desktop, 8 on mobile
   const perPage = 9;
 
-  const productsData = await getProducts(
-    page,
-    params?.search,
-    perPage
-  );
-
-  // ------------------------------------
-  // 🔧 FIX: normalize products 
-  // add missing inStock, missing image fields 
-  // ------------------------------------
-  const normalizedProducts = productsData.data.map((p: any) => ({
-    id: p.id,
-    slug: p.slug,
-    title: p.title,
-    price: p.price,
-    compareAtPrice: p.compareAtPrice ?? p.originalPrice ?? null,
-    image: p.image ?? null,
-    inStock: p.inStock ?? true,      // ⭐ FIXED
-    brand: p.brand ?? null,
-    colors: p.colors ?? [],          // ⭐ Add colors array
-    labels: p.labels ?? []            // ⭐ Add labels array (includes "Out of Stock" label)
-  }));
+  const productsData = await getProducts(page, params?.search, perPage);
+  const normalizedProducts = productsData.data;
 
   // Get language for translations - try cookies first, then fallback
   let language: string = 'en';

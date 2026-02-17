@@ -277,7 +277,7 @@ export function MobileMenu({
             e.currentTarget.style.background = 'transparent';
           }}
         >
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -303,30 +303,48 @@ export function MobileMenu({
         <nav className="flex flex-col gap-6">
           <button
             onClick={() => {
-              router.push('/about');
+              router.push('/');
               setShowMobileMenu(false);
             }}
-            className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            {t('home.navigation.aboutUs')}
+            HOME
           </button>
           <button
             onClick={() => {
-              router.push('/contact');
+              router.push('/products');
               setShowMobileMenu(false);
             }}
-            className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            {t('home.navigation.contactUs')}
+            SHOP
+          </button>
+          <button
+            onClick={() => {
+              router.push('/about');
+              setShowMobileMenu(false);
+            }}
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
+          >
+            ABOUT US
           </button>
           <button
             onClick={() => {
               router.push('/blog');
               setShowMobileMenu(false);
             }}
-            className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            {t('home.navigation.blog')}
+            BLOG
+          </button>
+          <button
+            onClick={() => {
+              router.push('/contact');
+              setShowMobileMenu(false);
+            }}
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
+          >
+            CONTACT
           </button>
           <button
             onClick={() => {
@@ -337,9 +355,9 @@ export function MobileMenu({
               }
               setShowMobileMenu(false);
             }}
-            className="text-left text-gray-400 font-bold text-lg uppercase tracking-wide hover:text-gray-600 transition-colors"
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            {t('common.navigation.logout').toUpperCase()}
+            {isLoggedIn ? 'LOGOUT' : 'LOG IN'}
           </button>
         </nav>
       </div>
@@ -563,7 +581,7 @@ export function ProfileMenuDrawer({ tabs, activeTab, onSelect }: ProfileMenuDraw
 }
 
 // Mobile Bottom Navigation Images
-const imgEllipse2 = "/assets/home/imgEllipse2.svg";
+const imgEllipse41 = "/assets/home/imgEllipse41.svg";
 const imgHomeVector = "/assets/home/Vector1.svg";
 const imgVector1 = "/assets/home/1254.svg";
 const imgGroup2148 = "/assets/home/Cart.svg";
@@ -571,16 +589,20 @@ const imgGroup2149 = "/assets/home/imgGroup2149.svg";
 
 /**
  * Top Header Bar for all pages (except home page)
- * Contains search, logo, and hamburger menu with white background
+ * Contains search, current page title, and hamburger menu with white background
  */
 interface TopHeaderBarProps {
   router: ReturnType<typeof useRouter>;
+  pathname: string;
+  t: (key: string) => string;
   setShowSearchModal: (show: boolean) => void;
   setShowMobileMenu: (show: boolean) => void;
 }
 
 export function TopHeaderBar({
   router,
+  pathname,
+  t,
   setShowSearchModal,
   setShowMobileMenu,
 }: TopHeaderBarProps) {
@@ -691,8 +713,8 @@ export function TopHeaderBar({
         borderColor: 'rgba(255, 255, 255, 0.5)',
       }}
     >
-      <div className="flex items-center justify-between pl-4 pr-4 py-3 h-[73px] w-full">
-        <div className="flex items-center gap-2">
+      <div className="relative flex items-center justify-between pl-4 pr-4 py-3 h-[73px] w-full">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Hamburger Menu Button */}
           <button
             onClick={() => setShowMobileMenu(true)}
@@ -720,9 +742,9 @@ export function TopHeaderBar({
             </div>
           </button>
         </div>
-        
+
         {/* Language & Currency Selector */}
-        <div className="relative z-[200]" ref={langCurrencyMenuRef}>
+        <div className="relative z-[200] flex-shrink-0" ref={langCurrencyMenuRef}>
           <button
             ref={buttonRef}
             onClick={() => setShowLangCurrencyMenu(!showLangCurrencyMenu)}
@@ -982,7 +1004,7 @@ export function MobileBottomNavigation() {
             >
               {activeIndex === 0 && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse2} />
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
@@ -1001,7 +1023,7 @@ export function MobileBottomNavigation() {
             >
               {activeIndex === 1 && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse2} />
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
@@ -1020,7 +1042,7 @@ export function MobileBottomNavigation() {
             >
               {activeIndex === 2 && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse2} />
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
@@ -1045,7 +1067,7 @@ export function MobileBottomNavigation() {
             >
               {activeIndex === 3 && (
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse2} />
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />

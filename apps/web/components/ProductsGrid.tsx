@@ -11,12 +11,14 @@ interface Product {
   id: string;
   slug: string;
   title: string;
+  description?: string | null;
   price: number;
   compareAtPrice: number | null;
   image: string | null;
   inStock: boolean;
   minimumOrderQuantity?: number;
   orderQuantityIncrement?: number;
+  defaultVariantId?: string | null;
   brand: {
     id: string;
     name: string;
@@ -112,6 +114,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
 
     const success = await addToCart({
       product,
+      variantId: product.defaultVariantId || undefined,
       quantity,
       isLoggedIn,
       router,
@@ -188,6 +191,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     id: product.id,
     slug: product.slug,
     title: product.title,
+    description: product.description ?? undefined,
     minimumOrderQuantity: product.minimumOrderQuantity,
     orderQuantityIncrement: product.orderQuantityIncrement,
     price: product.price,

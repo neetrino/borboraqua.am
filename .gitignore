@@ -10,6 +10,7 @@ Thumbs.db
 # Env and secrets
 .env
 .env.*
+.env.local
 !.env.example
 
 # Logs and temp
@@ -24,3 +25,4 @@ temp/
 # .vscode/
 # *.swp
 # *.swo
+payment integration/

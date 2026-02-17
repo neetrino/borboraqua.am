@@ -22,6 +22,7 @@ export interface AddToCartProduct {
   id: string;
   slug: string;
   inStock?: boolean;
+  defaultVariantId?: string | null;
 }
 
 export interface AddToCartOptions {
@@ -56,8 +57,8 @@ export async function addToCart({
       const stored = localStorage.getItem('shop_cart_guest');
       const cart = stored ? JSON.parse(stored) : [];
       
-      // If we have variantId, use it, otherwise get from product details
-      let finalVariantId = variantId;
+      // If we have variantId, use it, otherwise try defaultVariantId, otherwise get from product details
+      let finalVariantId = variantId || product.defaultVariantId || undefined;
       
       if (!finalVariantId) {
         // Get product details to get variant ID
@@ -108,7 +109,8 @@ export async function addToCart({
 
   // Logged in user - use API
   try {
-    let finalVariantId = variantId;
+    // If we have variantId, use it, otherwise try defaultVariantId, otherwise get from product details
+    let finalVariantId = variantId || product.defaultVariantId || undefined;
 
     // If no variantId provided, get from product details
     if (!finalVariantId) {
@@ -178,7 +180,7 @@ export async function addToCart({
 // Local image paths - main logo + footer/background wave
 const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
 // Footer/background wave PNG from Figma, saved locally in public/assets/home
-const imgDanielSinocaAancLsb0SU0Unsplash1 = "/assets/home/imgDanielWave.png";
+const imgDanielSinocaAancLsb0SU0Unsplash1 = "/assets/home/banner/imgDanielWave.webp";
 const imgIcon2 = "/assets/home/imgIcon2.svg";
 const imgSvg = "/assets/home/imgSvg.svg";
 const imgSvg1 = "/assets/home/imgSvg1.svg";
@@ -195,6 +197,7 @@ const imgCurrencyArrow = "http://localhost:3845/assets/1df18b1c925444bdbdca1d804
 interface HeaderProps {
   router: ReturnType<typeof useRouter>;
   t: (key: string) => string;
+  pathname: string;
   setShowSearchModal: (show: boolean) => void;
   isLoggedIn: boolean;
   isAdmin: boolean;
@@ -208,6 +211,7 @@ interface HeaderProps {
 export function Header({
   router,
   t,
+  pathname,
   setShowSearchModal,
   isLoggedIn,
   isAdmin,
@@ -377,35 +381,35 @@ export function Header({
             <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={imgBorborAguaLogoColorB2024Colored1} />
           </div>
 
-          {/* Navigation Menu */}
+          {/* Navigation Menu - active item highlighted */}
           <div className={`content-stretch flex font-['Inter:Bold',sans-serif] font-bold gap-[60px] lg:gap-[60px] md:gap-[24px] sm:gap-[12px] items-end justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-[#151e21] uppercase whitespace-nowrap sm:hidden md:flex`}>
             <div
               onClick={() => router.push('/')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname === '/' ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.home')}</p>
             </div>
             <div
               onClick={() => router.push('/products')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/products') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.shop')}</p>
             </div>
             <div
               onClick={() => router.push('/about')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/about') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.aboutUs')}</p>
             </div>
             <div
               onClick={() => router.push('/blog')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/blog') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.blog')}</p>
             </div>
             <div
               onClick={() => router.push('/contact')}
-              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/contact') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.contactUs')}</p>
             </div>
@@ -553,7 +557,11 @@ export function Header({
                 onClick={() => router.push('/login')}
                 className="h-[26px] md:h-[24px] sm:h-[20px] w-[26px] md:w-[22px] sm:w-[20px] relative shrink-0 cursor-pointer flex items-center justify-center"
               >
-                <ExitIcon size={26} className="brightness-0" />
+                <img 
+                  src="/assets/home/VectorHeader.svg" 
+                  alt="Login" 
+                  className="w-full h-full brightness-0"
+                />
               </div>
             )}
           </div>
@@ -574,7 +582,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
   return (
     <>
       {/* Footer */}
-      <div className={`relative h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 w-full ${isHomePage ? 'overflow-hidden mt-[5550px] lg:mt-[5550px] md:mt-[5000px] sm:mt-[4000px]' : 'overflow-visible'}`}>
+      <div className={` z-[9999] relative h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 w-full ${isHomePage ? 'overflow-hidden mt-[5550px] lg:mt-[5550px] md:mt-[5000px] sm:mt-[4000px]' : 'overflow-visible'}`}>
         {/* Footer transition gradient - seamless blend with page background (only for non-home pages) */}
         {!isHomePage && (
           <div className="absolute top-0 left-0 right-0 h-[250px] z-[1]"/>
@@ -769,7 +777,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
             <div className="relative shrink-0">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center justify-center relative">
                 <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[12px] lg:text-[12px] md:text-[11px] sm:text-[10px] text-white whitespace-nowrap">
-                  <p className="leading-[16px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">{t('home.footer.copyright')}</p>
+                  <p className="leading-[16px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">Copyright © 2024 | New Aqua LLC | All Rights Reserved</p>
                 </div>
               </div>
             </div>
@@ -913,6 +921,7 @@ export interface FeaturedProduct {
   inStock: boolean;
   minimumOrderQuantity?: number;
   orderQuantityIncrement?: number;
+  defaultVariantId?: string | null;
   brand: {
     id: string;
     name: string;
@@ -931,6 +940,7 @@ interface FeaturedProductCardProps {
   currency?: CurrencyCode;
   isMobile?: boolean;
   compact?: boolean; // For shop page - smaller cards
+  isRelated?: boolean; // For related products carousel
 }
 
 /**
@@ -950,6 +960,7 @@ export function FeaturedProductCard({
   currency,
   isMobile = false,
   compact = false,
+  isRelated = false,
 }: FeaturedProductCardProps) {
   if (isMobile) {
     // Extract volume from title or subtitle (e.g., "0.5L", "0.33L", "0.25L")
@@ -980,11 +991,12 @@ export function FeaturedProductCard({
         </div>
 
         {/* Rounded Card with Price, Volume, and Add Button */}
-        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[59.39%_0_21.5%_0] rounded-[9999px]">
+        <div className="absolute bg-[rgba(123,201,236,0.6)] inset-[59.39%_0_21.5%_0] rounded-2xl h-[30%] w-[90%] left-[0%]">
           {/* Price */}
-          <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] left-[15px] not-italic text-[16px] text-white top-[22px] whitespace-nowrap">
+          <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] right-[5px] not-italic text-[16px] text-white top-[62px] whitespace-nowrap">
             <p className="leading-[28px]">{formatPrice(product.price, currency)}</p>
           </div>
+          
           {/* Volume */}
           {volume && (
             <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[15px] not-italic text-[#9f9f9f] text-[12px] top-[41px] tracking-[1.2px] uppercase whitespace-nowrap">
@@ -994,11 +1006,12 @@ export function FeaturedProductCard({
           {/* Add to Cart Button */}
           <button
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onAddToCart(product);
             }}
             disabled={isAddingToCart || !product.inStock}
-            className="absolute block cursor-pointer left-[120px] size-[45px] top-[5px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+            className="absolute z-20 block cursor-pointer left-[120px] size-[45px] top-[5px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
             aria-label={t('home.featuredProducts.addToCart')}
           >
             <div className="flex flex-col font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] justify-center leading-[0] not-italic text-[30px] text-center text-white -mt-[2px]">
@@ -1007,10 +1020,16 @@ export function FeaturedProductCard({
           </button>
         </div>
 
-        {/* Product Title */}
-        <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[84.64%_3.21%_0_3.21%] justify-center leading-[0] text-[16px] text-center text-white">
+        <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[30.64%_3.41%_5_%] justify-center leading-[0] text-[16px] text-left text-white">
           <p className="leading-[25px] whitespace-pre-wrap">{product.title}</p>
+            
         </div>
+        {/* Product Title and Description */}
+        {product.description && (
+          <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[72.64%_5.41%_5_%] justify-center leading-[0] text-[16px] text-left text-gray-500 overflow-hidden">
+            <p className="leading-[25px] break-words">{product.description}</p>
+          </div>
+        )}
       </div>
     );
   }
@@ -1022,42 +1041,50 @@ export function FeaturedProductCard({
       <div
         key={product.id}
         onClick={() => onProductClick(product)}
-        className="flex flex-col items-center gap-[12px] w-full cursor-pointer product-card-hover product-card-compact  z-[11] isolate rounded-[45px] p-2"
+        className="flex flex-col items-center gap-0 w-full cursor-pointer product-card-hover product-card-compact  z-[11] isolate rounded-[45px] p-2"
       >
-        {/* Image Container - Smaller for shop */}
-        <div className="h-[200px] w-full relative product-image-container flex items-center justify-center bg-transparent rounded-lg">
+        {/* Image Container - Same bottom alignment as home page card, -10% overlap */}
+        <div className={`${isMobile ? 'h-[220px]' : 'md:h-[440px]'}   w-full relative product-image-container flex items-end justify-center bg-transparent rounded-lg overflow-visible min-h-0 -mb-[10%]`}>
           {product.image ? (
             <img
+              
               alt={product.title}
-              className="h-full w-full object-contain product-image-hover"
+              className="w-full max-w-[85%] h-auto object-contain object-bottom product-image-hover"
               src={product.image}
               style={{ backgroundColor: 'transparent' }}
             />
+            
           ) : (
             <div className="w-full h-full bg-gray-300 rounded-lg" />
           )}
         </div>
         {/* Content Section - Compact layout */}
-        <div className="w-full flex flex-col gap-[10px] px-[8px] pb-[8px]">
+        <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative">
+          <div className="absolute top-6 right-[8px]">
+            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[16px] whitespace-nowrap">
+              <p className="leading-[22px]">{formatPrice(product.price, currency)}</p>
+            </div>
+          </div>
           <div className="flex items-end justify-between w-full gap-2">
             <div className="flex flex-col items-start flex-1 min-w-0 max-w-[calc(100%-90px)]">
               <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-black">
                 <p className="leading-[20px] truncate w-full">{product.title}</p>
               </div>
-            </div>
-            <div className="flex flex-col items-start flex-shrink-0">
-              <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[16px] whitespace-nowrap">
-                <p className="leading-[22px]">{formatPrice(product.price, currency)}</p>
-              </div>
+              {product.description && (
+                <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-gray-500 mt-1">
+                  <p className="leading-[20px] break-words">{product.description}</p>
+                </div>
+              )}
             </div>
           </div>
           <button
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onAddToCart(product);
             }}
             disabled={!product.inStock || isAddingToCart}
-            className="bg-[#00d1ff] content-stretch flex h-[36px] items-center justify-center py-[8px] relative rounded-[20px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer"
+            className="bg-[#00d1ff] content-stretch flex h-[36px] items-center justify-center py-[8px] relative z-10 rounded-[20px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[12px] text-center text-white whitespace-nowrap">
               <p className="leading-[18px]">
@@ -1075,14 +1102,14 @@ export function FeaturedProductCard({
     <div
       key={product.id}
       onClick={() => onProductClick(product)}
-      className="flex flex-col items-center gap-[20px] lg:gap-[20px] md:gap-[24px] sm:gap-[24px] w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2 overflow-visible"
+      className="flex flex-col items-center gap-0 w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2 overflow-visible"
     >
-      {/* Image area: overflow visible so bottle can extend beyond card; bottle stands with shadow */}
-      <div className="h-[200px] lg:h-[200px] md:h-[200px] sm:h-[180px] w-full relative product-image-container product-image-container-home flex items-end justify-center bg-transparent overflow-visible min-h-0">
+      {/* Image area: overflow visible so bottle can extend beyond card; bottle stands with shadow (240/216 = 300/270 * 0.8 calm state) */}
+      <div className="h-[240px] lg:h-[240px] md:h-[240px] sm:h-[216px] w-full relative product-image-container product-image-container-home flex items-end justify-center bg-transparent overflow-visible min-h-0">
         {product.image ? (
           <img
             alt={product.title}
-            className="product-image-bottle-standing w-full max-w-[85%] h-auto object-contain object-bottom"
+            className="product-image-bottle-standing w-full max-w-[68%] h-auto object-contain object-bottom"
             src={product.image}
             style={{ backgroundColor: 'transparent' }}
           />
@@ -1106,11 +1133,12 @@ export function FeaturedProductCard({
         </div>
         <button
           onClick={(e) => {
+            e.preventDefault();
             e.stopPropagation();
             onAddToCart(product);
           }}
           disabled={!product.inStock || isAddingToCart}
-          className="bg-[#00d1ff] content-stretch flex h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center justify-center py-[10px] lg:py-[10px] md:py-[12px] sm:py-[12px] relative rounded-[30px] lg:rounded-[30px] md:rounded-[34px] sm:rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer"
+          className="bg-[#00d1ff] content-stretch flex h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center justify-center py-[10px] lg:py-[10px] md:py-[12px] sm:py-[12px] relative z-10 rounded-[30px] lg:rounded-[30px] md:rounded-[34px] sm:rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer"
         >
           <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
             <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">

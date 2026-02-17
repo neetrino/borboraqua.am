@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { Input, Card } from '@shop/ui';
 import Link from 'next/link';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useTranslation } from '../../lib/i18n-client';
-import { ProductPageButton } from '../../components/icons/global/globalMobile';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -119,76 +117,81 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full max-w-md sm:max-w-lg lg:max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <Card className="p-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('register.title')}</h1>
-        <p className="text-gray-600 mb-8">{t('register.subtitle')}</p>
+    <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+        
+        {/* Form Container with Glassmorphism */}
+        <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('register.title')}</h1>
+          <p className="text-gray-600 mb-6">{t('register.subtitle')}</p>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-[12px]">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} noValidate className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} noValidate className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t('register.form.firstName')}
                 <span className="text-red-500 ml-0.5">*</span>
               </label>
-              <Input
+              <input
                 id="firstName"
                 type="text"
                 placeholder={t('register.placeholders.firstName')}
-                className="w-full"
+                className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 disabled={isSubmitting || isLoading}
-              required
+                required
               />
             </div>
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t('register.form.lastName')}
                 <span className="text-red-500 ml-0.5">*</span>
               </label>
-              <Input
+              <input
                 id="lastName"
                 type="text"
                 placeholder={t('register.placeholders.lastName')}
-                className="w-full"
+                className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 disabled={isSubmitting || isLoading}
-              required
+                required
               />
             </div>
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
               {t('register.form.email')}
             </label>
-            <Input
+            <input
               id="email"
               type="text"
               placeholder={t('register.placeholders.email')}
-              className="w-full"
+              className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting || isLoading}
             />
           </div>
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1.5">
               {t('register.form.phone')}
               <span className="text-red-500 ml-0.5">*</span>
             </label>
-            <Input
+            <input
               id="phone"
               type="tel"
               placeholder={t('register.placeholders.phone')}
-              className="w-full"
+              className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               disabled={isSubmitting || isLoading}
@@ -196,16 +199,16 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
               {t('register.form.password')}
               <span className="text-red-500 ml-0.5">*</span>
             </label>
             <div className="relative">
-              <Input
+              <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder={t('register.placeholders.password')}
-                className="w-full pr-10"
+                className="w-full px-4 py-2 pr-10 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isSubmitting || isLoading}
@@ -253,16 +256,16 @@ export default function RegisterPage() {
             </p>
           </div>
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
               {t('register.form.confirmPassword')}
               <span className="text-red-500 ml-0.5">*</span>
             </label>
             <div className="relative">
-              <Input
+              <input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder={t('register.placeholders.confirmPassword')}
-                className="w-full pr-10"
+                className="w-full px-4 py-2 pr-10 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isSubmitting || isLoading}
@@ -336,14 +339,13 @@ export default function RegisterPage() {
           {!acceptTerms && error === t('register.errors.acceptTerms') && (
             <p className="text-xs text-red-600 -mt-2">{t('register.errors.mustAcceptTerms')}</p>
           )}
-          <ProductPageButton 
-            variant="primary" 
-            className="w-full py-3"
+          <button
             type="submit"
             disabled={isSubmitting || isLoading}
+            className="w-full py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSubmitting || isLoading ? t('register.form.creatingAccount') : t('register.form.createAccount')}
-          </ProductPageButton>
+          </button>
         </form>
 
         <div className="mt-6 text-center">
@@ -354,7 +356,8 @@ export default function RegisterPage() {
             </Link>
           </p>
         </div>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

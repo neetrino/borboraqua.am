@@ -3,13 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Card, Button } from '@shop/ui';
 import { apiClient } from '../../../lib/api-client';
 import { formatPrice, getStoredCurrency, convertPrice } from '../../../lib/currency';
 import { getStoredLanguage } from '../../../lib/language';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { useTranslation } from '../../../lib/i18n-client';
-import { ProductPageButton } from '../../../components/icons/global/globalMobile';
 
 // Helper function to get color hex/rgb from color name
 const getColorValue = (colorName: string): string => {
@@ -184,13 +182,18 @@ export default function OrderPage() {
   if (error || !order) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Card className="p-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('orders.notFound.title')}</h1>
-          <p className="text-gray-600 mb-6">{error || t('orders.notFound.description')}</p>
-          <Link href="/products">
-            <Button variant="primary">{t('orders.buttons.continueShopping')}</Button>
-          </Link>
-        </Card>
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+          <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-6 border border-[rgba(255,255,255,0)] overflow-clip text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('orders.notFound.title')}</h1>
+            <p className="text-gray-600 mb-6">{error || t('orders.notFound.description')}</p>
+            <Link href="/products">
+              <button className="py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300">
+                {t('orders.buttons.continueShopping')}
+              </button>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -229,23 +232,28 @@ export default function OrderPage() {
         {/* Order Details */}
         <div className="lg:col-span-2 space-y-6">
           {/* Status */}
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('orders.orderStatus.title')}</h2>
-            <div className="flex items-center gap-4">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                {order.status}
-              </span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.paymentStatus)}`}>
-                {t('orders.orderStatus.payment').replace('{status}', order.paymentStatus)}
-              </span>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.fulfillmentStatus)}`}>
-                {t('orders.orderStatus.fulfillment').replace('{status}', order.fulfillmentStatus)}
-              </span>
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+            <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('orders.orderStatus.title')}</h2>
+              <div className="flex items-center gap-4">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                  {order.status}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.paymentStatus)}`}>
+                  {t('orders.orderStatus.payment').replace('{status}', order.paymentStatus)}
+                </span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.fulfillmentStatus)}`}>
+                  {t('orders.orderStatus.fulfillment').replace('{status}', order.fulfillmentStatus)}
+                </span>
+              </div>
             </div>
-          </Card>
+          </div>
 
           {/* Order Items */}
-          <Card className="p-6">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+            <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
             <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('orders.orderItems.title')}</h2>
             <div className="space-y-4">
               {order.items.map((item, index) => {
@@ -284,7 +292,7 @@ export default function OrderPage() {
                 };
                 
                 return (
-                  <div key={index} className="flex gap-4 pb-4 border-b border-gray-200 last:border-0">
+                  <div key={index} className="flex gap-4 pb-4 border-b border-white/20 last:border-0">
                     {item.imageUrl && (
                       <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-transparent">
                         <img 
@@ -356,101 +364,108 @@ export default function OrderPage() {
                 );
               })}
             </div>
-          </Card>
+            </div>
+          </div>
 
           {/* Shipping Address */}
           {order.shippingAddress && (
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('orders.shippingAddress.title')}</h2>
-              <div className="text-gray-600">
-                {order.shippingAddress.firstName && order.shippingAddress.lastName && (
-                  <p>{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
-                )}
-                {order.shippingAddress.addressLine1 && <p>{order.shippingAddress.addressLine1}</p>}
-                {order.shippingAddress.addressLine2 && <p>{order.shippingAddress.addressLine2}</p>}
-                {order.shippingAddress.city && (
-                  <p>
-                    {order.shippingAddress.city}
-                    {order.shippingAddress.postalCode && `, ${order.shippingAddress.postalCode}`}
-                  </p>
-                )}
-                {order.shippingAddress.countryCode && <p>{order.shippingAddress.countryCode}</p>}
-                {order.shippingAddress.phone && <p className="mt-2">{t('orders.shippingAddress.phone').replace('{phone}', order.shippingAddress.phone)}</p>}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+              <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('orders.shippingAddress.title')}</h2>
+                <div className="text-gray-600">
+                  {order.shippingAddress.firstName && order.shippingAddress.lastName && (
+                    <p>{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
+                  )}
+                  {order.shippingAddress.addressLine1 && <p>{order.shippingAddress.addressLine1}</p>}
+                  {order.shippingAddress.addressLine2 && <p>{order.shippingAddress.addressLine2}</p>}
+                  {order.shippingAddress.city && (
+                    <p>
+                      {order.shippingAddress.city}
+                      {order.shippingAddress.postalCode && `, ${order.shippingAddress.postalCode}`}
+                    </p>
+                  )}
+                  {order.shippingAddress.countryCode && <p>{order.shippingAddress.countryCode}</p>}
+                  {order.shippingAddress.phone && <p className="mt-2">{t('orders.shippingAddress.phone').replace('{phone}', order.shippingAddress.phone)}</p>}
+                </div>
               </div>
-            </Card>
+            </div>
           )}
         </div>
 
         {/* Order Summary */}
         <div>
-          <Card className="p-6 sticky top-4">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('orders.orderSummary.title')}</h2>
-            <div className="space-y-4 mb-6">
-              {(() => {
-                // Use order.totals.subtotal and subtract discount to get discounted subtotal
-                // (like checkout uses cart.totals.subtotal which is already discounted)
-                // Order totals.subtotal is non-discounted, discount is stored separately
-                const originalSubtotal = order.totals?.subtotal || 0;
-                const discount = order.totals?.discount || 0;
-                // Calculate discounted subtotal: original - discount
-                // If discount is 0, items might already be discounted, so use items total
-                const subtotal = discount > 0 
-                  ? originalSubtotal - discount
-                  : order.items.reduce((sum, item) => sum + item.total, 0);
-                // Use shipping price from API if available, convert from AMD to USD like checkout does
-                // Otherwise use order.totals.shipping (already converted)
-                const shipping = shippingPrice !== null 
-                  ? shippingPrice
-                  : (order.totals?.shipping || 0);
-                // Calculate total the same way checkout does: subtotal + shipping
-                const total = subtotal + shipping;
+          <div className="relative sticky top-4">
+            <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+            <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('orders.orderSummary.title')}</h2>
+              <div className="space-y-4 mb-6">
+                {(() => {
+                  // Use order.totals.subtotal and subtract discount to get discounted subtotal
+                  // (like checkout uses cart.totals.subtotal which is already discounted)
+                  // Order totals.subtotal is non-discounted, discount is stored separately
+                  const originalSubtotal = order.totals?.subtotal || 0;
+                  const discount = order.totals?.discount || 0;
+                  // Calculate discounted subtotal: original - discount
+                  // If discount is 0, items might already be discounted, so use items total
+                  const subtotal = discount > 0 
+                    ? originalSubtotal - discount
+                    : order.items.reduce((sum, item) => sum + item.total, 0);
+                  // Use shipping price from API if available, convert from AMD to USD like checkout does
+                  // Otherwise use order.totals.shipping (already converted)
+                  const shipping = shippingPrice !== null 
+                    ? shippingPrice
+                    : (order.totals?.shipping || 0);
+                  // Calculate total the same way checkout does: subtotal + shipping
+                  const total = subtotal + shipping;
 
-                return (
-                  <>
-                    <div className="flex justify-between text-gray-600">
-                      <span>{t('orders.orderSummary.subtotal')}</span>
-                      <span>{formatPrice(subtotal, currency)}</span>
-                    </div>
-                    {discount > 0 && (
+                  return (
+                    <>
                       <div className="flex justify-between text-gray-600">
-                        <span>{t('orders.orderSummary.discount')}</span>
-                        <span>-{formatPrice(discount, currency)}</span>
+                        <span>{t('orders.orderSummary.subtotal')}</span>
+                        <span>{formatPrice(subtotal, currency)}</span>
                       </div>
-                    )}
-                    <div className="flex justify-between text-gray-600">
-                      <span>{t('orders.orderSummary.shipping')}</span>
-                      <span>
-                        {order.shippingMethod === 'pickup'
-                          ? t('common.cart.free')
-                          : shipping > 0
-                            ? formatPrice(shipping, currency)
-                            : t('checkout.shipping.enterCity')}
-                      </span>
-                    </div>
-                    <div className="border-t border-gray-200 pt-4">
-                      <div className="flex justify-between text-lg font-bold text-gray-900">
-                        <span>{t('orders.orderSummary.total')}</span>
-                        <span>{formatPrice(total, currency)}</span>
+                      {discount > 0 && (
+                        <div className="flex justify-between text-gray-600">
+                          <span>{t('orders.orderSummary.discount')}</span>
+                          <span>-{formatPrice(discount, currency)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-gray-600">
+                        <span>{t('orders.orderSummary.shipping')}</span>
+                        <span>
+                          {order.shippingMethod === 'pickup'
+                            ? t('common.cart.free')
+                            : shipping > 0
+                              ? formatPrice(shipping, currency)
+                              : t('checkout.shipping.enterCity')}
+                        </span>
                       </div>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
+                      <div className="border-t border-white/20 pt-4">
+                        <div className="flex justify-between text-lg font-bold text-gray-900">
+                          <span>{t('orders.orderSummary.total')}</span>
+                          <span>{formatPrice(total, currency)}</span>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
 
-            <div>
-              <Link href="/products">
-                <ProductPageButton variant="primary" className="w-full py-3">
-                  {t('orders.buttons.continueShopping')}
-                </ProductPageButton>
-              </Link>
-              <Link href="/cart">
-                <ProductPageButton variant="outline" className="w-full mt-3 py-3">
-                  {t('orders.buttons.viewCart')}
-                </ProductPageButton>
-              </Link>
+              <div>
+                <Link href="/products">
+                  <button className="w-full py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300">
+                    {t('orders.buttons.continueShopping')}
+                  </button>
+                </Link>
+                <Link href="/cart">
+                  <button className="w-full mt-3 py-2.5 px-6 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 text-gray-900 font-semibold text-base shadow-inner hover:bg-white/60 transition-all duration-300">
+                    {t('orders.buttons.viewCart')}
+                  </button>
+                </Link>
+              </div>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>

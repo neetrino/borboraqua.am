@@ -276,7 +276,7 @@
   }
 
   .product-card-hover:hover .product-image-bottle-standing {
-    transform: scale(2.0) translateY(38px);
+    transform: scale(2.4) translateY(38px);
     filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.3)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
     z-index: 10;
   }
@@ -292,23 +292,23 @@
     transform-origin: center bottom;
   }
 
-  /* Home page - full transform effect */
+  /* Home page - full transform effect (+20% scale on hover) */
   .product-card-hover:hover .product-image-hover {
-    transform: rotate(5deg) scale(1.15) translateY(-20px);
+    transform: rotate(5deg) scale(1.38) translateY(-20px);
     z-index: 10;
     position: relative;
   }
 
   .product-card-hover-centered:hover .product-image-hover {
-    transform: rotate(5deg) scale(1.15) translateY(-20px);
+    transform: rotate(5deg) scale(1.38) translateY(-20px);
     z-index: 10;
     position: relative;
   }
 
   /* Compact cards (shop page & related products) - only image moves, card stays still */
-  /* Image scales up and moves up to sit on top of border */
+  /* Image scales up and moves up to sit on top of border (+20% scale on hover) */
   .product-card-compact:hover .product-image-hover {
-    transform: scale(1.15) translateY(-12px);
+    transform: scale(1.38) translateY(-12px);
     z-index: 100;
     position: relative;
   }
@@ -406,16 +406,6 @@
 /* imgShape.svg — forced color #5bb7d9 */
 img[src*="imgShape"] {
   filter: brightness(0) saturate(100%) invert(65%) sepia(42%) saturate(1400%) hue-rotate(170deg) brightness(0.92) contrast(1.04);
-  animation: rotate-360 30s linear infinite;
-}
-
-img[src*="imgShape1"] {
-  filter: brightness(1) saturate(100%) invert(81%) sepia(55%) saturate(800%) hue-rotate(165deg) brightness(1.15) contrast(1.05);
-  animation: rotate-360 30s linear infinite;
-}
-
-img[src*="imgShape2"] {
-  filter: brightness(1.2) saturate(100%) invert(81%) sepia(85%) saturate(800%) hue-rotate(167deg) brightness(1.28) contrast(1.05);
   animation: rotate-360 30s linear infinite;
 }
 

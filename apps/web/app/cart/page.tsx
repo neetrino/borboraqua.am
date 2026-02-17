@@ -525,9 +525,14 @@ export default function CartPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Table */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="relative">
+            {/* Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+            
+            {/* Form Container with Glassmorphism */}
+            <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
         {/* Table Header */}
-        <div className="hidden md:grid md:grid-cols-12 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-200">
+        <div className="hidden md:grid md:grid-cols-12 gap-4 px-4 py-4 bg-white/30 backdrop-blur-sm rounded-[12px] mb-4">
           <div className="md:col-span-6">
             <span className="text-sm font-semibold text-gray-900 uppercase tracking-wide">{t('common.messages.product')}</span>
           </div>
@@ -541,15 +546,15 @@ export default function CartPage() {
         </div>
 
         {/* Table Body */}
-        <div className="divide-y divide-gray-200">
+        <div className="space-y-4">
           {cart.items.map((item) => (
             <div
               key={item.id}
-              className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 px-4 sm:px-6 py-6 hover:bg-gray-50 transition-colors relative"
+              className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 px-4 sm:px-6 py-6 bg-white/50 backdrop-blur-sm rounded-[12px] border border-white/30 hover:bg-white/60 transition-colors relative"
             >
               <button
                 onClick={() => handleRemoveItem(item.id)}
-                className="absolute top-2 right-2 md:top-4 md:right-4 w-7 h-7 rounded-full bg-white hover:bg-red-50 flex items-center justify-center text-gray-500 hover:text-red-600 transition-colors shadow-md border border-gray-200 hover:border-red-300 z-10"
+                className="absolute top-2 right-2 md:top-4 md:right-4 w-7 h-7 rounded-full bg-white/80 backdrop-blur-sm hover:bg-red-50 flex items-center justify-center text-gray-500 hover:text-red-600 transition-colors shadow-md border border-white/50 hover:border-red-300 z-10"
                 aria-label={t('common.buttons.remove')}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -608,7 +613,7 @@ export default function CartPage() {
                       handleUpdateQuantity(item.id, newQuantity);
                     }}
                     disabled={updatingItems.has(item.id)}
-                    className="w-9 h-9 flex-shrink-0 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-9 h-9 flex-shrink-0 rounded-[12px] border border-white/40 bg-white/60 backdrop-blur-sm flex items-center justify-center hover:bg-white/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label={t('common.ariaLabels.decreaseQuantity')}
                   >
                     <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -626,7 +631,7 @@ export default function CartPage() {
                       handleUpdateQuantity(item.id, newQuantity);
                     }}
                     disabled={updatingItems.has(item.id)}
-                    className="w-20 h-9 text-right border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 font-medium pl-2 pr-5"
+                    className="w-20 h-9 text-right border border-white/40 bg-white/60 backdrop-blur-sm rounded-[12px] focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/60 disabled:opacity-50 font-medium pl-2 pr-5"
                     title={item.variant.stock !== undefined ? t('common.messages.availableQuantity').replace('{stock}', item.variant.stock.toString()) : ''}
                   />
                   <button
@@ -639,7 +644,7 @@ export default function CartPage() {
                       }
                     }}
                     disabled={updatingItems.has(item.id) || (item.variant.stock !== undefined && item.quantity >= item.variant.stock)}
-                    className="w-9 h-9 flex-shrink-0 rounded border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-9 h-9 flex-shrink-0 rounded-[12px] border border-white/40 bg-white/60 backdrop-blur-sm flex items-center justify-center hover:bg-white/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label={t('common.ariaLabels.increaseQuantity')}
                     title={item.variant.stock !== undefined && item.quantity >= item.variant.stock ? t('common.messages.availableQuantity').replace('{stock}', item.variant.stock.toString()) : t('common.messages.addQuantity')}
                   >
@@ -669,51 +674,56 @@ export default function CartPage() {
             </div>
           ))}
         </div>
-      </div>
+            </div>
+          </div>
         </div>
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-        <div className="bg-white rounded-lg border border-gray-200 p-6 lg:sticky lg:top-24">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">
-            {t('common.cart.orderSummary')}
-          </h2>
-          <div className="space-y-4 mb-6">
-            <div className="flex justify-between text-gray-600">
-              <span>{t('common.cart.subtotal')}</span>
-              <span>{formatPrice(cart.totals.subtotal, currency)}</span>
-            </div>
-            <div className="flex justify-between text-gray-600">
-              <span>{t('common.cart.shipping')}</span>
-              <span>{t('common.cart.free')}</span>
-            </div>
-            <div className="border-t border-gray-200 pt-4">
-              <div className="flex justify-between text-lg font-bold text-gray-900">
-                <span>{t('common.cart.total')}</span>
-                <span>{formatPrice(cart.totals.subtotal, currency)}</span>
+          <div className="relative lg:sticky lg:top-24">
+            {/* Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+            
+            {/* Form Container with Glassmorphism */}
+            <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">
+                {t('common.cart.orderSummary')}
+              </h2>
+              <div className="space-y-4 mb-6">
+                <div className="flex justify-between text-gray-600">
+                  <span>{t('common.cart.subtotal')}</span>
+                  <span>{formatPrice(cart.totals.subtotal, currency)}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>{t('common.cart.shipping')}</span>
+                  <span>{t('common.cart.free')}</span>
+                </div>
+                <div className="border-t border-white/20 pt-4">
+                  <div className="flex justify-between text-lg font-bold text-gray-900">
+                    <span>{t('common.cart.total')}</span>
+                    <span>{formatPrice(cart.totals.subtotal, currency)}</span>
+                  </div>
+                </div>
               </div>
+              <button
+                onClick={() => {
+                  // Allow guest checkout - no redirect to login
+                  window.location.href = '/checkout';
+                }}
+                className="w-full py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300"
+              >
+                {t('common.buttons.proceedToCheckout')}
+              </button>
+              <button
+                onClick={() => {
+                  window.location.href = '/products';
+                }}
+                className="w-full mt-3 py-2.5 px-6 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 text-gray-900 font-semibold text-base shadow-inner hover:bg-white/60 transition-all duration-300"
+              >
+                {t('common.buttons.browseProducts')}
+              </button>
             </div>
           </div>
-          <ProductPageButton 
-            variant="primary" 
-            className="w-full py-3"
-            onClick={() => {
-              // Allow guest checkout - no redirect to login
-              window.location.href = '/checkout';
-            }}
-          >
-            {t('common.buttons.proceedToCheckout')}
-          </ProductPageButton>
-          <ProductPageButton
-            variant="outline"
-            className="w-full mt-3 py-3"
-            onClick={() => {
-              window.location.href = '/products';
-            }}
-          >
-            {t('common.buttons.browseProducts')}
-          </ProductPageButton>
-        </div>
         </div>
       </div>
     </div>
