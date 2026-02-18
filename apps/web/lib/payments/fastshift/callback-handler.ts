@@ -1,6 +1,11 @@
 import { db } from "@white-shop/db";
 import type { FastshiftCallbackParams } from "./types";
-import { FASTSHIFT_STATUS_SUCCESS } from "./constants";
+import {
+  FASTSHIFT_STATUS_SUCCESS,
+  FASTSHIFT_ORDER_STATUS_COMPLETED,
+  FASTSHIFT_GUID_REGEX,
+} from "./constants";
+import { getOrderStatus } from "./client";
 
 const PAYMENT_PROVIDER = "fastshift";
 
@@ -9,19 +14,51 @@ function isSuccessStatus(status: string): boolean {
   return FASTSHIFT_STATUS_SUCCESS.some((v) => v === s);
 }
 
+function isValidGuid(value: string): boolean {
+  return value.length <= 36 && FASTSHIFT_GUID_REGEX.test(value.trim());
+}
+
+/**
+ * Resolve order status from FastShift API (source of truth); fallback to callback params if API fails.
+ */
+async function resolveStatus(
+  orderNumberGuid: string,
+  callbackStatus: string
+): Promise<{ status: string; fromApi: boolean }> {
+  const api = await getOrderStatus(orderNumberGuid);
+  if (api?.status) {
+    return { status: api.status, fromApi: true };
+  }
+  return { status: (callbackStatus ?? "").trim(), fromApi: false };
+}
+
 /**
  * Handle callback from FastShift (user redirect or webhook).
- * Order is identified by: 1) "order" (our order number from callback_url), or 2) "order_number" (GUID) via Payment.providerTransactionId.
- * See HK Agency payment-gateway-for-fastshift: they use GUID as order_number and order_id in callback URL.
+ * - Verifies status via FastShift API when possible (secure).
+ * - Idempotent: if order already paid, returns success without duplicate updates.
+ * - Order identified by: 1) "order" (our number from callback_url), 2) "order_number" (GUID) via Payment.providerTransactionId.
  */
 export async function handleFastshiftResponse(
   params: FastshiftCallbackParams
 ): Promise<{ orderNumber: string; success: boolean }> {
-  const status = (params.status ?? "").trim();
-  const ourOrderNumber = (params.order ?? "").trim();
+  const ourOrderNumber = (params.order ?? "").trim().slice(0, 64);
   const fastshiftOrderNumber = (params.order_number ?? params.orderNumber ?? "").trim();
+  const callbackStatus = (params.status ?? "").trim();
 
-  let order: { id: string; number: string; userId: string | null; payments: { id: string; provider: string }[] } | null = null;
+  if (!ourOrderNumber && !fastshiftOrderNumber) {
+    throw new Error("Missing order identifier");
+  }
+  if (fastshiftOrderNumber && !isValidGuid(fastshiftOrderNumber)) {
+    throw new Error("Invalid order_number format");
+  }
+
+  let order: {
+    id: string;
+    number: string;
+    paymentStatus: string;
+    userId: string | null;
+    payments: { id: string; provider: string; providerTransactionId: string | null }[];
+  } | null = null;
 
   if (ourOrderNumber) {
     order = await db.order.findFirst({
@@ -31,20 +68,38 @@ export async function handleFastshiftResponse(
   }
   if (!order && fastshiftOrderNumber) {
     const payment = await db.payment.findFirst({
-      where: { provider: PAYMENT_PROVIDER, providerTransactionId: fastshiftOrderNumber },
+      where: {
+        provider: PAYMENT_PROVIDER,
+        providerTransactionId: fastshiftOrderNumber,
+      },
       include: { order: { include: { payments: true } } },
     });
-    if (payment?.order) order = payment.order as typeof order;
+    if (payment?.order) {
+      order = payment.order as typeof order;
+    }
   }
 
   if (!order) {
     throw new Error("Order not found");
   }
 
-  const payment = order.payments.find(
-    (p) => p.provider === PAYMENT_PROVIDER
-  );
-  const success = isSuccessStatus(status);
+  const payment = order.payments.find((p) => p.provider === PAYMENT_PROVIDER);
+  const orderGuid =
+    payment?.providerTransactionId != null
+      ? payment.providerTransactionId
+      : fastshiftOrderNumber
+        ? fastshiftOrderNumber
+        : null;
+
+  if (order.paymentStatus === "paid") {
+    return { orderNumber: order.number, success: true };
+  }
+
+  const { status: resolvedStatus, fromApi } = orderGuid
+    ? await resolveStatus(orderGuid, callbackStatus)
+    : { status: callbackStatus, fromApi: false };
+
+  const success = resolvedStatus === FASTSHIFT_ORDER_STATUS_COMPLETED || isSuccessStatus(resolvedStatus);
 
   if (success) {
     await db.$transaction([
@@ -63,8 +118,11 @@ export async function handleFastshiftResponse(
               data: {
                 status: "completed",
                 completedAt: new Date(),
-                providerTransactionId: params.transaction_id ?? params.payment_id ?? status,
-                providerResponse: (params as unknown) as object,
+                providerResponse: {
+                  callbackStatus,
+                  resolvedStatus,
+                  fromApi,
+                } as unknown as object,
               },
             }),
           ]
@@ -75,7 +133,8 @@ export async function handleFastshiftResponse(
           type: "payment_completed",
           data: {
             provider: PAYMENT_PROVIDER,
-            status,
+            status: resolvedStatus,
+            fromApi,
             order_number: order.number,
           },
         },
@@ -97,8 +156,12 @@ export async function handleFastshiftResponse(
               data: {
                 status: "failed",
                 failedAt: new Date(),
-                errorCode: status,
-                providerResponse: (params as unknown) as object,
+                errorCode: resolvedStatus || "unknown",
+                providerResponse: {
+                  callbackStatus,
+                  resolvedStatus,
+                  fromApi,
+                } as unknown as object,
               },
             }),
           ]
@@ -107,7 +170,11 @@ export async function handleFastshiftResponse(
         data: {
           orderId: order.id,
           type: "payment_failed",
-          data: { provider: PAYMENT_PROVIDER, status, order_number: order.number },
+          data: {
+            provider: PAYMENT_PROVIDER,
+            status: resolvedStatus,
+            order_number: order.number,
+          },
         },
       }),
     ]);

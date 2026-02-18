@@ -33,3 +33,11 @@ export interface FastshiftCallbackParams {
   payment_id?: string;
   [key: string]: string | undefined;
 }
+
+/** Response of GET /vpos/order/status/{order_number} (PayByFastShift doc) */
+export interface FastshiftOrderStatusResponse {
+  status?: string;
+  data?: {
+    order?: { status?: string };
+  };
+}

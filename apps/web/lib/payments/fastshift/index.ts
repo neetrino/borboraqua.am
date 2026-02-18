@@ -1,5 +1,5 @@
 export { getConfig, isFastshiftConfigured } from "./config";
-export { registerOrder } from "./client";
+export { registerOrder, getOrderStatus } from "./client";
 export { handleFastshiftResponse } from "./callback-handler";
 export {
   FASTSHIFT_REGISTER_URL,

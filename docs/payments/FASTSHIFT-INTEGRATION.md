@@ -2,7 +2,28 @@
 
 > Այս փաստաթուղթը նախատեսված է **FastShift** (e-wallet / vPOS) միացման համար։ Register order → redirect_url → callback/webhook։
 >
-> **Աղբյուր.** `docs/06-PAYMENT-INTEGRATION-PLAN.md` §9; PayByFastShift (vers25.02.25); **payment integration/Example only/HK Agency/payment-gateway-for-fastshift** (WordPress plugin — order_number = GUID, callback_url with order_id).
+> **Պաշտոնական API.** `payment integration/| Official doc for the API integrationm/FastShift/PayByFastShift (vers25.02.25).md` — Pay by FastShift v1.0. Իրականացումը համապատասխանում է այդ փաստաթղթին (Register order API, callback params `status` + `order_number`, response `data.redirect_url`, `data.order`).
+> **Օրինակ.** `payment integration/Example only/HK Agency/payment-gateway-for-fastshift` (WordPress plugin — order_number = GUID, callback_url with order_id).
+
+---
+
+## 0. Համապատասխանություն պաշտոնական PayByFastShift (vers25.02.25).md
+
+| Փաստաթղթի պահանջ | Մեր իրականացում |
+|--------------------|------------------|
+| URL `https://merchants.fastshift.am/api/en/vpos/order/register` | ✓ `FASTSHIFT_REGISTER_URL` |
+| Method POST, Header `Authorization: Bearer {Token}`, `Content-Type: application/json` | ✓ `client.ts` registerOrder |
+| `order_number` — **guid**, required | ✓ UUID v4 `generateFastshiftOrderGuid()` |
+| `amount` — unsigned int, required | ✓ `Math.round(total)` |
+| `description` — string, required | ✓ `Order ${order.number}` |
+| `callback_url` — string, required; callback-ում փոխանցվում են `status` և `order_number` | ✓ URL + query `?order=...`; handler ընդունում է `status`, `order_number` (և `order` մեր նույնացման համար) |
+| `webhook_url` — optional; params `status`, `order_number` | ✓ նույն URL, POST handler |
+| `external_order_id` — optional, merchant order id | ✓ `order.id` |
+| Success response `data.redirect_url`, `data.order.order_number` | ✓ redirectUrl; providerTransactionId |
+| Callback params: `status`, `order_number` (guid) | ✓ handleFastshiftResponse; order by `order` (URL) or by Payment.providerTransactionId = order_number |
+| Order status `completed` = success; `rejected`, `expired` = fail | ✓ FASTSHIFT_STATUS_SUCCESS includes `completed` |
+
+**Անվտանգություն.** Callback-ում status-ը **ստուգվում է FastShift API-ով** (GET `/vpos/order/status/{order_number}`). Եթե API-ն պատասխանում է — օգտագործվում է API-ի status-ը (source of truth); հակառակ դեպքում fallback callback params-ի վրա։ Idempotency: եթե order արդեն paid — կրկնակի callback-ը չի փոխում state։ order_number (GUID) վալիդացվում է UUID ֆորմատով։ Webhook/GET սխալի դեպքում պատասխանում ենք 400/redirect առանց ներքին սխալի տեքստի արտահոսքի։
 
 ---
 
@@ -83,7 +104,7 @@ FastShift-ում (register request-ում) փոխանցվում են.
 
 **Պարամետրներ.** `status`; պատվերի նույնացում. 1) **order** (query-ից — մեր callback_url-ում ուղարկած, օր. `order=260218-12345`), 2) **order_number** (GUID) — գտնում ենք Payment.providerTransactionId-ով. Հնարավոր են լրացուցիչ դաշտեր (transaction_id, payment_id և այլն).
 
-**Success status.** Իրականացումում հաջող է համարվում `status`-ը, եթե այն հավասար է one of: `success`, `completed`, `paid`, `SUCCESS`, `COMPLETED`, `PAID`. Այլ արժեք → failed.
+**Success status.** Պաշտոնական փաստաթղթում order status-ը՝ `completed` = հաջող վճարում; `rejected`, `expired` = ձախողում։ Callback-ում FastShift փոխանցում է `status` և `order_number` (guid). Մենք հաջող ենք համարում `completed` (և համատեղելիության համար success/paid/SUCCESS/COMPLETED/PAID). Այլ արժեք → failed.
 
 - **GET (user redirect).** Query params. Handler թարմացնում է order → success → redirect `/checkout/success?order={order_number}`; fail → redirect `/checkout?order={order_number}`.
 - **POST (webhook).** JSON or application/x-www-form-urlencoded. Պատասխան 200.

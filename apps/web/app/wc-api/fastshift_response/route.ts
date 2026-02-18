@@ -24,25 +24,27 @@ function getQueryParams(req: NextRequest): Record<string, string> {
 /**
  * GET /wc-api/fastshift_response
  * User redirect from FastShift with status, order_number (query).
+ * On error: redirect to checkout (no leak of internal errors).
  */
 export async function GET(req: NextRequest) {
+  const baseUrl = process.env.APP_URL?.replace(/\/$/, "") || "https://borboraqua.am";
   try {
     const params = getQueryParams(req) as FastshiftCallbackParams;
     const { orderNumber, success } = await handleFastshiftResponse(params);
-    const baseUrl = process.env.APP_URL?.replace(/\/$/, "") || "https://borboraqua.am";
     if (success) {
       return NextResponse.redirect(`${baseUrl}/checkout/success?order=${encodeURIComponent(orderNumber)}`, 302);
     }
     return NextResponse.redirect(`${baseUrl}/checkout?order=${encodeURIComponent(orderNumber)}`, 302);
   } catch (err) {
-    console.error("[wc-api/fastshift_response GET]", err);
-    return new NextResponse(null, { status: 400 });
+    console.error("[wc-api/fastshift_response GET]", err instanceof Error ? err.message : "Unknown error");
+    return NextResponse.redirect(`${baseUrl}/checkout`, 302);
   }
 }
 
 /**
  * POST /wc-api/fastshift_response
  * Webhook from FastShift (JSON or form) with status, order_number.
+ * Returns 200 on success; 400 on invalid request (no error body to avoid leaking internals).
  */
 export async function POST(req: NextRequest) {
   try {
@@ -66,7 +68,7 @@ export async function POST(req: NextRequest) {
     await handleFastshiftResponse(params as FastshiftCallbackParams);
     return new NextResponse(null, { status: 200 });
   } catch (err) {
-    console.error("[wc-api/fastshift_response POST]", err);
+    console.error("[wc-api/fastshift_response POST]", err instanceof Error ? err.message : "Unknown error");
     return new NextResponse(null, { status: 400 });
   }
 }
