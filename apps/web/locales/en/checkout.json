@@ -50,6 +50,8 @@
     "idramDescription": "Pay with Idram wallet or card",
     "arca": "ArCa",
     "arcaDescription": "Pay with ArCa card",
+    "ameriabank": "Ameriabank",
+    "ameriabankDescription": "Pay with Visa/Mastercard via Ameriabank",
     "paymentDetails": "Payment Details",
     "enterCardDetails": "Enter your card details to complete the payment"
   },
@@ -105,6 +107,7 @@
     "cartEmpty": "Cart is empty",
     "failedToLoadCart": "Failed to load cart",
     "failedToCreateOrder": "Failed to create order. Please try again.",
+    "paymentInitFailed": "Payment could not be started. Please try again.",
     "deliveryDayRequired": "Please select a delivery day",
     "deliveryTimeRequired": "Please select a delivery time slot"
   }

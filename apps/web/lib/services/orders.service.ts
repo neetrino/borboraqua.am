@@ -564,12 +564,8 @@ class OrdersService {
             },
           });
 
-          // If user cart, delete cart after successful checkout
-          if (userId && cartId && cartId !== 'guest-cart') {
-            await tx.cart.delete({
-              where: { id: cartId },
-            });
-          }
+          // Cart is cleared only after successful payment (see payment callback handlers).
+          // Do not delete cart here so that if payment fails user can retry without re-adding items.
 
           return { order: newOrder, payment };
         },
@@ -594,9 +590,12 @@ class OrdersService {
           paymentUrl: null, // TODO: Generate payment URL for Idram/ArCa
           expiresAt: null, // TODO: Set expiration if needed
         },
-        nextAction: paymentMethod === 'idram' || paymentMethod === 'arca' 
-          ? 'redirect_to_payment' 
-          : 'view_order',
+        nextAction:
+          paymentMethod === "idram" ||
+          paymentMethod === "arca" ||
+          paymentMethod === "ameriabank"
+            ? "redirect_to_payment"
+            : "view_order",
       };
     } catch (error: any) {
       // If it's already our custom error, re-throw it

@@ -50,6 +50,8 @@
     "idramDescription": "Оплатите кошельком Idram или картой",
     "arca": "ArCa",
     "arcaDescription": "Оплатите картой ArCa",
+    "ameriabank": "Ameriabank",
+    "ameriabankDescription": "Оплата картой Visa/Mastercard через Ameriabank",
     "paymentDetails": "Детали оплаты",
     "enterCardDetails": "Введите данные вашей карты для завершения оплаты"
   },
@@ -105,6 +107,7 @@
     "cartEmpty": "Корзина пуста",
     "failedToLoadCart": "Не удалось загрузить корзину",
     "failedToCreateOrder": "Не удалось создать заказ. Пожалуйста, попробуйте снова.",
+    "paymentInitFailed": "Не удалось начать оплату. Попробуйте снова.",
     "deliveryDayRequired": "Пожалуйста, выберите день доставки",
     "deliveryTimeRequired": "Пожалуйста, выберите временной интервал доставки"
   }

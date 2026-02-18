@@ -50,6 +50,8 @@
     "idramDescription": "Վճարեք Idram դրամապանակով կամ քարտով",
     "arca": "ArCa",
     "arcaDescription": "Վճարեք ArCa քարտով",
+    "ameriabank": "Ameriabank",
+    "ameriabankDescription": "Վճարեք Visa/Mastercard քարտով Ameriabank-ի միջոցով",
     "paymentDetails": "Վճարման մանրամասներ",
     "enterCardDetails": "Մուտքագրեք ձեր քարտի տվյալները՝ վճարումն ավարտելու համար"
   },
@@ -105,6 +107,7 @@
     "cartEmpty": "Զամբյուղը դատարկ է",
     "failedToLoadCart": "Չհաջողվեց բեռնել զամբյուղը",
     "failedToCreateOrder": "Չհաջողվեց ստեղծել պատվերը: Խնդրում ենք կրկին փորձել:",
+    "paymentInitFailed": "Վճարումը հնարավոր չէր սկսել: Խնդրում ենք կրկին փորձել:",
     "deliveryDayRequired": "Խնդրում ենք ընտրել առաքման օր",
     "deliveryTimeRequired": "Խնդրում ենք ընտրել առաքման ժամային միջակայք"
   }

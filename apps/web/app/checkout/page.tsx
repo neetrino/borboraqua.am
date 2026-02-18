@@ -66,7 +66,7 @@ type CheckoutFormData = {
   email: string;
   phone: string;
   shippingMethod: 'pickup' | 'delivery';
-  paymentMethod: 'idram' | 'arca' | 'cash_on_delivery';
+  paymentMethod: 'idram' | 'arca' | 'ameriabank' | 'cash_on_delivery';
   shippingAddress?: string;
   shippingCity?: string;
   shippingPostalCode?: string;
@@ -122,6 +122,12 @@ export default function CheckoutPage() {
       description: t('checkout.payment.arcaDescription'),
       logo: '/assets/payments/arca.svg',
     },
+    {
+      id: 'ameriabank' as const,
+      name: t('checkout.payment.ameriabank'),
+      description: t('checkout.payment.ameriabankDescription'),
+      logo: '/assets/payments/ameria.svg',
+    },
   ];
 
   // Create validation schema with translations
@@ -133,7 +139,7 @@ export default function CheckoutPage() {
     shippingMethod: z.enum(['pickup', 'delivery'], {
       message: t('checkout.errors.selectShippingMethod'),
     }),
-    paymentMethod: z.enum(['idram', 'arca', 'cash_on_delivery'], {
+    paymentMethod: z.enum(['idram', 'arca', 'ameriabank', 'cash_on_delivery'], {
       message: t('checkout.errors.selectPaymentMethod'),
     }),
     // Shipping address fields - required only for delivery
@@ -726,6 +732,7 @@ export default function CheckoutPage() {
       setShowCardModal(true);
       return;
     }
+    // Ameriabank: no modal, submit and then redirect to bank via init API
     
     // Otherwise submit directly (both logged in and guest users)
     console.log('[Checkout] Submitting directly');
@@ -829,13 +836,31 @@ export default function CheckoutPage() {
         }
       }
 
-      // Clear guest cart after successful checkout
-      if (!isLoggedIn) {
+      // Clear guest cart only when not redirecting to payment (e.g. cash). For card/ameriabank, cart is cleared after payment success.
+      if (!isLoggedIn && response.nextAction === 'view_order') {
         localStorage.removeItem('shop_cart_guest');
         window.dispatchEvent(new Event('cart-updated'));
       }
 
-      // If payment URL is provided, redirect to payment gateway
+      // Ameriabank: call init then redirect to bank
+      if (data.paymentMethod === 'ameriabank' && response.nextAction === 'redirect_to_payment') {
+        try {
+          const initRes = await apiClient.post<{ redirectUrl: string }>('/api/v1/payments/ameriabank/init', {
+            orderNumber: response.order.number,
+            lang: getStoredLanguage(),
+          });
+          if (initRes.redirectUrl) {
+            window.location.href = initRes.redirectUrl;
+            return;
+          }
+        } catch (initErr: any) {
+          console.error('[Checkout] Ameriabank init failed:', initErr);
+          setError(initErr?.message || t('checkout.errors.paymentInitFailed'));
+          return;
+        }
+      }
+
+      // If payment URL is provided (e.g. Idram/Arca), redirect to payment gateway
       if (response.payment?.paymentUrl) {
         console.log('[Checkout] Redirecting to payment gateway:', response.payment.paymentUrl);
         window.location.href = response.payment.paymentUrl;
@@ -1229,7 +1254,7 @@ export default function CheckoutPage() {
                       {...register('paymentMethod')}
                       value={method.id}
                       checked={paymentMethod === method.id}
-                      onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'arca' | 'cash_on_delivery')}
+                      onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'arca' | 'ameriabank' | 'cash_on_delivery')}
                       className="mr-4"
                       disabled={isSubmitting}
                     />
