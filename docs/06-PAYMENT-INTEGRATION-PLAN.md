@@ -5,7 +5,8 @@
 **Փաստաթղթեր.** `payment integration/| Official doc for the API integrationm/`  
 **Callback URL-ներ.** `payment integration/| Official doc for the API integrationm/call back.md`  
 **Ameriabank — մանրամասն ինտեգրացիա (API նյուանսներ, checklist).** `docs/payments/AMERIABANK-INTEGRATION.md`  
-**Idram — ինտեգրացիա (form, RESULT_URL precheck/confirm, checksum).** `docs/payments/IDRAM-INTEGRATION.md`
+**Idram — ինտեգրացիա (form, RESULT_URL precheck/confirm, checksum).** `docs/payments/IDRAM-INTEGRATION.md`  
+**Telcell — ինտեգրացիա (PostInvoice, security_code, RESULT checksum).** `docs/payments/TELCELL-INTEGRATION.md`
 
 ---
 
@@ -158,8 +159,12 @@
 
 ### 8.3 Route-եր
 
-- `wc-api/telcell_result` — callback (POST/GET ըստ API).
-- `wc-api/telcell_redirect` — redirect.
+- `wc-api/telcell_result` — GET/POST callback (checksum, issuer_id base64, status PAID).
+- `wc-api/telcell_redirect` — GET redirect օգտատիրոջ success էջ։
+
+### 8.4 Փուլ 3 ավարտված
+
+Իրականացված. Մանրամասն ձեռնարկ՝ `docs/payments/TELCELL-INTEGRATION.md`.
 
 ---
 

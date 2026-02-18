@@ -52,6 +52,8 @@
     "arcaDescription": "Pay with ArCa card",
     "ameriabank": "Ameriabank",
     "ameriabankDescription": "Pay with Visa/Mastercard via Ameriabank",
+    "telcell": "Telcell",
+    "telcellDescription": "Pay with Telcell Money wallet",
     "paymentDetails": "Payment Details",
     "enterCardDetails": "Enter your card details to complete the payment"
   },

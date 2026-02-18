@@ -52,6 +52,8 @@
     "arcaDescription": "Վճարեք ArCa քարտով",
     "ameriabank": "Ameriabank",
     "ameriabankDescription": "Վճարեք Visa/Mastercard քարտով Ameriabank-ի միջոցով",
+    "telcell": "Telcell",
+    "telcellDescription": "Վճարեք Telcell Money դրամապանակով",
     "paymentDetails": "Վճարման մանրամասներ",
     "enterCardDetails": "Մուտքագրեք ձեր քարտի տվյալները՝ վճարումն ավարտելու համար"
   },

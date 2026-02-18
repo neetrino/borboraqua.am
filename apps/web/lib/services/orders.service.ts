@@ -593,7 +593,8 @@ class OrdersService {
         nextAction:
           paymentMethod === "idram" ||
           paymentMethod === "arca" ||
-          paymentMethod === "ameriabank"
+          paymentMethod === "ameriabank" ||
+          paymentMethod === "telcell"
             ? "redirect_to_payment"
             : "view_order",
       };

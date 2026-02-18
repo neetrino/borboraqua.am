@@ -52,6 +52,8 @@
     "arcaDescription": "Оплатите картой ArCa",
     "ameriabank": "Ameriabank",
     "ameriabankDescription": "Оплата картой Visa/Mastercard через Ameriabank",
+    "telcell": "Telcell",
+    "telcellDescription": "Оплата кошельком Telcell Money",
     "paymentDetails": "Детали оплаты",
     "enterCardDetails": "Введите данные вашей карты для завершения оплаты"
   },
