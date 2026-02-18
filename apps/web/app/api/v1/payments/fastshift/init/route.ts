@@ -3,6 +3,7 @@ import { db } from "@white-shop/db";
 import {
   isFastshiftConfigured,
   registerOrder,
+  generateFastshiftOrderGuid,
 } from "@/lib/payments/fastshift";
 
 const PAYMENT_PROVIDER = "fastshift";
@@ -107,16 +108,22 @@ export async function POST(req: NextRequest) {
 
     const baseUrl =
       process.env.APP_URL?.replace(/\/$/, "") || "https://borboraqua.am";
-    const callbackUrl = `${baseUrl}/wc-api/fastshift_response`;
+    const orderGuid = generateFastshiftOrderGuid();
+    const callbackUrl = `${baseUrl}/wc-api/fastshift_response?order=${encodeURIComponent(order.number)}`;
     const webhookUrl = callbackUrl;
 
-    const { redirectUrl } = await registerOrder({
-      order_number: order.number,
+    const { redirectUrl, orderNumber: fastshiftOrderNumber } = await registerOrder({
+      order_number: orderGuid,
       amount: Math.round(total),
       description: `Order ${order.number}`,
       callback_url: callbackUrl,
       webhook_url: webhookUrl,
       external_order_id: order.id,
+    });
+
+    await db.payment.update({
+      where: { id: payment.id },
+      data: { providerTransactionId: fastshiftOrderNumber ?? orderGuid },
     });
 
     return NextResponse.json({ redirectUrl });

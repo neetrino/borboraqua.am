@@ -19,12 +19,17 @@ export interface FastshiftRegisterRequest {
 export interface FastshiftRegisterResponse {
   data?: {
     redirect_url?: string;
+    order?: { order_number?: string };
   };
   redirect_url?: string;
 }
 
 export interface FastshiftCallbackParams {
   status?: string;
+  order?: string;
   order_number?: string;
+  orderNumber?: string;
+  transaction_id?: string;
+  payment_id?: string;
   [key: string]: string | undefined;
 }

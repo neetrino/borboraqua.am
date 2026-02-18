@@ -2,7 +2,7 @@
 
 > Այս փաստաթուղթը նախատեսված է **FastShift** (e-wallet / vPOS) միացման համար։ Register order → redirect_url → callback/webhook։
 >
-> **Աղբյուր.** `docs/06-PAYMENT-INTEGRATION-PLAN.md` §9; PayByFastShift (vers25.02.25), Api and more fastshift.
+> **Աղբյուր.** `docs/06-PAYMENT-INTEGRATION-PLAN.md` §9; PayByFastShift (vers25.02.25); **payment integration/Example only/HK Agency/payment-gateway-for-fastshift** (WordPress plugin — order_number = GUID, callback_url with order_id).
 
 ---
 
@@ -68,10 +68,10 @@ FastShift-ում (register request-ում) փոխանցվում են.
 
 | Դաշտ | Նկարագրություն |
 |------|------------------|
-| order_number | Պատվերի համար (order.number) |
+| order_number | **GUID/UUID** (օր. `a1b2c3d4-e5f6-7890-abcd-ef1234567890`) — FastShift-ը սպասում է unique identifier, ոչ թե մեր պատվերի համարը. տես HK Agency plugin `generateOrderNumberGUID()` |
 | amount | Գումար (ամբողջ թիվ, Math.round(total)) |
 | description | Օր. "Order 260218-12345" |
-| callback_url | Full URL — user redirect after payment |
+| callback_url | Full URL — user redirect after payment; URL-ում պետք է ունենալ մեր order, օր. `...?order=260218-12345` |
 | webhook_url | Full URL — server-to-server (optional) |
 | external_order_id | Order id (optional) |
 
@@ -81,7 +81,7 @@ FastShift-ում (register request-ում) փոխանցվում են.
 
 ## 6. Callback / Webhook params
 
-**Պարամետրներ.** `status`, `order_number` (մեր order.number). Հնարավոր են լրացուցիչ դաշտեր (transaction_id, payment_id և այլն).
+**Պարամետրներ.** `status`; պատվերի նույնացում. 1) **order** (query-ից — մեր callback_url-ում ուղարկած, օր. `order=260218-12345`), 2) **order_number** (GUID) — գտնում ենք Payment.providerTransactionId-ով. Հնարավոր են լրացուցիչ դաշտեր (transaction_id, payment_id և այլն).
 
 **Success status.** Իրականացումում հաջող է համարվում `status`-ը, եթե այն հավասար է one of: `success`, `completed`, `paid`, `SUCCESS`, `COMPLETED`, `PAID`. Այլ արժեք → failed.
 
@@ -99,7 +99,7 @@ POST `/api/v1/payments/fastshift/init` body `{ orderNumber }` → response `{ re
 ## 8. Checklist
 
 - [ ] Env: FASTSHIFT_TEST_MODE, FASTSHIFT_TOKEN (test), FASTSHIFT_LIVE_TOKEN (live).
-- [ ] Register request: callback_url, webhook_url = `{APP_URL}/wc-api/fastshift_response`.
+- [ ] Register request: order_number = **GUID (UUID)**; callback_url = `{APP_URL}/wc-api/fastshift_response?order={order.number}`.
 - [ ] Callback: order_number → find order by number; status success/fail → update order/payment; cart clear on success.
 - [ ] GET callback → redirect user to success or checkout; POST → 200.
 - [ ] Checkout-ում FastShift ընտրելիս redirect to FastShift (ոչ card modal).

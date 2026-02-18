@@ -12,7 +12,7 @@ const JSON_HEADERS = {
  */
 export async function registerOrder(
   params: FastshiftRegisterRequest
-): Promise<{ redirectUrl: string }> {
+): Promise<{ redirectUrl: string; orderNumber?: string }> {
   const config = getConfig();
   const res = await fetch(FASTSHIFT_REGISTER_URL, {
     method: "POST",
@@ -41,5 +41,8 @@ export async function registerOrder(
     throw new Error("FastShift register: missing redirect_url in response");
   }
 
-  return { redirectUrl };
+  const orderNumber =
+    data.data?.order?.order_number ?? (params as { order_number?: string }).order_number;
+
+  return { redirectUrl, orderNumber: typeof orderNumber === "string" ? orderNumber : undefined };
 }

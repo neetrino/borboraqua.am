@@ -11,23 +11,31 @@ function isSuccessStatus(status: string): boolean {
 
 /**
  * Handle callback from FastShift (user redirect or webhook).
- * Params: status, order_number (our order number).
- * Updates order/payment; clears cart on success.
+ * Order is identified by: 1) "order" (our order number from callback_url), or 2) "order_number" (GUID) via Payment.providerTransactionId.
+ * See HK Agency payment-gateway-for-fastshift: they use GUID as order_number and order_id in callback URL.
  */
 export async function handleFastshiftResponse(
   params: FastshiftCallbackParams
-): Promise<void> {
-  const orderNumber = (params.order_number ?? params.orderNumber ?? "").trim();
+): Promise<{ orderNumber: string; success: boolean }> {
   const status = (params.status ?? "").trim();
+  const ourOrderNumber = (params.order ?? "").trim();
+  const fastshiftOrderNumber = (params.order_number ?? params.orderNumber ?? "").trim();
 
-  if (!orderNumber) {
-    throw new Error("Missing order_number");
+  let order: { id: string; number: string; userId: string | null; payments: { id: string; provider: string }[] } | null = null;
+
+  if (ourOrderNumber) {
+    order = await db.order.findFirst({
+      where: { number: ourOrderNumber },
+      include: { payments: true },
+    });
   }
-
-  const order = await db.order.findFirst({
-    where: { number: orderNumber },
-    include: { payments: true },
-  });
+  if (!order && fastshiftOrderNumber) {
+    const payment = await db.payment.findFirst({
+      where: { provider: PAYMENT_PROVIDER, providerTransactionId: fastshiftOrderNumber },
+      include: { order: { include: { payments: true } } },
+    });
+    if (payment?.order) order = payment.order as typeof order;
+  }
 
   if (!order) {
     throw new Error("Order not found");
@@ -68,7 +76,7 @@ export async function handleFastshiftResponse(
           data: {
             provider: PAYMENT_PROVIDER,
             status,
-            order_number: orderNumber,
+            order_number: order.number,
           },
         },
       }),
@@ -99,9 +107,11 @@ export async function handleFastshiftResponse(
         data: {
           orderId: order.id,
           type: "payment_failed",
-          data: { provider: PAYMENT_PROVIDER, status, order_number: orderNumber },
+          data: { provider: PAYMENT_PROVIDER, status, order_number: order.number },
         },
       }),
     ]);
   }
+
+  return { orderNumber: order.number, success };
 }

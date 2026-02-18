@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { handleFastshiftResponse, FASTSHIFT_STATUS_SUCCESS } from "@/lib/payments/fastshift";
+import { handleFastshiftResponse } from "@/lib/payments/fastshift";
 import type { FastshiftCallbackParams } from "@/lib/payments/fastshift";
 
 function toRecord(obj: unknown): Record<string, string> {
@@ -28,19 +28,12 @@ function getQueryParams(req: NextRequest): Record<string, string> {
 export async function GET(req: NextRequest) {
   try {
     const params = getQueryParams(req) as FastshiftCallbackParams;
-    await handleFastshiftResponse(params);
-    const orderNumber = (params.order_number ?? params.orderNumber ?? "").trim();
-    const success =
-      params.status &&
-      FASTSHIFT_STATUS_SUCCESS.includes(String(params.status).trim());
+    const { orderNumber, success } = await handleFastshiftResponse(params);
     const baseUrl = process.env.APP_URL?.replace(/\/$/, "") || "https://borboraqua.am";
-    if (orderNumber && success) {
+    if (success) {
       return NextResponse.redirect(`${baseUrl}/checkout/success?order=${encodeURIComponent(orderNumber)}`, 302);
     }
-    if (orderNumber) {
-      return NextResponse.redirect(`${baseUrl}/checkout?order=${encodeURIComponent(orderNumber)}`, 302);
-    }
-    return new NextResponse(null, { status: 200 });
+    return NextResponse.redirect(`${baseUrl}/checkout?order=${encodeURIComponent(orderNumber)}`, 302);
   } catch (err) {
     console.error("[wc-api/fastshift_response GET]", err);
     return new NextResponse(null, { status: 400 });
