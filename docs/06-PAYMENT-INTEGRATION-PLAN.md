@@ -3,7 +3,9 @@
 > **Կարևոր.** Հին WordPress կայքում արդեն գրանցված callback/redirect URL-ները **պետք է մնան նույնը**։ Նոր կայքը պետք է սպասարկի այդ path-երը (`/wc-api/...`), որպեսզի բանկերը/համակարգերը չստիպվեն վերագրանցել URL-ներ։
 
 **Փաստաթղթեր.** `payment integration/| Official doc for the API integrationm/`  
-**Callback URL-ներ.** `payment integration/| Official doc for the API integrationm/call back.md`
+**Callback URL-ներ.** `payment integration/| Official doc for the API integrationm/call back.md`  
+**Ameriabank — մանրամասն ինտեգրացիա (API նյուանսներ, checklist).** `docs/payments/AMERIABANK-INTEGRATION.md`  
+**Idram — ինտեգրացիա (form, RESULT_URL precheck/confirm, checksum).** `docs/payments/IDRAM-INTEGRATION.md`
 
 ---
 

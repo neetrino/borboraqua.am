@@ -860,7 +860,38 @@ export default function CheckoutPage() {
         }
       }
 
-      // If payment URL is provided (e.g. Idram/Arca), redirect to payment gateway
+      // Idram: call init then submit form to Idram
+      if (data.paymentMethod === 'idram' && response.nextAction === 'redirect_to_payment') {
+        try {
+          const initRes = await apiClient.post<{ formAction: string; formData: Record<string, string> }>('/api/v1/payments/idram/init', {
+            orderNumber: response.order.number,
+            lang: getStoredLanguage(),
+          });
+          if (initRes.formAction && initRes.formData) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = initRes.formAction;
+            form.style.display = 'none';
+            Object.entries(initRes.formData).forEach(([key, value]) => {
+              if (value == null) return;
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = key;
+              input.value = value;
+              form.appendChild(input);
+            });
+            document.body.appendChild(form);
+            form.submit();
+            return;
+          }
+        } catch (initErr: any) {
+          console.error('[Checkout] Idram init failed:', initErr);
+          setError(initErr?.message || t('checkout.errors.paymentInitFailed'));
+          return;
+        }
+      }
+
+      // If payment URL is provided (e.g. Arca), redirect to payment gateway
       if (response.payment?.paymentUrl) {
         console.log('[Checkout] Redirecting to payment gateway:', response.payment.paymentUrl);
         window.location.href = response.payment.paymentUrl;
