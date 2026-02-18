@@ -44,7 +44,7 @@ export function verifyTelcellResultChecksum(
  * Build redirect URL for Telcell PostInvoice (user is sent here to pay).
  * REDIRECT_URL is configured with Telcell; Telcell appends params (e.g. issuer_id, order) when redirecting.
  */
-export function buildTelcellRedirectUrl(params: {
+export function buildTelcellRedirectUrl(input: {
   orderId: string;
   orderTotal: number;
   productDescription: string;
@@ -52,11 +52,11 @@ export function buildTelcellRedirectUrl(params: {
   lang?: string;
 }): string {
   const config = getConfig();
-  const price = String(Math.round(params.orderTotal));
-  const product = Buffer.from(params.productDescription, "utf8").toString("base64");
-  const issuerId = Buffer.from(params.orderId, "utf8").toString("base64");
-  const validDays = String(params.validDays ?? 1);
-  const lang = params.lang ?? "am";
+  const price = String(Math.round(input.orderTotal));
+  const product = Buffer.from(input.productDescription, "utf8").toString("base64");
+  const issuerId = Buffer.from(input.orderId, "utf8").toString("base64");
+  const validDays = String(input.validDays ?? 1);
+  const lang = input.lang ?? "am";
 
   const securityCode = getTelcellSecurityCode(
     config.shopKey,
@@ -68,7 +68,7 @@ export function buildTelcellRedirectUrl(params: {
     validDays
   );
 
-  const search = new URLSearchParams({
+  const queryParams: Record<string, string> = {
     action: TELCELL_ACTION_POST_INVOICE,
     issuer: config.shopId,
     currency: TELCELL_CURRENCY,
@@ -78,6 +78,9 @@ export function buildTelcellRedirectUrl(params: {
     valid_days: validDays,
     lang,
     security_code: securityCode,
-  });
-  return `${config.apiUrl}?${search.toString()}`;
+  };
+  const query = Object.entries(queryParams)
+    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    .join("&");
+  return `${config.apiUrl}?${query}`;
 }

@@ -120,5 +120,37 @@ POST /api/v1/payments/telcell/init body `{ orderNumber, lang? }` → response `{
 
 ---
 
-**Փաստաթղթի տարբերակ.** 1.0  
+## 9. Համեմատություն payment-gateway-for-telcell plugin-ի հետ
+
+| Էլեմենտ | HK Agency plugin (PHP) | Մեր իրականացում | Նշում |
+|--------|------------------------|------------------|--------|
+| **PostInvoice URL** | `api_url . '?action=PostInvoice&issuer=' . $issuer . '&currency=' ...` | `buildTelcellRedirectUrl()` — նույն params | ✓ |
+| **security_code** | `MD5(shop_key + issuer + currency + price + product + issuer_id + valid_days)` | `getTelcellSecurityCode()` — նույն բանաձև | ✓ |
+| **product** | `base64_encode(get_bloginfo('url'))` (site URL) | `base64("Order " + order.number)` | Տարբերություն. մենք ցուցադրում ենք պատվերի նկարագրություն (ավելի պարզ օգտատիրոջ համար). |
+| **issuer_id** | `base64_encode($order_id)` (WooCommerce integer id) | `base64(order.id)` (DB UUID) | Երկուսն էլ unique identifier; callback-ում decode → order lookup. ✓ |
+| **RESULT checksum** | `MD5(shop_key + invoice + issuer_id + payment_id + currency + sum + time + status)` | `verifyTelcellResultChecksum()` — նույն բանաձև, issuer_id **raw** (ինչպես ստացվել է) | ✓ |
+| **RESULT success** | `$status === 'PAID'` | `TELCELL_STATUS_PAID` ("PAID") | ✓ |
+| **REDIRECT** | `wc_get_order($_REQUEST['order'])` → get_return_url | Decode issuer_id or order → `/checkout/success?order=...` | ✓ |
+
+**Օրինակ URL (թեստ).**  
+`https://telcellmoney.am/proto_test2/invoices?action=PostInvoice&issuer=...&currency=֏&price=2&product=T3JkZXIgMjYyMTgtMDE1MzU&issuer_id=...&valid_days=1&lang=en&security_code=...`  
+- `product=T3JkZXIgMjYyMTgtMDE1MzU` = base64("Order 260218-01535") ✓  
+- `issuer_id` = base64(order.id) ✓  
+- `security_code` = MD5(shop_key+issuer+currency+price+product+issuer_id+valid_days) ✓  
+
+Իրականացումը ճիշտ է և պատրաստ թեստի։
+
+---
+
+---
+
+## 10. Թեստ — 404 (This page can't be found)
+
+Եթե redirect-ից հետո Telcell-ի էջը ցույց է տալիս **404**:
+
+1. **Query encoding** — Բոլոր պարամետրերը (ներառյալ `currency=֏`) percent-encoded են (`encodeURIComponent`), որպեսզի server-ը ճիշտ parse անի.
+2. **Test URL** — Test միջավայրի URL-ը `https://telcellmoney.am/proto_test2/invoices`. Եթե Telcell-ը փոխել է test path-ը կամ անջատել է — 404 կլինի. **Պետք է հաստատել Telcell-ի հետ**, որ test endpoint-ը նույնն է, կամ ստանալ արդի test URL.
+3. **Փորձել live** — Եթե ունեք live shop_id/shop_key, փորձել `TELCELL_TEST_MODE=false` և live URL (`https://telcellmoney.am/invoices`) — եթե live-ը բացվում է, ապա խնդիրը test environment-ի հետ է.
+
+**Փաստաթղթի տարբերակ.** 1.1  
 **Ամսաթիվ.** 2026-02-18
