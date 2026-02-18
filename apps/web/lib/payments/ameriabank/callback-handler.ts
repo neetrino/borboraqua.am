@@ -40,10 +40,24 @@ export async function handleAmeriabankCallback(searchParams: URLSearchParams): P
   }
 
   const details = await getPaymentDetails(paymentID);
-  const isSuccess =
-    details.ResponseCode === AMERIA_PAYMENT_SUCCESS_RESPONSE_CODE &&
-    (details.PaymentState === AMERIA_PAYMENT_STATE_SUCCESSFUL ||
-      details.OrderStatus === AMERIA_ORDER_STATUS_DEPOSITED);
+  const rawCode = details.ResponseCode ?? (details as Record<string, unknown>).responseCode;
+  const responseCode = rawCode === 0 || rawCode === "0" ? "00" : String(rawCode ?? "").trim();
+  const paymentState = details.PaymentState ?? (details as Record<string, unknown>).PaymentState;
+  const orderStatus = details.OrderStatus ?? (details as Record<string, unknown>).OrderStatus;
+  const orderStatusNum = typeof orderStatus === "string" ? parseInt(orderStatus, 10) : orderStatus;
+  const responseCodeOk =
+    responseCode === AMERIA_PAYMENT_SUCCESS_RESPONSE_CODE ||
+    responseCode.startsWith("00");
+  const stateOk =
+    paymentState === AMERIA_PAYMENT_STATE_SUCCESSFUL ||
+    paymentState === "payment_deposited" ||
+    paymentState === "Deposited" ||
+    paymentState === 2 ||
+    paymentState === 4 ||
+    String(paymentState).toLowerCase() === "successful" ||
+    orderStatusNum === AMERIA_ORDER_STATUS_DEPOSITED ||
+    orderStatusNum === 4;
+  const isSuccess = responseCodeOk && stateOk;
 
   const payment = order.payments.find(
     (p) => p.provider === PAYMENT_PROVIDER
