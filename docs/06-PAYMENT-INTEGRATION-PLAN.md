@@ -188,9 +188,13 @@ Callback URL-ը borboraqua.am-ի համար (ըստ call back.md) — `https://b
 
 - `FASTSHIFT_TOKEN` (test), `FASTSHIFT_LIVE_TOKEN` (live). IP whitelist — server-ի исходящий IP (Vercel-ում կարող է փոխվել, հստակեցնել FastShift-ի հետ).
 
-### 9.4 Փուլ 4 ավարտված
+### 9.4 Փուլ 4 ավարտված ✅
 
-Իրականացված. Մանրամասն ձեռնարկ՝ `docs/payments/FASTSHIFT-INTEGRATION.md`. Route: `wc-api/fastshift_response` (GET — user redirect, POST — webhook).
+Իրականացված և աշխատում է. Մանրամասն ձեռնարկ՝ `docs/payments/FASTSHIFT-INTEGRATION.md`.
+
+- **Route:** `wc-api/fastshift_response` (GET — user redirect, POST — webhook).
+- **Անվտանգություն:** Callback-ում status-ը ստուգվում է FastShift **Check status API**-ով (GET `/vpos/order/status/{order_number}`); idempotency; GUID validation; պատասխաններ առանց ներքին տեղեկության արտահոսքի.
+- **Փուլ 4 (FastShift) — փակված.**
 
 ---
 

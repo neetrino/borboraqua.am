@@ -119,13 +119,18 @@ POST `/api/v1/payments/fastshift/init` body `{ orderNumber }` → response `{ re
 
 ## 8. Checklist
 
-- [ ] Env: FASTSHIFT_TEST_MODE, FASTSHIFT_TOKEN (test), FASTSHIFT_LIVE_TOKEN (live).
-- [ ] Register request: order_number = **GUID (UUID)**; callback_url = `{APP_URL}/wc-api/fastshift_response?order={order.number}`.
-- [ ] Callback: order_number → find order by number; status success/fail → update order/payment; cart clear on success.
-- [ ] GET callback → redirect user to success or checkout; POST → 200.
-- [ ] Checkout-ում FastShift ընտրելիս redirect to FastShift (ոչ card modal).
+- [x] Env: FASTSHIFT_TEST_MODE, FASTSHIFT_TOKEN (test), FASTSHIFT_LIVE_TOKEN (live).
+- [x] Register request: order_number = **GUID (UUID)**; callback_url = `{APP_URL}/wc-api/fastshift_response?order={order.number}`.
+- [x] Callback: order by `order` (URL) or `order_number` (GUID); status verified via **GET /vpos/order/status** (source of truth); idempotent if already paid.
+- [x] GET callback → redirect user to success or checkout; POST webhook → 200; errors → 400/redirect without leaking internals.
+- [x] Checkout-ում FastShift ընտրելիս redirect to FastShift (ոչ card modal).
 
 ---
 
-**Փաստաթղթի տարբերակ.** 1.0  
-**Ամսաթիվ.** 2026-02-18
+## 9. Փուլ 4 ավարտված
+
+Իրականացումը աշխատում է. Register (GUID, callback_url + order), callback/webhook with Status API verification, idempotency, GUID validation, safe responses. Մանրամասն՝ վերևի բաժիններում։
+
+**Փաստաթղթի տարբերակ.** 1.1  
+**Ամսաթիվ.** 2026-02-18  
+**Ստատուս.** Փուլ 4 (FastShift) — ավարտված
