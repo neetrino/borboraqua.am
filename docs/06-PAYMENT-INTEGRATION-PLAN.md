@@ -6,7 +6,8 @@
 **Callback URL-ներ.** `payment integration/| Official doc for the API integrationm/call back.md`  
 **Ameriabank — մանրամասն ինտեգրացիա (API նյուանսներ, checklist).** `docs/payments/AMERIABANK-INTEGRATION.md`  
 **Idram — ինտեգրացիա (form, RESULT_URL precheck/confirm, checksum).** `docs/payments/IDRAM-INTEGRATION.md`  
-**Telcell — ինտեգրացիա (PostInvoice, security_code, RESULT checksum).** `docs/payments/TELCELL-INTEGRATION.md`
+**Telcell — ինտեգրացիա (PostInvoice, security_code, RESULT checksum).** `docs/payments/TELCELL-INTEGRATION.md`  
+**FastShift — ինտեգրացիա (register order, Bearer token, callback_url/webhook).** `docs/payments/FASTSHIFT-INTEGRATION.md`
 
 ---
 
@@ -185,7 +186,11 @@ Callback URL-ը borboraqua.am-ի համար (ըստ call back.md) — `https://b
 
 ### 9.3 Env
 
-- `FASTSHIFT_TOKEN` (test/live). IP for whitelist — server-ի исходящий IP (Vercel-ում կարող է փոխվել, հստակեցնել FastShift-ի հետ):
+- `FASTSHIFT_TOKEN` (test), `FASTSHIFT_LIVE_TOKEN` (live). IP whitelist — server-ի исходящий IP (Vercel-ում կարող է փոխվել, հստակեցնել FastShift-ի հետ).
+
+### 9.4 Փուլ 4 ավարտված
+
+Իրականացված. Մանրամասն ձեռնարկ՝ `docs/payments/FASTSHIFT-INTEGRATION.md`. Route: `wc-api/fastshift_response` (GET — user redirect, POST — webhook).
 
 ---
 

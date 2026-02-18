@@ -594,7 +594,8 @@ class OrdersService {
           paymentMethod === "idram" ||
           paymentMethod === "arca" ||
           paymentMethod === "ameriabank" ||
-          paymentMethod === "telcell"
+          paymentMethod === "telcell" ||
+          paymentMethod === "fastshift"
             ? "redirect_to_payment"
             : "view_order",
       };

@@ -54,6 +54,8 @@
     "ameriabankDescription": "Վճարեք Visa/Mastercard քարտով Ameriabank-ի միջոցով",
     "telcell": "Telcell",
     "telcellDescription": "Վճարեք Telcell Money դրամապանակով",
+    "fastshift": "FastShift",
+    "fastshiftDescription": "Վճարեք FastShift e-wallet-ով",
     "paymentDetails": "Վճարման մանրամասներ",
     "enterCardDetails": "Մուտքագրեք ձեր քարտի տվյալները՝ վճարումն ավարտելու համար"
   },

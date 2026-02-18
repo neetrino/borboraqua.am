@@ -54,6 +54,8 @@
     "ameriabankDescription": "Оплата картой Visa/Mastercard через Ameriabank",
     "telcell": "Telcell",
     "telcellDescription": "Оплата кошельком Telcell Money",
+    "fastshift": "FastShift",
+    "fastshiftDescription": "Оплата кошельком FastShift",
     "paymentDetails": "Детали оплаты",
     "enterCardDetails": "Введите данные вашей карты для завершения оплаты"
   },

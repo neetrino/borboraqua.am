@@ -66,7 +66,7 @@ type CheckoutFormData = {
   email: string;
   phone: string;
   shippingMethod: 'pickup' | 'delivery';
-  paymentMethod: 'idram' | 'arca' | 'ameriabank' | 'telcell' | 'cash_on_delivery';
+  paymentMethod: 'idram' | 'arca' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery';
   shippingAddress?: string;
   shippingCity?: string;
   shippingPostalCode?: string;
@@ -134,6 +134,12 @@ export default function CheckoutPage() {
       description: t('checkout.payment.telcellDescription'),
       logo: '/assets/payments/telcell.svg',
     },
+    {
+      id: 'fastshift' as const,
+      name: t('checkout.payment.fastshift'),
+      description: t('checkout.payment.fastshiftDescription'),
+      logo: '/assets/payments/fastshift.svg',
+    },
   ];
 
   // Create validation schema with translations
@@ -145,7 +151,7 @@ export default function CheckoutPage() {
     shippingMethod: z.enum(['pickup', 'delivery'], {
       message: t('checkout.errors.selectShippingMethod'),
     }),
-    paymentMethod: z.enum(['idram', 'arca', 'ameriabank', 'telcell', 'cash_on_delivery'], {
+    paymentMethod: z.enum(['idram', 'arca', 'ameriabank', 'telcell', 'fastshift', 'cash_on_delivery'], {
       message: t('checkout.errors.selectPaymentMethod'),
     }),
     // Shipping address fields - required only for delivery
@@ -914,6 +920,21 @@ export default function CheckoutPage() {
           return;
         }
       }
+      if (data.paymentMethod === 'fastshift' && response.nextAction === 'redirect_to_payment') {
+        try {
+          const initRes = await apiClient.post<{ redirectUrl: string }>('/api/v1/payments/fastshift/init', {
+            orderNumber: response.order.number,
+          });
+          if (initRes.redirectUrl) {
+            window.location.href = initRes.redirectUrl;
+            return;
+          }
+        } catch (initErr: any) {
+          console.error('[Checkout] FastShift init failed:', initErr);
+          setError(initErr?.message || t('checkout.errors.paymentInitFailed'));
+          return;
+        }
+      }
 
       // If payment URL is provided (e.g. Arca), redirect to payment gateway
       if (response.payment?.paymentUrl) {
@@ -1309,7 +1330,7 @@ export default function CheckoutPage() {
                       {...register('paymentMethod')}
                       value={method.id}
                       checked={paymentMethod === method.id}
-                      onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'arca' | 'ameriabank' | 'telcell' | 'cash_on_delivery')}
+                      onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'arca' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery')}
                       className="mr-4"
                       disabled={isSubmitting}
                     />

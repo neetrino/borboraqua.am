@@ -54,6 +54,8 @@
     "ameriabankDescription": "Pay with Visa/Mastercard via Ameriabank",
     "telcell": "Telcell",
     "telcellDescription": "Pay with Telcell Money wallet",
+    "fastshift": "FastShift",
+    "fastshiftDescription": "Pay with FastShift e-wallet",
     "paymentDetails": "Payment Details",
     "enterCardDetails": "Enter your card details to complete the payment"
   },
