@@ -166,7 +166,7 @@ export default function CheckoutPage() {
     message: t('checkout.errors.cityRequired'),
     path: ['shippingCity'],
   }).refine((data) => {
-    if (data.paymentMethod === 'arca' || data.paymentMethod === 'idram') {
+    if (data.paymentMethod === 'arca') {
       return data.cardNumber && data.cardNumber.replace(/\s/g, '').length >= 13;
     }
     return true;
@@ -174,7 +174,7 @@ export default function CheckoutPage() {
     message: t('checkout.errors.cardNumberRequired'),
     path: ['cardNumber'],
   }).refine((data) => {
-    if (data.paymentMethod === 'arca' || data.paymentMethod === 'idram') {
+    if (data.paymentMethod === 'arca') {
       return data.cardExpiry && /^\d{2}\/\d{2}$/.test(data.cardExpiry);
     }
     return true;
@@ -182,7 +182,7 @@ export default function CheckoutPage() {
     message: t('checkout.errors.cardExpiryRequired'),
     path: ['cardExpiry'],
   }).refine((data) => {
-    if (data.paymentMethod === 'arca' || data.paymentMethod === 'idram') {
+    if (data.paymentMethod === 'arca') {
       return data.cardCvv && data.cardCvv.length >= 3;
     }
     return true;
@@ -190,7 +190,7 @@ export default function CheckoutPage() {
     message: t('checkout.errors.cvvRequired'),
     path: ['cardCvv'],
   }).refine((data) => {
-    if (data.paymentMethod === 'arca' || data.paymentMethod === 'idram') {
+    if (data.paymentMethod === 'arca') {
       return data.cardHolderName && data.cardHolderName.trim().length > 0;
     }
     return true;
@@ -726,13 +726,13 @@ export default function CheckoutPage() {
       return;
     }
     
-    // If ArCa or Idram is selected, show card details modal first
-    if (paymentMethod === 'arca' || paymentMethod === 'idram') {
-      console.log('[Checkout] Opening card modal for payment:', paymentMethod);
+    // If ArCa is selected, show card details modal first. Idram: no modal — redirect to Idram after order creation.
+    if (paymentMethod === 'arca') {
+      console.log('[Checkout] Opening card modal for ArCa');
       setShowCardModal(true);
       return;
     }
-    // Ameriabank: no modal, submit and then redirect to bank via init API
+    // Ameriabank / Idram: no modal, submit then redirect via init API / form submit
     
     // Otherwise submit directly (both logged in and guest users)
     console.log('[Checkout] Submitting directly');
@@ -1394,7 +1394,7 @@ export default function CheckoutPage() {
             <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {t('checkout.modals.cardDetails').replace('{method}', paymentMethod === 'arca' ? t('checkout.payment.arca') : t('checkout.payment.idram'))}
+                {t('checkout.modals.cardDetails').replace('{method}', t('checkout.payment.arca'))}
               </h2>
               <button
                 onClick={() => {
@@ -1413,25 +1413,25 @@ export default function CheckoutPage() {
             <div className="space-y-4 mb-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="relative w-16 h-10 flex-shrink-0 bg-white rounded border border-gray-200 flex items-center justify-center overflow-hidden">
-                  {logoErrors[paymentMethod] ? (
+                  {logoErrors.arca ? (
                     <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                   ) : (
                     <img
-                      src={paymentMethod === 'arca' ? '/assets/payments/arca.svg' : '/assets/payments/idram.svg'}
-                      alt={paymentMethod === 'arca' ? 'ArCa' : 'Idram'}
+                      src="/assets/payments/arca.svg"
+                      alt="ArCa"
                       className="w-full h-full object-contain p-1"
                       loading="lazy"
                       onError={() => {
-                        setLogoErrors((prev) => ({ ...prev, [paymentMethod]: true }));
+                        setLogoErrors((prev) => ({ ...prev, arca: true }));
                       }}
                     />
                   )}
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">
-                    {paymentMethod === 'arca' ? t('checkout.payment.arca') : t('checkout.payment.idram')} {t('checkout.payment.paymentDetails')}
+                    {t('checkout.payment.arca')} {t('checkout.payment.paymentDetails')}
                   </div>
                   <div className="text-sm text-gray-600">{t('checkout.payment.enterCardDetails')}</div>
                 </div>
