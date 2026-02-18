@@ -503,6 +503,8 @@ function ProfilePageContent() {
         return 'bg-yellow-100 text-yellow-800';
       case 'failed':
         return 'bg-red-100 text-red-800';
+      case 'cancelled':
+        return 'bg-orange-100 text-orange-800';
       case 'refunded':
         return 'bg-purple-100 text-purple-800';
       default:

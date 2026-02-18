@@ -643,6 +643,7 @@
     "paid": "Оплачен",
     "pendingPayment": "Ожидает оплаты",
     "failed": "Неудачно",
+    "refunded": "Возврат",
     "statusUpdated": "Статус успешно обновлен",
     "paymentStatusUpdated": "Статус оплаты успешно обновлен",
     "failedToUpdateStatus": "Не удалось обновить статус. Пожалуйста, попробуйте снова.",

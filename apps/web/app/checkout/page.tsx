@@ -66,7 +66,7 @@ type CheckoutFormData = {
   email: string;
   phone: string;
   shippingMethod: 'pickup' | 'delivery';
-  paymentMethod: 'idram' | 'arca' | 'cash_on_delivery';
+  paymentMethod: 'idram' | 'arca' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery';
   shippingAddress?: string;
   shippingCity?: string;
   shippingPostalCode?: string;
@@ -122,6 +122,24 @@ export default function CheckoutPage() {
       description: t('checkout.payment.arcaDescription'),
       logo: '/assets/payments/arca.svg',
     },
+    {
+      id: 'ameriabank' as const,
+      name: t('checkout.payment.ameriabank'),
+      description: t('checkout.payment.ameriabankDescription'),
+      logo: '/assets/payments/ameria.svg',
+    },
+    {
+      id: 'telcell' as const,
+      name: t('checkout.payment.telcell'),
+      description: t('checkout.payment.telcellDescription'),
+      logo: '/assets/payments/telcell.svg',
+    },
+    {
+      id: 'fastshift' as const,
+      name: t('checkout.payment.fastshift'),
+      description: t('checkout.payment.fastshiftDescription'),
+      logo: '/assets/payments/fastshift.svg',
+    },
   ];
 
   // Create validation schema with translations
@@ -133,7 +151,7 @@ export default function CheckoutPage() {
     shippingMethod: z.enum(['pickup', 'delivery'], {
       message: t('checkout.errors.selectShippingMethod'),
     }),
-    paymentMethod: z.enum(['idram', 'arca', 'cash_on_delivery'], {
+    paymentMethod: z.enum(['idram', 'arca', 'ameriabank', 'telcell', 'fastshift', 'cash_on_delivery'], {
       message: t('checkout.errors.selectPaymentMethod'),
     }),
     // Shipping address fields - required only for delivery
@@ -160,7 +178,7 @@ export default function CheckoutPage() {
     message: t('checkout.errors.cityRequired'),
     path: ['shippingCity'],
   }).refine((data) => {
-    if (data.paymentMethod === 'arca' || data.paymentMethod === 'idram') {
+    if (data.paymentMethod === 'arca') {
       return data.cardNumber && data.cardNumber.replace(/\s/g, '').length >= 13;
     }
     return true;
@@ -168,7 +186,7 @@ export default function CheckoutPage() {
     message: t('checkout.errors.cardNumberRequired'),
     path: ['cardNumber'],
   }).refine((data) => {
-    if (data.paymentMethod === 'arca' || data.paymentMethod === 'idram') {
+    if (data.paymentMethod === 'arca') {
       return data.cardExpiry && /^\d{2}\/\d{2}$/.test(data.cardExpiry);
     }
     return true;
@@ -176,7 +194,7 @@ export default function CheckoutPage() {
     message: t('checkout.errors.cardExpiryRequired'),
     path: ['cardExpiry'],
   }).refine((data) => {
-    if (data.paymentMethod === 'arca' || data.paymentMethod === 'idram') {
+    if (data.paymentMethod === 'arca') {
       return data.cardCvv && data.cardCvv.length >= 3;
     }
     return true;
@@ -184,7 +202,7 @@ export default function CheckoutPage() {
     message: t('checkout.errors.cvvRequired'),
     path: ['cardCvv'],
   }).refine((data) => {
-    if (data.paymentMethod === 'arca' || data.paymentMethod === 'idram') {
+    if (data.paymentMethod === 'arca') {
       return data.cardHolderName && data.cardHolderName.trim().length > 0;
     }
     return true;
@@ -720,12 +738,13 @@ export default function CheckoutPage() {
       return;
     }
     
-    // If ArCa or Idram is selected, show card details modal first
-    if (paymentMethod === 'arca' || paymentMethod === 'idram') {
-      console.log('[Checkout] Opening card modal for payment:', paymentMethod);
+    // If ArCa is selected, show card details modal first. Idram: no modal — redirect to Idram after order creation.
+    if (paymentMethod === 'arca') {
+      console.log('[Checkout] Opening card modal for ArCa');
       setShowCardModal(true);
       return;
     }
+    // Ameriabank / Idram: no modal, submit then redirect via init API / form submit
     
     // Otherwise submit directly (both logged in and guest users)
     console.log('[Checkout] Submitting directly');
@@ -829,13 +848,95 @@ export default function CheckoutPage() {
         }
       }
 
-      // Clear guest cart after successful checkout
-      if (!isLoggedIn) {
+      // Clear guest cart only when not redirecting to payment (e.g. cash). For card/ameriabank, cart is cleared after payment success.
+      if (!isLoggedIn && response.nextAction === 'view_order') {
         localStorage.removeItem('shop_cart_guest');
         window.dispatchEvent(new Event('cart-updated'));
       }
 
-      // If payment URL is provided, redirect to payment gateway
+      // Ameriabank: call init then redirect to bank
+      if (data.paymentMethod === 'ameriabank' && response.nextAction === 'redirect_to_payment') {
+        try {
+          const initRes = await apiClient.post<{ redirectUrl: string }>('/api/v1/payments/ameriabank/init', {
+            orderNumber: response.order.number,
+            lang: getStoredLanguage(),
+          });
+          if (initRes.redirectUrl) {
+            window.location.href = initRes.redirectUrl;
+            return;
+          }
+        } catch (initErr: any) {
+          console.error('[Checkout] Ameriabank init failed:', initErr);
+          setError(initErr?.message || t('checkout.errors.paymentInitFailed'));
+          return;
+        }
+      }
+
+      // Idram: call init then submit form to Idram
+      if (data.paymentMethod === 'idram' && response.nextAction === 'redirect_to_payment') {
+        try {
+          const initRes = await apiClient.post<{ formAction: string; formData: Record<string, string> }>('/api/v1/payments/idram/init', {
+            orderNumber: response.order.number,
+            lang: getStoredLanguage(),
+          });
+          if (initRes.formAction && initRes.formData) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = initRes.formAction;
+            form.style.display = 'none';
+            Object.entries(initRes.formData).forEach(([key, value]) => {
+              if (value == null) return;
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = key;
+              input.value = value;
+              form.appendChild(input);
+            });
+            document.body.appendChild(form);
+            form.submit();
+            return;
+          }
+        } catch (initErr: any) {
+          console.error('[Checkout] Idram init failed:', initErr);
+          setError(initErr?.message || t('checkout.errors.paymentInitFailed'));
+          return;
+        }
+      }
+
+      // Telcell: call init then redirect to Telcell
+      if (data.paymentMethod === 'telcell' && response.nextAction === 'redirect_to_payment') {
+        try {
+          const initRes = await apiClient.post<{ redirectUrl: string }>('/api/v1/payments/telcell/init', {
+            orderNumber: response.order.number,
+            lang: getStoredLanguage(),
+          });
+          if (initRes.redirectUrl) {
+            window.location.href = initRes.redirectUrl;
+            return;
+          }
+        } catch (initErr: any) {
+          console.error('[Checkout] Telcell init failed:', initErr);
+          setError(initErr?.message || t('checkout.errors.paymentInitFailed'));
+          return;
+        }
+      }
+      if (data.paymentMethod === 'fastshift' && response.nextAction === 'redirect_to_payment') {
+        try {
+          const initRes = await apiClient.post<{ redirectUrl: string }>('/api/v1/payments/fastshift/init', {
+            orderNumber: response.order.number,
+          });
+          if (initRes.redirectUrl) {
+            window.location.href = initRes.redirectUrl;
+            return;
+          }
+        } catch (initErr: any) {
+          console.error('[Checkout] FastShift init failed:', initErr);
+          setError(initErr?.message || t('checkout.errors.paymentInitFailed'));
+          return;
+        }
+      }
+
+      // If payment URL is provided (e.g. Arca), redirect to payment gateway
       if (response.payment?.paymentUrl) {
         console.log('[Checkout] Redirecting to payment gateway:', response.payment.paymentUrl);
         window.location.href = response.payment.paymentUrl;
@@ -1229,7 +1330,7 @@ export default function CheckoutPage() {
                       {...register('paymentMethod')}
                       value={method.id}
                       checked={paymentMethod === method.id}
-                      onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'arca' | 'cash_on_delivery')}
+                      onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'arca' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery')}
                       className="mr-4"
                       disabled={isSubmitting}
                     />
@@ -1338,7 +1439,7 @@ export default function CheckoutPage() {
             <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {t('checkout.modals.cardDetails').replace('{method}', paymentMethod === 'arca' ? t('checkout.payment.arca') : t('checkout.payment.idram'))}
+                {t('checkout.modals.cardDetails').replace('{method}', t('checkout.payment.arca'))}
               </h2>
               <button
                 onClick={() => {
@@ -1357,25 +1458,25 @@ export default function CheckoutPage() {
             <div className="space-y-4 mb-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="relative w-16 h-10 flex-shrink-0 bg-white rounded border border-gray-200 flex items-center justify-center overflow-hidden">
-                  {logoErrors[paymentMethod] ? (
+                  {logoErrors.arca ? (
                     <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                   ) : (
                     <img
-                      src={paymentMethod === 'arca' ? '/assets/payments/arca.svg' : '/assets/payments/idram.svg'}
-                      alt={paymentMethod === 'arca' ? 'ArCa' : 'Idram'}
+                      src="/assets/payments/arca.svg"
+                      alt="ArCa"
                       className="w-full h-full object-contain p-1"
                       loading="lazy"
                       onError={() => {
-                        setLogoErrors((prev) => ({ ...prev, [paymentMethod]: true }));
+                        setLogoErrors((prev) => ({ ...prev, arca: true }));
                       }}
                     />
                   )}
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">
-                    {paymentMethod === 'arca' ? t('checkout.payment.arca') : t('checkout.payment.idram')} {t('checkout.payment.paymentDetails')}
+                    {t('checkout.payment.arca')} {t('checkout.payment.paymentDetails')}
                   </div>
                   <div className="text-sm text-gray-600">{t('checkout.payment.enterCardDetails')}</div>
                 </div>
