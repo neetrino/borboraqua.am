@@ -1,104 +1,196 @@
 # Idram — ինտեգրացիայի ձեռնարկ
 
-> **Պաշտոնական API.** `payment integration/| Official doc for the API integrationm/IDram/Idram Merchant API New.md`
+> Այս փաստաթուղթը նախատեսված է **Idram**-ի միացման համար։ Բոլոր նյուանսները (form, RESULT_URL երկու POST, checksum կարգ, precheck «OK») ներառված են, որպեսզի նոր նախագծում ինտեգրացիան աշխատի առաջին փորձից։
+>
+> **Պաշտոնական API նկարագրություն:**  
+> `payment integration/| Official doc for the API integrationm/IDram/Idram Merchant API New.md`
 
 ---
 
 ## 1. Ընդհանուր
 
-- **Վճարում.** POST form → `https://banking.idram.am/Payment/GetPayment` (UTF-8).
-- **Կարգավորում.** Idram-ից ստանում եք: SUCCESS_URL, FAIL_URL, RESULT_URL, SECRET_KEY, EMAIL.
-- **Արտարժույթ.** Միայն **AMD** (Idram wallet).
+- **Պրոտոկոլ:** HTML form POST (UTF-8), callback — `application/x-www-form-urlencoded`.
+- **Կապ:** Idram-ից ստանում եք SUCCESS_URL, FAIL_URL, RESULT_URL, SECRET_KEY, EMAIL (կարգավորում agreement-ից հետո).
+- **Արտարժույթ.** Միայն **AMD** (Idram wallet). Ոչ AMD պատվերների համար Idram-ը չցուցադրել / չթույլատրել.
+
+### 1.1 Form action (մեկ URL test և production)
+
+| Նշանակում | URL |
+|-----------|-----|
+| **GetPayment** | `https://banking.idram.am/Payment/GetPayment` |
+
+Test/live տարբերակ չկա — միևնույն URL-ն է. Test/live ռեժիմը որոշվում է Idram-ում գրանցված REC_ACCOUNT / SECRET_KEY-ով:
 
 ---
 
 ## 2. Environment variables
 
+Յուրաքանչյուր նախագծում ավելացրեք.
+
 ```env
+# --- Idram ---
 IDRAM_TEST_MODE=true
-IDRAM_REC_ACCOUNT=          # Test EDP_REC_ACCOUNT (IdramID)
-IDRAM_SECRET_KEY=           # Test SECRET_KEY
-IDRAM_LIVE_REC_ACCOUNT=     # Production
-IDRAM_LIVE_SECRET_KEY=      # Production
+# Test
+IDRAM_REC_ACCOUNT=
+IDRAM_SECRET_KEY=
+# Live (production)
+IDRAM_LIVE_REC_ACCOUNT=
+IDRAM_LIVE_SECRET_KEY=
+# App URL for callbacks (no trailing slash)
 APP_URL=https://yoursite.com
 ```
 
+- **Test:** `IDRAM_TEST_MODE=true` → օգտագործվում են `IDRAM_REC_ACCOUNT`, `IDRAM_SECRET_KEY`.
+- **Live:** `IDRAM_TEST_MODE` ≠ `true` → `IDRAM_LIVE_REC_ACCOUNT`, `IDRAM_LIVE_SECRET_KEY`.
+
 ---
 
-## 3. Callback URL-ներ
+## 3. Callback URL-ներ (production)
+
+Idram merchant panel-ում գրանցել.
 
 | Պարամետր | URL |
 |----------|-----|
-| SUCCESS_URL | `https://yoursite.com/wc-api/idram_complete` |
-| FAIL_URL | `https://yoursite.com/wc-api/idram_fail` |
-| RESULT_URL | `https://yoursite.com/wc-api/idram_result` |
+| **RESULT_URL** | `https://yoursite.com/wc-api/idram_result` |
+| **SUCCESS_URL** | `https://yoursite.com/wc-api/idram_complete` |
+| **FAIL_URL** | `https://yoursite.com/wc-api/idram_fail` |
+
+WordPress-անման path (`/wc-api/...`) — ըստ նախագծի; կարող եք օգտագործել նաև `/api/payments/idram/...` եթե Idram-ում կարգավորեք համապատասխան URL-ներ:
 
 ---
 
-## 4. Վճարման սկիզբ (form)
+## 4. Ինտեգրացիայի հոսք (workflow)
 
-Form fields (hidden):
-
-| Field | Պարտադիր | Նկարագրություն |
-|-------|----------|-----------------|
-| EDP_LANGUAGE | Yes | EN, AM, RU |
-| EDP_REC_ACCOUNT | Yes | Merchant IdramID |
-| EDP_DESCRIPTION | Yes | Նկարագրություն |
-| EDP_AMOUNT | Yes | Գումար, dot (.) տասնորդական |
-| EDP_BILL_NO | Yes | Պատվերի/հաշվի ID (order.number) |
-| EDP_EMAIL | No | Էլ. փոստ |
-| (custom) | No | EDP_ չպրեֆիքսով դաշտերը Idram-ը վերադարձնում է redirect-ում |
-
-Form `method="POST"`, `action="https://banking.idram.am/Payment/GetPayment"`.
+1. Հաճախորդը հաստատում է պատվերը → ստեղծվում է Order + Payment (provider: `idram`, status: `pending`), currency = AMD.
+2. **Form build** — EDP_LANGUAGE, EDP_REC_ACCOUNT, EDP_DESCRIPTION, EDP_AMOUNT, EDP_BILL_NO (order.number); optional EDP_EMAIL.
+3. Form **POST** → `https://banking.idram.am/Payment/GetPayment` (UTF-8). Օգտատերը попадает Idram-ի էջ։
+4. Idram-ը **երկու POST** ուղարկում է RESULT_URL-ին (նախ precheck, ապա payment confirmation).
+5. Precheck: պատվերը/գումարը ստուգել **ԲԴ-ից**, պատասխան **«OK»** (plain text). Ոչ OK → Idram-ը redirect FAIL_URL.
+6. Payment confirmation: **EDP_CHECKSUM** ստուգել, գումարը ԲԴ-ից, order/payment թարմացնել, պատասխան **«OK»**. Cart clear (logged-in) միայն success-ից հետո։
+7. SUCCESS_URL / FAIL_URL — GET redirect օգտատիրոջ (success / error էջ).
 
 ---
 
-## 5. RESULT_URL — երկու POST
+## 5. Վճարման սկիզբ — form (GetPayment)
 
-Content-Type: `application/x-www-form-urlencoded`. Պատասխան — **plain text** (առանց HTML).
+**Action:** `POST https://banking.idram.am/Payment/GetPayment`  
+**Encoding:** UTF-8 (EDP_DESCRIPTION և այլ տեքստեր UTF-8).
 
-### (a) Precheck — EDP_PRECHECK=YES
+### 5.1 Form fields (hidden)
 
-Պարամետրներ: `EDP_PRECHECK`, `EDP_BILL_NO`, `EDP_REC_ACCOUNT`, `EDP_AMOUNT`.
+| Field | Տիպ | Պարտադիր | Նկարագրություն |
+|-------|-----|----------|-----------------|
+| EDP_LANGUAGE | string | Yes | **EN**, **AM** (հայերեն), **RU** |
+| EDP_REC_ACCOUNT | string | Yes | Merchant IdramID (EDP_REC_ACCOUNT) |
+| EDP_DESCRIPTION | string | Yes | Ապրանք/Պատվերի նկարագրություն (UTF-8) |
+| EDP_AMOUNT | string | Yes | Գումար, **տասնորդական — dot (.)** (օր. 1900 կամ 19.50) |
+| EDP_BILL_NO | string | Yes | Հաշվի/պատվերի ID (order.number — ձեր accounting system-ից) |
+| EDP_EMAIL | string | No | Էլ. փոստ; եթե set — overload-ում է Idram-ի EMAIL այդ գործարքի համար |
+| (custom, առանց EDP_) | string | No | Idram-ը «after payment completion» վերադարձնում է merchant-ին (օր. order_number success redirect-ում) |
 
-- Ստուգել `EDP_REC_ACCOUNT` = ձեր REC_ACCOUNT.
-- Գտնել order `EDP_BILL_NO`-ով (order.number), ստուգել գումարը **ԲԴ-ից** (ոչ request-ից).
-- Եթե ամեն ինչ ճիշտ է → պատասխան **«OK»** (ճիշտ այդ տեքստը).
-- Հակառակ դեպքում → ցանկացած այլ տեքստ → Idram-ը օգտատիրոջ կուղարկի FAIL_URL։
+**Կարևոր.**  
+- EDP_BILL_NO — ձեր համակարգում պատվերի/հաշվի unique ID; callback-ում **order-ը գտնելու** համար օգտագործել այդ արժեքը (find by order.number).  
+- Գումարը միշտ **ստուգել ԲԴ-ից** (order.total), ոչ request-ից։
 
-### (b) Payment confirmation
+### 5.2 Օրինակ (doc)
 
-Պարամետրներ: `EDP_BILL_NO`, `EDP_REC_ACCOUNT`, `EDP_PAYER_ACCOUNT`, `EDP_AMOUNT`, `EDP_TRANS_ID`, `EDP_TRANS_DATE`, `EDP_CHECKSUM`.
+```html
+<form action="https://banking.idram.am/Payment/GetPayment" method="POST">
+  <input type="hidden" name="EDP_LANGUAGE" value="EN">
+  <input type="hidden" name="EDP_REC_ACCOUNT" value="100000114">
+  <input type="hidden" name="EDP_DESCRIPTION" value="Order description">
+  <input type="hidden" name="EDP_AMOUNT" value="1900">
+  <input type="hidden" name="EDP_BILL_NO" value="1806">
+  <input type="submit" value="submit">
+</form>
+```
 
-**Checksum:**  
-`MD5(EDP_REC_ACCOUNT:EDP_AMOUNT:SECRET_KEY:EDP_BILL_NO:EDP_PAYER_ACCOUNT:EDP_TRANS_ID:EDP_TRANS_DATE)`  
-— դաշտերը concatenate `:`-ով, արդյունքը MD5 hex (case-insensitive համեմատություն).
+Իրականացումում form-ը սովորաբար build է լինում server-ում (orderNumber, amount, description), ապա frontend-ը submit է անում (կամ server-ը վերադարձնում է formAction + formData, frontend-ը POST է ուղարկում Idram-ին):
 
-- Ստուգել checksum.
-- Գումարը կրկին ստուգել ԲԴ-ից (order.total).
-- Թարմացնել order (paymentStatus = paid), payment (completed), cart clear.
+---
+
+## 6. RESULT_URL — **կրիտիկական նյուանսներ**
+
+Idram-ը ուղարկում է **երկու** POST (Content-Type: `application/x-www-form-urlencoded`) RESULT_URL-ին. Պատասխանը **plain text** (առանց HTML). Եթե «OK» չստացվի, Idram-ը precheck-ում չի թույլատրի վճարում, confirm-ում — կհամարի ձախողում:
+
+### 6.1 (a) Precheck — order authenticity
+
+**Պարամետրներ:** `EDP_PRECHECK=YES`, `EDP_BILL_NO`, `EDP_REC_ACCOUNT`, `EDP_AMOUNT`.
+
+- Ստուգել `EDP_REC_ACCOUNT` = ձեր config REC_ACCOUNT.
+- **EDP_BILL_NO**-ով DB-ից գտնել order; ստուգել, որ order գոյություն ունի և paymentStatus = pending.
+- **Գումարը** ստուգել **միայն ԲԴ-ից** (order.total), request-ի EDP_AMOUNT-ը համեմատել order.total-ի հետ (լվացում 0.01 tolerance float-ի համար).
+- Եթե ամեն ինչ ճիշտ է → պատասխան **ճիշտ «OK»** (without any html formatting).  
+- Հակառակ դեպքում → ցանկացած այլ տեքստ (օր. "EDP_BILL_NO not found", "EDP_AMOUNT mismatch") → Idram-ը գումարը չի փոխանցի և օգտատիրոջ կուղարկի **FAIL_URL**:
+
+### 6.2 (b) Payment confirmation
+
+**Պարամետրներ:** `EDP_BILL_NO`, `EDP_REC_ACCOUNT`, `EDP_PAYER_ACCOUNT`, `EDP_AMOUNT`, `EDP_TRANS_ID`, `EDP_TRANS_DATE`, `EDP_CHECKSUM`.
+
+- **Checksum.** Doc-ի կարգը (concatenate colon-ով):  
+  **EDP_REC_ACCOUNT : EDP_AMOUNT : SECRET_KEY : EDP_BILL_NO : EDP_PAYER_ACCOUNT : EDP_TRANS_ID : EDP_TRANS_DATE**  
+  → MD5 hash → hex. Համեմատել **case-insensitive** (Idram-ը կարող է upper/lowercase ուղարկել).
+- Եթե checksum-ը չի համապատասխանում → պատասխան `EDP_CHECKSUM not correct` (ոչ «OK»).
+- Գումարը **կրկին** ԲԴ-ից (order.total); EDP_AMOUNT-ը չպետք է գերազանցի/տարբերվի order.total-ից (tolerance 0.01).
+- Թարմացնել order (paymentStatus = paid, status = confirmed, paidAt), payment (status = completed, providerTransactionId = EDP_TRANS_ID), order event; **cart clear** (եթե order.userId).
 - Պատասխան **«OK»**.
 
-Checksum սխալ → պատասխան `EDP_CHECKSUM not correct`.
+Idempotency: եթե order արդեն paid է, կարող եք նույնիսկ «OK» վերադարձնել (ոչ duplicate update), որպեսզի Idram-ը չկրկնի request:
 
 ---
 
-## 6. SUCCESS_URL / FAIL_URL
+## 7. Checksum — բանաձև
 
-GET redirect օգտատիրոջ։ Idram-ը կարող է ավելացնել query params (օր. custom դաշտեր) — օգտագործել `order_number`/`order` success/error էջին redirect-ի համար։
+```
+str = EDP_REC_ACCOUNT + ":" + EDP_AMOUNT + ":" + SECRET_KEY + ":" + EDP_BILL_NO + ":" + EDP_PAYER_ACCOUNT + ":" + EDP_TRANS_ID + ":" + EDP_TRANS_DATE
+EDP_CHECKSUM = MD5(str), hex, optionally toUpperCase for comparison
+```
 
----
-
-## 7. Checklist
-
-- [ ] Env: IDRAM_TEST_MODE, REC_ACCOUNT, SECRET_KEY (test/live).
-- [ ] Form POST to `https://banking.idram.am/Payment/GetPayment`, UTF-8.
-- [ ] EDP_BILL_NO = order.number (կամ stable order id).
-- [ ] RESULT_URL: (a) precheck → "OK"; (b) confirm → checksum, then "OK".
-- [ ] Պատասխան plain text, առանց HTML.
-- [ ] Միայն AMD orders.
-- [ ] Cart clear միայն (b) success-ից հետո։
+Ստուգում: `(receivedChecksum || "").toUpperCase() === computedChecksum.toUpperCase()`.
 
 ---
 
-**Փաստաթղթի տարբերակ.** 1.0 | **Ամսաթիվ.** 2026-02-18
+## 8. SUCCESS_URL / FAIL_URL
+
+GET redirect — օգտատերը Idram-ից վերադառնում է այդ URL-ներով: Idram-ը կարող է ավելացնել query params (օր. custom դաշտեր form-ից): Օգտագործել `order_number` / `order` redirect-ը `/checkout/success?order=...` կամ `/checkout/error?order=...` կատարելու համար:
+
+---
+
+## 9. Init API (ձեր նախագիծ)
+
+Օրինակ flow: checkout-ում Idram ընտրելիս → order creation → **POST /api/v1/payments/idram/init** body `{ orderNumber, lang? }` → response `{ formAction, formData }` → frontend-ը build form և submit → Idram GetPayment:  
+
+- Init-ում ստուգել order, currency === AMD, paymentStatus pending, idram payment pending; build form (EDP_BILL_NO = order.number, EDP_AMOUNT = order.total, EDP_DESCRIPTION, EDP_REC_ACCOUNT from config, EDP_LANGUAGE from lang map EN/AM/RU).
+
+---
+
+## 10. Checkout UI — Idram vs քարտի մոդալ
+
+Idram-ի դեպքում **քարտի տվյալների մոդալ** (card number, expiry, CVV) **չի** պետք: Վճարումը Idram-ի էջում է: Ձևը submit → Idram → RESULT_URL callbacks → SUCCESS/FAIL redirect:  
+Այսինքն checkout-ում Idram ընտրելիս «Place order» → միայն order create + form submit to Idram, **ոչ** card modal:
+
+---
+
+## 11. Թեստ (ngrok) և production URL
+
+- **Թեստ.** Idram-ում կարող եք ժամանակավոր գրանցել ngrok URL (օր. RESULT_URL = `https://xxx.ngrok-free.dev/api/payments/idram/callback`, SUCCESS/FAIL = `.../order-success?...`): app-ում ավելացնել համապատասխան route-եր (POST callback, GET order-success), թեստ անել, ապա Idram-ում URL-ները **վերադարձնել** production-ի (`wc-api/idram_result`, `wc-api/idram_complete`, `wc-api/idram_fail`).
+- **Production.** Միայն wc-api (կամ ձեր ընտրած) path-եր; Idram panel-ում URL-ները պետք է համապատասխանեն app-ի route-երին:
+
+---
+
+## 12. Checklist — նոր նախագծում Idram միացնելիս
+
+- [ ] Env: `IDRAM_TEST_MODE`, `IDRAM_REC_ACCOUNT`, `IDRAM_SECRET_KEY` (test/live), `APP_URL`.
+- [ ] Idram panel: SUCCESS_URL, FAIL_URL, RESULT_URL — ձեր domain + path (օր. wc-api/idram_*).
+- [ ] Form POST to `https://banking.idram.am/Payment/GetPayment`, UTF-8; EDP_BILL_NO = order.number.
+- [ ] RESULT_URL handler: (a) precheck — validate order/amount from **DB**, respond exactly **«OK»**; (b) confirm — verify **checksum** (doc order), amount from DB, then «OK».
+- [ ] Response **plain text**, no HTML.
+- [ ] Միայն AMD orders (init-ում reject non-AMD).
+- [ ] Cart clear միայն payment confirmation success-ից հետո (logged-in user).
+- [ ] Checkout: Idram-ի դեպքում **ոչ** card modal — direct form submit to Idram.
+
+---
+
+**Փաստաթղթի տարբերակ.** 1.1  
+**Ամսաթիվ.** 2026-02-18  
+**Ծանոթություն.** Telcell, FastShift — առանձին ձեռնարկներ (հետագա փաստաթղթեր).

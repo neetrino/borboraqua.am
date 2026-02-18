@@ -138,6 +138,10 @@
 - `wc-api/idram_complete` — GET (redirect success).
 - `wc-api/idram_fail` — GET (redirect fail).
 
+### 7.5 Փուլ 2 ավարտված
+
+Իրականացված. Մանրամասն ձեռնարկ՝ `docs/payments/IDRAM-INTEGRATION.md`.
+
 ---
 
 ## 8. Փուլ 3 — Telcell
