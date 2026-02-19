@@ -2,6 +2,7 @@ import { db } from "@white-shop/db";
 import { getConfig } from "./config";
 import { verifyTelcellResultChecksum } from "./security";
 import { TELCELL_STATUS_PAID } from "./constants";
+import { printReceiptForOrder } from "@/lib/payments/ehdm";
 
 const PAYMENT_PROVIDER = "telcell";
 
@@ -104,6 +105,9 @@ async function updateOrderPayment(
     if (order.userId) {
       await db.cart.deleteMany({ where: { userId: order.userId } });
     }
+    printReceiptForOrder(order.id).catch((err) =>
+      console.error("[EHDM] printReceiptForOrder", err)
+    );
   } else {
     await db.$transaction([
       db.order.update({ where: { id: order.id }, data: { paymentStatus: "failed" } }),

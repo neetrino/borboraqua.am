@@ -66,15 +66,11 @@ type CheckoutFormData = {
   email: string;
   phone: string;
   shippingMethod: 'pickup' | 'delivery';
-  paymentMethod: 'idram' | 'arca' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery';
+  paymentMethod: 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery';
   shippingAddress?: string;
   shippingCity?: string;
   shippingPostalCode?: string;
   shippingPhone?: string;
-  cardNumber?: string;
-  cardExpiry?: string;
-  cardCvv?: string;
-  cardHolderName?: string;
   deliveryDay?: string;
   deliveryTimeSlot?: DeliveryTimeSlot;
 };
@@ -91,7 +87,6 @@ export default function CheckoutPage() {
   // eslint-disable-next-line no-unused-vars
   const [language, setLanguage] = useState(getStoredLanguage());
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
-  const [showCardModal, setShowCardModal] = useState(false);
   const [deliveryPrice, setDeliveryPrice] = useState<number | null>(null);
   const [loadingDeliveryPrice, setLoadingDeliveryPrice] = useState(false);
   const [enabledWeekdays, setEnabledWeekdays] = useState<number[] | null>(null);
@@ -102,43 +97,47 @@ export default function CheckoutPage() {
     return d;
   });
 
-  // Payment methods configuration
-  const paymentMethods = [
+  // Payment methods configuration (logo or logos: single image or multiple for card payment)
+  const paymentMethods: Array<{
+    id: 'cash_on_delivery' | 'idram' | 'ameriabank' | 'telcell' | 'fastshift';
+    name: string;
+    description: string;
+    logo?: string | null;
+    logos?: string[];
+  }> = [
     {
-      id: 'cash_on_delivery' as const,
+      id: 'cash_on_delivery',
       name: t('checkout.payment.cashOnDelivery'),
       description: t('checkout.payment.cashOnDeliveryDescription'),
-      logo: null,
+      logo: '/assets/payments/dollar.svg',
     },
     {
-      id: 'idram' as const,
+      id: 'ameriabank',
+      name: t('checkout.payment.cardPayment'),
+      description: t('checkout.payment.cardPaymentDescription'),
+      logos: [
+        '/assets/payments/Arca_logo_wiki.svg',
+        '/assets/payments/Mastercard-logo.svg',
+        '/assets/payments/Visa_logo_wiki.svg',
+      ],
+    },
+    {
+      id: 'idram',
       name: t('checkout.payment.idram'),
       description: t('checkout.payment.idramDescription'),
-      logo: '/assets/payments/idram.svg',
+      logo: '/assets/payments/Idram_logo_wiki.svg',
     },
     {
-      id: 'arca' as const,
-      name: t('checkout.payment.arca'),
-      description: t('checkout.payment.arcaDescription'),
-      logo: '/assets/payments/arca.svg',
-    },
-    {
-      id: 'ameriabank' as const,
-      name: t('checkout.payment.ameriabank'),
-      description: t('checkout.payment.ameriabankDescription'),
-      logo: '/assets/payments/ameria.svg',
-    },
-    {
-      id: 'telcell' as const,
+      id: 'telcell',
       name: t('checkout.payment.telcell'),
       description: t('checkout.payment.telcellDescription'),
-      logo: '/assets/payments/telcell.svg',
+      logo: '/assets/payments/Telcell_logo_wiki.svg',
     },
     {
-      id: 'fastshift' as const,
+      id: 'fastshift',
       name: t('checkout.payment.fastshift'),
       description: t('checkout.payment.fastshiftDescription'),
-      logo: '/assets/payments/fastshift.svg',
+      logo: '/assets/payments/Fastshift_logo_wiki.svg',
     },
   ];
 
@@ -151,7 +150,7 @@ export default function CheckoutPage() {
     shippingMethod: z.enum(['pickup', 'delivery'], {
       message: t('checkout.errors.selectShippingMethod'),
     }),
-    paymentMethod: z.enum(['idram', 'arca', 'ameriabank', 'telcell', 'fastshift', 'cash_on_delivery'], {
+    paymentMethod: z.enum(['idram', 'ameriabank', 'telcell', 'fastshift', 'cash_on_delivery'], {
       message: t('checkout.errors.selectPaymentMethod'),
     }),
     // Shipping address fields - required only for delivery
@@ -159,11 +158,6 @@ export default function CheckoutPage() {
     shippingCity: z.string().optional(),
     shippingPostalCode: z.string().optional(),
     shippingPhone: z.string().optional(),
-    // Payment details - optional, can be filled in modal
-    cardNumber: z.string().optional(),
-    cardExpiry: z.string().optional(),
-    cardCvv: z.string().optional(),
-    cardHolderName: z.string().optional(),
     // Delivery date & time - required only for home delivery
     deliveryDay: z.string().optional(),
     deliveryTimeSlot: z.string().optional(),
@@ -178,38 +172,6 @@ export default function CheckoutPage() {
     message: t('checkout.errors.cityRequired'),
     path: ['shippingCity'],
   }).refine((data) => {
-    if (data.paymentMethod === 'arca') {
-      return data.cardNumber && data.cardNumber.replace(/\s/g, '').length >= 13;
-    }
-    return true;
-  }, {
-    message: t('checkout.errors.cardNumberRequired'),
-    path: ['cardNumber'],
-  }).refine((data) => {
-    if (data.paymentMethod === 'arca') {
-      return data.cardExpiry && /^\d{2}\/\d{2}$/.test(data.cardExpiry);
-    }
-    return true;
-  }, {
-    message: t('checkout.errors.cardExpiryRequired'),
-    path: ['cardExpiry'],
-  }).refine((data) => {
-    if (data.paymentMethod === 'arca') {
-      return data.cardCvv && data.cardCvv.length >= 3;
-    }
-    return true;
-  }, {
-    message: t('checkout.errors.cvvRequired'),
-    path: ['cardCvv'],
-  }).refine((data) => {
-    if (data.paymentMethod === 'arca') {
-      return data.cardHolderName && data.cardHolderName.trim().length > 0;
-    }
-    return true;
-  }, {
-    message: t('checkout.errors.cardHolderNameRequired'),
-    path: ['cardHolderName'],
-  }).refine((data) => {
     // User must pick a delivery day
     return !!data.deliveryDay;
   }, {
@@ -222,38 +184,6 @@ export default function CheckoutPage() {
     message: t('checkout.errors.deliveryTimeRequired'),
     path: ['deliveryTimeSlot'],
   }), [t]);
-
-  // Prevent body scroll and hide header when modals are open
-  useEffect(() => {
-    if (showCardModal) {
-      // Save current scroll position
-      const scrollY = window.scrollY;
-      // Prevent scroll
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
-      // Dispatch event to hide header
-      window.dispatchEvent(new Event('app:modal-open'));
-      
-      return () => {
-        // Restore scroll position
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        document.body.style.overflow = '';
-        window.scrollTo(0, scrollY);
-        // Dispatch event to show header
-        window.dispatchEvent(new Event('app:modal-close'));
-      };
-    } else {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-      window.dispatchEvent(new Event('app:modal-close'));
-    }
-  }, [showCardModal]);
 
   const {
     register,
@@ -274,10 +204,6 @@ export default function CheckoutPage() {
       shippingCity: '',
       shippingPostalCode: '',
       shippingPhone: '',
-      cardNumber: '',
-      cardExpiry: '',
-      cardCvv: '',
-      cardHolderName: '',
       deliveryDay: '',
       deliveryTimeSlot: undefined,
     },
@@ -738,15 +664,7 @@ export default function CheckoutPage() {
       return;
     }
     
-    // If ArCa is selected, show card details modal first. Idram: no modal — redirect to Idram after order creation.
-    if (paymentMethod === 'arca') {
-      console.log('[Checkout] Opening card modal for ArCa');
-      setShowCardModal(true);
-      return;
-    }
-    // Ameriabank / Idram: no modal, submit then redirect via init API / form submit
-    
-    // Otherwise submit directly (both logged in and guest users)
+    // Submit directly (Ameriabank/Idram/Telcell/FastShift redirect via init API after order creation)
     console.log('[Checkout] Submitting directly');
     handleSubmit(onSubmit)(e);
   };
@@ -936,7 +854,6 @@ export default function CheckoutPage() {
         }
       }
 
-      // If payment URL is provided (e.g. Arca), redirect to payment gateway
       if (response.payment?.paymentUrl) {
         console.log('[Checkout] Redirecting to payment gateway:', response.payment.paymentUrl);
         window.location.href = response.payment.paymentUrl;
@@ -1319,10 +1236,10 @@ export default function CheckoutPage() {
                 {paymentMethods.map((method) => (
                   <label
                     key={method.id}
-                    className={`flex items-center p-4 border-2 rounded-[12px] cursor-pointer transition-all ${
+                    className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
                       paymentMethod === method.id
-                        ? 'border-purple-600 bg-purple-50'
-                        : 'border-gray-300 hover:bg-gray-50'
+                        ? 'border-[#1AC0FD] bg-[#E8F9FE] shadow-sm'
+                        : 'border-gray-200 bg-white/60 hover:border-gray-300 hover:bg-white/80'
                     }`}
                   >
                     <input
@@ -1330,31 +1247,56 @@ export default function CheckoutPage() {
                       {...register('paymentMethod')}
                       value={method.id}
                       checked={paymentMethod === method.id}
-                      onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'arca' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery')}
-                      className="mr-4"
+                      onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery')}
+                      className="w-5 h-5 text-[#1AC0FD] focus:ring-[#1AC0FD] shrink-0"
                       disabled={isSubmitting}
                     />
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="relative w-20 h-12 flex-shrink-0 bg-white rounded border border-gray-200 flex items-center justify-center overflow-hidden">
-                        {!method.logo || logoErrors[method.id] ? (
-                          <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {method.logos ? (
+                          <div className="flex items-center gap-1">
+                            {method.logos.map((src, i) => (
+                              <div
+                                key={`${method.id}-${src}`}
+                                className="w-11 h-8 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0"
+                              >
+                                {logoErrors[`${method.id}-${i}`] ? (
+                                  <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                  </svg>
+                                ) : (
+                                  <img
+                                    src={src}
+                                    alt=""
+                                    className="w-full h-full object-contain p-1"
+                                    loading="lazy"
+                                    onError={() => setLogoErrors((prev) => ({ ...prev, [`${method.id}-${i}`]: true }))}
+                                  />
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         ) : (
-                          <img
-                            src={method.logo}
-                            alt={method.name}
-                            className="w-full h-full object-contain p-1.5"
-                            loading="lazy"
-                            onError={() => {
-                              setLogoErrors((prev) => ({ ...prev, [method.id]: true }));
-                            }}
-                          />
+                          <div className="w-14 h-10 bg-white rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm">
+                            {!method.logo || logoErrors[method.id] ? (
+                              <svg className="w-7 h-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                              </svg>
+                            ) : (
+                              <img
+                                src={method.logo}
+                                alt={method.name}
+                                className="w-full h-full object-contain p-1.5"
+                                loading="lazy"
+                                onError={() => setLogoErrors((prev) => ({ ...prev, [method.id]: true }))}
+                              />
+                            )}
+                          </div>
                         )}
                       </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900">{method.name}</div>
-                        <div className="text-sm text-gray-600">{method.description}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-gray-900">{method.name}</div>
+                        <div className="text-sm text-gray-600 mt-0.5">{method.description}</div>
                       </div>
                     </div>
                   </label>
@@ -1366,6 +1308,7 @@ export default function CheckoutPage() {
 
           {/* Order Summary */}
           <div>
+
             <div className="relative sticky top-4">
               <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
               <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
@@ -1417,241 +1360,6 @@ export default function CheckoutPage() {
           </div>
         </div>
       </form>
-
-      {/* ArCa Card Details Modal */}
-      {showCardModal && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
-          onClick={() => {
-            console.log('[Checkout] Card modal backdrop clicked, closing modal');
-            setShowCardModal(false);
-          }}
-        >
-          <div 
-            className="relative max-w-lg w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log('[Checkout] Card modal content clicked');
-            }}
-            style={{ zIndex: 10000 }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
-            <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {t('checkout.modals.cardDetails').replace('{method}', t('checkout.payment.arca'))}
-              </h2>
-              <button
-                onClick={() => {
-                  setShowCardModal(false);
-                }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-                aria-label={t('checkout.modals.closeModal')}
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Payment Details */}
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="relative w-16 h-10 flex-shrink-0 bg-white rounded border border-gray-200 flex items-center justify-center overflow-hidden">
-                  {logoErrors.arca ? (
-                    <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                  ) : (
-                    <img
-                      src="/assets/payments/arca.svg"
-                      alt="ArCa"
-                      className="w-full h-full object-contain p-1"
-                      loading="lazy"
-                      onError={() => {
-                        setLogoErrors((prev) => ({ ...prev, arca: true }));
-                      }}
-                    />
-                  )}
-                </div>
-                <div>
-                  <div className="font-semibold text-gray-900">
-                    {t('checkout.payment.arca')} {t('checkout.payment.paymentDetails')}
-                  </div>
-                  <div className="text-sm text-gray-600">{t('checkout.payment.enterCardDetails')}</div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  {t('checkout.form.cardNumber')}
-                </label>
-                <input
-                  type="text"
-                  placeholder={t('checkout.placeholders.cardNumber')}
-                  maxLength={19}
-                  {...register('cardNumber')}
-                  disabled={isSubmitting}
-                  onChange={(e) => {
-                    let value = e.target.value.replace(/\s/g, '');
-                    value = value.replace(/(.{4})/g, '$1 ').trim();
-                    setValue('cardNumber', value);
-                  }}
-                  className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
-                />
-                {errors.cardNumber?.message && (
-                  <p className="mt-1 text-xs text-red-600">{errors.cardNumber.message}</p>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    {t('checkout.form.expiryDate')}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={t('checkout.placeholders.expiryDate')}
-                    maxLength={5}
-                    {...register('cardExpiry')}
-                    disabled={isSubmitting}
-                    onChange={(e) => {
-                      let value = e.target.value.replace(/\D/g, '');
-                      if (value.length >= 2) {
-                        value = value.substring(0, 2) + '/' + value.substring(2, 4);
-                      }
-                      setValue('cardExpiry', value);
-                    }}
-                    className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
-                  />
-                  {errors.cardExpiry?.message && (
-                    <p className="mt-1 text-xs text-red-600">{errors.cardExpiry.message}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    {t('checkout.form.cvv')}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={t('checkout.placeholders.cvv')}
-                    maxLength={4}
-                    {...register('cardCvv')}
-                    disabled={isSubmitting}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, '');
-                      setValue('cardCvv', value);
-                    }}
-                    className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
-                  />
-                  {errors.cardCvv?.message && (
-                    <p className="mt-1 text-xs text-red-600">{errors.cardCvv.message}</p>
-                  )}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  {t('checkout.form.cardHolderName')}
-                </label>
-                <input
-                  type="text"
-                  placeholder={t('checkout.placeholders.cardHolderName')}
-                  {...register('cardHolderName')}
-                  disabled={isSubmitting}
-                  className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
-                />
-                {errors.cardHolderName?.message && (
-                  <p className="mt-1 text-xs text-red-600">{errors.cardHolderName.message}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Error messages for card details */}
-            {(errors.cardNumber || errors.cardExpiry || errors.cardCvv || errors.cardHolderName) && (
-              <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-[12px]">
-                <p className="text-sm text-red-600">
-                  {errors.cardNumber?.message || 
-                   errors.cardExpiry?.message || 
-                   errors.cardCvv?.message || 
-                   errors.cardHolderName?.message}
-                </p>
-              </div>
-            )}
-
-            {/* Order Summary */}
-            {cart && (
-              <div className="bg-white/50 backdrop-blur-sm rounded-[12px] border border-white/30 p-4 space-y-2 mb-6">
-                <h3 className="font-semibold text-gray-900 mb-3">{t('checkout.orderSummary')}</h3>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">{t('checkout.summary.items')}:</span>
-                  <span className="font-medium">{cart.itemsCount}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">{t('checkout.summary.subtotal')}:</span>
-                  <span className="font-medium">{formatPrice(cart.totals.subtotal, currency)}</span>
-                </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">{t('checkout.summary.shipping')}:</span>
-                      <span className="font-medium">
-                        {loadingDeliveryPrice
-                          ? t('checkout.shipping.loading')
-                          : deliveryPrice !== null
-                            ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ` (${t('checkout.shipping.delivery')})`)
-                            : t('checkout.shipping.enterCity')}
-                      </span>
-                    </div>
-                    <div className="border-t border-white/20 pt-2 mt-2">
-                      <div className="flex justify-between">
-                        <span className="font-semibold text-gray-900">{t('checkout.summary.total')}:</span>
-                        <span className="font-bold text-gray-900">
-                          {formatPrice(
-                            cart.totals.subtotal + 
-                            (deliveryPrice !== null ? deliveryPrice : 0),
-                            currency
-                          )}
-                        </span>
-                      </div>
-                    </div>
-              </div>
-            )}
-
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setShowCardModal(false)}
-                disabled={isSubmitting}
-                className="flex-1 py-2.5 px-6 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 text-gray-900 font-semibold text-base shadow-inner hover:bg-white/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {t('checkout.buttons.cancel')}
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit(
-                  (data) => {
-                    setShowCardModal(false);
-                    onSubmit(data);
-                  },
-                  (errors) => {
-                    console.log('[Checkout Card Modal] Validation errors:', errors);
-                    // Keep modal open if there are errors - scroll to first error
-                    const firstErrorField = Object.keys(errors)[0];
-                    if (firstErrorField) {
-                      const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
-                      if (errorElement) {
-                        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }
-                    }
-                  }
-                )}
-                disabled={isSubmitting}
-                className="flex-1 py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? t('checkout.buttons.processing') : t('checkout.buttons.continueToPayment')}
-              </button>
-            </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

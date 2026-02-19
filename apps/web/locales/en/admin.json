@@ -679,6 +679,11 @@
     "total": "Total",
     "items": "Items",
     "date": "Date",
+    "invoice": "Invoice",
+    "invoiceTitle": "E-HDM fiscal invoice status",
+    "invoiceCreated": "Invoice created",
+    "invoiceNotCreated": "No invoice",
+    "invoiceAvailableWhenPaid": "Available when paid",
     "unknownCustomer": "Unknown customer",
     "viewOrderDetails": "View order details",
     "showingPage": "Showing page {page} of {totalPages} ({total} total)",
@@ -719,7 +724,9 @@
       "qty": "Qty",
       "price": "Price",
       "totalCol": "Total",
-      "noItemsFound": "No items found for this order"
+      "noItemsFound": "No items found for this order",
+      "fiscalReceipt": "Fiscal receipt (E-HDM)",
+      "fiscalReceiptNotCreated": "Not created"
     }
   },
   "messages": {

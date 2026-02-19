@@ -1,6 +1,6 @@
-
 import { db } from "@white-shop/db";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { printReceiptForOrder } from "@/lib/payments/ehdm";
 import { findOrCreateAttributeValue } from "../utils/variant-generator";
 import { ensureProductAttributesTable, ensureProductVariantAttributesColumn } from "../utils/db-ensure";
 import {
@@ -331,6 +331,7 @@ class AdminService {
               phone: true,
             },
           },
+          ehdmReceipt: { select: { id: true } },
         },
       }),
       db.order.count({ where }),
@@ -356,6 +357,7 @@ class AdminService {
         email: string | null;
         phone: string | null;
       } | null;
+      ehdmReceipt?: { id: string } | null;
     }) => {
       const customer = order.user || null;
       const firstName = customer?.firstName || '';
@@ -376,6 +378,7 @@ class AdminService {
         customerId: customer?.id || null,
         itemsCount: order.items.length,
         createdAt: order.createdAt.toISOString(),
+        hasEhdmReceipt: !!order.ehdmReceipt,
       };
     });
 
@@ -434,6 +437,7 @@ class AdminService {
           },
         },
         payments: true,
+        ehdmReceipt: true,
       },
     });
 
@@ -593,6 +597,16 @@ class AdminService {
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt?.toISOString?.() ?? undefined,
       items: formattedItems,
+      ehdmReceipt:
+        (order as any).ehdmReceipt != null
+          ? {
+              receiptId: (order as any).ehdmReceipt.receiptId,
+              fiscal: (order as any).ehdmReceipt.fiscal,
+              qr: (order as any).ehdmReceipt.qr,
+              createdAt: (order as any).ehdmReceipt.createdAt?.toISOString?.() ?? null,
+              result: ((order as any).ehdmReceipt.response as { result?: Record<string, unknown> })?.result ?? null,
+            }
+          : null,
     };
   }
 
@@ -818,6 +832,12 @@ class AdminService {
           },
         },
       });
+
+      if (data.paymentStatus === 'paid' && existing.paymentStatus !== 'paid') {
+        printReceiptForOrder(order.id).catch((err) =>
+          console.error("[EHDM] printReceiptForOrder", err)
+        );
+      }
 
       return order;
     } catch (error: any) {

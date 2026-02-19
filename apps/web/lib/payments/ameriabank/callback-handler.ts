@@ -5,6 +5,7 @@ import {
   AMERIA_PAYMENT_STATE_SUCCESSFUL,
   AMERIA_ORDER_STATUS_DEPOSITED,
 } from "./constants";
+import { printReceiptForOrder } from "@/lib/payments/ehdm";
 
 const PAYMENT_PROVIDER = "ameriabank";
 
@@ -102,6 +103,9 @@ export async function handleAmeriabankCallback(searchParams: URLSearchParams): P
     if (order.userId) {
       await db.cart.deleteMany({ where: { userId: order.userId } });
     }
+    printReceiptForOrder(order.id).catch((err) =>
+      console.error("[EHDM] printReceiptForOrder", err)
+    );
     return {
       redirect: `${successRedirect}?order=${encodeURIComponent(order.number)}`,
     };
