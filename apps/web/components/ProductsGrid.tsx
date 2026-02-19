@@ -12,6 +12,7 @@ interface Product {
   slug: string;
   title: string;
   description?: string | null;
+  category?: string | null; // Primary category title
   price: number;
   compareAtPrice: number | null;
   image: string | null;
@@ -166,6 +167,10 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
 
   // Get grid classes based on view mode
   const getGridClasses = () => {
+    if (isMobile) {
+      // Mobile: 2 columns with smaller gap for mobile cards
+      return 'grid grid-cols-2 gap-4 sm:gap-6';
+    }
     switch (viewMode) {
       case 'list':
         return 'grid grid-cols-1 gap-12';
@@ -192,6 +197,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     slug: product.slug,
     title: product.title,
     description: product.description ?? undefined,
+    category: product.category ?? undefined,
     minimumOrderQuantity: product.minimumOrderQuantity,
     orderQuantityIncrement: product.orderQuantityIncrement,
     price: product.price,
@@ -219,6 +225,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
             onProductClick={handleOpenProduct}
             formatPrice={(price: number, curr?: any) => formatPrice(price, curr || currency)}
             currency={currency}
+            isMobile={isMobile}
             compact={true}
           />
         );

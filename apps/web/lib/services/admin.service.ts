@@ -331,7 +331,7 @@ class AdminService {
               phone: true,
             },
           },
-          ehdmReceipt: { select: { id: true } },
+          ehdmReceipt: true,
         },
       }),
       db.order.count({ where }),
@@ -357,7 +357,7 @@ class AdminService {
         email: string | null;
         phone: string | null;
       } | null;
-      ehdmReceipt?: { id: string } | null;
+      ehdmReceipt?: { id: string; [key: string]: unknown } | null;
     }) => {
       const customer = order.user || null;
       const firstName = customer?.firstName || '';

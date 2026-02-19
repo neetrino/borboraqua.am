@@ -363,6 +363,35 @@ class ProductsService {
     const brandDiscountsSetting = discountSettings.find((s: { key: string; value: unknown }) => s.key === "brandDiscounts");
     const brandDiscounts = brandDiscountsSetting ? (brandDiscountsSetting.value as Record<string, number>) || {} : {};
 
+    // Fetch all categories that are missing from relations (for products with primaryCategoryId but empty categories array)
+    const primaryCategoryIds = products
+      .map((p: ProductWithRelations) => (p as any).primaryCategoryId)
+      .filter((id: string | null | undefined): id is string => !!id);
+    
+    const categoriesMap = new Map<string, { id: string; translations: Array<{ locale: string; title: string }> }>();
+    if (primaryCategoryIds.length > 0) {
+      try {
+        const missingCategories = await db.category.findMany({
+          where: {
+            id: { in: primaryCategoryIds },
+          },
+          include: {
+            translations: {
+              select: { locale: true, title: true },
+            },
+          },
+        });
+        missingCategories.forEach((cat) => {
+          categoriesMap.set(cat.id, {
+            id: cat.id,
+            translations: cat.translations || [],
+          });
+        });
+      } catch (err) {
+        console.warn('[ProductsService] Error fetching missing categories:', err);
+      }
+    }
+
     // Format response
     const data = products.map((product: ProductWithRelations) => {
       // Безопасное получение translation с проверкой на существование массива
@@ -413,12 +442,43 @@ class ProductsService {
       })();
 
       if (listOnly) {
+        // Get primary category title for list view
+        const categories = Array.isArray(product.categories) ? product.categories : [];
+        const primaryCategoryId = (product as any).primaryCategoryId;
+        
+        // Try to find primary category first, then fallback to first category
+        let selectedCategory = null;
+        if (primaryCategoryId && categories.length > 0) {
+          selectedCategory = categories.find((cat: { id: string }) => cat.id === primaryCategoryId);
+        }
+        if (!selectedCategory && categories.length > 0) {
+          selectedCategory = categories[0];
+        }
+        
+        // If categories array is empty but primaryCategoryId exists, use category from batch fetch
+        if (!selectedCategory && primaryCategoryId) {
+          selectedCategory = categoriesMap.get(primaryCategoryId) || null;
+        }
+        
+        // Get category title from translations
+        let categoryTitle: string | null = null;
+        if (selectedCategory) {
+          const categoryTranslations = Array.isArray(selectedCategory.translations)
+            ? selectedCategory.translations
+            : [];
+          const categoryTranslation = categoryTranslations.find((t: { locale: string }) => t.locale === lang)
+            || categoryTranslations[0]
+            || null;
+          categoryTitle = categoryTranslation?.title || null;
+        }
+        
         return {
           id: product.id,
           slug: translation?.slug || "",
           title: translation?.title || "",
           subtitle: translation?.subtitle || null,
           description: translation?.descriptionHtml || null,
+          category: categoryTitle,
           brand: product.brand
             ? { id: product.brand.id, name: brandTranslation?.name || "" }
             : null,

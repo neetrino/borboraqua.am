@@ -12,6 +12,7 @@ import { formatPrice, type CurrencyCode } from '../../lib/currency';
 import { ProfileMenuDrawer } from '../../components/icons/global/globalMobile';
 import { UserAvatar } from '../../components/UserAvatar';
 import { useTranslation } from '../../lib/i18n-client';
+import { getStoredLanguage } from '../../lib/language';
 import { getProfileMenuTABS } from '../../components/icons/global/global';
 
 interface Address {
