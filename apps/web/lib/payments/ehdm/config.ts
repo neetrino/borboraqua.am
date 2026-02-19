@@ -15,7 +15,7 @@ function getEhdmConfig(): EhdmConfig {
   const certPath = resolvePath(process.env.EHDM_CERT_PATH);
   const keyPath = resolvePath(process.env.EHDM_KEY_PATH);
   const keyPassphrase = process.env.EHDM_KEY_PASSPHRASE ?? "";
-  const initialSeq = Math.max(1, parseInt(process.env.EHDM_INITIAL_SEQ ?? "65", 10) || 65);
+  const initialSeq = Math.max(1, parseInt(process.env.EHDM_INITIAL_SEQ ?? "200", 10) || 200);
   const defaultAdgCode = process.env.EHDM_DEFAULT_ADG_CODE ?? "2201";
   const dep = Math.min(7, Math.max(1, parseInt(process.env.EHDM_DEP ?? "1", 10) || 1));
   const defaultUnit = process.env.EHDM_DEFAULT_UNIT ?? "Հատ";

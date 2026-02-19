@@ -50,9 +50,10 @@
 | `EHDM_CERT_PATH` | Ճանապարհ դեպի `.crt` ֆայլ | — | path, օր. `./Private/00505298.crt` |
 | `EHDM_KEY_PATH` | Ճանապարհ դեպի `.key` ֆայլ | — | path, օր. `./Private/00505298.key` |
 | `EHDM_KEY_PASSPHRASE` | Պարոլ `.key`-ի համար | **Այո** | միայն .env |
-| `EHDM_INITIAL_SEQ` | Առաջին seq (օր. 65) | Ոչ | INITIAL_SEQ=65 |
+| `EHDM_INITIAL_SEQ` | Առաջին seq. **200** խորհուրդ՝ հին site-ից անցնելիս (որ չհամընկնի) | Ոչ | 200 |
 | `EHDM_DEFAULT_ADG_CODE` | ԱՏԳ կոդ (դեֆոլտ) | Ոչ | 2201 |
-| `EHDM_DEP` | Հարկման կարգ. 1=ԱԱՀ, 2=առանց ԱԱՀ, 3=շրջանառու, 7=միկրո | Ոչ | 1 |
+| `EHDM_DEP` | **Հարկման տեսակ** (plugin քայլ 3). 1=ԱԱՀ-ով, 2=առանց ԱԱՀ, 3=շրջանառու, 7=միկրո | Ոչ | 1 |
+| `EHDM_VAT_PERCENT` | ԱԱՀ (%) — ըստ plugin (16,67). Օպցիոնալ, ցուցադրության համար | Ոչ | 16.67 |
 | `EHDM_DEFAULT_UNIT` | Չափման միավոր (օր. Հատ) | Ոչ | Հատ |
 | `EHDM_CASHIER_ID` | Գանձապահի ID | Ոչ | 1 |
 | `EHDM_SHIPPING_ENABLED` | Առաքում առանձին տող (1/0) | Ոչ | 1 |
@@ -65,7 +66,22 @@
 
 ---
 
-## 4. WordPress plugin → մեր ENV (քարտեզ)
+## 4. WordPress plugin — քայլ 3 (Հարկման կարգավորում) → մեր կարգավորում
+
+Պլագինի **քայլ 3** (սքրինշոթ SCR-20260209-qnbb.jpeg).
+
+| Պլագին (քայլ 3) | Մեր իրականացում |
+|------------------|------------------|
+| **Հարկման տեսակը** (ԱԱՀ-ով հարկվող / առանց ԱԱՀ / Շրջ. հարկ / Միկրո) | `EHDM_DEP`: 1 = ԱԱՀ-ով, 2 = առանց ԱԱՀ, 3 = շրջանառու, 7 = միկրո |
+| **ԱԱՀ (%)** (օր. 16,67) | `EHDM_VAT_PERCENT` (օպցիոնալ) — ցուցադրության/հաշվարկի համար; API-ում dep-ը որոշում է ռեժիմը |
+| **Գանձապահ** (1) | `EHDM_CASHIER_ID` |
+| **Ապրանքի SKU-ի համապատասխանեցնել ապրանքի կոդի հետ?** (галка) | **Միշտ այդպես.** Կոդում `goodCode` = `item.sku` (բոլոր դիրքերում), այլ ընտրություն չկա |
+
+Նախագծում «ապրանքի կոդ» (goodCode) EHDM-ի հարցումում **միշտ** վերցվում է պատվերի դիրքի SKU-ից (`order_item.sku`). Գալար «սվյազի с SKU» պլագինում = մեր դեպքում միշտ միացված է։
+
+---
+
+## 5. WordPress plugin → մեր ENV (քարտեզ)
 
 | Plugin (wp_options / upload) | Մեր ENV |
 |-----------------------------|---------|
@@ -74,21 +90,31 @@
 | `hkd_tax_service_upload_file_crt` | `EHDM_CERT_PATH` |
 | `hkd_tax_service_upload_file_key` | `EHDM_KEY_PATH` |
 | `hkd_tax_service_passphrase` | `EHDM_KEY_PASSPHRASE` |
-| `taxServiceSeqNumber` | ԲԴ (ehdm_seq կամ order_meta) + `EHDM_INITIAL_SEQ` |
+| `taxServiceSeqNumber` | ԲԴ `ehdm_state.nextSeq`; **EHDM_INITIAL_SEQ=200** հին site-ից անցնելիս |
 | `hkd_tax_service_atg_code` | `EHDM_DEFAULT_ADG_CODE` |
 | `hkd_tax_service_tax_type` → dep | `EHDM_DEP` (vat→1, without_vat→2, around_tax→3, micro→7) |
+| `hkd_tax_service_vat_percent` | `EHDM_VAT_PERCENT` (օպցիոնալ) |
 | `hkd_tax_service_units_value` | `EHDM_DEFAULT_UNIT` |
 | `hkd_tax_service_treasurer` | `EHDM_CASHIER_ID` |
+| `hkd_tax_service_verification_code_same_sku` | Միշտ SKU = goodCode (կոդում) |
 | `hkd_tax_service_shipping_activated` | `EHDM_SHIPPING_ENABLED` |
 | `hkd_tax_service_shipping_atg_code` | `EHDM_SHIPPING_ADG_CODE` |
-| `hkd_tax_service_shipping_good_code` | `EHDM_SHIPPING_GOOD_CODE` |
-| `hkd_tax_service_shipping_description` | `EHDM_SHIPPING_DESCRIPTION` |
-| `hkd_tax_service_shipping_unit_value` | `EHDM_SHIPPING_UNIT` |
+| ... | ... |
 | `hkd_tax_service_api_url` | `EHDM_API_URL` |
 
 ---
 
-## 5. API — հարցումներ (plugin-ի համեմատ)
+## 6. Seq 200 — հին site-ից անցնելիս
+
+Որպեսզի նոր նախագծի seq-ը **չհամընկնի** հին WordPress site-ի հետ (որտեղ seq-ը կարող էր 65–100+ լինել), խորհուրդ է տրվում.
+
+- **.env**-ում դնել `EHDM_INITIAL_SEQ=200` (կամ ավելի մեծ, եթե հին site-ում seq-ը արդեն 100+ էր):
+- Եթե ԲԴ-ում արդեն կա `ehdm_state` տող (միգրացիայից) `nextSeq=65`-ով, **մեկ անգամ** թարմացնել.  
+  `UPDATE ehdm_state SET "nextSeq" = 200 WHERE id = 'default';`
+
+---
+
+## 7. API — հարցումներ (plugin-ի համեմատ)
 
 - **Auth.** HTTPS client certificate: CURLOPT_SSLCERT = `.crt` path, CURLOPT_SSLKEY = `.key` path, CURLOPT_SSLKEYPASSWD = passphrase.
 - **Content-Type.** `application/json`.
@@ -116,7 +142,7 @@
 
 ---
 
-## 6. Ինտեգրացիայի հոսք (նախագիծ)
+## 8. Ինտեգրացիայի հոսք (նախագիծ)
 
 1. Պատվեր հաստատվելուց (status → paid/confirmed) → կանչել EHDM `/print` (order items + shipping եթե `EHDM_SHIPPING_ENABLED`).
 2. Պատասխանում պահել `receiptId`, `qr`, `fiscal`, `crn`, `sn`, `tin`, `time`, `total` — order-ի meta կամ `ehdm_receipts` աղյուսակ.
@@ -125,7 +151,7 @@
 
 ---
 
-## 7. Իրականացում (նախագիծ)
+## 9. Իրականացում (նախագիծ)
 
 - **Config / client.** `apps/web/lib/payments/ehdm/` — config, client (HTTPS + client cert), seq (БД `ehdm_state`), buildPrintBody, callPrint.
 - **Print on paid.** `printReceiptForOrder(orderId)` կանչվում է ավտոմատ՝ Ameriabank, Telcell, Idram, FastShift callback-ներից և ադմինում `paymentStatus` → paid դնելիս (fire-and-forget).
@@ -134,7 +160,7 @@
 
 ---
 
-## 8. Checklist
+## 10. Checklist
 
 - [ ] ENV: `EHDM_API_URL`, `EHDM_CRN`, `EHDM_TIN`, `EHDM_CERT_PATH`, `EHDM_KEY_PATH`, `EHDM_KEY_PASSPHRASE`, `EHDM_INITIAL_SEQ`, dep/unit/cashier/shipping.
 - [ ] `.crt`/`.key` — **repo-ից դուրս**; լոկալում `Private/` (gitignore), path-ը ENV-ում.
