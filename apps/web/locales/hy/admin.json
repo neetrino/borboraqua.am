@@ -660,6 +660,11 @@
     "total": "Ընդամենը",
     "items": "Ապրանքներ",
     "date": "Ամսաթիվ",
+    "invoice": "Ինվոյս",
+    "invoiceTitle": "E-HDM ֆիսկալ ինվոյսի կարգավիճակ",
+    "invoiceCreated": "Ինվոյս ստեղծված է",
+    "invoiceNotCreated": "Ինվոյս չկա",
+    "invoiceAvailableWhenPaid": "Հասանելի է վճարումից հետո",
     "unknownCustomer": "Անհայտ հաճախորդ",
     "viewOrderDetails": "Դիտել պատվերի մանրամասները",
     "showingPage": "Ցուցադրվում է {page} էջը {totalPages}-ից ({total} ընդամենը)",
@@ -700,7 +705,9 @@
       "qty": "Քանակ",
       "price": "Գին",
       "totalCol": "Ընդամենը",
-      "noItemsFound": "Այս պատվերի համար ապրանքներ չեն գտնվել"
+      "noItemsFound": "Այս պատվերի համար ապրանքներ չեն գտնվել",
+      "fiscalReceipt": "Ֆիսկալ կտրոն (E-HDM)",
+      "fiscalReceiptNotCreated": "Չի ստեղծվել"
     }
   },
   "messages": {

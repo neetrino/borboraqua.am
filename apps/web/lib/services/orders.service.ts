@@ -709,6 +709,7 @@ class OrdersService {
         },
         payments: true,
         events: true,
+        ehdmReceipt: true,
       },
     });
 
@@ -863,6 +864,16 @@ class OrdersService {
       trackingNumber: order.trackingNumber || undefined,
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),
+      ehdmReceipt:
+        (order as any).ehdmReceipt != null
+          ? {
+              receiptId: (order as any).ehdmReceipt.receiptId,
+              fiscal: (order as any).ehdmReceipt.fiscal,
+              qr: (order as any).ehdmReceipt.qr,
+              createdAt: (order as any).ehdmReceipt.createdAt?.toISOString?.() ?? null,
+              result: ((order as any).ehdmReceipt.response as { result?: Record<string, unknown> })?.result ?? null,
+            }
+          : null,
     };
   }
 }

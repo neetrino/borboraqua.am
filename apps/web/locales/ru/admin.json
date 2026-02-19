@@ -663,6 +663,11 @@
     "total": "Итого",
     "items": "Товары",
     "date": "Дата",
+    "invoice": "Инвойс",
+    "invoiceTitle": "Статус фискального инвойса E-HDM",
+    "invoiceCreated": "Инвойс создан",
+    "invoiceNotCreated": "Нет инвойса",
+    "invoiceAvailableWhenPaid": "Доступно после оплаты",
     "unknownCustomer": "Неизвестный клиент",
     "viewOrderDetails": "Просмотр деталей заказа",
     "selectAllOrders": "Выбрать все заказы",
@@ -700,7 +705,9 @@
       "qty": "Кол-во",
       "price": "Цена",
       "totalCol": "Итого",
-      "noItemsFound": "Товары для этого заказа не найдены"
+      "noItemsFound": "Товары для этого заказа не найдены",
+      "fiscalReceipt": "Фискальный чек (E-HDM)",
+      "fiscalReceiptNotCreated": "Не создан"
     },
     "showingPage": "Показана страница {page} из {totalPages} ({total} всего)",
     "previous": "Предыдущая",

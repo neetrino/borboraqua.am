@@ -398,6 +398,7 @@ model Order {
   items             OrderItem[]
   payments          Payment[]
   events            OrderEvent[]
+  ehdmReceipt       EhdmReceipt?
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
 
@@ -466,6 +467,32 @@ model OrderEvent {
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("order_events")
+}
+
+// ============================================
+// EHDM (Էլեկտրոնային ՀԴՄ — fiscal receipts)
+// ============================================
+model EhdmState {
+  id      String @id @default("default")
+  nextSeq Int    @default(65)
+
+  @@map("ehdm_state")
+}
+
+model EhdmReceipt {
+  id         String   @id @default(cuid())
+  orderId    String   @unique
+  receiptId  String
+  seq        Int
+  fiscal     String?
+  qr         String?  @db.Text
+  response   Json?
+  createdAt  DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("ehdm_receipts")
 }
 
 // ============================================

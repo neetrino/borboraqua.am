@@ -7,7 +7,8 @@
 **Ameriabank — մանրամասն ինտեգրացիա (API նյուանսներ, checklist).** `docs/payments/AMERIABANK-INTEGRATION.md`  
 **Idram — ինտեգրացիա (form, RESULT_URL precheck/confirm, checksum).** `docs/payments/IDRAM-INTEGRATION.md`  
 **Telcell — ինտեգրացիա (PostInvoice, security_code, RESULT checksum).** `docs/payments/TELCELL-INTEGRATION.md`  
-**FastShift — ինտեգրացիա (register order, Bearer token, callback_url/webhook).** `docs/payments/FASTSHIFT-INTEGRATION.md`
+**FastShift — ինտեգրացիա (register order, Bearer token, callback_url/webhook).** `docs/payments/FASTSHIFT-INTEGRATION.md`  
+**EHDM (Էլեկտրոնային ՀԴՄ) — ֆիսկալ կտրոններ (client cert, seq, print/return/copy).** `docs/payments/EHDM-INTEGRATION.md`
 
 ---
 
