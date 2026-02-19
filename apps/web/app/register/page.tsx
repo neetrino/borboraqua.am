@@ -117,7 +117,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="w-full max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="relative">
         {/* Gradient Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />

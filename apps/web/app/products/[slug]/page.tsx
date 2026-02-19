@@ -2155,11 +2155,11 @@ export default function ProductPage({ params }: ProductPageProps) {
         </div>
       )}
 
-      <div id="product-reviews" className="mt-24 scroll-mt-24">
-        <ProductReviews productSlug={slug} productId={product.id} />
-      </div>
       <div className="mt-16">
         <RelatedProducts categorySlug={product.categories?.[0]?.slug} currentProductId={product.id} />
+      </div>
+      <div id="product-reviews" className="mt-24 scroll-mt-24">
+        <ProductReviews productSlug={slug} productId={product.id} />
       </div>
     </div>
   );

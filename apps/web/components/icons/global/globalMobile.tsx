@@ -346,19 +346,6 @@ export function MobileMenu({
           >
             CONTACT
           </button>
-          <button
-            onClick={() => {
-              if (isLoggedIn) {
-                handleLogout();
-              } else {
-                router.push('/login');
-              }
-              setShowMobileMenu(false);
-            }}
-            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
-          >
-            {isLoggedIn ? 'LOGOUT' : 'LOG IN'}
-          </button>
         </nav>
       </div>
     </div>
@@ -993,7 +980,7 @@ export function MobileBottomNavigation() {
 
   return (
     <div 
-      className="-translate-x-1/2 fixed xl:hidden left-1/2 bottom-0 w-full max-w-[90%] sm:max-w-[360px] px-2 z-50 overflow-x-hidden"
+      className="-translate-x-1/2 fixed xl:hidden left-1/2 bottom-0 md:bottom-8 w-full max-w-[95%] sm:max-w-[420px] md:max-w-[700px] px-2 z-50 overflow-x-hidden"
       style={{ 
         paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))',
       }}
@@ -1011,12 +998,12 @@ export function MobileBottomNavigation() {
           boxShadow: 'none', // Remove any box shadow
         }}
       >
-        <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-1/2 w-full max-w-[360px] sm:max-w-[380px] px-3">
-          <div className="content-stretch flex items-center justify-center gap-7 sm:gap-9 md:gap-11 relative shrink-0 w-full">
+        <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-1/2 w-full max-w-[400px] sm:max-w-[420px] md:max-w-[680px] px-3">
+          <div className="content-stretch flex items-center justify-center gap-5 sm:gap-6 md:gap-12 relative shrink-0 w-full">
             {/* Home */}
             <button
               onClick={() => router.push('/')}
-              className="group h-[56px] w-[56px] relative flex items-center justify-center transition-transform duration-200 hover:-translate-y-1 active:scale-95"
+              className="group h-[56px] w-[70px] relative flex items-center justify-center transition-transform duration-200 hover:-translate-y-1 active:scale-95"
             >
               {activeIndex === 0 && (
                 <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none animate-in fade-in ${getSlideDirection(0)} duration-300`}>

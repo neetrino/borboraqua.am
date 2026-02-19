@@ -156,7 +156,7 @@ export default function ContactPage() {
           </div>
 
           {/* Right Side: Contact Form */}
-          <div className="relative max-w-lg mx-auto lg:mx-0">
+          <div className="relative max-w-2xl mx-auto lg:mx-0 w-full">
             {/* Gradient Background */}
             <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
             

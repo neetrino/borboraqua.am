@@ -1,12 +1,62 @@
 import { db } from "@white-shop/db";
 
-function generateOrderNumber(): string {
-  const now = new Date();
-  const year = now.getFullYear().toString().slice(-2);
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const random = String(Math.floor(Math.random() * 10000)).padStart(5, "0");
-  return `${year}${month}${day}-${random}`;
+/**
+ * Get next order number (P100, P101, ...) and increment in DB (transaction).
+ * If no row exists, create with 100 and return P100 (then next call will return P101).
+ * If table doesn't exist, creates it automatically (fallback for development).
+ */
+async function getNextOrderNumber(): Promise<string> {
+  try {
+    const result = await db.$transaction(async (tx) => {
+      let row = await tx.orderNumberState.findUnique({ where: { id: "default" } });
+      if (!row) {
+        await tx.orderNumberState.create({
+          data: { id: "default", nextNumber: 100 },
+        });
+        row = await tx.orderNumberState.findUnique({ where: { id: "default" } });
+      }
+      if (!row) throw new Error("Failed to get order number");
+      const numberToUse = row.nextNumber;
+      await tx.orderNumberState.update({
+        where: { id: "default" },
+        data: { nextNumber: numberToUse + 1 },
+      });
+      return numberToUse;
+    });
+    return `P${result}`;
+  } catch (error: any) {
+    // If table doesn't exist (P2021 = table not found), create it
+    if (error?.code === 'P2021' || error?.message?.includes('does not exist') || error?.message?.includes('order_number_state')) {
+      console.log('🔧 [ORDERS SERVICE] order_number_state table not found, creating...');
+      try {
+        // Create table using raw SQL
+        await db.$executeRaw`
+          CREATE TABLE IF NOT EXISTS "order_number_state" (
+            "id" TEXT NOT NULL,
+            "nextNumber" INTEGER NOT NULL DEFAULT 100,
+            CONSTRAINT "order_number_state_pkey" PRIMARY KEY ("id")
+          )
+        `;
+        // Insert default row
+        await db.$executeRaw`
+          INSERT INTO "order_number_state" ("id", "nextNumber") 
+          VALUES ('default', 100)
+          ON CONFLICT ("id") DO NOTHING
+        `;
+        console.log('✅ [ORDERS SERVICE] order_number_state table created');
+        // Retry getting order number
+        return await getNextOrderNumber();
+      } catch (createError: any) {
+        console.error('❌ [ORDERS SERVICE] Failed to create order_number_state table:', createError);
+        throw new Error('Failed to initialize order number system. Please run database migrations.');
+      }
+    }
+    throw error;
+  }
+}
+
+async function generateOrderNumber(): Promise<string> {
+  return await getNextOrderNumber();
 }
 
 class OrdersService {
@@ -417,7 +467,7 @@ class OrdersService {
       }
 
       // Generate order number
-      const orderNumber = generateOrderNumber();
+      const orderNumber = await generateOrderNumber();
 
       // Create order with items in a transaction
       // Set timeout to 30s for payment processing (critical operation)

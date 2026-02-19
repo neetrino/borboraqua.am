@@ -332,6 +332,9 @@
     contain: layout style paint;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
+    /* Prevent layout shift when last item is hovered */
+    padding-right: 0;
+    box-sizing: border-box;
   }
 
   /* Ensure related products carousel doesn't clip hovered images */
@@ -339,6 +342,27 @@
     z-index: 50;
     position: relative;
     overflow: visible !important;
+    /* Prevent layout shift on hover */
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  /* Prevent last item from causing layout shift */
+  .related-products-carousel-container > div > div:last-child {
+    contain: layout style;
+    position: relative;
+  }
+
+  .related-products-carousel-container > div > div:last-child .product-card-compact {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .related-products-carousel-container > div > div:last-child .product-card-compact:hover {
+    transform: translateZ(0);
+    margin-right: 0;
+    padding-right: 0;
   }
 
   /* Allow overflow in carousel containers when card is hovered - BUT keep carousel container clipped */
