@@ -664,6 +664,7 @@
     "invoiceTitle": "E-HDM ֆիսկալ ինվոյսի կարգավիճակ",
     "invoiceCreated": "Ինվոյս ստեղծված է",
     "invoiceNotCreated": "Ինվոյս չկա",
+    "invoiceAvailableWhenPaid": "Հասանելի է վճարումից հետո",
     "unknownCustomer": "Անհայտ հաճախորդ",
     "viewOrderDetails": "Դիտել պատվերի մանրամասները",
     "showingPage": "Ցուցադրվում է {page} էջը {totalPages}-ից ({total} ընդամենը)",

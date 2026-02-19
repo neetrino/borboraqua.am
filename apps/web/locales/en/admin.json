@@ -673,6 +673,7 @@
     "invoiceTitle": "E-HDM fiscal invoice status",
     "invoiceCreated": "Invoice created",
     "invoiceNotCreated": "No invoice",
+    "invoiceAvailableWhenPaid": "Available when paid",
     "unknownCustomer": "Unknown customer",
     "viewOrderDetails": "View order details",
     "showingPage": "Showing page {page} of {totalPages} ({total} total)",

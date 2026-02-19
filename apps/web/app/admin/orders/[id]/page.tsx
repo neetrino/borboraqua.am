@@ -144,6 +144,7 @@ export default function OrderDetailPage() {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [updatingPaymentStatus, setUpdatingPaymentStatus] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showInvoicePopup, setShowInvoicePopup] = useState(false);
 
   const fetchOrder = useCallback(async (id: string) => {
     try {
@@ -299,11 +300,11 @@ export default function OrderDetailPage() {
             </svg>
             <span className="text-sm font-medium">{t('admin.orders.orderDetails.backToOrders')}</span>
           </button>
-          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-4">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {t('admin.orders.orderDetails.title')} — {order.number}
             </h1>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap">
               <span className="text-sm text-gray-500">{t('admin.orders.orderDetails.createdAt')}</span>
               <span className="text-sm font-medium text-gray-700">
                 {new Date(order.createdAt).toLocaleString(undefined, {
@@ -311,6 +312,32 @@ export default function OrderDetailPage() {
                   timeStyle: 'short',
                 })}
               </span>
+              <button
+                type="button"
+                onClick={() => order.paymentStatus === 'paid' && setShowInvoicePopup(true)}
+                disabled={order.paymentStatus !== 'paid'}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed hover:bg-gray-50 hover:disabled:bg-white"
+              >
+                <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>{t('admin.orders.orderDetails.fiscalReceipt')}</span>
+                {order.paymentStatus === 'paid' ? (
+                  order.ehdmReceipt != null ? (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                      {t('admin.orders.invoiceCreated')}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                      {t('admin.orders.invoiceNotCreated')}
+                    </span>
+                  )
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">
+                    {t('admin.orders.invoiceAvailableWhenPaid')}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
           {updateMessage && (
@@ -330,8 +357,38 @@ export default function OrderDetailPage() {
             <h2 className="text-sm font-semibold text-gray-900 mb-4">{t('admin.orders.orderDetails.summary')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.orders.orderDetails.orderNumber')}</p>
-                <p className="mt-1 text-base font-semibold text-gray-900">{order.number}</p>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.orders.orderDetails.method')}</p>
+                <div className="mt-1 flex items-center gap-2">
+                  {(order.payment?.provider ?? order.payment?.method) && (() => {
+                    const config = getPaymentMethodConfig(order.payment?.provider ?? order.payment?.method ?? null, t);
+                    if (!config) return <span className="text-sm text-gray-500">—</span>;
+                    return (
+                      <>
+                        {config.logos ? (
+                          <div className="flex items-center gap-0.5">
+                            {config.logos.map((src) => (
+                              <div key={src} className="w-9 h-6 bg-white rounded border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                <img src={src} alt="" className="w-full h-full object-contain p-0.5" />
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="w-9 h-6 bg-white rounded border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                            {config.logo ? (
+                              <img src={config.logo} alt={config.name} className="w-full h-full object-contain p-0.5" />
+                            ) : (
+                              <svg className="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                              </svg>
+                            )}
+                          </div>
+                        )}
+                        <span className="text-sm font-medium text-gray-900">{config.name}</span>
+                      </>
+                    );
+                  })()}
+                  {!(order.payment?.provider ?? order.payment?.method) && <span className="text-sm text-gray-500">—</span>}
+                </div>
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.orders.orderDetails.total')}</p>
@@ -379,38 +436,6 @@ export default function OrderDetailPage() {
                 </div>
               </div>
             </div>
-            {/* Payment method: icon + name (like checkout) */}
-            {(order.payment?.provider ?? order.payment?.method) && (() => {
-              const config = getPaymentMethodConfig(order.payment?.provider ?? order.payment?.method ?? null, t);
-              if (!config) return null;
-              return (
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">{t('admin.orders.orderDetails.method')}</p>
-                  <div className="flex items-center gap-3">
-                    {config.logos ? (
-                      <div className="flex items-center gap-1">
-                        {config.logos.map((src) => (
-                          <div key={src} className="w-10 h-7 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
-                            <img src={src} alt="" className="w-full h-full object-contain p-1" />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="w-11 h-8 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
-                        {config.logo ? (
-                          <img src={config.logo} alt={config.name} className="w-full h-full object-contain p-1" />
-                        ) : (
-                          <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                        )}
-                      </div>
-                    )}
-                    <span className="font-medium text-gray-900">{config.name}</span>
-                  </div>
-                </div>
-              );
-            })()}
           </Card>
 
           {/* Shipping & Customer — 2 columns */}
@@ -479,7 +504,7 @@ export default function OrderDetailPage() {
             </Card>
           </div>
 
-          {/* Items + order totals at bottom */}
+          {/* Items: table + integrated totals */}
           <Card className="p-4 md:p-6">
             <h2 className="text-sm font-semibold text-gray-900 mb-4">{t('admin.orders.orderDetails.items')}</h2>
             {Array.isArray(order.items) && order.items.length > 0 ? (
@@ -554,75 +579,77 @@ export default function OrderDetailPage() {
                       );
                     })}
                   </tbody>
+                  <tfoot className="bg-gray-50/80 border-t-2 border-gray-200">
+                    {(() => {
+                      const originalSubtotal = order.totals?.subtotal ?? order.subtotal ?? 0;
+                      const discount = order.totals?.discount ?? order.discountAmount ?? 0;
+                      const subtotal = discount > 0 ? originalSubtotal - discount : order.items.reduce((sum, item) => sum + (item.total || 0), 0);
+                      const baseShipping = order.shippingMethod === 'pickup' ? 0 : (order.totals?.shipping ?? order.shippingAmount ?? 0);
+                      const shipping = baseShipping === 0 && deliveryPrice !== null ? deliveryPrice : baseShipping;
+                      const total = subtotal + shipping;
+                      return (
+                        <>
+                          <tr>
+                            <td colSpan={5} className="px-4 py-2 text-right text-gray-600">{t('checkout.summary.subtotal')}</td>
+                            <td className="px-4 py-2 text-right font-medium text-gray-900">{formatPrice(subtotal, currency)}</td>
+                          </tr>
+                          <tr>
+                            <td colSpan={5} className="px-4 py-2 text-right text-gray-600">{t('checkout.summary.shipping')}</td>
+                            <td className="px-4 py-2 text-right font-medium text-gray-900">
+                              {order.shippingMethod === 'pickup'
+                                ? t('common.cart.free')
+                                : loadingDeliveryPrice
+                                  ? t('checkout.shipping.loading')
+                                  : order.shippingAddress?.city
+                                    ? `${formatPrice(shipping, currency)} (${order.shippingAddress.city})`
+                                    : t('checkout.shipping.enterCity')}
+                            </td>
+                          </tr>
+                          <tr className="border-t border-gray-200">
+                            <td colSpan={5} className="px-4 py-3 text-right font-semibold text-gray-900">{t('checkout.summary.total')}</td>
+                            <td className="px-4 py-3 text-right font-bold text-gray-900">{formatPrice(total, currency)}</td>
+                          </tr>
+                        </>
+                      );
+                    })()}
+                  </tfoot>
                 </table>
               </div>
             ) : (
               <p className="text-sm text-gray-500">{t('admin.orders.orderDetails.noItemsFound')}</p>
             )}
-
-            {/* Order totals at bottom of Items block */}
-            {(() => {
-              const originalSubtotal = order.totals?.subtotal ?? order.subtotal ?? 0;
-              const discount = order.totals?.discount ?? order.discountAmount ?? 0;
-              const subtotal = discount > 0 ? originalSubtotal - discount : order.items.reduce((sum, item) => sum + (item.total || 0), 0);
-              const baseShipping = order.shippingMethod === 'pickup' ? 0 : (order.totals?.shipping ?? order.shippingAmount ?? 0);
-              const shipping = baseShipping === 0 && deliveryPrice !== null ? deliveryPrice : baseShipping;
-              const tax = order.totals?.tax ?? order.taxAmount ?? 0;
-              const total = subtotal + shipping;
-              return (
-                <div className="mt-6 pt-6 border-t border-gray-200 space-y-2 max-w-sm ml-auto">
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>{t('checkout.summary.subtotal')}</span>
-                    <span>{formatPrice(subtotal, currency)}</span>
-                  </div>
-                  {discount > 0 && (
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>{t('checkout.summary.discount')}</span>
-                      <span>-{formatPrice(discount, currency)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>{t('checkout.summary.shipping')}</span>
-                    <span>
-                      {order.shippingMethod === 'pickup'
-                        ? t('common.cart.free')
-                        : loadingDeliveryPrice
-                          ? t('checkout.shipping.loading')
-                          : order.shippingAddress?.city
-                            ? `${formatPrice(shipping, currency)} (${order.shippingAddress.city})`
-                            : t('checkout.shipping.enterCity')}
-                    </span>
-                  </div>
-                  {tax > 0 && (
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>{t('checkout.summary.tax')}</span>
-                      <span>{formatPrice(tax, currency)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-base font-bold text-gray-900 pt-2 mt-2 border-t border-gray-200">
-                    <span>{t('checkout.summary.total')}</span>
-                    <span>{formatPrice(total, currency)}</span>
-                  </div>
-                </div>
-              );
-            })()}
           </Card>
 
-          {/* EHDM fiscal receipt */}
-          {order.paymentStatus === 'paid' && (
-            <Card className="p-4 md:p-6">
-              {order.ehdmReceipt != null ? (
-                <EhdmReceiptBlock receipt={order.ehdmReceipt} orderNumber={order.number} variant="compact" />
-              ) : (
-                <div className="text-sm">
-                  <h3 className="font-semibold text-gray-900 mb-1">{t('admin.orders.orderDetails.fiscalReceipt')}</h3>
-                  <p className="text-gray-500">{t('admin.orders.orderDetails.fiscalReceiptNotCreated')}</p>
-                </div>
-              )}
-            </Card>
-          )}
         </div>
       </div>
+
+      {/* Invoice popup (EHDM) */}
+      {showInvoicePopup && order?.paymentStatus === 'paid' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowInvoicePopup(false)}>
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="sticky top-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white rounded-t-xl">
+              <h3 className="text-lg font-semibold text-gray-900">{t('admin.orders.orderDetails.fiscalReceipt')}</h3>
+              <button
+                type="button"
+                onClick={() => setShowInvoicePopup(false)}
+                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                aria-label={t('admin.common.close')}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              {order.ehdmReceipt != null ? (
+                <EhdmReceiptBlock receipt={order.ehdmReceipt} orderNumber={order.number} variant="full" />
+              ) : (
+                <p className="text-gray-500 py-4">{t('admin.orders.orderDetails.fiscalReceiptNotCreated')}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
