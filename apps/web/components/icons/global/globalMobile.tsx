@@ -427,13 +427,13 @@ export function MobileSearch({
 
   return (
     <div 
-      className="xl:hidden fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[100] flex items-start justify-center pt-16 px-4"
+      className="xl:hidden fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[200] flex items-start justify-center pt-16 px-4"
       onClick={() => setShowSearchModal(false)}
       style={{ touchAction: 'none' }}
     >
       <div
         ref={searchModalRef}
-        className="w-full max-w-md animate-in fade-in slide-in-from-top-2 duration-200 relative z-[101]"
+        className="w-full max-w-md animate-in fade-in slide-in-from-top-2 duration-200 relative z-[201]"
         onClick={(e) => e.stopPropagation()}
         style={{ touchAction: 'auto' }}
       >
@@ -845,6 +845,7 @@ export function MobileBottomNavigation() {
   const { isLoggedIn } = useAuth();
   const [cartCount, setCartCount] = useState<number>(0);
   const [scrollProgress, setScrollProgress] = useState<number>(0);
+  const [prevActiveIndex, setPrevActiveIndex] = useState<number | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
   const rafId = useRef<number | null>(null);
   const iconRefs = useRef<(HTMLImageElement | null)[]>([]);
@@ -975,9 +976,24 @@ export function MobileBottomNavigation() {
 
   const activeIndex = getActiveIndex();
 
+  // Track previous active index for slide animation direction
+  useEffect(() => {
+    if (activeIndex !== null && activeIndex !== prevActiveIndex) {
+      setPrevActiveIndex(activeIndex);
+    }
+  }, [activeIndex, prevActiveIndex]);
+
+  // Determine slide direction based on previous and current active index
+  const getSlideDirection = (index: number) => {
+    if (prevActiveIndex === null) return 'slide-in-from-bottom';
+    if (index > prevActiveIndex) return 'slide-in-from-right';
+    if (index < prevActiveIndex) return 'slide-in-from-left';
+    return 'slide-in-from-bottom';
+  };
+
   return (
     <div 
-      className="-translate-x-1/2 fixed xl:hidden left-1/2 bottom-0 w-full max-w-[85%] sm:max-w-[320px] px-2 z-50 overflow-x-hidden"
+      className="-translate-x-1/2 fixed xl:hidden left-1/2 bottom-0 w-full max-w-[90%] sm:max-w-[360px] px-2 z-50 overflow-x-hidden"
       style={{ 
         paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))',
       }}
@@ -995,7 +1011,7 @@ export function MobileBottomNavigation() {
           boxShadow: 'none', // Remove any box shadow
         }}
       >
-        <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-1/2 w-full max-w-[320px] sm:max-w-[340px] px-1">
+        <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-1/2 w-full max-w-[360px] sm:max-w-[380px] px-3">
           <div className="content-stretch flex items-center justify-center gap-7 sm:gap-9 md:gap-11 relative shrink-0 w-full">
             {/* Home */}
             <button
@@ -1003,8 +1019,8 @@ export function MobileBottomNavigation() {
               className="group h-[56px] w-[56px] relative flex items-center justify-center transition-transform duration-200 hover:-translate-y-1 active:scale-95"
             >
               {activeIndex === 0 && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
+                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none animate-in fade-in ${getSlideDirection(0)} duration-300`}>
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src='/assets/home/Ellipse 2.svg' />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
@@ -1022,8 +1038,8 @@ export function MobileBottomNavigation() {
               className="group block cursor-pointer h-[56px] w-[56px] relative flex items-center justify-center opacity-90 hover:opacity-100 transition-transform duration-200 hover:scale-110 hover:-translate-y-1 active:scale-95"
             >
               {activeIndex === 1 && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
+                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none animate-in fade-in ${getSlideDirection(1)} duration-300`}>
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src='/assets/home/Ellipse 2.svg' />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
@@ -1041,8 +1057,8 @@ export function MobileBottomNavigation() {
               className="group block cursor-pointer h-[56px] w-[56px] relative flex items-center justify-center opacity-90 hover:opacity-100 transition-transform duration-200 hover:scale-110 hover:-translate-y-1 active:scale-95"
             >
               {activeIndex === 2 && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
+                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none animate-in fade-in ${getSlideDirection(2)} duration-300`}>
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src='/assets/home/Ellipse 2.svg' />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
@@ -1066,8 +1082,8 @@ export function MobileBottomNavigation() {
               className="group block cursor-pointer h-[56px] w-[56px] relative flex items-center justify-center opacity-90 hover:opacity-100 transition-transform duration-200 hover:scale-110 hover:-translate-y-1 active:scale-95"
             >
               {activeIndex === 3 && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                  <img className="block max-w-none size-[48px] opacity-70" alt="" src={imgEllipse41} />
+                <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none animate-in fade-in ${getSlideDirection(3)} duration-300`}>
+                  <img className="block max-w-none size-[48px] opacity-70" alt="" src='/assets/home/Ellipse 2.svg' />
                 </div>
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />

@@ -26,7 +26,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
   roles: string[];
-  login: (_emailOrPhone: string, _password: string) => Promise<void>;
+  login: (_emailOrPhone: string, _password: string) => Promise<User>;
   register: (_data: RegisterData) => Promise<void>;
   logout: () => void;
 }
@@ -146,7 +146,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Trigger auth update event
       window.dispatchEvent(new Event('auth-updated'));
 
-      // Don't redirect here - let the login page handle redirect based on query params
+      // Return user data so login page can use it for redirect
+      return response.user;
     } catch (error: any) {
       console.error('❌ [AUTH] Login error:', error);
       
