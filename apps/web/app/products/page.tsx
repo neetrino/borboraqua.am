@@ -18,6 +18,7 @@ interface Product {
   slug: string;
   title: string;
   description?: string | null;
+  category?: string | null; // Primary category title
   price: number;
   compareAtPrice: number | null;
   image: string | null;
@@ -54,6 +55,7 @@ function trimProductForGrid(p: {
   slug?: string | null;
   title?: string | null;
   description?: string | null;
+  category?: string | null;
   price?: number;
   compareAtPrice?: number | null;
   originalPrice?: number | null;
@@ -69,6 +71,7 @@ function trimProductForGrid(p: {
     slug: p.slug ?? '',
     title: p.title ?? '',
     description: p.description ?? null,
+    category: p.category ?? null,
     price: p.price ?? 0,
     compareAtPrice: p.compareAtPrice ?? p.originalPrice ?? null,
     image: p.image ?? null,
@@ -106,6 +109,7 @@ async function getProducts(
       limit,
       lang: language,
       search: search?.trim() || undefined,
+      listOnly: true, // Use listOnly mode to get category field
     };
 
     const result = await unstable_cache(
@@ -114,12 +118,23 @@ async function getProducts(
         if (!raw.data || !Array.isArray(raw.data)) {
           return { data: [], meta: { total: 0, page: 1, limit: 24, totalPages: 0 } };
         }
+        
+        // Debug: log first product to see if category is present
+        if (process.env.NODE_ENV === 'development' && raw.data.length > 0) {
+          console.log('[SHOP PAGE] First product from API:', {
+            id: raw.data[0].id,
+            title: raw.data[0].title,
+            category: raw.data[0].category,
+            hasCategory: !!raw.data[0].category,
+          });
+        }
+        
         return {
           data: raw.data.map(trimProductForGrid),
           meta: raw.meta,
         };
       },
-      ['products-page', language, String(page), String(limit), search?.trim() ?? ''],
+      ['products-page', language, String(page), String(limit), search?.trim() ?? '', 'listOnly'],
       { revalidate: PRODUCTS_PAGE_REVALIDATE }
     )();
 

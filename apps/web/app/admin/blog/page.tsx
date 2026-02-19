@@ -44,6 +44,7 @@ export default function AdminBlogPage() {
 
   const [posts, setPosts] = useState<AdminBlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [duplicating, setDuplicating] = useState<string | null>(null); // Track which post is being duplicated
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -51,7 +52,7 @@ export default function AdminBlogPage() {
   const [editingPost, setEditingPost] = useState<AdminBlogPost | null>(null);
 
   const [formSlug, setFormSlug] = useState('');
-  const [formPublished, setFormPublished] = useState(false);
+  const [formPublished, setFormPublished] = useState(true);
   const [formTranslations, setFormTranslations] = useState<{
     hy: { title: string; contentHtml: string; excerpt: string; seoTitle: string; seoDescription: string };
     en: { title: string; contentHtml: string; excerpt: string; seoTitle: string; seoDescription: string };
@@ -140,7 +141,7 @@ export default function AdminBlogPage() {
     });
     setFormFeaturedImage(null);
     setFormOgImage(null);
-    setFormPublished(false);
+    setFormPublished(true);
   };
 
   const openCreateModal = () => {
@@ -154,7 +155,8 @@ export default function AdminBlogPage() {
       setError(null);
 
       // Fetch post with all translations
-      const response = await apiClient.get<AdminBlogPost & {
+      // Retry once if post not found (might be duplicate in progress)
+      let response: AdminBlogPost & {
         translations?: Array<{
           locale: string;
           title: string;
@@ -165,9 +167,45 @@ export default function AdminBlogPage() {
         }>;
         featuredImage?: string | null;
         ogImage?: string | null;
-      }>(`/api/v1/admin/blog/${post.id}`, {
-        params: { includeTranslations: 'true' },
-      });
+      };
+      
+      try {
+        response = await apiClient.get<AdminBlogPost & {
+          translations?: Array<{
+            locale: string;
+            title: string;
+            contentHtml?: string | null;
+            excerpt?: string | null;
+            seoTitle?: string | null;
+            seoDescription?: string | null;
+          }>;
+          featuredImage?: string | null;
+          ogImage?: string | null;
+        }>(`/api/v1/admin/blog/${post.id}`, {
+          params: { includeTranslations: 'true' },
+        });
+      } catch (firstError: any) {
+        // If 404 and might be duplicate, wait a bit and retry once
+        if (firstError?.status === 404 || firstError?.response?.status === 404) {
+          await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms
+          response = await apiClient.get<AdminBlogPost & {
+            translations?: Array<{
+              locale: string;
+              title: string;
+              contentHtml?: string | null;
+              excerpt?: string | null;
+              seoTitle?: string | null;
+              seoDescription?: string | null;
+            }>;
+            featuredImage?: string | null;
+            ogImage?: string | null;
+          }>(`/api/v1/admin/blog/${post.id}`, {
+            params: { includeTranslations: 'true' },
+          });
+        } else {
+          throw firstError;
+        }
+      }
 
       const data = response;
 
@@ -231,12 +269,21 @@ export default function AdminBlogPage() {
     if (!confirm(t('admin.blog.deleteConfirm').replace('{title}', post.title))) {
       return;
     }
+    
+    // Optimistic update: remove from UI immediately
+    const originalPosts = [...posts];
+    setPosts(prev => prev.filter(p => p.id !== post.id));
+    
     try {
       await apiClient.delete(`/api/v1/admin/blog/${post.id}`);
-      await fetchPosts();
-      alert(t('admin.blog.deletedSuccess'));
+      // Refetch in background to ensure consistency
+      fetchPosts().catch(err => {
+        console.error('❌ [ADMIN BLOG] Error refetching after delete:', err);
+      });
     } catch (err: any) {
       console.error('❌ [ADMIN BLOG] Error deleting post:', err);
+      // Rollback on error
+      setPosts(originalPosts);
       const message = err?.message || t('admin.common.unknownErrorFallback');
       alert(t('admin.blog.errorDeleting').replace('{message}', message));
     }
@@ -253,6 +300,34 @@ export default function AdminBlogPage() {
       console.error('❌ [ADMIN BLOG] Error updating status:', err);
       const message = err?.message || t('admin.common.unknownErrorFallback');
       alert(t('admin.blog.errorLoading').replace('{message}', message));
+    }
+  };
+
+  const handleDuplicatePost = async (post: AdminBlogPost) => {
+    if (!confirm(t('admin.blog.duplicateConfirm').replace('{title}', post.title))) {
+      return;
+    }
+
+    // Set loading state for this specific post
+    setDuplicating(post.id);
+
+    try {
+      const response = await apiClient.post<AdminBlogPost>(`/api/v1/admin/blog/${post.id}/duplicate`);
+      console.log('✅ [ADMIN BLOG] Post duplicated successfully');
+      
+      // Add the duplicated post to the list immediately
+      setPosts(prev => [response, ...prev]);
+      
+      // Refetch in background to ensure consistency
+      fetchPosts().catch(err => {
+        console.error('❌ [ADMIN BLOG] Error refetching after duplicate:', err);
+      });
+    } catch (err: any) {
+      console.error('❌ [ADMIN BLOG] Error duplicating post:', err);
+      const message = err?.message || t('admin.common.unknownErrorFallback');
+      alert(t('admin.blog.errorDuplicating').replace('{message}', message));
+    } finally {
+      setDuplicating(null);
     }
   };
 
@@ -587,20 +662,52 @@ export default function AdminBlogPage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div className="flex items-center gap-2">
-                              <ProductPageButton
-                                variant="outline"
-                                className="text-xs px-3 py-1 !text-blue-600 !border-blue-300 hover:!bg-blue-50 hover:!text-blue-600 hover:!border-blue-300"
+                              <button
+                                type="button"
+                                className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
                                 onClick={() => openEditModal(post)}
+                                aria-label={t('admin.blog.edit')}
+                                title={t('admin.blog.edit')}
                               >
-                                {t('admin.blog.edit')}
-                              </ProductPageButton>
-                              <ProductPageButton
-                                variant="outline"
-                                className="text-xs px-3 py-1 !text-red-600 !border-red-300 hover:!bg-red-50 hover:!text-red-600 hover:!border-red-300"
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                              </button>
+                              <button
+                                type="button"
+                                className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                onClick={() => handleDuplicatePost(post)}
+                                disabled={duplicating === post.id}
+                                aria-label={t('admin.blog.duplicate') || 'Duplicate'}
+                                title={t('admin.blog.duplicate') || 'Duplicate post'}
+                              >
+                                {duplicating === post.id ? (
+                                  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                ) : (
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    {/* Back square (offset to top-left) */}
+                                    <rect x="2" y="2" width="16" height="16" rx="2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                                    {/* Front square (centered) */}
+                                    <rect x="4" y="4" width="16" height="16" rx="2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                                    {/* Plus sign in front square */}
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v8M8 12h8" />
+                                  </svg>
+                                )}
+                              </button>
+                              <button
+                                type="button"
+                                className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
                                 onClick={() => handleDelete(post)}
+                                aria-label={t('admin.blog.delete')}
+                                title={t('admin.blog.delete')}
                               >
-                                {t('admin.blog.delete')}
-                              </ProductPageButton>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -707,17 +814,20 @@ export default function AdminBlogPage() {
                 </div>
               </div>
 
-              <div className="flex items-center">
-                <label className="inline-flex items-center text-sm text-gray-700">
-                  <input
-                    type="checkbox"
-                    checked={formPublished}
-                    onChange={(e) => setFormPublished(e.target.checked)}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <span className="ml-2">{t('admin.blog.publishedLabel')}</span>
-                </label>
-              </div>
+              {/* Published checkbox - only show when editing existing post */}
+              {editingPost && (
+                <div className="flex items-center">
+                  <label className="inline-flex items-center text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={formPublished}
+                      onChange={(e) => setFormPublished(e.target.checked)}
+                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                    <span className="ml-2">{t('admin.blog.publishedLabel')}</span>
+                  </label>
+                </div>
+              )}
 
               {/* Featured Image */}
               <div>

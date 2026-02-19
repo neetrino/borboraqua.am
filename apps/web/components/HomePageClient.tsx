@@ -65,6 +65,7 @@ interface Product {
   title: string;
   subtitle?: string;
   description?: string;
+  category?: string; // Primary category title
   price: number;
   image: string | null;
   inStock: boolean;
