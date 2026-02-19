@@ -1,6 +1,6 @@
-
 import { db } from "@white-shop/db";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { printReceiptForOrder } from "@/lib/payments/ehdm";
 import { findOrCreateAttributeValue } from "../utils/variant-generator";
 import { ensureProductAttributesTable, ensureProductVariantAttributesColumn } from "../utils/db-ensure";
 import {
@@ -818,6 +818,12 @@ class AdminService {
           },
         },
       });
+
+      if (data.paymentStatus === 'paid' && existing.paymentStatus !== 'paid') {
+        printReceiptForOrder(order.id).catch((err) =>
+          console.error("[EHDM] printReceiptForOrder", err)
+        );
+      }
 
       return order;
     } catch (error: any) {
