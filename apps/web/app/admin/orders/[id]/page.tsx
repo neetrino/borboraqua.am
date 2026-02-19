@@ -108,6 +108,26 @@ function getPaymentStatusColor(paymentStatus: string): string {
   }
 }
 
+/** Payment method display config (same logos/names as checkout). */
+function getPaymentMethodConfig(
+  providerOrMethod: string | null | undefined,
+  t: (key: string) => string
+): { id: string; name: string; logo?: string | null; logos?: string[] } | null {
+  const raw = (providerOrMethod ?? '').toLowerCase().replace(/-/g, '_').trim();
+  const methods: Array<{ id: string; nameKey: string; logo?: string; logos?: string[] }> = [
+    { id: 'cash_on_delivery', nameKey: 'checkout.payment.cashOnDelivery', logo: '/assets/payments/dollar.svg' },
+    { id: 'ameriabank', nameKey: 'checkout.payment.cardPayment', logos: ['/assets/payments/Arca_logo_wiki.svg', '/assets/payments/Mastercard-logo.svg', '/assets/payments/Visa_logo_wiki.svg'] },
+    { id: 'idram', nameKey: 'checkout.payment.idram', logo: '/assets/payments/Idram_logo_wiki.svg' },
+    { id: 'telcell', nameKey: 'checkout.payment.telcell', logo: '/assets/payments/Telcell_logo_wiki.svg' },
+    { id: 'fastshift', nameKey: 'checkout.payment.fastshift', logo: '/assets/payments/Fastshift_logo_wiki.svg' },
+  ];
+  const alias: Record<string, string> = { card: 'ameriabank', card_payment: 'ameriabank' };
+  const normalized = alias[raw] ?? raw;
+  const match = methods.find((m) => normalized === m.id || raw === m.id || raw === m.id.replace(/_/g, '-'));
+  if (!match) return null;
+  return { id: match.id, name: t(match.nameKey), logo: match.logo, logos: match.logos };
+}
+
 export default function OrderDetailPage() {
   const { t } = useTranslation();
   const { isLoggedIn, isAdmin, isLoading } = useAuth();
@@ -359,22 +379,41 @@ export default function OrderDetailPage() {
                 </div>
               </div>
             </div>
+            {/* Payment method: icon + name (like checkout) */}
+            {(order.payment?.provider ?? order.payment?.method) && (() => {
+              const config = getPaymentMethodConfig(order.payment?.provider ?? order.payment?.method ?? null, t);
+              if (!config) return null;
+              return (
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">{t('admin.orders.orderDetails.method')}</p>
+                  <div className="flex items-center gap-3">
+                    {config.logos ? (
+                      <div className="flex items-center gap-1">
+                        {config.logos.map((src) => (
+                          <div key={src} className="w-10 h-7 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
+                            <img src={src} alt="" className="w-full h-full object-contain p-1" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="w-11 h-8 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
+                        {config.logo ? (
+                          <img src={config.logo} alt={config.name} className="w-full h-full object-contain p-1" />
+                        ) : (
+                          <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                        )}
+                      </div>
+                    )}
+                    <span className="font-medium text-gray-900">{config.name}</span>
+                  </div>
+                </div>
+              );
+            })()}
           </Card>
 
-          {/* Customer */}
-          <Card className="p-4 md:p-6">
-            <h2 className="text-sm font-semibold text-gray-900 mb-3">{t('admin.orders.orderDetails.customer')}</h2>
-            <div className="text-sm text-gray-700 space-y-1">
-              <p className="font-medium text-gray-900">
-                {(order.customer?.firstName ?? '') + (order.customer?.lastName ? ` ${order.customer.lastName}` : '') ||
-                  t('admin.orders.unknownCustomer')}
-              </p>
-              {order.customerPhone && <p>{order.customerPhone}</p>}
-              {order.customerEmail && <p>{order.customerEmail}</p>}
-            </div>
-          </Card>
-
-          {/* Shipping & Payment — 2 columns */}
+          {/* Shipping & Customer — 2 columns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="p-4 md:p-6">
               <h2 className="text-sm font-semibold text-gray-900 mb-3">{t('admin.orders.orderDetails.shippingAddress')}</h2>
@@ -386,19 +425,19 @@ export default function OrderDetailPage() {
               ) : order.shippingMethod === 'delivery' && order.shippingAddress ? (
                 <div className="text-sm text-gray-700 space-y-1">
                   <p><span className="font-medium">{t('admin.orders.orderDetails.shippingMethod')}</span> {t('checkout.shipping.delivery')}</p>
-                  {(order.shippingAddress.address || order.shippingAddress.addressLine1) && (
+                  {Boolean(order.shippingAddress.address ?? order.shippingAddress.addressLine1) && (
                     <p><span className="font-medium">{t('checkout.form.address')}:</span>{' '}
                       {String(order.shippingAddress.address || order.shippingAddress.addressLine1)}
-                      {order.shippingAddress.addressLine2 && `, ${order.shippingAddress.addressLine2}`}
+                      {order.shippingAddress.addressLine2 != null && `, ${String(order.shippingAddress.addressLine2)}`}
                     </p>
                   )}
-                  {order.shippingAddress.city && (
+                  {order.shippingAddress.city != null && order.shippingAddress.city !== '' && (
                     <p><span className="font-medium">{t('checkout.form.city')}:</span> {String(order.shippingAddress.city)}</p>
                   )}
-                  {order.shippingAddress.postalCode && (
+                  {order.shippingAddress.postalCode != null && order.shippingAddress.postalCode !== '' && (
                     <p><span className="font-medium">{t('checkout.form.postalCode')}:</span> {String(order.shippingAddress.postalCode)}</p>
                   )}
-                  {(order.shippingAddress.phone || order.shippingAddress.shippingPhone) && (
+                  {Boolean(order.shippingAddress.phone ?? order.shippingAddress.shippingPhone) && (
                     <p><span className="font-medium">{t('checkout.form.phoneNumber')}:</span>{' '}
                       {String(order.shippingAddress.phone || order.shippingAddress.shippingPhone)}
                     </p>
@@ -428,23 +467,19 @@ export default function OrderDetailPage() {
             </Card>
 
             <Card className="p-4 md:p-6">
-              <h2 className="text-sm font-semibold text-gray-900 mb-3">{t('admin.orders.orderDetails.paymentInfo')}</h2>
-              {order.payment ? (
-                <div className="text-sm text-gray-700 space-y-1">
-                  {order.payment.method && <p>{t('admin.orders.orderDetails.method')} {order.payment.method}</p>}
-                  <p>{t('admin.orders.orderDetails.amount')} {formatPrice(order.payment.amount, currency)}</p>
-                  <p>{t('admin.orders.orderDetails.status')} {order.payment.status}</p>
-                  {order.payment.cardBrand && order.payment.cardLast4 && (
-                    <p>{t('admin.orders.orderDetails.card')} {order.payment.cardBrand} ••••{order.payment.cardLast4}</p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500">{t('admin.orders.orderDetails.noPaymentInfo')}</p>
-              )}
+              <h2 className="text-sm font-semibold text-gray-900 mb-3">{t('admin.orders.orderDetails.customer')}</h2>
+              <div className="text-sm text-gray-700 space-y-1">
+                <p className="font-medium text-gray-900">
+                  {(order.customer?.firstName ?? '') + (order.customer?.lastName ? ` ${order.customer.lastName}` : '') ||
+                    t('admin.orders.unknownCustomer')}
+                </p>
+                {order.customerPhone && <p>{order.customerPhone}</p>}
+                {order.customerEmail && <p>{order.customerEmail}</p>}
+              </div>
             </Card>
           </div>
 
-          {/* Items */}
+          {/* Items + order totals at bottom */}
           <Card className="p-4 md:p-6">
             <h2 className="text-sm font-semibold text-gray-900 mb-4">{t('admin.orders.orderDetails.items')}</h2>
             {Array.isArray(order.items) && order.items.length > 0 ? (
@@ -524,11 +559,8 @@ export default function OrderDetailPage() {
             ) : (
               <p className="text-sm text-gray-500">{t('admin.orders.orderDetails.noItemsFound')}</p>
             )}
-          </Card>
 
-          {/* Order Summary */}
-          <Card className="p-4 md:p-6">
-            <h2 className="text-sm font-semibold text-gray-900 mb-4">{t('checkout.orderSummary')}</h2>
+            {/* Order totals at bottom of Items block */}
             {(() => {
               const originalSubtotal = order.totals?.subtotal ?? order.subtotal ?? 0;
               const discount = order.totals?.discount ?? order.discountAmount ?? 0;
@@ -538,7 +570,7 @@ export default function OrderDetailPage() {
               const tax = order.totals?.tax ?? order.taxAmount ?? 0;
               const total = subtotal + shipping;
               return (
-                <div className="space-y-3 max-w-sm">
+                <div className="mt-6 pt-6 border-t border-gray-200 space-y-2 max-w-sm ml-auto">
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>{t('checkout.summary.subtotal')}</span>
                     <span>{formatPrice(subtotal, currency)}</span>
@@ -567,11 +599,9 @@ export default function OrderDetailPage() {
                       <span>{formatPrice(tax, currency)}</span>
                     </div>
                   )}
-                  <div className="border-t border-gray-200 pt-3 mt-3">
-                    <div className="flex justify-between text-base font-bold text-gray-900">
-                      <span>{t('checkout.summary.total')}</span>
-                      <span>{formatPrice(total, currency)}</span>
-                    </div>
+                  <div className="flex justify-between text-base font-bold text-gray-900 pt-2 mt-2 border-t border-gray-200">
+                    <span>{t('checkout.summary.total')}</span>
+                    <span>{formatPrice(total, currency)}</span>
                   </div>
                 </div>
               );
