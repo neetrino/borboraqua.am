@@ -750,7 +750,7 @@ class AdminService {
 
       // Validate status values
       const validStatuses = ['pending', 'processing', 'completed', 'cancelled'];
-      const validPaymentStatuses = ['pending', 'paid', 'failed', 'refunded'];
+      const validPaymentStatuses = ['pending', 'paid', 'failed', 'refunded', 'cancelled'];
       const validFulfillmentStatuses = ['unfulfilled', 'fulfilled', 'shipped', 'delivered'];
 
       if (data.status !== undefined && !validStatuses.includes(data.status)) {

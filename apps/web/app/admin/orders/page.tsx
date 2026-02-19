@@ -482,6 +482,10 @@ export default function OrdersPage() {
         return 'bg-yellow-100 text-yellow-800';
       case 'failed':
         return 'bg-red-100 text-red-800';
+      case 'cancelled':
+        return 'bg-orange-100 text-orange-800';
+      case 'refunded':
+        return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -817,6 +821,8 @@ export default function OrdersPage() {
               <option value="paid">{t('admin.orders.paid')}</option>
               <option value="pending">{t('admin.orders.pendingPayment')}</option>
               <option value="failed">{t('admin.orders.failed')}</option>
+              <option value="cancelled">{t('admin.orders.cancelled')}</option>
+              <option value="refunded">{t('admin.orders.refunded')}</option>
             </select>
             <input
               type="text"
@@ -1101,6 +1107,8 @@ export default function OrdersPage() {
                                 <option value="paid">{t('admin.orders.paid')}</option>
                                 <option value="pending">{t('admin.orders.pendingPayment')}</option>
                                 <option value="failed">{t('admin.orders.failed')}</option>
+                                <option value="cancelled">{t('admin.orders.cancelled')}</option>
+                                <option value="refunded">{t('admin.orders.refunded')}</option>
                               </select>
                             )}
                           </div>
