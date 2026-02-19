@@ -312,33 +312,35 @@ export default function OrderDetailPage() {
                   timeStyle: 'short',
                 })}
               </span>
-              <button
-                type="button"
-                onClick={() => order.paymentStatus === 'paid' && setShowInvoicePopup(true)}
-                disabled={order.paymentStatus !== 'paid'}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed hover:bg-gray-50 hover:disabled:bg-white"
-              >
-                <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>{t('admin.orders.orderDetails.fiscalReceipt')}</span>
-                {order.paymentStatus === 'paid' ? (
-                  order.ehdmReceipt != null ? (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                      {t('admin.orders.invoiceCreated')}
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-                      {t('admin.orders.invoiceNotCreated')}
-                    </span>
-                  )
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">
-                    {t('admin.orders.invoiceAvailableWhenPaid')}
-                  </span>
-                )}
-              </button>
             </div>
+          </div>
+          <div className="mt-3 flex justify-end">
+            <button
+              type="button"
+              onClick={() => order.paymentStatus === 'paid' && setShowInvoicePopup(true)}
+              disabled={order.paymentStatus !== 'paid'}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 shadow-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed hover:bg-gray-50 hover:disabled:bg-white"
+            >
+              <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>{t('admin.orders.orderDetails.fiscalReceipt')}</span>
+              {order.paymentStatus === 'paid' ? (
+                order.ehdmReceipt != null ? (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                    {t('admin.orders.invoiceCreated')}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
+                    {t('admin.orders.invoiceNotCreated')}
+                  </span>
+                )
+              ) : (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">
+                  {t('admin.orders.invoiceAvailableWhenPaid')}
+                </span>
+              )}
+            </button>
           </div>
           {updateMessage && (
             <div
@@ -354,8 +356,32 @@ export default function OrderDetailPage() {
         <div className="space-y-6">
           {/* Summary & Status */}
           <Card className="p-4 md:p-6">
-            <h2 className="text-sm font-semibold text-gray-900 mb-4">{t('admin.orders.orderDetails.summary')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.orders.orderDetails.total')}</p>
+                <p className="mt-1 text-base font-semibold text-gray-900">
+                  {formatPrice(order.totals?.total ?? order.total, currency)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.orders.orderDetails.status')}</p>
+                <div className="mt-1">
+                  {updatingStatus ? (
+                    <span className="text-sm text-gray-500">{t('admin.orders.updating')}</span>
+                  ) : (
+                    <select
+                      value={order.status}
+                      onChange={(e) => handleStatusChange(e.target.value)}
+                      className={`px-3 py-1.5 text-sm font-medium rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${getStatusColor(order.status)}`}
+                    >
+                      <option value="pending">{t('admin.orders.pending')}</option>
+                      <option value="processing">{t('admin.orders.processing')}</option>
+                      <option value="completed">{t('admin.orders.completed')}</option>
+                      <option value="cancelled">{t('admin.orders.cancelled')}</option>
+                    </select>
+                  )}
+                </div>
+              </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.orders.orderDetails.method')}</p>
                 <div className="mt-1 flex items-center gap-2">
@@ -388,31 +414,6 @@ export default function OrderDetailPage() {
                     );
                   })()}
                   {!(order.payment?.provider ?? order.payment?.method) && <span className="text-sm text-gray-500">—</span>}
-                </div>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.orders.orderDetails.total')}</p>
-                <p className="mt-1 text-base font-semibold text-gray-900">
-                  {formatPrice(order.totals?.total ?? order.total, currency)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{t('admin.orders.orderDetails.status')}</p>
-                <div className="mt-1">
-                  {updatingStatus ? (
-                    <span className="text-sm text-gray-500">{t('admin.orders.updating')}</span>
-                  ) : (
-                    <select
-                      value={order.status}
-                      onChange={(e) => handleStatusChange(e.target.value)}
-                      className={`px-3 py-1.5 text-sm font-medium rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer ${getStatusColor(order.status)}`}
-                    >
-                      <option value="pending">{t('admin.orders.pending')}</option>
-                      <option value="processing">{t('admin.orders.processing')}</option>
-                      <option value="completed">{t('admin.orders.completed')}</option>
-                      <option value="cancelled">{t('admin.orders.cancelled')}</option>
-                    </select>
-                  )}
                 </div>
               </div>
               <div>
