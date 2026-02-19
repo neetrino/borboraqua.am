@@ -506,23 +506,37 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Items: table + integrated totals */}
-          <Card className="p-4 md:p-6">
-            <h2 className="text-sm font-semibold text-gray-900 mb-4">{t('admin.orders.orderDetails.items')}</h2>
+          <Card className="p-4 md:p-6 overflow-hidden">
+            <h2 className="text-base font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+              {t('admin.orders.orderDetails.items')}
+            </h2>
             {Array.isArray(order.items) && order.items.length > 0 ? (
-              <div className="overflow-x-auto border border-gray-200 rounded-lg">
+              <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left font-medium text-gray-500">{t('admin.orders.orderDetails.product')}</th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-500">{t('admin.orders.orderDetails.sku')}</th>
-                      <th className="px-4 py-3 text-left font-medium text-gray-500">{t('admin.orders.orderDetails.colorSize')}</th>
-                      <th className="px-4 py-3 text-right font-medium text-gray-500">{t('admin.orders.orderDetails.qty')}</th>
-                      <th className="px-4 py-3 text-right font-medium text-gray-500">{t('admin.orders.orderDetails.price')}</th>
-                      <th className="px-4 py-3 text-right font-medium text-gray-500">{t('admin.orders.orderDetails.totalCol')}</th>
+                  <thead>
+                    <tr className="bg-gray-100 border-b border-gray-200">
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        {t('admin.orders.orderDetails.product')}
+                      </th>
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        {t('admin.orders.orderDetails.sku')}
+                      </th>
+                      <th className="px-4 py-3.5 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        {t('admin.orders.orderDetails.colorSize')}
+                      </th>
+                      <th className="px-4 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        {t('admin.orders.orderDetails.qty')}
+                      </th>
+                      <th className="px-4 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        {t('admin.orders.orderDetails.price')}
+                      </th>
+                      <th className="px-4 py-3.5 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        {t('admin.orders.orderDetails.totalCol')}
+                      </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100 bg-white">
-                    {order.items.map((item) => {
+                  <tbody className="divide-y divide-gray-100">
+                    {order.items.map((item, index) => {
                       const allOptions = item.variantOptions ?? [];
                       const getColorsArray = (colors: unknown): string[] => {
                         if (!colors) return [];
@@ -538,10 +552,10 @@ export default function OrderDetailPage() {
                         return [];
                       };
                       return (
-                        <tr key={item.id} className="hover:bg-gray-50/50">
-                          <td className="px-4 py-3 font-medium text-gray-900">{item.productTitle}</td>
-                          <td className="px-4 py-3 text-gray-500">{item.sku}</td>
-                          <td className="px-4 py-3">
+                        <tr key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}>
+                          <td className="px-4 py-3.5 font-semibold text-gray-900">{item.productTitle}</td>
+                          <td className="px-4 py-3.5 text-gray-500">{item.sku}</td>
+                          <td className="px-4 py-3.5">
                             {allOptions.length > 0 ? (
                               <div className="flex flex-wrap gap-2 items-center">
                                 {allOptions.map((opt, optIndex) => {
@@ -570,45 +584,52 @@ export default function OrderDetailPage() {
                                 })}
                               </div>
                             ) : (
-                              <span className="text-xs text-gray-400">—</span>
+                              <span className="text-gray-400">—</span>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-right">{item.quantity}</td>
-                          <td className="px-4 py-3 text-right">{formatPrice(item.unitPrice, currency)}</td>
-                          <td className="px-4 py-3 text-right font-medium">{formatPrice(item.total, currency)}</td>
+                          <td className="px-4 py-3.5 text-right text-gray-700">{item.quantity}</td>
+                          <td className="px-4 py-3.5 text-right text-gray-700">{formatPrice(item.unitPrice, currency)}</td>
+                          <td className="px-4 py-3.5 text-right font-semibold text-gray-900">{formatPrice(item.total, currency)}</td>
                         </tr>
                       );
                     })}
                   </tbody>
-                  <tfoot className="bg-gray-50/80 border-t-2 border-gray-200">
+                  <tfoot>
                     {(() => {
                       const originalSubtotal = order.totals?.subtotal ?? order.subtotal ?? 0;
                       const discount = order.totals?.discount ?? order.discountAmount ?? 0;
-                      const subtotal = discount > 0 ? originalSubtotal - discount : order.items.reduce((sum, item) => sum + (item.total || 0), 0);
+                      const sub = discount > 0 ? originalSubtotal - discount : order.items.reduce((sum, i) => sum + (i.total || 0), 0);
                       const baseShipping = order.shippingMethod === 'pickup' ? 0 : (order.totals?.shipping ?? order.shippingAmount ?? 0);
-                      const shipping = baseShipping === 0 && deliveryPrice !== null ? deliveryPrice : baseShipping;
-                      const total = subtotal + shipping;
+                      const ship = baseShipping === 0 && deliveryPrice !== null ? deliveryPrice : baseShipping;
+                      const tot = sub + ship;
                       return (
                         <>
-                          <tr>
-                            <td colSpan={5} className="px-4 py-2 text-right text-gray-600">{t('checkout.summary.subtotal')}</td>
-                            <td className="px-4 py-2 text-right font-medium text-gray-900">{formatPrice(subtotal, currency)}</td>
+                          <tr className="bg-gray-100/80 border-t-2 border-gray-200">
+                            <td colSpan={6} className="px-4 pt-4 pb-1">
+                              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                {t('checkout.orderSummary')}
+                              </span>
+                            </td>
                           </tr>
-                          <tr>
-                            <td colSpan={5} className="px-4 py-2 text-right text-gray-600">{t('checkout.summary.shipping')}</td>
-                            <td className="px-4 py-2 text-right font-medium text-gray-900">
+                          <tr className="bg-gray-100/80">
+                            <td colSpan={5} className="px-4 py-2.5 text-right text-gray-600">{t('checkout.summary.subtotal')}</td>
+                            <td className="px-4 py-2.5 text-right font-medium text-gray-900">{formatPrice(sub, currency)}</td>
+                          </tr>
+                          <tr className="bg-gray-100/80">
+                            <td colSpan={5} className="px-4 py-2.5 text-right text-gray-600">{t('checkout.summary.shipping')}</td>
+                            <td className="px-4 py-2.5 text-right font-medium text-gray-900">
                               {order.shippingMethod === 'pickup'
                                 ? t('common.cart.free')
                                 : loadingDeliveryPrice
                                   ? t('checkout.shipping.loading')
                                   : order.shippingAddress?.city
-                                    ? `${formatPrice(shipping, currency)} (${order.shippingAddress.city})`
+                                    ? `${formatPrice(ship, currency)} (${order.shippingAddress.city})`
                                     : t('checkout.shipping.enterCity')}
                             </td>
                           </tr>
-                          <tr className="border-t border-gray-200">
-                            <td colSpan={5} className="px-4 py-3 text-right font-semibold text-gray-900">{t('checkout.summary.total')}</td>
-                            <td className="px-4 py-3 text-right font-bold text-gray-900">{formatPrice(total, currency)}</td>
+                          <tr className="bg-gray-200/70 border-t-2 border-gray-300">
+                            <td colSpan={5} className="px-4 py-3.5 text-right font-bold text-gray-900">{t('checkout.summary.total')}</td>
+                            <td className="px-4 py-3.5 text-right font-bold text-gray-900 text-base">{formatPrice(tot, currency)}</td>
                           </tr>
                         </>
                       );
@@ -617,7 +638,7 @@ export default function OrderDetailPage() {
                 </table>
               </div>
             ) : (
-              <p className="text-sm text-gray-500">{t('admin.orders.orderDetails.noItemsFound')}</p>
+              <p className="text-sm text-gray-500 py-4">{t('admin.orders.orderDetails.noItemsFound')}</p>
             )}
           </Card>
 
