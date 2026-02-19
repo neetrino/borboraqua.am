@@ -988,22 +988,62 @@ export default function OrdersPage() {
 
               {/* Pagination */}
               {meta && meta.totalPages > 1 && (
-                <div className="mt-6 flex items-center justify-between">
+                <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="text-sm text-gray-700">
                     {t('admin.orders.showingPage').replace('{page}', meta.page.toString()).replace('{totalPages}', meta.totalPages.toString()).replace('{total}', meta.total.toString())}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-1">
                     <ProductPageButton
                       variant="outline"
-                      className="px-4 py-1 text-sm"
+                      className="px-3 py-1.5 text-sm shrink-0"
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
                     >
                       {t('admin.orders.previous')}
                     </ProductPageButton>
+                    <div className="flex items-center gap-0.5 mx-1">
+                      {(() => {
+                        const totalPages = meta.totalPages;
+                        const current = page;
+                        const maxVisible = 5;
+                        let from = Math.max(1, current - Math.floor(maxVisible / 2));
+                        let to = Math.min(totalPages, from + maxVisible - 1);
+                        if (to - from + 1 < maxVisible) {
+                          from = Math.max(1, to - maxVisible + 1);
+                        }
+                        const pages: (number | 'ellipsis')[] = [];
+                        if (from > 1) {
+                          pages.push(1);
+                          if (from > 2) pages.push('ellipsis');
+                        }
+                        for (let i = from; i <= to; i++) pages.push(i);
+                        if (to < totalPages) {
+                          if (to < totalPages - 1) pages.push('ellipsis');
+                          pages.push(totalPages);
+                        }
+                        return pages.map((p, i) =>
+                          p === 'ellipsis' ? (
+                            <span key={`e-${i}`} className="px-2 text-gray-400">…</span>
+                          ) : (
+                            <button
+                              key={p}
+                              type="button"
+                              onClick={() => setPage(p)}
+                              className={`min-w-[2rem] px-2 py-1.5 text-sm rounded-md transition-colors ${
+                                p === current
+                                  ? 'bg-gray-900 text-white font-medium'
+                                  : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                              }`}
+                            >
+                              {p}
+                            </button>
+                          )
+                        );
+                      })()}
+                    </div>
                     <ProductPageButton
                       variant="outline"
-                      className="px-4 py-1 text-sm"
+                      className="px-3 py-1.5 text-sm shrink-0"
                       onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
                       disabled={page === meta.totalPages}
                     >
