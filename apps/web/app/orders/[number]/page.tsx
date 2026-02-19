@@ -8,6 +8,7 @@ import { formatPrice, getStoredCurrency, convertPrice } from '../../../lib/curre
 import { getStoredLanguage } from '../../../lib/language';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { useTranslation } from '../../../lib/i18n-client';
+import { EhdmReceiptBlock, type EhdmReceiptData } from '../../../components/EhdmReceiptBlock';
 
 // Helper function to get color hex/rgb from color name
 const getColorValue = (colorName: string): string => {
@@ -87,6 +88,7 @@ interface Order {
   }>;
   createdAt: string;
   updatedAt: string;
+  ehdmReceipt?: EhdmReceiptData | null;
 }
 
 export default function OrderPage() {
@@ -132,16 +134,6 @@ export default function OrderPage() {
       const currentLang = getStoredLanguage();
       const response = await apiClient.get<Order>(`/api/v1/orders/${params.number}`, {
         params: { lang: currentLang }
-      });
-      console.log('📦 [ORDER PAGE] Order data received:', {
-        orderNumber: response.number,
-        itemsCount: response.items.length,
-        items: response.items.map(item => ({
-          productTitle: item.productTitle,
-          variantId: item.variantId,
-          variantOptions: item.variantOptions,
-          variantOptionsCount: item.variantOptions?.length || 0,
-        })),
       });
       setOrder(response);
 
@@ -257,14 +249,6 @@ export default function OrderPage() {
             <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('orders.orderItems.title')}</h2>
             <div className="space-y-4">
               {order.items.map((item, index) => {
-                // Debug logging
-                console.log(`🔍 [ORDER PAGE] Item ${index}:`, {
-                  productTitle: item.productTitle,
-                  variantId: item.variantId,
-                  variantOptions: item.variantOptions,
-                  variantOptionsCount: item.variantOptions?.length || 0,
-                });
-
                 // Get all variant options (not just color and size)
                 const allOptions = item.variantOptions || [];
                 
@@ -451,6 +435,17 @@ export default function OrderPage() {
                   );
                 })()}
               </div>
+
+              {/* EHDM fiscal receipt (only when paid and receipt exists) */}
+              {order.paymentStatus === 'paid' && order.ehdmReceipt != null && (
+                <div className="mt-6">
+                  <EhdmReceiptBlock
+                    receipt={order.ehdmReceipt}
+                    orderNumber={order.number}
+                    variant="full"
+                  />
+                </div>
+              )}
 
               <div>
                 <Link href="/products">

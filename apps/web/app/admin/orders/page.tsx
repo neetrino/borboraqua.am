@@ -8,6 +8,7 @@ import { apiClient } from '../../../lib/api-client';
 import { useTranslation } from '../../../lib/i18n-client';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
 import { formatPrice, getStoredCurrency, type CurrencyCode } from '../../../lib/currency';
+import { EhdmReceiptBlock, type EhdmReceiptData } from '../../../components/EhdmReceiptBlock';
 
 interface Order {
   id: string;
@@ -24,6 +25,7 @@ interface Order {
   customerId?: string | null;
   itemsCount: number;
   createdAt: string;
+  hasEhdmReceipt?: boolean;
 }
 
 interface OrdersResponse {
@@ -113,6 +115,7 @@ interface OrderDetails {
   }>;
   createdAt: string;
   updatedAt?: string;
+  ehdmReceipt?: EhdmReceiptData | null;
 }
 
 const ORDER_EXPORT_COLUMNS: { key: keyof OrderExportRow; header: string }[] = [
@@ -1006,6 +1009,9 @@ export default function OrdersPage() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {t('admin.orders.payment')}
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" title={t('admin.orders.invoiceTitle')}>
+                        {t('admin.orders.invoice')}
+                      </th>
                       <th 
                         className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 select-none"
                         onClick={() => handleSort('createdAt')}
@@ -1049,9 +1055,6 @@ export default function OrdersPage() {
                         <td
                           className="px-6 py-4 whitespace-nowrap cursor-pointer hover:bg-gray-50"
                           onClick={() => {
-                            console.log('📂 [ADMIN][Orders] Opening order details modal', {
-                              orderId: order.id,
-                            });
                             setSelectedOrderId(order.id);
                             loadOrderDetails(order.id);
                           }}
@@ -1112,6 +1115,21 @@ export default function OrdersPage() {
                               </select>
                             )}
                           </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap" title={order.hasEhdmReceipt ? t('admin.orders.invoiceCreated') : t('admin.orders.invoiceNotCreated')}>
+                          {order.hasEhdmReceipt ? (
+                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-green-100 text-green-700" aria-label={t('admin.orders.invoiceCreated')}>
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-gray-400" aria-label={t('admin.orders.invoiceNotCreated')}>
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(order.createdAt).toLocaleDateString()}
@@ -1470,6 +1488,24 @@ export default function OrdersPage() {
                         })()}
                       </div>
                     </Card>
+
+                    {/* EHDM fiscal receipt: always show section when paid; content = full block or "Not created" */}
+                    {orderDetails.paymentStatus === 'paid' && (
+                      <Card className="p-4 md:p-6">
+                        {orderDetails.ehdmReceipt != null ? (
+                          <EhdmReceiptBlock
+                            receipt={orderDetails.ehdmReceipt}
+                            orderNumber={orderDetails.number}
+                            variant="compact"
+                          />
+                        ) : (
+                          <div className="text-sm">
+                            <h3 className="font-semibold text-gray-900 mb-1">{t('admin.orders.orderDetails.fiscalReceipt')}</h3>
+                            <p className="text-gray-500">{t('admin.orders.orderDetails.fiscalReceiptNotCreated')}</p>
+                          </div>
+                        )}
+                      </Card>
+                    )}
                   </div>
                 ) : null}
               </div>
