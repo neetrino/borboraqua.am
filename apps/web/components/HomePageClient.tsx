@@ -677,19 +677,6 @@ export function HomePageClient({
                 >
                   CONTACT
                 </button>
-                <button
-                  onClick={() => {
-                    if (isLoggedIn) {
-                      handleLogout();
-                    } else {
-                      router.push('/login');
-                    }
-                    setShowMobileMenu(false);
-                  }}
-                  className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
-                >
-                  {isLoggedIn ? 'LOGOUT' : 'LOG IN'}
-                </button>
               </nav>
             </div>
           </div>
@@ -855,7 +842,7 @@ export function HomePageClient({
         <div className="absolute bg-gradient-to-b blur-[40px] from-[rgba(98,179,232,0.8)] h-[150px] left-0 right-0 opacity-70 to-[rgba(221,216,216,0.6)] top-[700px] z-0" />
 
         {/* Mobile CTA Buttons */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[8px] h-[136px] items-center justify-end left-1/2 pt-[16px] top-[675px] w-full max-w-[430px] px-4 z-10">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[8px] h-[136px] items-center justify-end left-1/2 pt-[16px] top-[600px] w-full max-w-[430px] px-4 z-10">
           <button
             onClick={() => router.push('/products')}
             className="bg-[#31daff] content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] py-[16px] relative rounded-[9999px] shrink-0 w-full max-w-[368px] cursor-pointer transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#31daff]/50 hover:scale-105 active:scale-95"
@@ -995,9 +982,9 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Trusted By Background Ellipse */}
-        <div className="-translate-x-1/2 absolute flex items-center justify-center left-1/2 top-[2450px] w-full h-[500px] z-0 overflow-hidden">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <img alt="Trusted By Background" className="block max-w-none w-[150%] h-[150%] object-cover opacity-30" src={imgEllipse41} />
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-1/2 top-[2450px] w-full h-[500px] z-0 overflow-hidden" style={{ overflow: 'hidden', overflowY: 'hidden', overflowX: 'hidden' }}>
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden" style={{ overflow: 'hidden' }}>
+            <img alt="Trusted By Background" className="block max-w-none w-[150%] h-[150%] object-cover opacity-30" src={imgEllipse41} style={{ maxWidth: '100%', maxHeight: '100%' }} />
           </div>
         </div>
 
@@ -1239,15 +1226,18 @@ export function HomePageClient({
             background: "linear-gradient(to bottom, transparent 0%, transparent 10%, rgba(255, 255, 255, 0.1) 45%, rgba(255, 255, 255, 0) 65%, rgba(255, 255, 255, 0.3) 80%, white 100%)"
           }}
         />
-        <div className="absolute h-[870px] lg:h-[870px] md:h-[750px] sm:h-[600px] left-1/2 translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%] top-[160px] lg:top-[160px] md:top-[130px] sm:top-[100px] relative z-10">
+        <div className="absolute h-[870px] lg:h-[870px] md:h-[750px] sm:h-[600px] left-1/2 translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%] top-[160px] lg:top-[160px] md:top-[120px] sm:top-[100px] relative z-10">
           {/* Section Header */}
-          <div className="absolute content-stretch flex flex-col gap-[14px] lg:gap-[14px] md:gap-[12px] sm:gap-[10px] items-start left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] top-[8px] lg:top-[8px] md:top-[0px] sm:top-[0px]">
+          <div className="absolute content-stretch flex flex-col gap-[14px] lg:gap-[14px] md:gap-[12px] sm:gap-[10px] items-start left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] -top-[40px] lg:-top-[40px] md:top-[0px] sm:top-[0px]">
             <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
               <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[60px] lg:text-[60px] md:text-[48px] sm:text-[32px] text-center text-white tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
                 <p className="leading-[36px] lg:leading-[36px] md:leading-[32px] sm:leading-[28px]">{t('home.featuredProducts.title')}</p>
               </div>
             </div>
-            <div className="content-stretch flex flex-col items-center relative shrink-0 w-full mt-[16px] lg:mt-[16px]">
+            <div className="flex items-center justify-center relative shrink-0 w-full mt-[8px] lg:mt-[8px] mb-[8px] lg:mb-[8px]">
+              <div className="bg-[#00d1ff] h-[5px] rounded-[30px] shrink-0 w-[90px]" />
+            </div>
+            <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
               <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
                 <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{t('home.featuredProducts.subtitle')}</p>
               </div>
@@ -1294,15 +1284,15 @@ export function HomePageClient({
           </div>
           {/* Pagination Dots - Show 3 dots for 3 carousel modes (positioned above "View All Products" on non-mobile) */}
           {featuredProducts.length > 3 && (
-            <div className="absolute contents left-1/2 top-[520px] lg:top-[520px] md:top-[350px] sm:top-[300px] translate-x-[-50%]">
+            <div className="absolute flex items-center justify-center gap-2 left-1/2 top-[520px] lg:top-[520px] md:top-[350px] sm:top-[300px] translate-x-[-50%]">
               {/* Dot 1 - First mode (products 0-2) */}
               <button
                 type="button"
                 onClick={() => setCarouselIndex(0)}
-                className={`absolute rounded-full top-[520px] lg:top-[520px] md:top-[350px] sm:top-[300px] translate-x-[-50%] transition-all duration-300 ${
+                className={`rounded-full transition-all duration-300 ${
                   carouselIndex === 0
-                    ? 'bg-[#00d1ff] h-[6px] w-[16px] left-[calc(50%-17px)]'
-                    : 'bg-[#e2e8f0] size-[6px] left-[calc(50%-17px)] hover:bg-[#00d1ff]/50'
+                    ? 'bg-[#00d1ff] h-[6px] w-[16px]'
+                    : 'bg-[#e2e8f0] size-[6px] hover:bg-[#00d1ff]/50'
                 }`}
                 aria-label={t('home.trustedBy.showFirst3Products')}
               />
@@ -1310,10 +1300,10 @@ export function HomePageClient({
               <button
                 type="button"
                 onClick={() => setCarouselIndex(3)}
-                className={`absolute rounded-full top-[580px] lg:top-[580px] md:top-[380px] sm:top-[330px] translate-x-[-50%] transition-all duration-300 ${
+                className={`rounded-full transition-all duration-300 ${
                   carouselIndex === 3
-                    ? 'bg-[#00d1ff] h-[6px] w-[16px] left-1/2'
-                    : 'bg-[#e2e8f0] size-[6px] left-1/2 hover:bg-[#00d1ff]/50'
+                    ? 'bg-[#00d1ff] h-[6px] w-[16px]'
+                    : 'bg-[#e2e8f0] size-[6px] hover:bg-[#00d1ff]/50'
                 }`}
                 aria-label={t('home.trustedBy.showSecond3Products')}
               />
@@ -1321,17 +1311,17 @@ export function HomePageClient({
               <button
                 type="button"
                 onClick={() => setCarouselIndex(6)}
-                className={`absolute rounded-full top-[580px] lg:top-[580px] md:top-[380px] sm:top-[330px] translate-x-[-50%] transition-all duration-300 ${
+                className={`rounded-full transition-all duration-300 ${
                   carouselIndex === 6
-                    ? 'bg-[#00d1ff] h-[6px] w-[16px] left-[calc(50%+17px)]'
-                    : 'bg-[#e2e8f0] size-[6px] left-[calc(50%+17px)] hover:bg-[#00d1ff]/50'
+                    ? 'bg-[#00d1ff] h-[6px] w-[16px]'
+                    : 'bg-[#e2e8f0] size-[6px] hover:bg-[#00d1ff]/50'
                 }`}
                 aria-label={t('home.trustedBy.showThird3Products')}
               />
             </div>
           )}
           {/* View All Products Button */}
-          <div className="absolute content-stretch flex flex-col items-center left-[20px] lg:left-[20px] md:left-[16px] sm:left-[12px] right-[20px] lg:right-[20px] md:right-[16px] sm:right-[12px] top-[620px] lg:top-[620px] md:top-[420px] sm:top-[370px]">
+          <div className="absolute content-stretch flex flex-col items-center left-[20px] lg:left-[20px] md:left-[16px] sm:left-[12px] right-[20px] lg:right-[20px] md:right-[16px] sm:right-[12px] top-[560px] lg:top-[560px] md:top-[380px] sm:top-[330px]">
             <div
               onClick={() => router.push('/products')}
               className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[7px] lg:gap-[7px] md:gap-[6px] sm:gap-[4px] items-center px-[30px] lg:px-[30px] md:px-[28px] sm:px-[20px] py-[10px] lg:py-[10px] md:py-[10px] sm:py-[8px] relative rounded-[9999px] shrink-0 cursor-pointer hover:border-[#00d1ff] hover:bg-[#00d1ff]/5 transition-all"
@@ -1353,9 +1343,6 @@ export function HomePageClient({
             </div>
           </div>
           {/* Blue Underline */}
-          <div className="absolute content-stretch flex items-start justify-center left-1/2 top-[50px] lg:top-[67px] md:top-[50px] sm:top-[110px] translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
-            <div className="bg-[#00d1ff] h-[4px] lg:h-[4px] md:h-[5px] sm:h-[5px] rounded-[25px] lg:rounded-[25px] md:rounded-[30px] sm:rounded-[30px] shrink-0 w-[80px] lg:w-[80px] md:w-[90px] sm:w-[90px]" />
-          </div>
         </div>
       </div>
       {/* Navigation Arrows - Only show if we have more than 3 products - Outside overflow-hidden container */}

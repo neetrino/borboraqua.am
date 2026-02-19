@@ -249,17 +249,17 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     };
   }, [visibleCards, products.length]);
 
-  const maxIndex = Math.max(0, products.length - visibleCards);
-
   const goToPrevious = () => {
     setCurrentIndex((prevIndex) => {
-      return prevIndex === 0 ? maxIndex : prevIndex - 1;
+      const maxIdx = Math.max(0, products.length - visibleCards);
+      return prevIndex === 0 ? maxIdx : prevIndex - 1;
     });
   };
 
   const goToNext = () => {
     setCurrentIndex((prevIndex) => {
-      return prevIndex >= maxIndex ? 0 : prevIndex + 1;
+      const maxIdx = Math.max(0, products.length - visibleCards);
+      return prevIndex >= maxIdx ? 0 : prevIndex + 1;
     });
   };
 
@@ -270,7 +270,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     if (!carouselRef.current) return;
     setHasMoved(false);
     setIsDragging(true);
-    setStartX(e.pageX - carouselRef.current.offsetLeft);
+    setStartX(e.pageX);
     setScrollLeft(currentIndex);
   };
 
@@ -279,17 +279,23 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
    */
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
     if (!isDragging || !carouselRef.current) return;
-    const x = e.pageX - carouselRef.current.offsetLeft;
-    const deltaX = Math.abs(x - startX);
+    const x = e.pageX;
+    const deltaX = x - startX;
+    const absDeltaX = Math.abs(deltaX);
     
     // Only consider it dragging if mouse moved more than 5px
-    if (deltaX > 5) {
+    if (absDeltaX > 5) {
       setHasMoved(true);
       e.preventDefault();
-      const walk = (x - startX) * 2; // Scroll speed multiplier
-      const cardWidth = 100 / visibleCards;
-      const newIndex = Math.round((scrollLeft - walk / (carouselRef.current.offsetWidth / 100)) / cardWidth);
-      const clampedIndex = Math.max(0, Math.min(maxIndex, newIndex));
+      
+      // Calculate how many cards to move based on drag distance
+      const containerWidth = carouselRef.current.offsetWidth;
+      const cardWidthPercent = 100 / visibleCards;
+      const cardWidthPixels = containerWidth / visibleCards;
+      const cardsMoved = deltaX / cardWidthPixels;
+      const newIndex = Math.round(scrollLeft - cardsMoved);
+      const maxIdx = Math.max(0, products.length - visibleCards);
+      const clampedIndex = Math.max(0, Math.min(maxIdx, newIndex));
       setCurrentIndex(clampedIndex);
     }
   };
@@ -317,7 +323,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     if (!carouselRef.current) return;
     setHasMoved(false);
     setIsDragging(true);
-    setStartX(e.touches[0].pageX - carouselRef.current.offsetLeft);
+    setStartX(e.touches[0].pageX);
     setScrollLeft(currentIndex);
   };
 
@@ -326,16 +332,21 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
    */
   const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
     if (!isDragging || !carouselRef.current) return;
-    const x = e.touches[0].pageX - carouselRef.current.offsetLeft;
-    const deltaX = Math.abs(x - startX);
+    const x = e.touches[0].pageX;
+    const deltaX = x - startX;
+    const absDeltaX = Math.abs(deltaX);
     
     // Only consider it dragging if touch moved more than 5px
-    if (deltaX > 5) {
+    if (absDeltaX > 5) {
       setHasMoved(true);
-      const walk = (x - startX) * 2;
-      const cardWidth = 100 / visibleCards;
-      const newIndex = Math.round((scrollLeft - walk / (carouselRef.current.offsetWidth / 100)) / cardWidth);
-      const clampedIndex = Math.max(0, Math.min(maxIndex, newIndex));
+      
+      // Calculate how many cards to move based on drag distance
+      const containerWidth = carouselRef.current.offsetWidth;
+      const cardWidthPixels = containerWidth / visibleCards;
+      const cardsMoved = deltaX / cardWidthPixels;
+      const newIndex = Math.round(scrollLeft - cardsMoved);
+      const maxIdx = Math.max(0, products.length - visibleCards);
+      const clampedIndex = Math.max(0, Math.min(maxIdx, newIndex));
       setCurrentIndex(clampedIndex);
     }
   };
@@ -364,8 +375,9 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     e.preventDefault();
     const delta = e.deltaY > 0 ? 1 : -1;
     setCurrentIndex((prevIndex) => {
+      const maxIdx = Math.max(0, products.length - visibleCards);
       const newIndex = prevIndex + delta;
-      return Math.max(0, Math.min(maxIndex, newIndex));
+      return Math.max(0, Math.min(maxIdx, newIndex));
     });
   };
 
@@ -455,11 +467,11 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
           </div>
         ) : (
           // Products Carousel
-          <div className="relative related-products-carousel">
+          <div className="relative related-products-carousel w-full overflow-visible">
             {/* Carousel Container */}
             <div 
               ref={carouselRef}
-              className={`relative related-products-carousel-container ${visibleCards === 1 ? 'overflow-x-auto' : 'sm:overflow-hidden'} cursor-grab active:cursor-grabbing select-none scrollbar-hide`}
+              className={`relative related-products-carousel-container w-full ${visibleCards === 1 ? 'overflow-x-auto' : 'overflow-hidden'} cursor-grab active:cursor-grabbing select-none scrollbar-hide`}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
@@ -467,27 +479,41 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              onWheel={handleWheel}
+              onWheel={visibleCards > 1 ? handleWheel : undefined}
+              onMouseEnter={(e) => {
+                if (visibleCards > 1) {
+                  e.currentTarget.classList.add('allow-overflow');
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (visibleCards > 1) {
+                  e.currentTarget.classList.remove('allow-overflow');
+                }
+              }}
               style={{
                 WebkitOverflowScrolling: 'touch',
                 scrollSnapType: visibleCards === 1 ? 'x mandatory' : 'none',
+                paddingRight: visibleCards > 1 ? '0' : '0',
               }}
             >
               <div
-                className="flex items-stretch sm:flex-row"
+                className="flex items-stretch flex-row"
                 style={{
                   transform: visibleCards > 1 ? `translateX(-${currentIndex * (100 / visibleCards)}%)` : 'none',
                   transition: visibleCards > 1 && !isDragging ? 'transform 0.5s ease-in-out' : 'none',
+                  width: visibleCards > 1 ? `${products.length * (100 / visibleCards)}%` : 'auto',
                 }}
               >
-                {products.map((product) => {
+                {products.map((product, index) => {
                   const featuredProduct = convertToFeaturedProduct(product);
+                  const isLastItem = index === products.length - 1;
                   return (
                     <div
                       key={product.id}
                       className="flex-shrink-0 px-3 h-full snap-start"
                       style={{ 
                         width: visibleCards === 1 ? 'min(85vw, 320px)' : `${100 / visibleCards}%`,
+                        paddingRight: isLastItem && visibleCards > 1 ? '0' : undefined,
                       }}
                       onClick={(e) => {
                         // Prevent navigation if we actually dragged
