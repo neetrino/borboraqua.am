@@ -1828,12 +1828,12 @@ export function HomePageClient({
       {/* Search Modal */}
       {showSearchModal && (
         <div 
-          className="fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[100] flex items-start justify-center pt-16 md:pt-20 px-4"
+          className="fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[200] flex items-start justify-center pt-16 md:pt-20 px-4"
           onClick={() => setShowSearchModal(false)}
         >
           <div
             ref={searchModalRef}
-            className="w-full max-w-2xl animate-in fade-in slide-in-from-top-2 duration-200"
+            className="w-full max-w-2xl animate-in fade-in slide-in-from-top-2 duration-200 relative z-[201]"
             onClick={(e) => e.stopPropagation()}
           >
             <form onSubmit={handleSearch} className="relative">

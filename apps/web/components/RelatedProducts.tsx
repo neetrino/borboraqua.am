@@ -455,11 +455,11 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
           </div>
         ) : (
           // Products Carousel
-          <div className="relative">
+          <div className="relative related-products-carousel">
             {/* Carousel Container */}
             <div 
               ref={carouselRef}
-              className={`relative ${visibleCards === 1 ? 'overflow-x-auto' : 'sm:overflow-hidden'} cursor-grab active:cursor-grabbing select-none scrollbar-hide`}
+              className={`relative related-products-carousel-container ${visibleCards === 1 ? 'overflow-x-auto' : 'sm:overflow-hidden'} cursor-grab active:cursor-grabbing select-none scrollbar-hide`}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}

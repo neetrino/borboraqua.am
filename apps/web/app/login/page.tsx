@@ -15,11 +15,11 @@ function LoginPageContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
-  const { login, isLoading, isLoggedIn } = useAuth();
+  const { login, isLoading, isLoggedIn, isAdmin } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams?.get('redirect') || '/';
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,10 +43,17 @@ function LoginPageContent() {
 
     try {
       console.log('📤 [LOGIN PAGE] Calling login function...');
-      await login(emailOrPhone.trim(), password);
-      console.log('✅ [LOGIN PAGE] Login successful, redirecting to:', redirectTo);
-      // Redirect to the specified page or home
-      router.push(redirectTo);
+      const loggedInUser = await login(emailOrPhone.trim(), password);
+      
+      // Check user role from login response
+      const userIsAdmin = loggedInUser?.roles?.includes('admin') || false;
+      
+      // Determine redirect based on user role
+      const redirectParam = searchParams?.get('redirect');
+      const finalRedirect = redirectParam || (userIsAdmin ? '/admin' : '/profile');
+      console.log('✅ [LOGIN PAGE] Login successful, redirecting to:', finalRedirect, { isAdmin: userIsAdmin, roles: loggedInUser?.roles });
+      setHasRedirected(true);
+      router.push(finalRedirect);
     } catch (err: any) {
       console.error('❌ [LOGIN PAGE] Login error:', err);
       setError(err.message || t('login.errors.loginFailed'));
@@ -55,12 +62,14 @@ function LoginPageContent() {
     }
   };
 
-  // Redirect if already logged in
+  // Redirect if already logged in (but not if we just redirected from handleSubmit)
   useEffect(() => {
-    if (isLoggedIn && !isLoading) {
-      router.push(redirectTo);
+    if (isLoggedIn && !isLoading && !hasRedirected) {
+      const finalRedirect = searchParams?.get('redirect') || (isAdmin ? '/admin' : '/profile');
+      console.log('✅ [LOGIN PAGE] Already logged in, redirecting to:', finalRedirect);
+      router.push(finalRedirect);
     }
-  }, [isLoggedIn, isLoading, redirectTo, router]);
+  }, [isLoggedIn, isLoading, isAdmin, searchParams, router, hasRedirected]);
 
   return (
     <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-12">

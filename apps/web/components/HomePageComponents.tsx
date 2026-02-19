@@ -108,8 +108,9 @@ export function HomePageHeader() {
 
   return (
     <>
-      {/* Header Section - Navigation Bar */}
-      <div className="fixed bg-[rgba(255,255,255,0.32)] backdrop-blur-[15px] content-stretch flex flex-col h-[65px] md:h-[60px] sm:h-[50px] items-center justify-center left-1/2 px-[32px] md:px-[24px] sm:px-[16px] py-[14px] md:py-[12px] sm:py-[8px] rounded-[60px] md:rounded-[50px] sm:rounded-[40px] top-[56px] md:top-[32px] sm:top-[16px] translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] z-[150] border border-[rgba(255,255,255,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_60px_rgba(98,179,232,0.15)]">
+      {/* Header Section - Navigation Bar - Hidden when search modal is open */}
+      {!showSearchModal && (
+        <div className="fixed bg-[rgba(255,255,255,0.32)] backdrop-blur-[15px] content-stretch flex flex-col h-[65px] md:h-[60px] sm:h-[50px] items-center justify-center left-1/2 px-[32px] md:px-[24px] sm:px-[16px] py-[14px] md:py-[12px] sm:py-[8px] rounded-[60px] md:rounded-[50px] sm:rounded-[40px] top-[56px] md:top-[32px] sm:top-[16px] translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] z-[150] border border-[rgba(255,255,255,0.15)] shadow-[0_8px_32px_rgba(0,0,0,0.12),0_0_60px_rgba(98,179,232,0.15)]">
         <div className="content-stretch flex gap-[160px] lg:gap-[160px] md:gap-[120px] sm:gap-[16px] h-[50px] md:h-[44px] sm:h-[36px] items-center justify-center relative shrink-0">
           {/* Logo */}
           <div
@@ -203,14 +204,18 @@ export function HomePageHeader() {
               )}
             </div>
 
-            {/* Exit/Logout Icon with User Menu */}
+            {/* Login/Logout Icon with User Menu */}
             {isLoggedIn ? (
               <div className="relative shrink-0" ref={userMenuRef}>
                 <div
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="h-[20px] md:h-[18px] sm:h-[16px] w-[20px] md:w-[18px] sm:w-[16px] relative cursor-pointer flex items-center justify-center"
                 >
-                  <ExitIcon size={20} className="brightness-0" />
+                  <img 
+                    src="/assets/home/VectorHeader.svg" 
+                    alt="User Menu" 
+                    className="w-full h-full brightness-0"
+                  />
                 </div>
                 {showUserMenu && (
                   <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
@@ -251,27 +256,24 @@ export function HomePageHeader() {
                 onClick={() => router.push('/login')}
                 className="h-[20px] md:h-[18px] sm:h-[16px] w-[20px] md:w-[18px] sm:w-[16px] relative shrink-0 cursor-pointer flex items-center justify-center"
               >
-                <img 
-                  src="/assets/home/VectorHeader.svg" 
-                  alt="Login" 
-                  className="w-full h-full brightness-0"
-                />
+                <ExitIcon size={20} className="brightness-0" />
               </div>
             )}
           </div>
         </div>
       </div>
+      )}
 
       {/* Search Modal */}
       {showSearchModal && (
         <div 
-          className="fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[100] flex items-start justify-center pt-16 md:pt-20 px-4"
+          className="fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[200] flex items-start justify-center pt-16 md:pt-20 px-4"
           onClick={() => setShowSearchModal(false)}
           style={{ touchAction: 'none' }}
         >
           <div 
             ref={searchModalRef}
-            className="w-full max-w-2xl animate-in fade-in slide-in-from-top-2 duration-200 relative z-[101]"
+            className="w-full max-w-2xl animate-in fade-in slide-in-from-top-2 duration-200 relative z-[201]"
             onClick={(e) => e.stopPropagation()}
             style={{ touchAction: 'auto' }}
           >

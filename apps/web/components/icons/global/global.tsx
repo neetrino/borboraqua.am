@@ -509,14 +509,18 @@ export function Header({
               )}
             </div>
 
-            {/* Exit/Logout Icon with User Menu */}
+            {/* Login/Logout Icon with User Menu */}
             {isLoggedIn ? (
               <div className="relative shrink-0" ref={userMenuRef}>
                 <div
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="h-[26px] md:h-[24px] sm:h-[20px] w-[26px] md:w-[22px] sm:w-[20px] relative cursor-pointer flex items-center justify-center"
                 >
-                  <ExitIcon size={26} className="brightness-0" />
+                  <img 
+                    src="/assets/home/VectorHeader.svg" 
+                    alt="User Menu" 
+                    className="w-full h-full brightness-0"
+                  />
                 </div>
                 {showUserMenu && (
                   <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
@@ -557,11 +561,7 @@ export function Header({
                 onClick={() => router.push('/login')}
                 className="h-[26px] md:h-[24px] sm:h-[20px] w-[26px] md:w-[22px] sm:w-[20px] relative shrink-0 cursor-pointer flex items-center justify-center"
               >
-                <img 
-                  src="/assets/home/VectorHeader.svg" 
-                  alt="Login" 
-                  className="w-full h-full brightness-0"
-                />
+                <ExitIcon size={26} className="brightness-0" />
               </div>
             )}
           </div>
