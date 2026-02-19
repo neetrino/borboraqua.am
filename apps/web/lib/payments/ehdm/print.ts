@@ -65,13 +65,18 @@ export function buildPrintBody(
     crn: config.crn,
     seq,
     cashierId: config.cashierId,
+    partialAmount: 0,
+    prePaymentAmount: 0,
+    partnerTin: null,
     items,
   };
 
   if (isCash) {
     body.cashAmount = total;
+    body.cardAmount = 0;
   } else {
     body.cardAmount = total;
+    body.cashAmount = 0;
   }
 
   return body;

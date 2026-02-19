@@ -171,5 +171,26 @@
 
 ---
 
+## 11. Ստուգում թեստից առաջ (по документации и плагину)
+
+| Էլեմենտ | Փաստաթուղթ / Plugin | Մեր կոդ | Статус |
+|---------|------------------------|---------|--------|
+| **URL** | `https://ecrm.taxservice.am/taxsystem-rs-vcr/api/v1.0` + `/print` | `config.apiUrl` + `/print` | ✓ |
+| **Auth** | Client cert (.crt) + key (.key) + passphrase | `https.Agent` cert/key/passphrase | ✓ |
+| **Content-Type** | application/json | application/json | ✓ |
+| **Body: mode** | 2 (ապրանքներով կտրոն) | MODE_SALE_WITH_ITEMS = 2 | ✓ |
+| **Body: crn, seq, cashierId** | string, int, int | config.crn, seq, config.cashierId | ✓ |
+| **Body: cardAmount / cashAmount** | Один заполнен, второй 0 в образце | Оба передаём (total и 0) | ✓ |
+| **Body: partialAmount, prePaymentAmount, partnerTin** | 0, 0, null в образце | 0, 0, null добавлены | ✓ |
+| **Body: items[]. dep, adgCode, goodCode, goodName, quantity, unit, price** | Как в плагине | buildPrintBody — те же поля, goodCode=sku, goodName до 30 символов | ✓ |
+| **Seq** | Уникальный, +1 после каждого запроса | getNextSeqAndIncrement() в транзакции, откат при ошибке | ✓ |
+| **Response** | code === 0, result.receiptId, fiscal, qr | Проверяем code !== 0, сохраняем в ehdm_receipts | ✓ |
+| **Только AMD** | — | printReceiptForOrder проверяет order.currency === "AMD" | ✓ |
+| **Повтор** | Не печатать дважды на заказ | Проверка order.ehdmReceipt | ✓ |
+
+Թեստից առաջ. ENV-ը լրացված, `Private/00505298.crt` և `.key` առկա, ԲԴ-ում `ehdm_state` nextSeq ≥ 200 (կամ UPDATE), server-ը գործարկվում է root-ից (կամ path-ը absolute).
+
+---
+
 **Փաստաթղթի տարբերակ.** 1.0  
 **Ամսաթիվ.** 2026-02-19

@@ -42,6 +42,9 @@ export type EhdmPrintRequestBody = {
   cashierId: number;
   cardAmount?: number;
   cashAmount?: number;
+  partialAmount?: number;
+  prePaymentAmount?: number;
+  partnerTin?: string | null;
   items: EhdmPrintItem[];
 };
 

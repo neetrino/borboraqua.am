@@ -26,8 +26,8 @@ CREATE UNIQUE INDEX "ehdm_receipts_orderId_key" ON "ehdm_receipts"("orderId");
 -- CreateIndex
 CREATE INDEX "ehdm_receipts_orderId_idx" ON "ehdm_receipts"("orderId");
 
--- Insert default EHDM seq row (initial seq from env EHDM_INITIAL_SEQ, typically 65)
-INSERT INTO "ehdm_state" ("id", "nextSeq") VALUES ('default', 65);
+-- Insert default EHDM seq row (200 to avoid overlap when migrating from old site)
+INSERT INTO "ehdm_state" ("id", "nextSeq") VALUES ('default', 200);
 
 -- AddForeignKey
 ALTER TABLE "ehdm_receipts" ADD CONSTRAINT "ehdm_receipts_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "orders"("id") ON DELETE CASCADE ON UPDATE CASCADE;
