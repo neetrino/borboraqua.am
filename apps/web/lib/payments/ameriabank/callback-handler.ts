@@ -103,9 +103,13 @@ export async function handleAmeriabankCallback(searchParams: URLSearchParams): P
     if (order.userId) {
       await db.cart.deleteMany({ where: { userId: order.userId } });
     }
-    printReceiptForOrder(order.id).catch((err) =>
-      console.error("[EHDM] printReceiptForOrder", err)
-    );
+    printReceiptForOrder(order.id)
+      .then((r) => {
+        if (!r.ok) console.error("[EHDM] printReceiptForOrder failed:", r.error);
+      })
+      .catch((err) =>
+        console.error("[EHDM] printReceiptForOrder exception", err)
+      );
     return {
       redirect: `${successRedirect}?order=${encodeURIComponent(order.number)}`,
     };
