@@ -656,7 +656,7 @@ export default function CartPage() {
               </div>
 
               {/* Subtotal */}
-              <div className="md:col-span-3 flex flex-col md:flex-row md:items-center md:justify-start md:ml-4">
+              <div className="md:col-span-3 flex flex-col md:flex-row md:items-center md:justify-start md:ml-10">
                 <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 md:hidden">
                   {t('common.messages.subtotal')}
                 </p>

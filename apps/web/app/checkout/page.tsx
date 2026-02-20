@@ -1308,6 +1308,7 @@ export default function CheckoutPage() {
 
           {/* Order Summary */}
           <div>
+
             <div className="relative sticky top-4">
               <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
               <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">

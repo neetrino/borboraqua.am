@@ -212,12 +212,12 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       {/* Desktop Search Modal - Only visible on desktop */}
       {showSearchModal && (
         <div 
-          className="hidden xl:flex fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[100] items-start justify-center pt-16 px-4"
+          className="hidden xl:flex fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[200] items-start justify-center pt-16 px-4"
           onClick={() => setShowSearchModal(false)}
         >
           <div
             ref={searchModalRef}
-            className="w-full max-w-2xl animate-in fade-in slide-in-from-top-2 duration-200"
+            className="w-full max-w-2xl animate-in fade-in slide-in-from-top-2 duration-200 relative z-[201]"
             onClick={(e) => e.stopPropagation()}
           >
             <form onSubmit={handleSearch} className="relative">

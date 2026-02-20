@@ -159,6 +159,7 @@ function AddProductPageContent() {
   const [newBrandName, setNewBrandName] = useState('');
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryRequiresSizes, setNewCategoryRequiresSizes] = useState(false);
+  const [newCategories, setNewCategories] = useState<Array<{ name: string; requiresSizes: boolean }>>([]);
   const [useNewBrand, setUseNewBrand] = useState(false);
   const [useNewCategory, setUseNewCategory] = useState(false);
   const [newColorName, setNewColorName] = useState('');
@@ -170,8 +171,8 @@ function AddProductPageContent() {
   // Default currency from settings
   const [defaultCurrency, setDefaultCurrency] = useState<CurrencyCode>('AMD');
   
-  // Product Type: 'simple' or 'variable' (default: 'variable')
-  const [productType, setProductType] = useState<'simple' | 'variable'>('variable');
+  // Product Type: 'simple' or 'variable' (default: 'simple')
+  const [productType, setProductType] = useState<'simple' | 'variable'>('simple');
   // Simple product fields (only used when productType === 'simple')
   const [simpleProductData, setSimpleProductData] = useState({
     price: '',
@@ -1989,26 +1990,34 @@ function AddProductPageContent() {
         }
       }
 
-      // Create new category if provided
+      // Create new categories if provided
       let finalPrimaryCategoryId = formData.primaryCategoryId;
-      if (useNewCategory && newCategoryName.trim()) {
+      if (useNewCategory && newCategories.length > 0) {
         try {
-          console.log('📁 [ADMIN] Creating new category:', newCategoryName, 'requiresSizes:', newCategoryRequiresSizes);
-          const categoryResponse = await apiClient.post<{ data: Category }>('/api/v1/admin/categories', {
-            title: newCategoryName.trim(),
-            locale: 'en',
-            requiresSizes: newCategoryRequiresSizes,
-          });
-          if (categoryResponse.data) {
-            finalPrimaryCategoryId = categoryResponse.data.id;
-            // Add to categories list for future use
-            setCategories((prev) => [...prev, categoryResponse.data]);
-            console.log('✅ [ADMIN] Category created:', categoryResponse.data.id, 'requiresSizes:', categoryResponse.data.requiresSizes);
-            creationMessages.push(
-              newCategoryRequiresSizes 
-                ? t('admin.products.add.categoryCreatedSuccessSizes').replace('{name}', newCategoryName.trim())
-                : t('admin.products.add.categoryCreatedSuccess').replace('{name}', newCategoryName.trim())
-            );
+          // Create all new categories from the tags
+          const createdCategoryIds: string[] = [];
+          for (const category of newCategories) {
+            console.log('📁 [ADMIN] Creating new category:', category.name, 'requiresSizes:', category.requiresSizes);
+            const categoryResponse = await apiClient.post<{ data: Category }>('/api/v1/admin/categories', {
+              title: category.name,
+              locale: 'en',
+              requiresSizes: category.requiresSizes,
+            });
+            if (categoryResponse.data) {
+              createdCategoryIds.push(categoryResponse.data.id);
+              // Add to categories list for future use
+              setCategories((prev) => [...prev, categoryResponse.data]);
+              console.log('✅ [ADMIN] Category created:', categoryResponse.data.id, 'requiresSizes:', categoryResponse.data.requiresSizes);
+              creationMessages.push(
+                category.requiresSizes 
+                  ? t('admin.products.add.categoryCreatedSuccessSizes').replace('{name}', category.name)
+                  : t('admin.products.add.categoryCreatedSuccess').replace('{name}', category.name)
+              );
+            }
+          }
+          // Set primary category to the first created one if none was selected
+          if (createdCategoryIds.length > 0 && !finalPrimaryCategoryId) {
+            finalPrimaryCategoryId = createdCategoryIds[0];
           }
         } catch (err: any) {
           console.error('❌ [ADMIN] Error creating category:', err);
@@ -2327,10 +2336,6 @@ function AddProductPageContent() {
           return;
         }
         if (!simpleProductData.sku || simpleProductData.sku.trim() === '') {
-          setLoading(false);
-          return;
-        }
-        if (!simpleProductData.quantity || simpleProductData.quantity.trim() === '') {
           setLoading(false);
           return;
         }
@@ -3349,39 +3354,6 @@ function AddProductPageContent() {
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('admin.products.add.basicInformation')}</h2>
               <div className="space-y-4">
-                {/* Product Type Selector */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('admin.products.add.productType')} *
-                  </label>
-                  <p className="text-xs text-gray-500 mb-3">
-                    {t('admin.products.add.productTypeDescription')}
-                  </p>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="productType"
-                        value="simple"
-                        checked={productType === 'simple'}
-                        onChange={(e) => setProductType(e.target.value as 'simple' | 'variable')}
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">{t('admin.products.add.productTypeSimple')}</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="productType"
-                        value="variable"
-                        checked={productType === 'variable'}
-                        onChange={(e) => setProductType(e.target.value as 'simple' | 'variable')}
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">{t('admin.products.add.productTypeVariable')}</span>
-                    </label>
-                  </div>
-                </div>
 
                 {/* Multi-language Title and Description */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -3770,119 +3742,86 @@ function AddProductPageContent() {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        <Input
-                          type="text"
-                          value={newCategoryName}
-                          onChange={(e) => setNewCategoryName(e.target.value)}
-                          placeholder={t('admin.products.add.enterNewCategoryName')}
-                          className="w-full"
-                        />
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (newCategoryName.trim()) {
+                                  setNewCategories((prev) => [
+                                    ...prev,
+                                    { name: newCategoryName.trim(), requiresSizes: newCategoryRequiresSizes },
+                                  ]);
+                                  setNewCategoryName('');
+                                  setNewCategoryRequiresSizes(false);
+                                }
+                              }
+                            }}
+                            placeholder={t('admin.products.add.enterNewCategoryName')}
+                            className="flex-1"
+                          />
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              if (newCategoryName.trim()) {
+                                setNewCategories((prev) => [
+                                  ...prev,
+                                  { name: newCategoryName.trim(), requiresSizes: newCategoryRequiresSizes },
+                                ]);
+                                setNewCategoryName('');
+                                setNewCategoryRequiresSizes(false);
+                              }
+                            }}
+                            variant="primary"
+                            className="px-4 py-2 whitespace-nowrap"
+                          >
+                            {t('admin.products.add.add')}
+                          </Button>
+                        </div>
+                        <p className="text-sm text-gray-500">
+                          {t('admin.products.add.separateCategoriesWithCommas')}
+                        </p>
+                        {newCategories.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {newCategories.map((category, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center gap-1 px-3 py-1 bg-white border border-blue-300 rounded-md"
+                              >
+                                <span className="text-sm text-gray-700">{category.name}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setNewCategories((prev) => prev.filter((_, i) => i !== index));
+                                  }}
+                                  className="ml-1 w-4 h-4 flex items-center justify-center rounded-full bg-blue-600 text-white hover:bg-blue-700 focus:outline-none transition-colors"
+                                >
+                                  <svg
+                                    className="w-3 h-3"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M6 18L18 6M6 6l12 12"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
 
-                {/* Brands - Multi-select */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t('admin.products.add.brands')} <span className="text-gray-500 font-normal">{t('admin.products.add.selectMultiple')}</span>
-                  </label>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 mb-2">
-                      <input
-                        type="radio"
-                        id="select-brand"
-                        name="brand-mode"
-                        checked={!useNewBrand}
-                        onChange={() => {
-                          setUseNewBrand(false);
-                          setNewBrandName('');
-                        }}
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <label htmlFor="select-brand" className="text-sm text-gray-700">
-                        {t('admin.products.add.selectExistingBrands')}
-                      </label>
-                    </div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <input
-                        type="radio"
-                        id="new-brand"
-                        name="brand-mode"
-                        checked={useNewBrand}
-                        onChange={() => {
-                          setUseNewBrand(true);
-                        }}
-                        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                      />
-                      <label htmlFor="new-brand" className="text-sm text-gray-700">
-                        {t('admin.products.add.addNewBrand')}
-                      </label>
-                    </div>
-                    {!useNewBrand ? (
-                      <div className="relative" data-brand-dropdown>
-                        <button
-                          type="button"
-                          onClick={() => setBrandsExpanded(!brandsExpanded)}
-                          className="w-full px-3 py-2 text-left border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm flex items-center justify-between"
-                        >
-                          <span className="text-gray-700">
-                            {formData.brandIds.length === 0
-                              ? t('admin.products.add.selectBrands')
-                              : formData.brandIds.length === 1 
-                                ? t('admin.products.add.brandSelected').replace('{count}', formData.brandIds.length.toString())
-                                : t('admin.products.add.brandsSelected').replace('{count}', formData.brandIds.length.toString())}
-                          </span>
-                          <svg
-                            className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
-                              brandsExpanded ? 'transform rotate-180' : ''
-                            }`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                        {brandsExpanded && (
-                          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                            <div className="p-2">
-                              <div className="space-y-1">
-                                {brands.map((brand) => (
-                                  <label
-                                    key={brand.id}
-                                    className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={formData.brandIds.includes(brand.id)}
-                                      onChange={(e) => {
-                                        const newBrandIds = e.target.checked
-                                          ? [...formData.brandIds, brand.id]
-                                          : formData.brandIds.filter((id) => id !== brand.id);
-                                        setFormData((prev) => ({ ...prev, brandIds: newBrandIds }));
-                                      }}
-                                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                    />
-                                    <span className="text-sm text-gray-700">{brand.name}</span>
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <Input
-                        type="text"
-                        value={newBrandName}
-                        onChange={(e) => setNewBrandName(e.target.value)}
-                        placeholder={t('admin.products.add.enterNewBrandName')}
-                        className="w-full"
-                      />
-                    )}
-                  </div>
-                </div>
               </div>
             </div>
 
@@ -3949,7 +3888,7 @@ function AddProductPageContent() {
                     {/* Quantity */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {t('admin.products.add.quantity')} *
+                        {t('admin.products.add.quantity')}
                       </label>
                       <Input
                         type="number"
@@ -3958,7 +3897,6 @@ function AddProductPageContent() {
                         placeholder={t('admin.products.add.quantityPlaceholder')}
                         className="w-full"
                         min="0"
-                        required
                       />
                     </div>
                   </div>

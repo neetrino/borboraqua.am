@@ -12,6 +12,7 @@ interface Product {
   slug: string;
   title: string;
   description?: string | null;
+  category?: string | null; // Primary category title
   price: number;
   compareAtPrice: number | null;
   image: string | null;
@@ -43,6 +44,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
   // Initialize with 'AMD' to match server-side default and prevent hydration mismatch
   const [currency, setCurrency] = useState<'USD' | 'AMD' | 'EUR' | 'RUB' | 'GEL'>('AMD');
   const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
 
   // Always use grid-3 view mode
   useEffect(() => {
@@ -57,7 +59,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
 
   // Detect mobile screen size using matchMedia for accurate responsive detection even with zoom
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 1279px)'); // xl breakpoint (1280px)
+    const mediaQuery = window.matchMedia('(max-width: 767px)'); // md breakpoint (768px) - tablet is not mobile
     const checkMobile = () => {
       setIsMobile(mediaQuery.matches);
     };
@@ -74,6 +76,30 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
       return () => {
         mediaQuery.removeListener(checkMobile);
         window.removeEventListener('resize', checkMobile);
+      };
+    }
+  }, []);
+
+  // Detect tablet screen size (768px - 1279px) for shop page - use mobile card on tablet
+  // This covers md (768px) and lg (1024px) breakpoints, but not xl (1280px+)
+  useEffect(() => {
+    const tabletQuery = window.matchMedia('(min-width: 768px) and (max-width: 1279px)');
+    const checkTablet = () => {
+      setIsTablet(tabletQuery.matches);
+    };
+    
+    checkTablet();
+    // Use addEventListener for matchMedia (modern browsers)
+    if (tabletQuery.addEventListener) {
+      tabletQuery.addEventListener('change', checkTablet);
+      return () => tabletQuery.removeEventListener('change', checkTablet);
+    } else {
+      // Fallback for older browsers
+      tabletQuery.addListener(checkTablet);
+      window.addEventListener('resize', checkTablet);
+      return () => {
+        tabletQuery.removeListener(checkTablet);
+        window.removeEventListener('resize', checkTablet);
       };
     }
   }, []);
@@ -166,15 +192,21 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
 
   // Get grid classes based on view mode
   const getGridClasses = () => {
+    // Always use responsive classes - let Tailwind handle breakpoints
+    // Mobile (< 768px): 2 columns
+    // Tablet (md, >= 768px): 3 columns
+    // Desktop (lg, >= 1024px): 3 columns
     switch (viewMode) {
       case 'list':
         return 'grid grid-cols-1 gap-12';
       case 'grid-2':
         return 'grid grid-cols-2 gap-12 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2';
       case 'grid-3':
-        return 'grid grid-cols-2 gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3';
+        // Mobile: 2 columns, Tablet (md) and Desktop (lg): 3 columns
+        return 'grid grid-cols-2 gap-4 sm:gap-6 md:gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3';
       default:
-        return 'grid grid-cols-2 gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3';
+        // Mobile: 2 columns, Tablet (md) and Desktop (lg): 3 columns
+        return 'grid grid-cols-2 gap-4 sm:gap-6 md:gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3';
     }
   };
 
@@ -192,6 +224,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     slug: product.slug,
     title: product.title,
     description: product.description ?? undefined,
+    category: product.category ?? undefined,
     minimumOrderQuantity: product.minimumOrderQuantity,
     orderQuantityIncrement: product.orderQuantityIncrement,
     price: product.price,
@@ -219,6 +252,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
             onProductClick={handleOpenProduct}
             formatPrice={(price: number, curr?: any) => formatPrice(price, curr || currency)}
             currency={currency}
+            isMobile={isMobile || isTablet}
             compact={true}
           />
         );

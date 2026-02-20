@@ -509,14 +509,18 @@ export function Header({
               )}
             </div>
 
-            {/* Exit/Logout Icon with User Menu */}
+            {/* Login/Logout Icon with User Menu */}
             {isLoggedIn ? (
               <div className="relative shrink-0" ref={userMenuRef}>
                 <div
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="h-[26px] md:h-[24px] sm:h-[20px] w-[26px] md:w-[22px] sm:w-[20px] relative cursor-pointer flex items-center justify-center"
                 >
-                  <ExitIcon size={26} className="brightness-0" />
+                  <img 
+                    src="/assets/home/VectorHeader.svg" 
+                    alt="User Menu" 
+                    className="w-full h-full brightness-0"
+                  />
                 </div>
                 {showUserMenu && (
                   <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
@@ -557,11 +561,7 @@ export function Header({
                 onClick={() => router.push('/login')}
                 className="h-[26px] md:h-[24px] sm:h-[20px] w-[26px] md:w-[22px] sm:w-[20px] relative shrink-0 cursor-pointer flex items-center justify-center"
               >
-                <img 
-                  src="/assets/home/VectorHeader.svg" 
-                  alt="Login" 
-                  className="w-full h-full brightness-0"
-                />
+                <ExitIcon size={26} className="brightness-0" />
               </div>
             )}
           </div>
@@ -777,7 +777,18 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
             <div className="relative shrink-0">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center justify-center relative">
                 <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[12px] lg:text-[12px] md:text-[11px] sm:text-[10px] text-white whitespace-nowrap">
-                  <p className="leading-[16px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">Copyright © 2024 | New Aqua LLC | All Rights Reserved</p>
+                  <p className="leading-[16px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">
+                    Copyright © 2026 | All Rights Reserved, Created by{' '}
+                    <a 
+                      href="https://neetrino.com/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-white hover:text-blue-300 transition-colors duration-200 underline"
+                    >
+                      Neetrino IT Company
+                    </a>
+                    
+                  </p>
                 </div>
               </div>
             </div>
@@ -916,6 +927,7 @@ export interface FeaturedProduct {
   title: string;
   subtitle?: string;
   description?: string;
+  category?: string; // Primary category title
   price: number;
   image: string | null;
   inStock: boolean;
@@ -976,7 +988,7 @@ export function FeaturedProductCard({
 
     return (
       <div
-        className="h-[293px] relative w-[187px] cursor-pointer overflow-visible"
+        className="h-[293px] relative w-full max-w-[187px] mx-auto cursor-pointer overflow-visible"
         onClick={() => onProductClick(product)}
       >
         {/* Product Image */}
@@ -991,19 +1003,20 @@ export function FeaturedProductCard({
         </div>
 
         {/* Rounded Card with Price, Volume, and Add Button */}
-        <div className="absolute bg-[rgba(123,201,236,0.6)] inset-[59.39%_0_21.5%_0] rounded-2xl h-[30%] w-[90%] left-[0%]">
-          {/* Price */}
-          <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] right-[5px] not-italic text-[16px] text-white top-[62px] whitespace-nowrap">
-            <p className="leading-[28px]">{formatPrice(product.price, currency)}</p>
+        <div className="absolute bg-[rgba(123,201,236,0.7)] inset-[59.39%_0_21.5%_0] rounded-2xl h-[33%] w-[95%] left-[3%]">
+          {/* Title - left top corner */}
+          <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold left-[15px] top-[8px] right-[50px] justify-start leading-[0] text-left text-black overflow-hidden">
+            <p className="leading-[18px] break-words w-full line-clamp-3" style={{ fontSize: 'clamp(12px, 3.5vw, 16px)', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{product.title}</p>
           </div>
           
-          {/* Volume */}
-          {volume && (
-            <div className="-translate-y-1/2 absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[15px] not-italic text-[#9f9f9f] text-[12px] top-[41px] tracking-[1.2px] uppercase whitespace-nowrap">
-              <p className="leading-[16px]">{volume}</p>
+          {/* Category - left bottom corner */}
+          {product.category && (
+            <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold left-[15px] bottom-[8px] right-[50px] justify-start leading-[0] text-[16px] text-left text-gray-300 overflow-hidden">
+              <p className="leading-[16px] break-words w-full">{product.category}</p>
             </div>
           )}
-          {/* Add to Cart Button */}
+          
+          {/* Add to Cart Button - right top corner */}
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -1011,25 +1024,26 @@ export function FeaturedProductCard({
               onAddToCart(product);
             }}
             disabled={isAddingToCart || !product.inStock}
-            className="absolute z-20 block cursor-pointer left-[120px] size-[45px] top-[5px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+            className="absolute z-20 block cursor-pointer right-[8px] size-[45px] top-[8px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
             aria-label={t('home.featuredProducts.addToCart')}
           >
-            <div className="flex flex-col font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] justify-center leading-[0] not-italic text-[30px] text-center text-white -mt-[2px]">
+            <div className="flex flex-col font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] justify-center leading-[0] not-italic text-[30px] text-center text-white -mt-[3px]">
               <p className="leading-[24px] whitespace-pre-wrap">+</p>
             </div>
           </button>
-        </div>
-
-        <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[30.64%_3.41%_5_%] justify-center leading-[0] text-[16px] text-left text-white">
-          <p className="leading-[25px] whitespace-pre-wrap">{product.title}</p>
-            
-        </div>
-        {/* Product Title and Description */}
-        {product.description && (
-          <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold inset-[72.64%_5.41%_5_%] justify-center leading-[0] text-[16px] text-left text-gray-500 overflow-hidden">
-            <p className="leading-[25px] break-words">{product.description}</p>
+          
+          {/* Price - right bottom corner */}
+          <div className="absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] right-[15px] not-italic text-[16px] text-white bottom-[4px] whitespace-nowrap">
+            <p className="leading-[28px]">{formatPrice(product.price, currency)}</p>
           </div>
-        )}
+          
+          {/* Volume */}
+          {volume && (
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[15px] not-italic text-[#9f9f9f] text-[12px] top-[35px] tracking-[1.2px] uppercase whitespace-nowrap">
+              <p className="leading-[16px]">{volume}</p>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -1060,21 +1074,21 @@ export function FeaturedProductCard({
         </div>
         {/* Content Section - Compact layout */}
         <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative">
-          <div className="absolute top-6 right-[8px]">
-            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[16px] whitespace-nowrap">
-              <p className="leading-[22px]">{formatPrice(product.price, currency)}</p>
-            </div>
-          </div>
-          <div className="flex items-end justify-between w-full gap-2">
-            <div className="flex flex-col items-start flex-1 min-w-0 max-w-[calc(100%-90px)]">
-              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-black">
-                <p className="leading-[20px] truncate w-full">{product.title}</p>
+          <div className="flex items-start justify-between w-full gap-2">
+            <div className="flex flex-col items-start flex-1 min-w-0 pr-2 overflow-hidden">
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-black w-full">
+                <p className="leading-[20px] break-words w-full">{product.title}</p>
               </div>
-              {product.description && (
-                <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-gray-500 mt-1">
-                  <p className="leading-[20px] break-words">{product.description}</p>
+              {product.category && (
+                <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-gray-500 mt-1 w-full">
+                  <p className="leading-[20px] break-words">{product.category}</p>
                 </div>
               )}
+            </div>
+            <div className="flex flex-col items-start flex-shrink-0">
+              <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[16px] whitespace-nowrap">
+                <p className="leading-[22px]">{formatPrice(product.price, currency)}</p>
+              </div>
             </div>
           </div>
           <button
@@ -1119,11 +1133,16 @@ export function FeaturedProductCard({
       </div>
       {/* Content Section - Uniform layout */}
       <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px]">
-        <div className="flex items-end justify-between w-full gap-2">
-          <div className="flex flex-col items-start flex-1 min-w-0 max-w-[calc(100%-100px)]">
-            <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black">
-              <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] truncate w-full">{product.title}</p>
+        <div className="flex items-start justify-between w-full gap-2">
+          <div className="flex flex-col items-start flex-1 min-w-0 pr-2 overflow-hidden">
+            <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full">
+              <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full">{product.title}</p>
             </div>
+            {product.category && (
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-gray-500 mt-1 w-full">
+                <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] break-words">{product.category}</p>
+              </div>
+            )}
           </div>
           <div className="flex flex-col items-start flex-shrink-0">
             <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] whitespace-nowrap">

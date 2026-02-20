@@ -1,6 +1,6 @@
 {
   "hero": {
-    "showResults": "Ցուցադրել {total} արդյունք",
+    "showResults": "Ցուցադրված է {total} արդյունք",
     "all": "Բոլորը",
     "lowPrice": "Ցածր գին",
     "low": "Ցածր",

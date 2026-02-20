@@ -313,21 +313,88 @@
     position: relative;
   }
 
+  /* Prevent flickering for last item in related products carousel */
+  /* Limit image transform to stay within container bounds and add optimizations for smooth animation */
+  .related-products-carousel-container .product-card-compact .product-image-hover {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform-style: preserve-3d;
+  }
+
+  .related-products-carousel-container .product-card-compact:hover .product-image-hover {
+    transform: scale(1.35) translateY(-10px);
+    max-width: 100%;
+  }
+
+  /* Ensure container has stable dimensions to prevent layout shifts */
+  .related-products-carousel-container {
+    contain: layout style paint;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    /* Prevent layout shift when last item is hovered */
+    padding-right: 0;
+    box-sizing: border-box;
+  }
+
   /* Ensure related products carousel doesn't clip hovered images */
   .product-card-compact:hover {
     z-index: 50;
     position: relative;
     overflow: visible !important;
+    /* Prevent layout shift on hover */
+    transform: translateZ(0);
+    will-change: transform;
   }
 
-  /* Allow overflow in carousel containers when card is hovered */
-  .relative:has(.product-card-compact:hover) {
+  /* Prevent last item from causing layout shift */
+  .related-products-carousel-container > div > div:last-child {
+    contain: layout style;
+    position: relative;
+  }
+
+  .related-products-carousel-container > div > div:last-child .product-card-compact {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .related-products-carousel-container > div > div:last-child .product-card-compact:hover {
+    transform: translateZ(0);
+    margin-right: 0;
+    padding-right: 0;
+  }
+
+  /* Allow overflow in carousel containers when card is hovered - BUT keep carousel container clipped */
+  /* Only allow overflow for non-carousel containers (like shop page grid) */
+  .relative:has(.product-card-compact:hover):not(.related-products-carousel):not([class*="overflow-hidden"]):not([class*="sm:overflow-hidden"]) {
     overflow: visible !important;
   }
 
-  /* Ensure flex container in carousel allows overflow */
-  .flex.items-stretch:has(.product-card-compact:hover) {
+  /* Ensure flex container in carousel allows overflow - BUT keep carousel container clipped */
+  /* Only allow overflow for non-carousel flex containers */
+  .flex.items-stretch:has(.product-card-compact:hover):not(.related-products-carousel-container) {
     overflow: visible;
+  }
+
+  /* Related products carousel - keep outer container visible for arrows, but inner container clipped */
+  /* Outer container must allow overflow for navigation arrows */
+  .related-products-carousel {
+    overflow: visible !important;
+  }
+
+  /* Related products carousel inner container - ALWAYS keep clipped to prevent side products from showing */
+  /* This overrides any :has() selectors that might try to show overflow */
+  .related-products-carousel-container:has(.product-card-compact:hover),
+  .related-products-carousel .related-products-carousel-container:has(.product-card-compact:hover) {
+    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+  }
+
+  /* Carousel flex container inside related products - keep clipped */
+  .related-products-carousel-container .flex.items-stretch:has(.product-card-compact:hover) {
+    overflow: hidden !important;
   }
 
   /* Ensure grid containers allow overflow when card is hovered (shop page) */

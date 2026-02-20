@@ -610,6 +610,23 @@ export default function ProductsPage() {
     });
   };
 
+  const handleDuplicateProduct = async (productId: string, productTitle: string) => {
+    if (!confirm(t('admin.products.duplicateConfirm')?.replace('{title}', productTitle) || `Duplicate "${productTitle}"?`)) {
+      return;
+    }
+
+    try {
+      await apiClient.post<{ id: string }>(`/api/v1/admin/products/${productId}/duplicate`);
+      console.log('✅ [ADMIN] Product duplicated successfully');
+      
+      // Refresh products list
+      fetchProducts();
+    } catch (err: any) {
+      console.error('❌ [ADMIN] Error duplicating product:', err);
+      alert(t('admin.products.errorDuplicating')?.replace('{message}', err.message || t('admin.common.unknownErrorFallback')) || 'Error duplicating product');
+    }
+  };
+
   const handleDeleteProduct = async (productId: string, productTitle: string) => {
     if (!confirm(t('admin.products.deleteConfirm').replace('{title}', productTitle))) {
       return;
@@ -1254,6 +1271,22 @@ export default function ProductsPage() {
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              type="button"
+                              className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                              onClick={() => handleDuplicateProduct(product.id, product.title)}
+                              aria-label={t('admin.products.duplicate') || 'Duplicate'}
+                              title={t('admin.products.duplicate') || 'Duplicate product'}
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {/* Back square (offset to top-left) */}
+                                <rect x="2" y="2" width="16" height="16" rx="2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                                {/* Front square (centered) */}
+                                <rect x="4" y="4" width="16" height="16" rx="2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
+                                {/* Plus sign in front square */}
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v8M8 12h8" />
                               </svg>
                             </button>
                             <button

@@ -496,6 +496,16 @@ model EhdmReceipt {
 }
 
 // ============================================
+// ORDER NUMBER STATE
+// ============================================
+model OrderNumberState {
+  id        String @id @default("default")
+  nextNumber Int   @default(100) // P100-ից սկսվող համար
+
+  @@map("order_number_state")
+}
+
+// ============================================
 // PRODUCT REVIEW MODEL
 // ============================================
 model ProductReview {
