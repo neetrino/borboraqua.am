@@ -1,8 +1,10 @@
 "use client";
 
+import { useCallback, useRef } from "react";
+
 /**
  * Displays EHDM fiscal receipt (Էլեկտրոնային ՀԴՄ) for an order.
- * Used in admin order details and client order page. No PDF — print via browser.
+ * Used in admin order details and client order page. No PDF — print via browser; "Download" opens print (Save as PDF).
  */
 export type EhdmReceiptData = {
   receiptId: string;
@@ -51,11 +53,42 @@ export function EhdmReceiptBlock({
         )}`
       : null;
 
+  const sectionRef = useRef<HTMLElement>(null);
+
+  const handleDownloadOrPrint = useCallback(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const root = document.createElement("div");
+    root.className = "ehdm-print-root";
+    const clone = section.cloneNode(true) as HTMLElement;
+    root.appendChild(clone);
+    document.body.appendChild(root);
+    const removeRoot = () => {
+      root.remove();
+      window.removeEventListener("afterprint", removeRoot);
+    };
+    window.addEventListener("afterprint", removeRoot);
+    window.print();
+  }, []);
+
   return (
-    <section
-      className="rounded-lg border border-gray-200 bg-gray-50/80 p-4 print:border print:bg-white"
-      aria-label="Fiscal receipt (EHDM)"
-    >
+    <>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            @media print {
+              body > *:not(.ehdm-print-root) { display: none !important; }
+              body > .ehdm-print-root { display: block !important; padding: 16px !important; }
+              .ehdm-receipt-no-print { display: none !important; }
+            }
+          `,
+        }}
+      />
+      <section
+        ref={sectionRef}
+        className="ehdm-receipt-print rounded-lg border border-gray-200 bg-gray-50/80 p-4 print:border print:bg-white"
+        aria-label="Fiscal receipt (EHDM)"
+      >
       <h3 className="text-sm font-semibold text-gray-900 mb-3">
         ԿՏՐՈՆԻ ՖԻՍԿԱԼ ՀԱՄԱՐ (E-HDM)
         {orderNumber != null && (
@@ -131,24 +164,44 @@ export function EhdmReceiptBlock({
           )}
         </div>
 
-        {qrUrl != null && (
-          <div className="flex shrink-0 justify-center sm:justify-end">
-            <img
-              src={qrUrl}
-              alt="QR receipt"
-              width={QR_IMAGE_SIZE}
-              height={QR_IMAGE_SIZE}
-              className="rounded border border-gray-200 bg-white"
-            />
+        {(qrUrl != null || (variant === "full")) && (
+          <div className="flex shrink-0 flex-col items-center gap-4 sm:items-end">
+            {qrUrl != null && (
+              <div
+                style={{ width: QR_IMAGE_SIZE, height: QR_IMAGE_SIZE, minWidth: QR_IMAGE_SIZE, minHeight: QR_IMAGE_SIZE }}
+              >
+                <img
+                  src={qrUrl}
+                  alt="QR receipt"
+                  width={QR_IMAGE_SIZE}
+                  height={QR_IMAGE_SIZE}
+                  className="block rounded border border-gray-200 bg-white object-contain"
+                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                />
+              </div>
+            )}
+            {variant === "full" && (
+              <button
+                type="button"
+                onClick={handleDownloadOrPrint}
+                className="ehdm-receipt-no-print inline-flex w-[120px] justify-center items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                PDF
+              </button>
+            )}
           </div>
         )}
       </div>
 
       {variant === "full" && (
         <p className="mt-3 text-xs text-gray-500 print:text-gray-700">
-          Էլեկտրոնային ՀԴՄ կտրոն. Տպելու համար օգտագործեք brauzerի «Տպել»:
+          Էլեկտրոնային ՀԴՄ կտրոն. Կարող եք նաև օգտագործել brauzerի «Տպել»:
         </p>
       )}
     </section>
+    </>
   );
 }

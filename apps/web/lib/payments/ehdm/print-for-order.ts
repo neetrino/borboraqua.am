@@ -27,7 +27,7 @@ export async function printReceiptForOrder(orderId: string): Promise<{
     return { ok: false, error: "Order not found" };
   }
   if (order.currency !== "AMD") {
-    return { ok: false, error: "EHDM only for AMD orders" };
+    return { ok: false, error: `EHDM only for AMD orders (order ${order.number} has ${order.currency})` };
   }
   if (order.ehdmReceipt) {
     return {
@@ -53,10 +53,10 @@ export async function printReceiptForOrder(orderId: string): Promise<{
     const response = await callPrint(body);
     if (response.code !== 0 || response.error || !response.result) {
       await decrementSeq();
-      return {
-        ok: false,
-        error: response.errorMessage ?? response.error ?? "EHDM print failed",
-      };
+      const errMsg =
+        response.errorMessage ?? response.error ?? "EHDM print failed";
+      console.error("[EHDM] print failed:", order.number, errMsg);
+      return { ok: false, error: errMsg };
     }
 
     const r = response.result;
@@ -78,9 +78,11 @@ export async function printReceiptForOrder(orderId: string): Promise<{
     };
   } catch (e) {
     await decrementSeq();
+    const errMsg = e instanceof Error ? e.message : "EHDM request failed";
+    console.error("[EHDM] request failed:", order.number, errMsg);
     return {
       ok: false,
-      error: e instanceof Error ? e.message : "EHDM request failed",
+      error: errMsg,
     };
   }
 }
