@@ -1,3 +1,5 @@
+import fs from "fs";
+import os from "os";
 import path from "path";
 import type { EhdmConfig } from "./types";
 
@@ -8,12 +10,34 @@ function resolvePath(envValue: string | undefined): string {
   return path.resolve(process.cwd(), p);
 }
 
+/** Cert/key: if EHDM_CERT_BASE64 + EHDM_KEY_BASE64 set → decode to /tmp (local + Vercel); else use EHDM_CERT_PATH / EHDM_KEY_PATH (file paths). */
+function resolveCertAndKeyPaths(): { certPath: string; keyPath: string } {
+  const certBase64 = process.env.EHDM_CERT_BASE64?.trim();
+  const keyBase64 = process.env.EHDM_KEY_BASE64?.trim();
+  if (certBase64 && keyBase64) {
+    const certContent = Buffer.from(certBase64, "base64").toString("utf8");
+    const keyContent = Buffer.from(keyBase64, "base64").toString("utf8");
+    const tmpDir = os.tmpdir();
+    const certPath = path.join(tmpDir, "ehdm-cert.pem");
+    const keyPath = path.join(tmpDir, "ehdm-key.pem");
+    fs.writeFileSync(certPath, certContent, { mode: 0o600 });
+    fs.writeFileSync(keyPath, keyContent, { mode: 0o600 });
+    return { certPath, keyPath };
+  }
+  if (certBase64 || keyBase64) {
+    return { certPath: "", keyPath: "" };
+  }
+  return {
+    certPath: resolvePath(process.env.EHDM_CERT_PATH),
+    keyPath: resolvePath(process.env.EHDM_KEY_PATH),
+  };
+}
+
 function getEhdmConfig(): EhdmConfig {
   const apiUrl = (process.env.EHDM_API_URL ?? "").replace(/\/$/, "");
   const crn = process.env.EHDM_CRN ?? "";
   const tin = process.env.EHDM_TIN ?? "";
-  const certPath = resolvePath(process.env.EHDM_CERT_PATH);
-  const keyPath = resolvePath(process.env.EHDM_KEY_PATH);
+  const { certPath, keyPath } = resolveCertAndKeyPaths();
   const keyPassphrase = process.env.EHDM_KEY_PASSPHRASE ?? "";
   const initialSeq = Math.max(1, parseInt(process.env.EHDM_INITIAL_SEQ ?? "200", 10) || 200);
   const defaultAdgCode = process.env.EHDM_DEFAULT_ADG_CODE ?? "2201";
