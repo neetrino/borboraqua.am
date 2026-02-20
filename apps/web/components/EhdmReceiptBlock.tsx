@@ -132,13 +132,17 @@ export function EhdmReceiptBlock({
         </div>
 
         {qrUrl != null && (
-          <div className="flex shrink-0 justify-center sm:justify-end">
+          <div
+            className="flex shrink-0 justify-center sm:justify-end"
+            style={{ width: QR_IMAGE_SIZE, height: QR_IMAGE_SIZE, minWidth: QR_IMAGE_SIZE, minHeight: QR_IMAGE_SIZE }}
+          >
             <img
               src={qrUrl}
               alt="QR receipt"
               width={QR_IMAGE_SIZE}
               height={QR_IMAGE_SIZE}
-              className="rounded border border-gray-200 bg-white"
+              className="block rounded border border-gray-200 bg-white object-contain"
+              style={{ width: "100%", height: "100%", objectFit: "contain" }}
             />
           </div>
         )}
