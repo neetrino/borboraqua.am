@@ -82,6 +82,12 @@ export async function printReceiptForOrder(orderId: string): Promise<{
       },
     });
 
+    console.info("[EHDM] receipt created (ՀԴՄ պատասխան OK):", {
+      orderNumber: order.number,
+      receiptId: r.receiptId,
+      fiscal: r.fiscal,
+    });
+
     return {
       ok: true,
       receiptId: String(r.receiptId),
