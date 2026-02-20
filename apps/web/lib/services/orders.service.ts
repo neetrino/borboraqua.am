@@ -1,4 +1,5 @@
 import { db } from "@white-shop/db";
+import { sendOrderNotificationToAdmin } from "@/lib/email-templates/order-admin-notification";
 
 /**
  * Get next order number (P100, P101, ...) and increment in DB (transaction).
@@ -624,6 +625,35 @@ class OrdersService {
           timeout: 30000, // Transaction timeout: 30s (payment processing is critical)
         }
       );
+
+      // Notify admin by email (non-blocking: failures are logged only)
+      const fullOrder = order.order as {
+        number: string;
+        customerEmail: string | null;
+        customerPhone: string | null;
+        total: number;
+        currency: string | null;
+        shippingAddress: unknown;
+        shippingMethod: string | null;
+        items: Array<{
+          productTitle: string;
+          variantTitle: string | null;
+          sku: string;
+          quantity: number;
+          price: number;
+          total: number;
+        }>;
+      };
+      sendOrderNotificationToAdmin({
+        number: fullOrder.number,
+        customerEmail: fullOrder.customerEmail,
+        customerPhone: fullOrder.customerPhone,
+        total: fullOrder.total,
+        currency: fullOrder.currency ?? "AMD",
+        shippingAddress: fullOrder.shippingAddress,
+        shippingMethod: fullOrder.shippingMethod,
+        items: fullOrder.items,
+      }).catch(() => {});
 
       // Return order and payment info
       return {
