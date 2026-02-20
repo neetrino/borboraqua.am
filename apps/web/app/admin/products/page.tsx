@@ -1275,18 +1275,18 @@ export default function ProductsPage() {
                             </button>
                             <button
                               type="button"
-                              className="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                              className="p-1.5 text-black hover:text-gray-900 hover:bg-gray-100 rounded transition-colors"
                               onClick={() => handleDuplicateProduct(product.id, product.title)}
                               aria-label={t('admin.products.duplicate') || 'Duplicate'}
                               title={t('admin.products.duplicate') || 'Duplicate product'}
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                {/* Back square (offset to top-left) */}
-                                <rect x="2" y="2" width="16" height="16" rx="2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-                                {/* Front square (centered) */}
-                                <rect x="4" y="4" width="16" height="16" rx="2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
-                                {/* Plus sign in front square */}
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v8M8 12h8" />
+                                {/* Back square (dashed outline, offset to top-right) */}
+                                <rect x="8" y="1" width="16" height="16" rx="2" strokeDasharray="2 2" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} fill="none" />
+                                {/* Front square (solid filled, centered) */}
+                                <rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor" />
+                                {/* Plus sign in front square (rounded ends) */}
+                                <path stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v8M8 12h8" />
                               </svg>
                             </button>
                             <button

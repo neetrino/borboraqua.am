@@ -290,7 +290,7 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
                   key={star}
                   className={`w-6 h-6 ${
                     star <= Math.round(averageRating)
-                      ? 'text-yellow-400'
+                      ? 'text-[#00d1ff]'
                       : 'text-gray-300'
                   }`}
                   fill="currentColor"
@@ -348,10 +348,15 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
 
         {/* Review Form */}
         {showForm && (
-          <form onSubmit={editingReviewId ? handleUpdateReview : handleSubmit} className="mb-8 p-6 bg-gray-50 rounded-lg">
-            <h3 className="text-xl font-semibold  text-gray-900 mb-4">
-              {editingReviewId ? 'Update Your Review' : t('common.reviews.writeReview')}
-            </h3>
+          <div className="mb-8 relative max-w-6xl mx-auto">
+            {/* Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+            
+            {/* Form Container with Glassmorphism */}
+            <form onSubmit={editingReviewId ? handleUpdateReview : handleSubmit} className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+              <h3 className="text-xl font-semibold  text-gray-900 mb-4">
+                {editingReviewId ? 'Update Your Review' : t('common.reviews.writeReview')}
+              </h3>
 
             {/* Rating Selector */}
             <div className="mb-4">
@@ -393,18 +398,18 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 rows={5}
-                className=" w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-white/40 bg-white/60 backdrop-blur-sm rounded-[24px] focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/60 transition-colors"
                 placeholder={t('common.reviews.commentPlaceholder')}
                 required
               />
             </div>
 
             {/* Form Actions */}
-            <div className="flex gap-4">
+            <div className="flex gap-2 items-center">
               <ProductPageButton
                 type="submit"
                 disabled={submitting}
-                className="py-3"
+                className="flex-1 py-3 whitespace-nowrap"
               >
                 {submitting
                   ? t('common.reviews.submitting')
@@ -415,7 +420,7 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
               <ProductPageButton
                 type="button"
                 variant="outline"
-                className="py-3"
+                className="flex-1 py-3 whitespace-nowrap"
                 onClick={editingReviewId ? handleCancelEdit : () => {
                   setShowForm(false);
                   setRating(0);
@@ -426,6 +431,7 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
               </ProductPageButton>
             </div>
           </form>
+          </div>
         )}
       </div>
 

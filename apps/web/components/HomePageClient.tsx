@@ -1472,7 +1472,7 @@ export function HomePageClient({
       <div className="absolute h-[208px] lg:h-[260px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] top-[4200px] lg:top-[4200px] md:top-[3700px] sm:top-[3000px] w-[272px] lg:w-[340px] md:w-[45%] sm:w-[90%] z-[100]">
         <div className="absolute bg-white inset-[18.18%_0_0_-5%] rounded-[30px] lg:rounded-[37px]" />
         <div className="absolute aspect-[100/100] left-[34.13%] right-[34.93%] lg:left-[38%] lg:right-[38%] top-0">
-          <div className="absolute inset-[9.48%_0_18.97%_34.91%] overflow-hidden">
+          <div className="absolute inset-[11.48%_0_20.97%_32.91%] overflow-hidden">
             <div className="absolute inset-0">
               <img alt="PC Icon" className="block max-w-none size-full" src={img13} />
             </div>

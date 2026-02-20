@@ -1003,20 +1003,25 @@ export function FeaturedProductCard({
         </div>
 
         {/* Rounded Card with Price, Volume, and Add Button */}
-        <div className="absolute bg-[rgba(123,201,236,0.7)] inset-[59.39%_0_21.5%_0] rounded-2xl h-[33%] w-[95%] left-[3%]">
+        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[59.39%_0_21.5%_0] rounded-[20px] h-[38%] w-[98%] left-[1%]">
           {/* Title - left top corner */}
-          <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold left-[15px] top-[8px] right-[50px] justify-start leading-[0] text-left text-black overflow-hidden">
-            <p className="leading-[18px] break-words w-full line-clamp-3" style={{ fontSize: 'clamp(12px, 3.5vw, 16px)', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{product.title}</p>
+          <div className="absolute flex flex-col font-['Inter:Bold',sans-serif] font-bold left-[12px] top-[8px] right-[35px] justify-start leading-[0] text-left text-black overflow-hidden">
+            <p className="leading-[20px] break-words w-full line-clamp-3 " style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{product.title}</p>
           </div>
           
-          {/* Category - left bottom corner */}
-          {product.category && (
-            <div className="absolute flex flex-col font-['Montserrat:Bold',sans-serif] font-bold left-[15px] bottom-[8px] right-[50px] justify-start leading-[0] text-[16px] text-left text-gray-300 overflow-hidden">
-              <p className="leading-[16px] break-words w-full">{product.category}</p>
+          {/* Category/Volume - below title, left side */}
+          {(volume || product.category) && (
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#737373] text-[12px] top-[63px] tracking-[1.2px] uppercase whitespace-nowrap">
+              <p className="leading-[16px]">{volume || product.category}</p>
             </div>
           )}
           
-          {/* Add to Cart Button - right top corner */}
+          {/* Price - bottom left */}
+          <div className="absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] left-[12px] not-italic text-[16px] text-white bottom-[8px] whitespace-nowrap">
+            <p className="leading-[28px]">{formatPrice(product.price, currency)}</p>
+          </div>
+          
+          {/* Add to Cart Button - bottom right */}
           <button
             onClick={(e) => {
               e.preventDefault();
@@ -1024,25 +1029,13 @@ export function FeaturedProductCard({
               onAddToCart(product);
             }}
             disabled={isAddingToCart || !product.inStock}
-            className="absolute z-20 block cursor-pointer right-[8px] size-[45px] top-[8px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+            className="absolute z-20 block cursor-pointer right-[8px] size-[38px] bottom-[8px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
             aria-label={t('home.featuredProducts.addToCart')}
           >
-            <div className="flex flex-col font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] justify-center leading-[0] not-italic text-[30px] text-center text-white -mt-[3px]">
-              <p className="leading-[24px] whitespace-pre-wrap">+</p>
+            <div className="flex flex-col font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] justify-center leading-[0] not-italic text-[20px] text-center text-white -mt-[3px]">
+              <p className="leading-[20px] whitespace-pre-wrap">+</p>
             </div>
           </button>
-          
-          {/* Price - right bottom corner */}
-          <div className="absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] right-[15px] not-italic text-[16px] text-white bottom-[4px] whitespace-nowrap">
-            <p className="leading-[28px]">{formatPrice(product.price, currency)}</p>
-          </div>
-          
-          {/* Volume */}
-          {volume && (
-            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[15px] not-italic text-[#9f9f9f] text-[12px] top-[35px] tracking-[1.2px] uppercase whitespace-nowrap">
-              <p className="leading-[16px]">{volume}</p>
-            </div>
-          )}
         </div>
       </div>
     );
@@ -1058,7 +1051,7 @@ export function FeaturedProductCard({
         className="flex flex-col items-center gap-0 w-full cursor-pointer product-card-hover product-card-compact  z-[11] isolate rounded-[45px] p-2"
       >
         {/* Image Container - Same bottom alignment as home page card, -10% overlap */}
-        <div className={`${isMobile ? 'h-[220px]' : 'md:h-[440px]'}   w-full relative product-image-container flex items-end justify-center bg-transparent rounded-lg overflow-visible min-h-0 -mb-[10%]`}>
+        <div className={`${isRelated ? (isMobile ? 'h-[180px]' : 'md:h-[300px]') : (isMobile ? 'h-[220px]' : 'md:h-[440px]')}   w-full relative product-image-container flex items-end justify-center bg-transparent rounded-lg overflow-visible min-h-0 -mb-[10%]`}>
           {product.image ? (
             <img
               
@@ -1076,12 +1069,14 @@ export function FeaturedProductCard({
         <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative">
           <div className="flex items-start justify-between w-full gap-2">
             <div className="flex flex-col items-start flex-1 min-w-0 pr-2 overflow-hidden">
-              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-black w-full">
-                <p className="leading-[20px] break-words w-full">{product.title}</p>
+              {/* Title - large, bold, dark */}
+              <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[16px] text-black w-full">
+                <p className="leading-[24px] break-words w-full line-clamp-2">{product.title}</p>
               </div>
+              {/* Category - below title, smaller, lighter gray */}
               {product.category && (
-                <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] text-gray-500 mt-1 w-full">
-                  <p className="leading-[20px] break-words">{product.category}</p>
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[12px] text-[#737373] mt-1 w-full tracking-[1.2px] uppercase">
+                  <p className="leading-[16px] break-words line-clamp-1">{product.category}</p>
                 </div>
               )}
             </div>

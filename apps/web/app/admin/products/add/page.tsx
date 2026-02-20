@@ -311,6 +311,36 @@ function AddProductPageContent() {
     fetchData();
   }, []);
 
+  // Add new categories to categories list so they appear in "Select existing categories" dropdown
+  useEffect(() => {
+    if (newCategories.length > 0) {
+      setCategories((prev) => {
+        // Get existing category names to avoid duplicates
+        const existingNames = new Set(prev.map((cat) => cat.title.toLowerCase()));
+        
+        // Add new categories that don't already exist
+        const newCategoriesToAdd = newCategories
+          .filter((newCat) => !existingNames.has(newCat.name.toLowerCase()))
+          .map((newCat, index) => ({
+            id: `temp-${Date.now()}-${index}`, // Temporary ID until saved
+            title: newCat.name,
+            slug: newCat.name.toLowerCase().replace(/\s+/g, '-'),
+            parentId: null,
+            requiresSizes: newCat.requiresSizes,
+          }));
+        
+        // Remove old temporary categories that are no longer in newCategories
+        const newCategoryNames = new Set(newCategories.map((cat) => cat.name.toLowerCase()));
+        const filteredPrev = prev.filter((cat) => !cat.id.startsWith('temp-') || newCategoryNames.has(cat.title.toLowerCase()));
+        
+        return [...filteredPrev, ...newCategoriesToAdd];
+      });
+    } else {
+      // Remove all temporary categories when newCategories is empty
+      setCategories((prev) => prev.filter((cat) => !cat.id.startsWith('temp-')));
+    }
+  }, [newCategories]);
+
   // Close category dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -2005,8 +2035,21 @@ function AddProductPageContent() {
             });
             if (categoryResponse.data) {
               createdCategoryIds.push(categoryResponse.data.id);
-              // Add to categories list for future use
-              setCategories((prev) => [...prev, categoryResponse.data]);
+              // Replace temporary category with real one, or add if not found
+              setCategories((prev) => {
+                const tempCategoryIndex = prev.findIndex(
+                  (cat) => cat.id.startsWith('temp-') && cat.title.toLowerCase() === category.name.toLowerCase()
+                );
+                if (tempCategoryIndex !== -1) {
+                  // Replace temporary category with real one
+                  const newCategories = [...prev];
+                  newCategories[tempCategoryIndex] = categoryResponse.data;
+                  return newCategories;
+                } else {
+                  // Add new category if temporary not found
+                  return [...prev, categoryResponse.data];
+                }
+              });
               console.log('✅ [ADMIN] Category created:', categoryResponse.data.id, 'requiresSizes:', categoryResponse.data.requiresSizes);
               creationMessages.push(
                 category.requiresSizes 
@@ -3616,31 +3659,8 @@ function AddProductPageContent() {
                       </label>
                     </div>
                     {!useNewCategory ? (
-                      <div className="relative" data-category-dropdown>
-                        <button
-                          type="button"
-                          onClick={() => setCategoriesExpanded(!categoriesExpanded)}
-                          className="w-full px-3 py-2 text-left border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-sm flex items-center justify-between"
-                        >
-                          <span className="text-gray-700">
-                            {formData.categoryIds.length === 0
-                              ? t('admin.products.add.selectCategories')
-                              : formData.categoryIds.length === 1 
-                                ? t('admin.products.add.categorySelected').replace('{count}', formData.categoryIds.length.toString())
-                                : t('admin.products.add.categoriesSelected').replace('{count}', formData.categoryIds.length.toString())}
-                          </span>
-                          <svg
-                            className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
-                              categoriesExpanded ? 'transform rotate-180' : ''
-                            }`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </button>
-                        {categoriesExpanded && (() => {
+                      <div className="border border-gray-300 rounded-md bg-white max-h-60 overflow-y-auto" data-category-dropdown>
+                        {(() => {
                           // Build category tree structure
                           const categoryMap = new Map<string, Category & { children: Category[] }>();
                           const rootCategories: (Category & { children: Category[] })[] = [];
@@ -3677,10 +3697,14 @@ function AddProductPageContent() {
                           const displayCategories = flattenTree(rootCategories);
 
                           return (
-                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                              <div className="p-2">
-                                <div className="space-y-1">
-                                  {displayCategories.map((category) => (
+                            <div className="p-2">
+                              <div className="space-y-1">
+                                {displayCategories.length === 0 ? (
+                                  <div className="p-2 text-sm text-gray-500 text-center">
+                                    {t('admin.products.noCategoriesAvailable')}
+                                  </div>
+                                ) : (
+                                  displayCategories.map((category) => (
                                     <label
                                       key={category.id}
                                       className={`flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded ${
@@ -3733,8 +3757,8 @@ function AddProductPageContent() {
                                         {category.title}
                                       </span>
                                     </label>
-                                  ))}
-                                </div>
+                                  ))
+                                )}
                               </div>
                             </div>
                           );

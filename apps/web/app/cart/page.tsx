@@ -507,11 +507,6 @@ export default function CartPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               {t('common.cart.empty')}
             </h2>
-            <Link href="/products">
-              <ProductPageButton variant="primary" className="mt-6 py-3">
-                {t('common.buttons.browseProducts')}
-              </ProductPageButton>
-            </Link>
           </div>
         </div>
       </div>
@@ -550,7 +545,7 @@ export default function CartPage() {
           {cart.items.map((item) => (
             <div
               key={item.id}
-              className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 px-4 sm:px-6 py-6 bg-white/50 backdrop-blur-sm rounded-[12px] border border-white/30 hover:bg-white/60 transition-colors relative"
+              className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 px-4 sm:px-6 py-6 bg-white/50 backdrop-blur-sm rounded-[24px] border border-white/30 hover:bg-white/60 transition-colors relative"
             >
               <button
                 onClick={() => handleRemoveItem(item.id)}
@@ -713,14 +708,6 @@ export default function CartPage() {
                 className="w-full py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300"
               >
                 {t('common.buttons.proceedToCheckout')}
-              </button>
-              <button
-                onClick={() => {
-                  window.location.href = '/products';
-                }}
-                className="w-full mt-3 py-2.5 px-6 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 text-gray-900 font-semibold text-base shadow-inner hover:bg-white/60 transition-all duration-300"
-              >
-                {t('common.buttons.browseProducts')}
               </button>
             </div>
           </div>

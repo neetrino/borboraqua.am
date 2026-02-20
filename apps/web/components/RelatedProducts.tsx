@@ -56,14 +56,9 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
   const { t: tClient } = useTranslation();
   const [products, setProducts] = useState<RelatedProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [visibleCards, setVisibleCards] = useState(4);
+  const [carouselIndex, setCarouselIndex] = useState(0);
   const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set());
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const [hasMoved, setHasMoved] = useState(false);
-  const carouselRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
   // Initialize language with 'en' to match server-side default and prevent hydration mismatch
   const [language, setLanguage] = useState<LanguageCode>('en');
   // Initialize currency with 'AMD' to match server-side default and prevent hydration mismatch
@@ -105,6 +100,27 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     };
   }, []);
 
+  // Detect mobile screen size
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const checkMobile = () => {
+      setIsMobile(mediaQuery.matches);
+    };
+    
+    checkMobile();
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', checkMobile);
+      return () => mediaQuery.removeEventListener('change', checkMobile);
+    } else {
+      mediaQuery.addListener(checkMobile);
+      window.addEventListener('resize', checkMobile);
+      return () => {
+        mediaQuery.removeListener(checkMobile);
+        window.removeEventListener('resize', checkMobile);
+      };
+    }
+  }, []);
+
   useEffect(() => {
     const fetchRelatedProducts = async () => {
       try {
@@ -128,16 +144,31 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
         
         const response = await apiClient.get<{
           data: RelatedProduct[];
-          meta: {
+          meta?: {
             total: number;
           };
-        }>('/api/v1/products', {
+        } | RelatedProduct[]>('/api/v1/products', {
           params,
         });
 
-        console.log('[RelatedProducts] Received products:', response.data.length);
+        // Handle both response structures: { data: [...], meta: {...} } or direct array
+        const productsArray = Array.isArray(response) 
+          ? response 
+          : (response?.data || []);
+        
+        console.log('[RelatedProducts] API Response structure:', {
+          isArray: Array.isArray(response),
+          hasData: !Array.isArray(response) && !!response?.data,
+          productsCount: productsArray.length,
+        });
+        console.log('[RelatedProducts] First product sample:', productsArray[0] ? {
+          id: productsArray[0].id,
+          title: productsArray[0].title,
+          categories: productsArray[0].categories,
+        } : 'No products');
+        
         // Filter out current product and take exactly 10
-        const filtered = response.data.filter(p => p.id !== currentProductId);
+        const filtered = productsArray.filter(p => p.id !== currentProductId);
         console.log('[RelatedProducts] After filtering current product:', filtered.length);
         const finalProducts = filtered.slice(0, 10);
         console.log('[RelatedProducts] Final products to display:', finalProducts.length);
@@ -173,213 +204,50 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     };
   }, [language]);
 
-  // Determine visible cards based on screen size
-  useEffect(() => {
-    const updateVisibleCards = () => {
-      const width = window.innerWidth;
-      if (width < 640) {
-        setVisibleCards(1); // mobile
-      } else if (width < 1024) {
-        setVisibleCards(2); // tablet
-      } else if (width < 1280) {
-        setVisibleCards(3); // desktop
-      } else {
-        setVisibleCards(4); // large desktop
-      }
-    };
-
-    updateVisibleCards();
-    window.addEventListener('resize', updateVisibleCards);
-    return () => window.removeEventListener('resize', updateVisibleCards);
-  }, []);
-
-  // Auto-rotate carousel
-  useEffect(() => {
-    if (products.length <= visibleCards || isDragging) return; // Don't auto-rotate if all products are visible or if dragging
-    
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => {
-        const maxIndex = Math.max(0, products.length - visibleCards);
-        return prevIndex >= maxIndex ? 0 : prevIndex + 1;
-      });
-    }, 5000); // Change every 5 seconds
-
-    return () => clearInterval(interval);
-  }, [products.length, visibleCards, isDragging]);
-
-  // Adjust currentIndex when visibleCards changes
-  useEffect(() => {
-    const maxIndex = Math.max(0, products.length - visibleCards);
-    setCurrentIndex((prevIndex) => {
-      if (prevIndex > maxIndex) {
-        return maxIndex;
-      }
-      return prevIndex;
-    });
-  }, [visibleCards, products.length]);
-
-  // Update currentIndex based on scroll position for mobile
-  useEffect(() => {
-    if (visibleCards > 1 || !carouselRef.current) return; // Only for mobile with native scroll
-    
-    const handleScroll = () => {
-      if (!carouselRef.current) return;
-      const scrollLeft = carouselRef.current.scrollLeft;
-      const clientWidth = carouselRef.current.clientWidth;
-      
-      // Calculate which card is currently visible
-      // Card width is min(85vw, 320px) + padding (24px total: 12px on each side)
-      const cardWidth = Math.min(clientWidth * 0.85, 320) + 24;
-      const currentCardIndex = Math.round(scrollLeft / cardWidth);
-      const clampedIndex = Math.max(0, Math.min(products.length - 1, currentCardIndex));
-      
-      setCurrentIndex((prevIndex) => {
-        if (prevIndex !== clampedIndex) {
-          return clampedIndex;
-        }
-        return prevIndex;
-      });
-    };
-
-    const carousel = carouselRef.current;
-    carousel.addEventListener('scroll', handleScroll);
-    
-    return () => {
-      carousel.removeEventListener('scroll', handleScroll);
-    };
-  }, [visibleCards, products.length]);
-
-  const goToPrevious = () => {
-    setCurrentIndex((prevIndex) => {
-      const maxIdx = Math.max(0, products.length - visibleCards);
-      return prevIndex === 0 ? maxIdx : prevIndex - 1;
-    });
-  };
-
-  const goToNext = () => {
-    setCurrentIndex((prevIndex) => {
-      const maxIdx = Math.max(0, products.length - visibleCards);
-      return prevIndex >= maxIdx ? 0 : prevIndex + 1;
-    });
-  };
-
   /**
-   * Handle mouse down for dragging
+   * Handle carousel navigation - similar to home page
    */
-  const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-    if (!carouselRef.current) return;
-    setHasMoved(false);
-    setIsDragging(true);
-    setStartX(e.pageX);
-    setScrollLeft(currentIndex);
-  };
-
-  /**
-   * Handle mouse move for dragging
-   */
-  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!isDragging || !carouselRef.current) return;
-    const x = e.pageX;
-    const deltaX = x - startX;
-    const absDeltaX = Math.abs(deltaX);
-    
-    // Only consider it dragging if mouse moved more than 5px
-    if (absDeltaX > 5) {
-      setHasMoved(true);
+  const handlePreviousProducts = (e?: React.MouseEvent) => {
+    if (e) {
       e.preventDefault();
-      
-      // Calculate how many cards to move based on drag distance
-      const containerWidth = carouselRef.current.offsetWidth;
-      const cardWidthPercent = 100 / visibleCards;
-      const cardWidthPixels = containerWidth / visibleCards;
-      const cardsMoved = deltaX / cardWidthPixels;
-      const newIndex = Math.round(scrollLeft - cardsMoved);
-      const maxIdx = Math.max(0, products.length - visibleCards);
-      const clampedIndex = Math.max(0, Math.min(maxIdx, newIndex));
-      setCurrentIndex(clampedIndex);
+      e.stopPropagation();
     }
-  };
-
-  /**
-   * Handle mouse up/leave to stop dragging
-   */
-  const handleMouseUp = () => {
-    const wasDragging = isDragging;
-    const didMove = hasMoved;
-    setIsDragging(false);
-    // Reset hasMoved after a short delay to allow click events to process
-    // Only reset if we were actually dragging
-    if (wasDragging && didMove) {
-      setTimeout(() => setHasMoved(false), 150);
-    } else {
-      setHasMoved(false);
-    }
-  };
-
-  /**
-   * Handle touch start for mobile dragging
-   */
-  const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
-    if (!carouselRef.current) return;
-    setHasMoved(false);
-    setIsDragging(true);
-    setStartX(e.touches[0].pageX);
-    setScrollLeft(currentIndex);
-  };
-
-  /**
-   * Handle touch move for mobile dragging
-   */
-  const handleTouchMove = (e: TouchEvent<HTMLDivElement>) => {
-    if (!isDragging || !carouselRef.current) return;
-    const x = e.touches[0].pageX;
-    const deltaX = x - startX;
-    const absDeltaX = Math.abs(deltaX);
-    
-    // Only consider it dragging if touch moved more than 5px
-    if (absDeltaX > 5) {
-      setHasMoved(true);
-      
-      // Calculate how many cards to move based on drag distance
-      const containerWidth = carouselRef.current.offsetWidth;
-      const cardWidthPixels = containerWidth / visibleCards;
-      const cardsMoved = deltaX / cardWidthPixels;
-      const newIndex = Math.round(scrollLeft - cardsMoved);
-      const maxIdx = Math.max(0, products.length - visibleCards);
-      const clampedIndex = Math.max(0, Math.min(maxIdx, newIndex));
-      setCurrentIndex(clampedIndex);
-    }
-  };
-
-  /**
-   * Handle touch end to stop dragging
-   */
-  const handleTouchEnd = () => {
-    const wasDragging = isDragging;
-    const didMove = hasMoved;
-    setIsDragging(false);
-    // Reset hasMoved after a short delay to allow click events to process
-    // Only reset if we were actually dragging
-    if (wasDragging && didMove) {
-      setTimeout(() => setHasMoved(false), 150);
-    } else {
-      setHasMoved(false);
-    }
-  };
-
-  /**
-   * Handle wheel scroll for horizontal scrolling
-   */
-  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-    if (e.deltaY === 0) return;
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? 1 : -1;
-    setCurrentIndex((prevIndex) => {
-      const maxIdx = Math.max(0, products.length - visibleCards);
-      const newIndex = prevIndex + delta;
-      return Math.max(0, Math.min(maxIdx, newIndex));
+    setCarouselIndex((prevIndex) => {
+      const visibleCount = isMobile ? 2 : 3;
+      // Calculate current page (0-based)
+      const currentPage = Math.floor(prevIndex / visibleCount);
+      // Move to previous page
+      const newPage = currentPage - 1;
+      const totalPages = Math.ceil(products.length / visibleCount);
+      // If we go below 0, loop to the last page
+      if (newPage < 0) {
+        const lastPage = Math.max(0, totalPages - 1);
+        return lastPage * visibleCount;
+      }
+      return newPage * visibleCount;
     });
   };
+
+  const handleNextProducts = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setCarouselIndex((prevIndex) => {
+      const visibleCount = isMobile ? 2 : 3;
+      // Calculate current page (0-based)
+      const currentPage = Math.floor(prevIndex / visibleCount);
+      // Move to next page
+      const newPage = currentPage + 1;
+      const totalPages = Math.ceil(products.length / visibleCount);
+      // If we go beyond max, loop to 0
+      if (newPage >= totalPages) {
+        return 0;
+      }
+      return newPage * visibleCount;
+    });
+  };
+
 
   /**
    * Handle opening product page
@@ -429,19 +297,33 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
   };
 
   // Convert RelatedProduct to FeaturedProduct format
-  const convertToFeaturedProduct = (product: RelatedProduct): FeaturedProduct => ({
-    id: product.id,
-    slug: product.slug,
-    title: product.title,
-    description: product.description || undefined,
-    price: product.price,
-    image: product.image,
-    inStock: product.inStock,
-    minimumOrderQuantity: product.minimumOrderQuantity,
-    orderQuantityIncrement: product.orderQuantityIncrement,
-    defaultVariantId: product.defaultVariantId || null,
-    brand: product.brand || null,
-  });
+  const convertToFeaturedProduct = (product: RelatedProduct): FeaturedProduct => {
+    // Get category - check both categories array and direct category field
+    const category = product.categories && product.categories.length > 0 
+      ? product.categories[0].title 
+      : undefined;
+    
+    console.log('[RelatedProducts] Converting product:', {
+      id: product.id,
+      title: product.title,
+      categories: product.categories,
+      category,
+    });
+    
+    return {
+      id: product.id,
+      slug: product.slug,
+      title: product.title,
+      category,
+      price: product.price,
+      image: product.image,
+      inStock: product.inStock,
+      minimumOrderQuantity: product.minimumOrderQuantity,
+      orderQuantityIncrement: product.orderQuantityIncrement,
+      defaultVariantId: product.defaultVariantId || null,
+      brand: product.brand || null,
+    };
+  };
 
   // Always show the section, even if no products (will show loading or empty state)
   return (
@@ -451,7 +333,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
         
         {loading ? (
           // Loading state
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-square bg-gray-200 rounded-lg mb-4"></div>
@@ -466,64 +348,17 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
             <p className="text-gray-500 text-lg">{t(language, 'product.noRelatedProducts')}</p>
           </div>
         ) : (
-          // Products Carousel
-          <div className="relative related-products-carousel w-full overflow-visible">
-            {/* Carousel Container */}
-            <div 
-              ref={carouselRef}
-              className={`relative related-products-carousel-container w-full ${visibleCards === 1 ? 'overflow-x-auto' : 'overflow-hidden'} cursor-grab active:cursor-grabbing select-none scrollbar-hide`}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onWheel={visibleCards > 1 ? handleWheel : undefined}
-              onMouseEnter={(e) => {
-                if (visibleCards > 1) {
-                  e.currentTarget.classList.add('allow-overflow');
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (visibleCards > 1) {
-                  e.currentTarget.classList.remove('allow-overflow');
-                }
-              }}
-              style={{
-                WebkitOverflowScrolling: 'touch',
-                scrollSnapType: visibleCards === 1 ? 'x mandatory' : 'none',
-                paddingRight: visibleCards > 1 ? '0' : '0',
-              }}
-            >
-              <div
-                className="flex items-stretch flex-row"
-                style={{
-                  transform: visibleCards > 1 ? `translateX(-${currentIndex * (100 / visibleCards)}%)` : 'none',
-                  transition: visibleCards > 1 && !isDragging ? 'transform 0.5s ease-in-out' : 'none',
-                  width: visibleCards > 1 ? `${products.length * (100 / visibleCards)}%` : 'auto',
-                }}
-              >
-                {products.map((product, index) => {
+          // Products Carousel - Similar to home page
+          <div className="relative">
+            {/* Products Grid - Show products based on carouselIndex */}
+            <div className={isMobile ? "grid grid-cols-2 gap-4 justify-center items-start" : "flex gap-12 lg:gap-12 md:gap-10 sm:gap-8 justify-center items-start"}>
+              {(() => {
+                const visibleCount = isMobile ? 2 : 3;
+                const visibleProducts = products.slice(carouselIndex, carouselIndex + visibleCount);
+                return visibleProducts.map((product) => {
                   const featuredProduct = convertToFeaturedProduct(product);
-                  const isLastItem = index === products.length - 1;
                   return (
-                    <div
-                      key={product.id}
-                      className="flex-shrink-0 px-3 h-full snap-start"
-                      style={{ 
-                        width: visibleCards === 1 ? 'min(85vw, 320px)' : `${100 / visibleCards}%`,
-                        paddingRight: isLastItem && visibleCards > 1 ? '0' : undefined,
-                      }}
-                      onClick={(e) => {
-                        // Prevent navigation if we actually dragged
-                        if (hasMoved) {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          return;
-                        }
-                      }}
-                    >
+                    <div key={product.id} className={isMobile ? "w-full" : "max-w-[280px] w-full"}>
                       <FeaturedProductCard
                         product={featuredProduct}
                         router={router}
@@ -534,86 +369,111 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                         onProductClick={handleOpenProduct}
                         formatPrice={(price: number, curr?: any) => formatPrice(price, curr || currency)}
                         currency={currency}
+                        isMobile={isMobile}
                         compact={true}
                         isRelated={true}
                       />
                     </div>
                   );
-                })}
-              </div>
+                });
+              })()}
             </div>
 
-            {/* Navigation Arrows - Only show on desktop (hidden on mobile) */}
-            {products.length > visibleCards && (
+            {/* Navigation Arrows and Pagination - Mobile: arrows next to pagination, Desktop: arrows on sides */}
+            {products.length > (isMobile ? 2 : 3) && (
               <>
-                <FeaturedProductsNavigationArrow
-                  direction="next"
-                  onClick={(e?: React.MouseEvent) => {
-                    if (e) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }
-                    goToNext();
-                  }}
-                  className="hidden min-[1025px]:block absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-8 sm:translate-x-12 md:translate-x-16 lg:translate-x-20 rotate-180 z-20 size-[32px] sm:size-[36px] md:size-[42px] lg:size-[48px] !border-black hover:!border-black !p-0 flex items-center justify-center [&_path]:fill-black [&_path]:hover:fill-black [&_svg]:m-auto"
-                  ariaLabel="Next products"
-                />
-
-                <FeaturedProductsNavigationArrow
-                  direction="prev"
-                  onClick={(e?: React.MouseEvent) => {
-                    if (e) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }
-                    goToPrevious();
-                  }}
-                  className="hidden min-[1025px]:block absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-8 sm:-translate-x-12 md:-translate-x-16 lg:-translate-x-20 rotate-180 z-20 size-[32px] sm:size-[36px] md:size-[42px] lg:size-[48px] !border-black hover:!border-black !p-0 flex items-center justify-center [&_path]:fill-black [&_path]:hover:fill-black [&_svg]:m-auto"
-                  ariaLabel="Previous products"
-                />
-              </>
-            )}
-
-            {/* Dots Indicator - Only show if there are more products than visible */}
-            {products.length > visibleCards && (
-              <div className="flex justify-center gap-2 mt-6">
-                {Array.from({ 
-                  length: visibleCards === 1 ? products.length : Math.ceil(products.length / visibleCards) 
-                }).map((_, index) => {
-                  // For mobile (visibleCards === 1), each dot represents one product
-                  // For desktop, each dot represents a page of visibleCards products
-                  const startIndex = visibleCards === 1 ? index : index * visibleCards;
-                  const endIndex = visibleCards === 1 ? index + 1 : Math.min(startIndex + visibleCards, products.length);
-                  
-                  // For mobile, check exact match; for desktop, check if currentIndex is within page range
-                  const isActive = visibleCards === 1 
-                    ? currentIndex === index
-                    : currentIndex >= startIndex && currentIndex < endIndex;
-                  
-                  return (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        if (visibleCards === 1 && carouselRef.current) {
-                          // For mobile, scroll to the card
-                          const cardWidth = Math.min(carouselRef.current.clientWidth * 0.85, 320);
-                          carouselRef.current.scrollTo({
-                            left: index * (cardWidth + 24), // cardWidth + padding
-                            behavior: 'smooth'
-                          });
-                        }
-                        setCurrentIndex(startIndex);
-                      }}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        isActive
-                          ? 'bg-[#00d1ff] w-8'
-                          : 'bg-gray-300 hover:bg-[#00d1ff]/50 w-2'
-                      }`}
-                      aria-label={`Go to slide ${index + 1}`}
+                {isMobile ? (
+                  // Mobile: Arrows next to pagination dots
+                  <div className="flex items-center justify-center gap-8 sm:gap-12 md:gap-16 pt-[2px] mt-6">
+                    {/* Next Button - Left side */}
+                    <FeaturedProductsNavigationArrow
+                      direction="next"
+                      onClick={handleNextProducts}
+                      className="size-[56px] relative border-[#eee] [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
+                      ariaLabel="Next products"
                     />
-                  );
-                })}
-              </div>
+
+                    {/* Pagination Dots */}
+                    <div className="flex items-center justify-center gap-2">
+                      {(() => {
+                        const visibleCount = 2;
+                        const totalPages = Math.ceil(products.length / visibleCount);
+                        return Array.from({ length: totalPages }).map((_, index) => {
+                          const pageStartIndex = index * visibleCount;
+                          const isActive = carouselIndex === pageStartIndex;
+                          
+                          return (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => setCarouselIndex(pageStartIndex)}
+                              className={`rounded-full transition-all duration-300 ${
+                                isActive
+                                  ? 'bg-[#00d1ff] h-[6px] w-[16px]'
+                                  : 'bg-[#e2e8f0] size-[6px] hover:bg-[#00d1ff]/50'
+                              }`}
+                              aria-label={`Go to page ${index + 1}`}
+                            />
+                          );
+                        });
+                      })()}
+                    </div>
+
+                    {/* Previous Button - Right side */}
+                    <FeaturedProductsNavigationArrow
+                      direction="prev"
+                      onClick={handlePreviousProducts}
+                      className="size-[56px] relative border-[#eee] [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
+                      ariaLabel="Previous products"
+                    />
+                  </div>
+                ) : (
+                  // Desktop: Arrows on sides, pagination below
+                  <>
+                    {/* Next Button - Left side */}
+                    <FeaturedProductsNavigationArrow
+                      direction="next"
+                      onClick={handleNextProducts}
+                      className="left-[calc(50%-580px)] lg:left-[calc(50%-580px)] md:left-[calc(50%-530px)] top-1/2 -translate-y-1/2"
+                      ariaLabel="Next products"
+                    />
+
+                    {/* Previous Button - Right side */}
+                    <FeaturedProductsNavigationArrow
+                      direction="prev"
+                      onClick={handlePreviousProducts}
+                      className="right-[calc(50%-580px)] lg:right-[calc(50%-580px)] md:right-[calc(50%-530px)] top-1/2 -translate-y-1/2"
+                      ariaLabel="Previous products"
+                    />
+
+                    {/* Pagination Dots */}
+                    <div className="flex items-center justify-center gap-2 mt-6">
+                      {(() => {
+                        const visibleCount = 3;
+                        const totalPages = Math.ceil(products.length / visibleCount);
+                        return Array.from({ length: totalPages }).map((_, index) => {
+                          const pageStartIndex = index * visibleCount;
+                          const isActive = carouselIndex === pageStartIndex;
+                          
+                          return (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => setCarouselIndex(pageStartIndex)}
+                              className={`rounded-full transition-all duration-300 ${
+                                isActive
+                                  ? 'bg-[#00d1ff] h-[6px] w-[16px]'
+                                  : 'bg-[#e2e8f0] size-[6px] hover:bg-[#00d1ff]/50'
+                              }`}
+                              aria-label={`Go to page ${index + 1}`}
+                            />
+                          );
+                        });
+                      })()}
+                    </div>
+                  </>
+                )}
+              </>
             )}
           </div>
         )}
