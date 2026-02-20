@@ -25,6 +25,15 @@ export type OrderForAdminEmail = {
   items: OrderItemForEmail[];
 };
 
+function formatCustomerName(addr: unknown): string {
+  if (addr == null || typeof addr !== "object") return "—";
+  const o = addr as Record<string, unknown>;
+  const first = o.firstName != null ? String(o.firstName).trim() : "";
+  const last = o.lastName != null ? String(o.lastName).trim() : "";
+  const name = [first, last].filter(Boolean).join(" ");
+  return name || "—";
+}
+
 function formatAddress(addr: unknown): string {
   if (addr == null) return "—";
   if (typeof addr === "string") return addr;
@@ -47,6 +56,7 @@ function formatAddress(addr: unknown): string {
 }
 
 function buildOrderAdminHtml(order: OrderForAdminEmail): string {
+  const customerName = formatCustomerName(order.shippingAddress);
   const addressText = formatAddress(order.shippingAddress);
   const rows = order.items
     .map(
@@ -78,7 +88,11 @@ function buildOrderAdminHtml(order: OrderForAdminEmail): string {
     <div style="padding:28px;">
       <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
         <tr>
-          <td style="padding:6px 0;color:#64748b;font-size:14px;width:140px;">Email клиента</td>
+          <td style="padding:6px 0;color:#64748b;font-size:14px;width:140px;">Заказчик</td>
+          <td style="padding:6px 0;font-size:14px;">${escapeHtml(customerName)}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#64748b;font-size:14px;">Email клиента</td>
           <td style="padding:6px 0;font-size:14px;">${escapeHtml(order.customerEmail ?? "—")}</td>
         </tr>
         <tr>
@@ -145,6 +159,9 @@ export async function sendOrderNotificationToAdmin(
 ): Promise<void> {
   const adminEmail = process.env.ADMIN_EMAIL?.trim();
   if (!adminEmail) {
+    console.warn(
+      "[EMAIL] ADMIN_EMAIL is not set — skipping order notification to admin. Add ADMIN_EMAIL to .env (root or apps/web) and restart the dev server."
+    );
     return;
   }
 
@@ -155,6 +172,7 @@ export async function sendOrderNotificationToAdmin(
       html: buildOrderAdminHtml(order),
       text: [
         `Новый заказ #${order.number}`,
+        `Заказчик: ${formatCustomerName(order.shippingAddress)}`,
         `Клиент: ${order.customerEmail ?? "—"}, ${order.customerPhone ?? "—"}`,
         `Адрес: ${formatAddress(order.shippingAddress)}`,
         ``,
@@ -168,6 +186,7 @@ export async function sendOrderNotificationToAdmin(
         `Итого: ${formatMoney(order.total)} ${order.currency}`,
       ].join("\n"),
     });
+    console.log("[EMAIL] Order notification sent to admin:", adminEmail);
   } catch (err) {
     console.error("[EMAIL] Failed to send order notification to admin:", err);
   }
