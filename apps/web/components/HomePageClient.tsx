@@ -842,10 +842,10 @@ export function HomePageClient({
         <div className="absolute bg-gradient-to-b blur-[40px] from-[rgba(98,179,232,0.8)] h-[150px] left-0 right-0 opacity-70 to-[rgba(221,216,216,0.6)] top-[700px] z-0" />
 
         {/* Mobile CTA Buttons */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[8px] h-[136px] items-center justify-end left-1/2 pt-[16px] top-[600px] w-full max-w-[430px] px-4 z-10">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col min-[728px]:flex-row gap-[8px] min-[728px]:gap-[12px] h-[136px] min-[728px]:h-[60px] items-center justify-end left-1/2 pt-[16px] min-[728px]:pt-0 top-[600px] min-[728px]:top-[680px] w-full max-w-[430px] min-[728px]:max-w-[600px] px-4 z-10">
           <button
             onClick={() => router.push('/products')}
-            className="bg-[#31daff] content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] py-[16px] relative rounded-[9999px] shrink-0 w-full max-w-[368px] cursor-pointer transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#31daff]/50 hover:scale-105 active:scale-95"
+            className="bg-[#31daff] content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#31daff]/50 hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white whitespace-nowrap">
               <p className="leading-[24px]">{t('home.hero.shopNow')}</p>
@@ -853,7 +853,7 @@ export function HomePageClient({
           </button>
           <button
             onClick={() => router.push('/about')}
-            className="bg-[rgba(0,0,0,0)] border-2 border-white/30 content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] py-[16px] relative rounded-[9999px] shrink-0 w-full max-w-[368px] cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:shadow-lg hover:shadow-white/20 hover:scale-105 active:scale-95"
+            className="bg-[rgba(0,0,0,0)] border-2 border-white/30 content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:shadow-lg hover:shadow-white/20 hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold h-[19px] justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
               <p className="leading-[24px] whitespace-nowrap">{t('home.hero.learnMore')}</p>
@@ -885,27 +885,49 @@ export function HomePageClient({
           <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-7 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} />
         </div>
 
-        {/* Mobile Featured Products - 4 products in 2x2 grid */}
+        {/* Mobile Featured Products - 4 products in 2x2 grid, 9 products in 3x3 grid from 728px */}
         {featuredProducts.length > 0 && (() => {
           const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 4);
+          const visibleProductsTablet = featuredProducts.slice(carouselIndex, carouselIndex + 9);
           return (
-            <div className="-translate-x-1/2 absolute content-stretch grid grid-cols-2 gap-[16px] items-center justify-center left-1/2 top-[1088px] w-full max-w-[400px] px-4">
-              {visibleProducts.map((product) => (
-                <FeaturedProductCard
-                  key={product.id}
-                  product={product}
-                  router={router}
-                  t={t}
-                  isLoggedIn={isLoggedIn}
-                  isAddingToCart={addingToCart.has(product.id)}
-                  onAddToCart={handleAddToCart}
-                  onProductClick={handleOpenProduct}
-                  formatPrice={formatPrice}
-                  currency={getStoredCurrency()}
-                  isMobile={true}
-                />
-              ))}
-            </div>
+            <>
+              {/* Mobile: 2x2 grid */}
+              <div className="-translate-x-1/2 absolute content-stretch grid grid-cols-2 min-[728px]:hidden gap-[16px] items-center justify-center left-1/2 top-[1088px] w-full max-w-[400px] px-4">
+                {visibleProducts.map((product) => (
+                  <FeaturedProductCard
+                    key={product.id}
+                    product={product}
+                    router={router}
+                    t={t}
+                    isLoggedIn={isLoggedIn}
+                    isAddingToCart={addingToCart.has(product.id)}
+                    onAddToCart={handleAddToCart}
+                    onProductClick={handleOpenProduct}
+                    formatPrice={formatPrice}
+                    currency={getStoredCurrency()}
+                    isMobile={true}
+                  />
+                ))}
+              </div>
+              {/* Tablet: 3x3 grid from 728px */}
+              <div className="-translate-x-1/2 absolute content-stretch grid grid-cols-3 hidden min-[728px]:grid gap-[16px] items-center justify-center left-1/2 top-[1088px] w-full max-w-[700px] px-4">
+                {visibleProductsTablet.map((product) => (
+                  <FeaturedProductCard
+                    key={product.id}
+                    product={product}
+                    router={router}
+                    t={t}
+                    isLoggedIn={isLoggedIn}
+                    isAddingToCart={addingToCart.has(product.id)}
+                    onAddToCart={handleAddToCart}
+                    onProductClick={handleOpenProduct}
+                    formatPrice={formatPrice}
+                    currency={getStoredCurrency()}
+                    isMobile={true}
+                  />
+                ))}
+              </div>
+            </>
           );
         })()}
         {/* Mobile View All Products Button */}
@@ -931,7 +953,7 @@ export function HomePageClient({
           </button>
         </div>
         {/* Mobile Stats Cards */}
-        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[1900px] w-full max-w-[400px] px-4">
+        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[1900px] w-full max-w-[400px] min-[728px]:max-w-[700px] px-4">
           <div className="h-[227px] relative rounded-[30px] shrink-0 w-[calc(50%-4px)] min-w-0 overflow-hidden">
             <img
               alt=""
@@ -941,35 +963,35 @@ export function HomePageClient({
           </div>
           <div className="h-[227px] relative shrink-0 w-[calc(50%-4px)] min-w-0">
             <div className="absolute bg-[#1ac0fd] inset-0 rounded-[30px]" />
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[70%_6%_18%_40%] justify-center leading-[0] text-[40px] text-center text-white tracking-[-0.9px] uppercase">
-              <p className="leading-[36px] whitespace-pre-wrap">98%</p>
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[70%_6%_18%_40%] min-[728px]:inset-[65%_6%_18%_40%] justify-center leading-[0] text-[40px] min-[728px]:text-[50px] text-center text-white tracking-[-0.9px] uppercase">
+              <p className="leading-[36px] min-[728px]:leading-[45px] whitespace-pre-wrap">98%</p>
             </div>
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[6%_10%_40%_10%] justify-center leading-[22px] text-[18px] text-white text-left tracking-[-0.9px] uppercase break-words">
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[6%_10%_40%_10%] min-[728px]:inset-[6%_6%_30%_6%] justify-center leading-[22px] min-[728px]:leading-[28px] text-[18px] min-[728px]:text-[24px] text-white text-left tracking-[-0.9px] uppercase break-words">
               <p className="mb-0">{t('home.cards.pureSpringWater.pure')}</p>
               <p className="mb-0">{t('home.cards.pureSpringWater.spring')}</p>
               <p className="mb-0">{t('home.cards.pureSpringWater.water')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light mb-0">{t('home.cards.pureSpringWater.from')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light">{t('home.cards.pureSpringWater.armenia')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[82%_8%_6%_40%] italic justify-center leading-[0] text-[12px] text-right text-white">
-              <p className="leading-[18px] whitespace-pre-wrap">{t('home.cards.pureSpringWater.source')}</p>
+            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[82%_8%_6%_40%] min-[728px]:inset-[80%_8%_6%_40%] italic justify-center leading-[0] text-[12px] min-[728px]:text-[14px] text-right text-white">
+              <p className="leading-[18px] min-[728px]:leading-[21px] whitespace-pre-wrap">{t('home.cards.pureSpringWater.source')}</p>
             </div>
           </div>
         </div>
-        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[2150px] w-full max-w-[400px] px-4">
+        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[2150px] w-full max-w-[400px] min-[728px]:max-w-[700px] px-4">
           <div className="h-[227px] relative shrink-0 w-[calc(50%-4px)] min-w-0">
             <div className="absolute bg-white inset-0 rounded-[30px]" />
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[65%_6%_18%_26%] justify-center leading-[0] text-[#0f172a] text-[40px] text-center tracking-[-0.9px] uppercase">
-              <p className="leading-[36px] whitespace-pre-wrap">100%</p>
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[65%_6%_18%_26%] min-[728px]:inset-[60%_6%_18%_26%] justify-center leading-[0] text-[#0f172a] text-[40px] min-[728px]:text-[50px] text-center tracking-[-0.9px] uppercase">
+              <p className="leading-[36px] min-[728px]:leading-[45px] whitespace-pre-wrap">100%</p>
             </div>
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[6%_10%_40%_10%] justify-center leading-[22px] text-[#1ac0fd] text-[18px] tracking-[-0.9px] uppercase break-words">
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[6%_10%_40%_10%] min-[728px]:inset-[6%_6%_30%_6%] justify-center leading-[22px] min-[728px]:leading-[28px] text-[#1ac0fd] text-[18px] min-[728px]:text-[24px] tracking-[-0.9px] uppercase break-words">
               <p className="mb-0">{t('home.cards.balancedHydration.balanced')}</p>
               <p className="mb-0">{t('home.cards.balancedHydration.hydration')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light mb-0">{t('home.cards.balancedHydration.every')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light">{t('home.cards.balancedHydration.day')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[84.65%_8.65%_6.46%_44.71%] italic justify-center leading-[0] text-[#1ac0fd] text-[14px] text-right">
-              <p className="leading-[24px] whitespace-pre-wrap">{t('home.cards.balancedHydration.source')}</p>
+            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[84.65%_8.65%_6.46%_44.71%] min-[728px]:inset-[82%_8%_6%_44%] italic justify-center leading-[0] text-[#1ac0fd] text-[14px] min-[728px]:text-[16px] text-right">
+              <p className="leading-[24px] min-[728px]:leading-[24px] whitespace-pre-wrap">{t('home.cards.balancedHydration.source')}</p>
             </div>
           </div>
           <div className="h-[227px] relative rounded-[30px] shrink-0 w-[calc(50%-4px)] min-w-0 overflow-hidden">
@@ -1009,8 +1031,9 @@ export function HomePageClient({
           </div>
         </div>
 
-        {/* Mobile Trusted By Logo - uses same 3 logos as desktop via trustedByIndex */}
-        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[2600px] w-full z-0">
+        {/* Mobile Trusted By Logo - single logo on mobile, 2 logos on tablet (728px+) */}
+        {/* Mobile: Single logo */}
+        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[2600px] min-[728px]:hidden w-full z-0">
           <div className="h-[72px] relative shrink-0 w-[260px]">
             <img
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
@@ -1019,9 +1042,26 @@ export function HomePageClient({
             />
           </div>
         </div>
+        {/* Tablet: 2 logos grid from 728px - no arrows */}
+        <div className="-translate-x-1/2 absolute content-stretch grid grid-cols-2 gap-4 items-center justify-center left-1/2 top-[2600px] hidden min-[728px]:grid xl:hidden w-full max-w-[600px] z-0">
+          <div className="h-[72px] relative shrink-0 w-auto flex items-center justify-center">
+            <img
+              alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
+              className="max-w-none object-contain pointer-events-none h-full w-auto"
+              src={TRUSTED_BY_LOGOS[trustedByIndex].src}
+            />
+          </div>
+          <div className="h-[72px] relative shrink-0 w-auto flex items-center justify-center">
+            <img
+              alt={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % 3].alt}
+              className="max-w-none object-contain pointer-events-none h-full w-auto"
+              src={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % 3].src}
+            />
+          </div>
+        </div>
 
         {/* Mobile Trusted By Navigation - same handlers as desktop */}
-        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-1/2 top-[2600px] w-full max-w-[470px] px-4 z-20">
+        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-1/2 top-[2600px] w-full max-w-[470px] min-[728px]:hidden px-4 z-20">
           <FeaturedProductsNavigationArrow
             direction="prev"
             onClick={handlePreviousTrustedBy}
@@ -1039,7 +1079,41 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Trusted By Pagination Dots */}
-        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[2700px]">
+        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[2700px] min-[728px]:hidden">
+          <button
+            type="button"
+            onClick={() => setTrustedByIndex(0)}
+            className={`rounded-full transition-all duration-300 ${
+              trustedByIndex === 0
+                ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
+            }`}
+            aria-label="Show first partner"
+          />
+          <button
+            type="button"
+            onClick={() => setTrustedByIndex(1)}
+            className={`rounded-full transition-all duration-300 ${
+              trustedByIndex === 1
+                ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
+            }`}
+            aria-label="Show second partner"
+          />
+          <button
+            type="button"
+            onClick={() => setTrustedByIndex(2)}
+            className={`rounded-full transition-all duration-300 ${
+              trustedByIndex === 2
+                ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
+            }`}
+            aria-label={t('home.trustedBy.showThirdPartner')}
+          />
+        </div>
+
+        {/* Tablet: Pagination dots only (728px - xl) */}
+        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[2700px] hidden min-[728px]:flex xl:hidden">
           <button
             type="button"
             onClick={() => setTrustedByIndex(0)}
