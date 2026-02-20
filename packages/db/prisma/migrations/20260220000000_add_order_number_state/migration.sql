@@ -9,3 +9,5 @@ CREATE TABLE "order_number_state" (
 -- Insert default order number state row (starts from 100 for P100)
 INSERT INTO "order_number_state" ("id", "nextNumber") VALUES ('default', 100);
 
+
+

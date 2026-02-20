@@ -9,8 +9,8 @@ import { formatPrice, getStoredCurrency } from '../../../lib/currency';
 import { getStoredLanguage, type LanguageCode } from '../../../lib/language';
 import { t, getProductText } from '../../../lib/i18n';
 import { useAuth } from '../../../lib/auth/AuthContext';
-import { RelatedProducts } from '../../../components/RelatedProducts';
 import { ProductReviews } from '../../../components/ProductReviews';
+import { RelatedProducts } from '../../../components/RelatedProducts';
 import { Minus, Plus, Maximize2 } from 'lucide-react';
 import { ProductLabels } from '../../../components/ProductLabels';
 import { addToCart } from '../../../components/icons/global/global';
@@ -1547,10 +1547,52 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="grid grid-cols-1 lg:grid-cols-[55%_45%] gap-12 items-start">
-        <div className="flex gap-6 items-start">
-          {/* Left Column - Thumbnails (Vertical) - Show 3 at a time, scrollable */}
-          <div className="flex flex-col gap-4 w-28 flex-shrink-0">
+      {/* Mobile: Image first, then info */}
+      <div className="flex flex-col lg:grid lg:grid-cols-[55%_45%] gap-12 items-start">
+        {/* Mobile: Image section - shown first */}
+        <div className="w-full lg:hidden mb-6">
+          <div className="relative aspect-square product-card-glass overflow-visible group flex items-center justify-center min-h-0">
+            {images.length > 0 ? (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-full h-[115%] flex items-center justify-center">
+                  <img 
+                    src={images[currentImageIndex]} 
+                    alt={product.title} 
+                    className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105" 
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400">{t(language, 'common.messages.noImage')}</div>
+            )}
+            
+            {/* Discount Badge on Image - Blue circle in top-right */}
+            {discountPercent && (
+              <div className="absolute top-4 right-4 w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold z-10 shadow-[0_2px_8px_rgba(37,99,235,0.3)]">
+                -{discountPercent}%
+              </div>
+            )}
+
+            {product.labels && <ProductLabels labels={product.labels} />}
+            
+            {/* Control Buttons - Bottom left */}
+            <div className="absolute bottom-4 left-4 flex flex-col gap-3 z-10">
+              {/* Fullscreen Button */}
+              <button 
+                onClick={() => setShowZoom(true)} 
+                className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:bg-white/90 transition-all duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
+                aria-label={t(language, 'common.ariaLabels.fullscreenImage')}
+              >
+                <Maximize2 className="w-5 h-5 text-gray-800" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop: Image with thumbnails */}
+        <div className="hidden lg:flex gap-6 items-start">
+          {/* Left Column - Thumbnails (Vertical) - Show 3 at a time, scrollable - Hidden on mobile */}
+          <div className="hidden lg:flex flex-col gap-4 w-28 flex-shrink-0">
             <div className="flex flex-col gap-4 flex-1 overflow-hidden">
               {visibleThumbnails.map((image, index) => {
                 const actualIndex = thumbnailStartIndex + index;
@@ -1689,47 +1731,60 @@ export default function ProductPage({ params }: ProductPageProps) {
           </div>
         </div>
 
-        <div className="flex flex-col h-full">
+        {/* Mobile: Info section - shown second */}
+        <div className="flex flex-col h-full w-full lg:w-auto">
           <div className="flex-1">
-            {product.brand && <p className="text-sm text-gray-500 mb-2">{product.brand.name}</p>}
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            {/* Mobile: Brand name on top */}
+            {product.brand && <p className="text-sm text-gray-500 mb-2 lg:mb-2">{product.brand.name}</p>}
+            {/* Mobile: Smaller title */}
+            <h1 className="text-2xl lg:text-4xl font-bold text-gray-900 mb-4">
               {getProductText(language, product.id, 'title') || product.title}
             </h1>
             <div className="mb-6">
               <div className="flex flex-col gap-1">
-                {/* Discounted price with discount percentage */}
-                <div className="flex items-center gap-2">
-                  <p className="text-3xl font-bold text-gray-900">{formatPrice(price, currency)}</p>
+                {/* Mobile: Price layout - old price on right, new price on left */}
+                <div className="flex items-center gap-2 justify-between lg:justify-start">
+                  <p className="text-xl lg:text-3xl font-bold text-gray-900">{formatPrice(price, currency)}</p>
                   {discountPercent && discountPercent > 0 && (
                     <span className="text-lg font-semibold text-blue-600">
                       -{discountPercent}%
                     </span>
                   )}
+                  {/* Mobile: Old price on right side */}
+                  {(originalPrice || (compareAtPrice && compareAtPrice > price)) && (
+                    <p className="text-base lg:text-xl text-gray-500 line-through decoration-gray-400 ml-auto lg:ml-0 lg:mt-1 lg:w-full">
+                      {formatPrice(originalPrice || compareAtPrice || 0, currency)}
+                    </p>
+                  )}
                 </div>
-                {/* Original price below discounted price - full width, not inline */}
-                {(originalPrice || (compareAtPrice && compareAtPrice > price)) && (
-                  <p className="text-xl text-gray-500 line-through decoration-gray-400 mt-1">
-                    {formatPrice(originalPrice || compareAtPrice || 0, currency)}
-                  </p>
-                )}
+                {/* Desktop: Original price below discounted price - full width, not inline */}
+                <div className="hidden lg:block">
+                  {(originalPrice || (compareAtPrice && compareAtPrice > price)) && (
+                    <p className="text-xl text-gray-500 line-through decoration-gray-400 mt-1">
+                      {formatPrice(originalPrice || compareAtPrice || 0, currency)}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="text-gray-600 mb-8 prose prose-sm" dangerouslySetInnerHTML={{ __html: getProductText(language, product.id, 'longDescription') || product.description || '' }} />
+            {/* Description - Hidden on mobile */}
+            <div className="hidden lg:block text-gray-600 mb-8 prose prose-sm" dangerouslySetInnerHTML={{ __html: getProductText(language, product.id, 'longDescription') || product.description || '' }} />
 
-            <div className="mt-8 p-4 bg-white border border-gray-200 rounded-2xl space-y-4">
             {/* Rating Section */}
-            <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
+            <div className="mt-8 flex items-center gap-2 pb-3">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <svg
                       key={star}
-                      className={`w-5 h-5 ${
+                      className={`w-4 h-4 lg:w-5 lg:h-5 ${
                         star <= Math.round(averageRating)
-                          ? 'text-yellow-400'
-                          : 'text-gray-300'
+                          ? 'text-[#00D1FF]'
+                          : 'text-[#00D1FF] opacity-30'
                       }`}
-                      fill="currentColor"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
                       viewBox="0 0 20 20"
                     >
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -2068,8 +2123,6 @@ export default function ProductPage({ params }: ProductPageProps) {
                 </div>
               </div>
             )}
-
-            </div>
           </div>
           
           {/* Action Buttons - Aligned with bottom of image */}
@@ -2097,10 +2150,11 @@ export default function ProductPage({ params }: ProductPageProps) {
               </div>
             )}
             <div className="flex items-center gap-3 pt-4 border-t">
-              <div className="flex items-center border rounded-xl overflow-hidden bg-white">
-                <button onClick={() => adjustQuantity(-1)} className="w-12 h-12 flex items-center justify-center">-</button>
-                <div className="w-12 text-center font-bold">{quantity}</div>
-                <button onClick={() => adjustQuantity(1)} className="w-12 h-12 flex items-center justify-center">+</button>
+              {/* Mobile: Quantity selector with glassmorphism style */}
+              <div className="flex items-center border border-white/30 rounded-[72px] overflow-clip bg-white/10 backdrop-blur-md lg:bg-white lg:backdrop-blur-none">
+                <button onClick={() => adjustQuantity(-1)} className="w-12 h-12 flex items-center justify-center text-gray-900 hover:bg-white/20 lg:hover:bg-gray-100">-</button>
+                <div className="w-12 text-center font-bold text-gray-900">{quantity}</div>
+                <button onClick={() => adjustQuantity(1)} className="w-12 h-12 flex items-center justify-center text-gray-900 hover:bg-white/20 lg:hover:bg-gray-100">+</button>
               </div>
               <button disabled={!canAddToCart || isAddingToCart} className="flex-1 h-[48px] bg-[#00d1ff] text-white rounded-[34px] uppercase font-bold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-[#00b8e6] transition-colors"
                 onClick={async () => {
@@ -2155,9 +2209,16 @@ export default function ProductPage({ params }: ProductPageProps) {
         </div>
       )}
 
-      <div className="mt-16">
-        <RelatedProducts categorySlug={product.categories?.[0]?.slug} currentProductId={product.id} />
-      </div>
+      {/* Related Products Carousel - Above Reviews */}
+      {product && (
+        <div className="mt-24">
+          <RelatedProducts 
+            categorySlug={product.categories && product.categories.length > 0 ? product.categories[0]?.slug : undefined} 
+            currentProductId={product.id} 
+          />
+        </div>
+      )}
+
       <div id="product-reviews" className="mt-24 scroll-mt-24">
         <ProductReviews productSlug={slug} productId={product.id} />
       </div>

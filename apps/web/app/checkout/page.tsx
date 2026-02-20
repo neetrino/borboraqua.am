@@ -1055,7 +1055,7 @@ export default function CheckoutPage() {
                     </h3>
 
                     {/* Calendar-style month selector */}
-                    <div className="border border-gray-200 rounded-[12px] p-4 inline-block">
+                    <div className="border-2 border-white/30 rounded-[20px] p-4 inline-block backdrop-blur-md bg-white/50">
                       <div className="flex items-center justify-between mb-3">
                         <button
                           type="button"
@@ -1103,7 +1103,7 @@ export default function CheckoutPage() {
                       </div>
 
                       {/* Days grid */}
-                      <div className="grid grid-cols-7 gap-1 text-sm">
+                      <div className="grid grid-cols-7 gap-1 text-sm ">
                         {(() => {
                           const days: JSX.Element[] = [];
                           const year = calendarMonth.getFullYear();
@@ -1141,13 +1141,15 @@ export default function CheckoutPage() {
                                   // Reset time slot when changing the day
                                   setValue('deliveryTimeSlot', undefined);
                                 }}
-                                className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm
-                                  ${!isEnabled ? 'text-gray-300 cursor-default' : 'cursor-pointer hover:bg-purple-50'}
+                                className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm border backdrop-blur-md
+                                  ${!isEnabled 
+                                    ? 'border-white/30 bg-white/50 text-gray-300 cursor-default' 
+                                    : 'cursor-pointer hover:bg-purple-50'}
                                   ${
                                     isSelected
-                                      ? 'bg-purple-600 text-white hover:bg-purple-700'
+                                      ? 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700'
                                       : isEnabled
-                                        ? 'text-gray-900'
+                                        ? 'text-gray-900 border-white/30 bg-white/50'
                                         : ''
                                   }`}
                               >
@@ -1169,7 +1171,7 @@ export default function CheckoutPage() {
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3 ">
                       {t('checkout.delivery.time')}
                     </h3>
                     <div className="space-y-3">
@@ -1180,10 +1182,10 @@ export default function CheckoutPage() {
                           return (
                             <label
                               key={slot.id}
-                              className={`flex items-center p-3 border-2 rounded-[12px] cursor-pointer transition-all ${
+                              className={`flex items-center p-3 border-2 rounded-[20px] cursor-pointer backdrop-blur-md ${
                                 deliveryTimeSlot === slot.id
                                   ? 'border-purple-600 bg-purple-50'
-                                  : 'border-gray-300 hover:bg-gray-50'
+                                  : 'border-white/30 bg-white/50 hover:bg-white/60'
                               }`}
                             >
                               <input
@@ -1197,7 +1199,7 @@ export default function CheckoutPage() {
                                     e.target.value as DeliveryTimeSlot
                                   )
                                 }
-                                className="mr-3"
+                                className="mr-3 w-4 h-4 rounded-full bg-white/50 backdrop-blur-md border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 accent-purple-600 disabled:opacity-50"
                                 disabled={isSubmitting || !deliveryDay}
                               />
                               <div className="flex-1">
