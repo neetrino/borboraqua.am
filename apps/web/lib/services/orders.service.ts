@@ -71,11 +71,24 @@ class OrdersService {
         items: guestItems,
         email,
         phone,
+        firstName,
+        lastName,
         shippingMethod = 'pickup',
-        shippingAddress,
+        shippingAddress: rawShippingAddress,
         paymentMethod = 'idram',
         locale = 'en', // Language for product translations
       } = data;
+
+      // Merge customer name into shipping address so admin email and order details can show it
+      const shippingAddress = rawShippingAddress
+        ? {
+            ...(typeof rawShippingAddress === "object" && rawShippingAddress !== null
+              ? rawShippingAddress
+              : {}),
+            firstName: firstName ?? (rawShippingAddress as Record<string, unknown>)?.firstName,
+            lastName: lastName ?? (rawShippingAddress as Record<string, unknown>)?.lastName,
+          }
+        : null;
 
       // Validate required fields
       if (!email || !phone) {
