@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '../../../../lib/auth/AuthContext';
 import { Card } from '@shop/ui';
@@ -651,9 +652,9 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* Invoice popup (EHDM) */}
-      {showInvoicePopup && order?.paymentStatus === 'paid' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowInvoicePopup(false)}>
+      {/* Invoice popup (EHDM) — Portal into body so it stays above Footer (z-[9999]) */}
+      {showInvoicePopup && order?.paymentStatus === 'paid' && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/50" onClick={() => setShowInvoicePopup(false)}>
           <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white rounded-t-xl">
               <h3 className="text-lg font-semibold text-gray-900">{t('admin.orders.orderDetails.fiscalReceipt')}</h3>
@@ -676,7 +677,8 @@ export default function OrderDetailPage() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
