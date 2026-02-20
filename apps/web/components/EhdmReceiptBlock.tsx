@@ -1,8 +1,10 @@
 "use client";
 
+import { useCallback } from "react";
+
 /**
  * Displays EHDM fiscal receipt (Էլեկտրոնային ՀԴՄ) for an order.
- * Used in admin order details and client order page. No PDF — print via browser.
+ * Used in admin order details and client order page. No PDF — print via browser; "Download" opens print (Save as PDF).
  */
 export type EhdmReceiptData = {
   receiptId: string;
@@ -38,6 +40,15 @@ function formatReceiptTime(unixSeconds: number | undefined): string {
   });
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function EhdmReceiptBlock({
   receipt,
   orderNumber,
@@ -50,6 +61,49 @@ export function EhdmReceiptBlock({
           receipt.qr.replace(/\s/g, "")
         )}`
       : null;
+
+  const handleDownloadOrPrint = useCallback(() => {
+    const printWindow = window.open("", "_blank", "noopener,noreferrer");
+    if (!printWindow) return;
+    const timeStr =
+      result?.time != null
+        ? formatReceiptTime(result.time)
+        : "";
+    const qrImg =
+      qrUrl != null
+        ? `<img src="${qrUrl}" alt="QR" width="${QR_IMAGE_SIZE}" height="${QR_IMAGE_SIZE}" style="display:block;width:120px;height:120px;object-fit:contain" />`
+        : "";
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head><meta charset="utf-8"><title>Ֆիսկալ կտրոն ${receipt.receiptId}</title>
+        <style>
+          body { font-family: system-ui, sans-serif; padding: 24px; max-width: 400px; }
+          h1 { font-size: 1rem; margin-bottom: 12px; }
+          p { margin: 4px 0; font-size: 14px; }
+          .qr { margin-top: 12px; }
+        </style>
+        </head>
+        <body>
+          <h1>ԿՏՐՈՆԻ ՖԻՍԿԱԼ ՀԱՄԱՐ (E-HDM)${orderNumber != null ? ` — Պատվեր ${orderNumber}` : ""}</h1>
+          ${result?.taxpayer != null ? `<p><strong>Կազմակերպություն:</strong> ${escapeHtml(result.taxpayer)}</p>` : ""}
+          ${result?.address != null ? `<p><strong>Հասցե:</strong> ${escapeHtml(result.address)}</p>` : ""}
+          ${result?.tin != null ? `<p><strong>ՀՎՀՀ:</strong> ${escapeHtml(result.tin)}</p>` : ""}
+          ${result?.crn != null ? `<p><strong>ԳՀ:</strong> ${escapeHtml(result.crn)}</p>` : ""}
+          ${result?.sn != null ? `<p><strong>ՍՀ:</strong> ${escapeHtml(result.sn)}</p>` : ""}
+          ${receipt.fiscal != null && receipt.fiscal !== "" ? `<p><strong>Ֆիսկալ:</strong> ${escapeHtml(receipt.fiscal)}</p>` : ""}
+          <p><strong>Կտրոնի հերթ. համար (ԿՀ):</strong> ${escapeHtml(receipt.receiptId)}</p>
+          ${timeStr ? `<p><strong>Ամսաթիվ, ժամ:</strong> ${escapeHtml(timeStr)}</p>` : ""}
+          ${result?.total != null ? `<p><strong>Ընդամենը:</strong> ${Number(result.total).toFixed(2)} AMD</p>` : ""}
+          <div class="qr">${qrImg}</div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.onafterprint = () => printWindow.close();
+  }, [receipt, result, orderNumber, qrUrl]);
 
   return (
     <section
@@ -131,26 +185,41 @@ export function EhdmReceiptBlock({
           )}
         </div>
 
-        {qrUrl != null && (
-          <div
-            className="flex shrink-0 justify-center sm:justify-end"
-            style={{ width: QR_IMAGE_SIZE, height: QR_IMAGE_SIZE, minWidth: QR_IMAGE_SIZE, minHeight: QR_IMAGE_SIZE }}
-          >
-            <img
-              src={qrUrl}
-              alt="QR receipt"
-              width={QR_IMAGE_SIZE}
-              height={QR_IMAGE_SIZE}
-              className="block rounded border border-gray-200 bg-white object-contain"
-              style={{ width: "100%", height: "100%", objectFit: "contain" }}
-            />
+        {(qrUrl != null || (variant === "full")) && (
+          <div className="flex shrink-0 flex-col items-center gap-4 sm:items-end">
+            {qrUrl != null && (
+              <div
+                style={{ width: QR_IMAGE_SIZE, height: QR_IMAGE_SIZE, minWidth: QR_IMAGE_SIZE, minHeight: QR_IMAGE_SIZE }}
+              >
+                <img
+                  src={qrUrl}
+                  alt="QR receipt"
+                  width={QR_IMAGE_SIZE}
+                  height={QR_IMAGE_SIZE}
+                  className="block rounded border border-gray-200 bg-white object-contain"
+                  style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                />
+              </div>
+            )}
+            {variant === "full" && (
+              <button
+                type="button"
+                onClick={handleDownloadOrPrint}
+                className="inline-flex w-[120px] justify-center items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                PDF
+              </button>
+            )}
           </div>
         )}
       </div>
 
       {variant === "full" && (
         <p className="mt-3 text-xs text-gray-500 print:text-gray-700">
-          Էլեկտրոնային ՀԴՄ կտրոն. Տպելու համար օգտագործեք brauzerի «Տպել»:
+          Էլեկտրոնային ՀԴՄ կտրոն. Կարող եք նաև օգտագործել brauzerի «Տպել»:
         </p>
       )}
     </section>
