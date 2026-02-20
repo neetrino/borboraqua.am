@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 /**
  * Displays EHDM fiscal receipt (Էլեկտրոնային ՀԴՄ) for an order.
@@ -40,15 +40,6 @@ function formatReceiptTime(unixSeconds: number | undefined): string {
   });
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 export function EhdmReceiptBlock({
   receipt,
   orderNumber,
@@ -62,54 +53,42 @@ export function EhdmReceiptBlock({
         )}`
       : null;
 
+  const sectionRef = useRef<HTMLElement>(null);
+
   const handleDownloadOrPrint = useCallback(() => {
-    const printWindow = window.open("", "_blank", "noopener,noreferrer");
-    if (!printWindow) return;
-    const timeStr =
-      result?.time != null
-        ? formatReceiptTime(result.time)
-        : "";
-    const qrImg =
-      qrUrl != null
-        ? `<img src="${qrUrl}" alt="QR" width="${QR_IMAGE_SIZE}" height="${QR_IMAGE_SIZE}" style="display:block;width:120px;height:120px;object-fit:contain" />`
-        : "";
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head><meta charset="utf-8"><title>Ֆիսկալ կտրոն ${receipt.receiptId}</title>
-        <style>
-          body { font-family: system-ui, sans-serif; padding: 24px; max-width: 400px; }
-          h1 { font-size: 1rem; margin-bottom: 12px; }
-          p { margin: 4px 0; font-size: 14px; }
-          .qr { margin-top: 12px; }
-        </style>
-        </head>
-        <body>
-          <h1>ԿՏՐՈՆԻ ՖԻՍԿԱԼ ՀԱՄԱՐ (E-HDM)${orderNumber != null ? ` — Պատվեր ${orderNumber}` : ""}</h1>
-          ${result?.taxpayer != null ? `<p><strong>Կազմակերպություն:</strong> ${escapeHtml(result.taxpayer)}</p>` : ""}
-          ${result?.address != null ? `<p><strong>Հասցե:</strong> ${escapeHtml(result.address)}</p>` : ""}
-          ${result?.tin != null ? `<p><strong>ՀՎՀՀ:</strong> ${escapeHtml(result.tin)}</p>` : ""}
-          ${result?.crn != null ? `<p><strong>ԳՀ:</strong> ${escapeHtml(result.crn)}</p>` : ""}
-          ${result?.sn != null ? `<p><strong>ՍՀ:</strong> ${escapeHtml(result.sn)}</p>` : ""}
-          ${receipt.fiscal != null && receipt.fiscal !== "" ? `<p><strong>Ֆիսկալ:</strong> ${escapeHtml(receipt.fiscal)}</p>` : ""}
-          <p><strong>Կտրոնի հերթ. համար (ԿՀ):</strong> ${escapeHtml(receipt.receiptId)}</p>
-          ${timeStr ? `<p><strong>Ամսաթիվ, ժամ:</strong> ${escapeHtml(timeStr)}</p>` : ""}
-          ${result?.total != null ? `<p><strong>Ընդամենը:</strong> ${Number(result.total).toFixed(2)} AMD</p>` : ""}
-          <div class="qr">${qrImg}</div>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.onafterprint = () => printWindow.close();
-  }, [receipt, result, orderNumber, qrUrl]);
+    const section = sectionRef.current;
+    if (!section) return;
+    const root = document.createElement("div");
+    root.className = "ehdm-print-root";
+    const clone = section.cloneNode(true) as HTMLElement;
+    root.appendChild(clone);
+    document.body.appendChild(root);
+    const removeRoot = () => {
+      root.remove();
+      window.removeEventListener("afterprint", removeRoot);
+    };
+    window.addEventListener("afterprint", removeRoot);
+    window.print();
+  }, []);
 
   return (
-    <section
-      className="rounded-lg border border-gray-200 bg-gray-50/80 p-4 print:border print:bg-white"
-      aria-label="Fiscal receipt (EHDM)"
-    >
+    <>
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            @media print {
+              body > *:not(.ehdm-print-root) { display: none !important; }
+              body > .ehdm-print-root { display: block !important; padding: 16px !important; }
+              .ehdm-receipt-no-print { display: none !important; }
+            }
+          `,
+        }}
+      />
+      <section
+        ref={sectionRef}
+        className="ehdm-receipt-print rounded-lg border border-gray-200 bg-gray-50/80 p-4 print:border print:bg-white"
+        aria-label="Fiscal receipt (EHDM)"
+      >
       <h3 className="text-sm font-semibold text-gray-900 mb-3">
         ԿՏՐՈՆԻ ՖԻՍԿԱԼ ՀԱՄԱՐ (E-HDM)
         {orderNumber != null && (
@@ -205,7 +184,7 @@ export function EhdmReceiptBlock({
               <button
                 type="button"
                 onClick={handleDownloadOrPrint}
-                className="inline-flex w-[120px] justify-center items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="ehdm-receipt-no-print inline-flex w-[120px] justify-center items-center gap-1.5 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 <svg className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -223,5 +202,6 @@ export function EhdmReceiptBlock({
         </p>
       )}
     </section>
+    </>
   );
 }
