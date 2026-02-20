@@ -15,9 +15,7 @@ export async function printReceiptForOrder(orderId: string): Promise<{
   error?: string;
 }> {
   if (!isEhdmConfigured()) {
-    const msg = "EHDM not configured";
-    console.error("[EHDM]", msg);
-    return { ok: false, error: msg };
+    return { ok: false, error: "EHDM not configured" };
   }
 
   const order = await db.order.findUnique({
@@ -29,9 +27,7 @@ export async function printReceiptForOrder(orderId: string): Promise<{
     return { ok: false, error: "Order not found" };
   }
   if (order.currency !== "AMD") {
-    const msg = `EHDM only for AMD orders (order ${order.number} has ${order.currency})`;
-    console.error("[EHDM]", msg);
-    return { ok: false, error: msg };
+    return { ok: false, error: `EHDM only for AMD orders (order ${order.number} has ${order.currency})` };
   }
   if (order.ehdmReceipt) {
     return {
@@ -59,14 +55,7 @@ export async function printReceiptForOrder(orderId: string): Promise<{
       await decrementSeq();
       const errMsg =
         response.errorMessage ?? response.error ?? "EHDM print failed";
-      console.error("[EHDM] print failed:", {
-        orderId: orderId,
-        orderNumber: order.number,
-        code: (response as { code?: number }).code,
-        errorMessage: (response as { errorMessage?: string }).errorMessage,
-        error: (response as { error?: string }).error,
-        raw: JSON.stringify(response).slice(0, 300),
-      });
+      console.error("[EHDM] print failed:", order.number, errMsg);
       return { ok: false, error: errMsg };
     }
 
@@ -82,12 +71,6 @@ export async function printReceiptForOrder(orderId: string): Promise<{
       },
     });
 
-    console.info("[EHDM] receipt created (ՀԴՄ պատասխան OK):", {
-      orderNumber: order.number,
-      receiptId: r.receiptId,
-      fiscal: r.fiscal,
-    });
-
     return {
       ok: true,
       receiptId: String(r.receiptId),
@@ -96,12 +79,7 @@ export async function printReceiptForOrder(orderId: string): Promise<{
   } catch (e) {
     await decrementSeq();
     const errMsg = e instanceof Error ? e.message : "EHDM request failed";
-    console.error("[EHDM] request failed:", {
-      orderId: orderId,
-      orderNumber: order.number,
-      error: errMsg,
-      stack: e instanceof Error ? e.stack : undefined,
-    });
+    console.error("[EHDM] request failed:", order.number, errMsg);
     return {
       ok: false,
       error: errMsg,

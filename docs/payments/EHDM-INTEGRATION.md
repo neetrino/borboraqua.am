@@ -29,7 +29,7 @@
 ### Որտեղ պահել .crt և .key
 
 - **Երբեք** չcommit անել `.crt`/`.key` repo-ում։
-- **Լոկալ.** Խորհուրդ — `Private/` թղթապանակ (արդեն **.gitignore**-ում է). օր. `Private/00505298.crt`, `Private/00505298.key`. ENV-ում նշել **ճանապարհ**՝ `EHDM_CERT_PATH`, `EHDM_KEY_PATH` (օր. `./Private/00505298.crt`).
+- **Լոկալ.** Խորհուրդ — `Private/` թղթապանակ (արդեն **.gitignore**-ում է). ENV-ում `EHDM_CERT_PATH`, `EHDM_KEY_PATH`. **Կարևոր.** Next.js-ը աշխատում է `apps/web`-ից, այդ պատճառով `./Private/...` = `apps/web/Private/...`. Եթե `Private/`-ը **նախագծի արմատում** է — .env-ում օգտագործել **բացարձակ** ճանապարհ, օր. `/path/to/borboraqua.am/Private/00505298.crt`.
 - **Production (Vercel/Render/վերբ).** Սերվերում կամ secrets manager-ում պահել ֆայլերի **բովանդակությունը** (base64 կամ raw) և deploy ժամանակ գրել ֆայլ (tmp/secure dir), ապա `EHDM_CERT_PATH`/`EHDM_KEY_PATH` ցույց տալ այդ path-ին. Կամ օգտագործել platform-ի «secret file»/volume, եթե կա.
 - **Ամփոփում.**  
   - **Սեկրետ.** passphrase → միայն ENV.  
@@ -188,9 +188,17 @@
 | **Только AMD** | — | printReceiptForOrder проверяет order.currency === "AMD" | ✓ |
 | **Повтор** | Не печатать дважды на заказ | Проверка order.ehdmReceipt | ✓ |
 
-Թեստից առաջ. ENV-ը լրացված, `Private/00505298.crt` և `.key` առկա, ԲԴ-ում `ehdm_state` nextSeq ≥ 200 (կամ UPDATE), server-ը գործարկվում է root-ից (կամ path-ը absolute).
+Թեստից առաջ. ENV-ը լրացված, `Private/00505298.crt` և `.key` առկա (path-ը **բացարձակ**, եթե Private-ը repo արմատում է), ԲԴ-ում `ehdm_state` nextSeq ≥ 200 (կամ UPDATE).
 
 ---
 
-**Փաստաթղթի տարբերակ.** 1.0  
+## 12. Իրականացման կարգավիճակ (2026-02)
+
+- **Backend.** `/print` — config, client (cert/key), seq (DB), buildPrintBody, printReceiptForOrder. Կանչվում է Ameriabank/Idram/Telcell/FastShift callback-ից և ադմինում paymentStatus → paid.
+- **Ցուցադրում.** Ֆիսկալ կտրոն ցույց է տրվում ադմինի պատվերի դետալներում և կլիենտի պատվերի էջում (EhdmReceiptBlock, HTML; PDF — հաջորդ փուլ).
+- **Ցանկ.** Ադմինի պատվերների աղյուսակում «Invoice» սյունակ — իկոն (ստեղծված / չկա).
+
+---
+
+**Փաստաթղթի տարբերակ.** 1.1  
 **Ամսաթիվ.** 2026-02-19
