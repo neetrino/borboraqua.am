@@ -15,6 +15,7 @@ interface RelatedProduct {
   slug: string;
   title: string;
   description?: string | null;
+  category?: string | null; // Primary category title (when listOnly=true)
   price: number;
   originalPrice?: number | null;
   compareAtPrice: number | null;
@@ -133,6 +134,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
         const params: Record<string, string> = {
           limit: '30', // Fetch more to ensure we have 10 after filtering
           lang: currentLang,
+          listOnly: 'true', // Use listOnly mode to get category field (string) instead of categories array
         };
         
         if (categorySlug) {
@@ -164,7 +166,10 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
         console.log('[RelatedProducts] First product sample:', productsArray[0] ? {
           id: productsArray[0].id,
           title: productsArray[0].title,
+          category: productsArray[0].category,
           categories: productsArray[0].categories,
+          hasCategory: !!productsArray[0].category,
+          hasCategories: !!productsArray[0].categories && productsArray[0].categories.length > 0,
         } : 'No products');
         
         // Filter out current product and take exactly 10
@@ -298,16 +303,30 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
 
   // Convert RelatedProduct to FeaturedProduct format
   const convertToFeaturedProduct = (product: RelatedProduct): FeaturedProduct => {
-    // Get category - check both categories array and direct category field
-    const category = product.categories && product.categories.length > 0 
-      ? product.categories[0].title 
-      : undefined;
+    // Get category - prefer direct category field (from listOnly mode), fallback to categories array
+    let category: string | undefined = undefined;
+    
+    // First try direct category field (when listOnly=true)
+    if (product.category && product.category.trim() !== '') {
+      category = product.category.trim();
+    } 
+    // Fallback to categories array if category field is not available
+    else if (product.categories && product.categories.length > 0) {
+      // Find first category with a valid non-empty title
+      const categoryWithTitle = product.categories.find(
+        (cat) => cat?.title && cat.title.trim() !== ''
+      );
+      if (categoryWithTitle) {
+        category = categoryWithTitle.title.trim();
+      }
+    }
     
     console.log('[RelatedProducts] Converting product:', {
       id: product.id,
       title: product.title,
+      category: product.category,
       categories: product.categories,
-      category,
+      finalCategory: category,
     });
     
     return {
@@ -434,7 +453,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                     <FeaturedProductsNavigationArrow
                       direction="next"
                       onClick={handleNextProducts}
-                      className="left-[calc(50%-580px)] lg:left-[calc(50%-580px)] md:left-[calc(50%-530px)] top-1/2 -translate-y-1/2"
+                      className="left-[calc(50%-580px)] lg:left-[calc(50%-580px)] md:left-[calc(50%-530px)] top-1/2 -translate-y-1/2 border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
                       ariaLabel="Next products"
                     />
 
@@ -442,7 +461,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                     <FeaturedProductsNavigationArrow
                       direction="prev"
                       onClick={handlePreviousProducts}
-                      className="right-[calc(50%-580px)] lg:right-[calc(50%-580px)] md:right-[calc(50%-530px)] top-1/2 -translate-y-1/2"
+                      className="right-[calc(50%-580px)] lg:right-[calc(50%-580px)] md:right-[calc(50%-530px)] top-1/2 -translate-y-1/2 border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
                       ariaLabel="Previous products"
                     />
 

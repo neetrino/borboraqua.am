@@ -131,6 +131,11 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [isVariantInCart, setIsVariantInCart] = useState(false);
   const thumbnailsPerView = 3; // Show 3 thumbnails at a time
 
+  // Mobile swipe carousel state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
   // Use unified image utilities (imported from image-utils.ts)
 
   // Get images array from product - using unified utilities
@@ -327,6 +332,38 @@ export default function ProductPage({ params }: ProductPageProps) {
       setCurrentImageIndex(0);
     }
   }, [images.length, currentImageIndex]);
+
+  // Mobile swipe handlers
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && images.length > 0) {
+      // Swipe left - next image
+      setIsTransitioning(true);
+      setCurrentImageIndex((prev) => (prev + 1) % images.length);
+      setTimeout(() => setIsTransitioning(false), 300);
+    } else if (isRightSwipe && images.length > 0) {
+      // Swipe right - previous image
+      setIsTransitioning(true);
+      setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+      setTimeout(() => setIsTransitioning(false), 300);
+    }
+  };
 
   useEffect(() => {
     if (!product || !slug) return;
@@ -1551,15 +1588,40 @@ export default function ProductPage({ params }: ProductPageProps) {
       <div className="flex flex-col lg:grid lg:grid-cols-[55%_45%] gap-12 items-start">
         {/* Mobile: Image section - shown first */}
         <div className="w-full lg:hidden mb-6">
-          <div className="relative aspect-square product-card-glass overflow-visible group flex items-center justify-center min-h-0">
+          <div 
+            className="relative aspect-square product-card-glass overflow-hidden group flex items-center justify-center min-h-0"
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
             {images.length > 0 ? (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-full h-[115%] flex items-center justify-center">
-                  <img 
-                    src={images[currentImageIndex]} 
-                    alt={product.title} 
-                    className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105" 
-                  />
+              <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                {/* Image Carousel Container */}
+                <div className="relative w-full h-full">
+                  {/* Images Container - Horizontal Scroll */}
+                  <div 
+                    className="flex h-full transition-transform duration-300 ease-out"
+                    style={{
+                      transform: `translateX(-${currentImageIndex * (100 / images.length)}%)`,
+                      width: `${images.length * 100}%`,
+                    }}
+                  >
+                    {images.map((image, index) => (
+                      <div 
+                        key={index}
+                        className="h-full flex-shrink-0 flex items-center justify-center"
+                        style={{ width: `${100 / images.length}%` }}
+                      >
+                        <div className="w-full h-[115%] flex items-center justify-center">
+                          <img 
+                            src={image} 
+                            alt={`${product.title} - ${index + 1}`}
+                            className="w-full h-full object-contain object-center"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : (
@@ -1586,6 +1648,83 @@ export default function ProductPage({ params }: ProductPageProps) {
                 <Maximize2 className="w-5 h-5 text-gray-800" />
               </button>
             </div>
+
+            {/* Dots Pagination - Bottom center (only if multiple images) */}
+            {images.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-2 z-10 px-4">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setIsTransitioning(true);
+                      setCurrentImageIndex(index);
+                      setTimeout(() => setIsTransitioning(false), 300);
+                    }}
+                    className={`transition-all duration-300 rounded-full ${
+                      index === currentImageIndex
+                        ? 'bg-[#00d1ff] w-8 h-2'
+                        : 'bg-white/60 w-2 h-2 hover:bg-white/80'
+                    }`}
+                    aria-label={`Go to image ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Navigation Arrows - Left and Right (only if multiple images) */}
+            {images.length > 1 && (
+              <>
+                {/* Previous Button - Left */}
+                <button
+                  onClick={() => {
+                    setIsTransitioning(true);
+                    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+                    setTimeout(() => setIsTransitioning(false), 300);
+                  }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:bg-white/90 transition-all duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)] z-10"
+                  aria-label={t(language, 'common.ariaLabels.previousImage')}
+                >
+                  <svg 
+                    className="w-5 h-5 text-gray-800" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M15 19l-7-7 7-7" 
+                    />
+                  </svg>
+                </button>
+
+                {/* Next Button - Right */}
+                <button
+                  onClick={() => {
+                    setIsTransitioning(true);
+                    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+                    setTimeout(() => setIsTransitioning(false), 300);
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:bg-white/90 transition-all duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)] z-10"
+                  aria-label={t(language, 'common.ariaLabels.nextImage')}
+                >
+                  <svg 
+                    className="w-5 h-5 text-gray-800" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M9 5l7 7-7 7" 
+                    />
+                  </svg>
+                </button>
+              </>
+            )}
           </div>
         </div>
 
