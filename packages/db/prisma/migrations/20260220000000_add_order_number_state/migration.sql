@@ -11,3 +11,4 @@ INSERT INTO "order_number_state" ("id", "nextNumber") VALUES ('default', 100);
 
 
 
+

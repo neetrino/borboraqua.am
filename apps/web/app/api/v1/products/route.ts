@@ -26,6 +26,9 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(MAX_PAGE_SIZE, Math.max(1, requestedLimit));
 
   try {
+    const listOnlyParam = searchParams.get("listOnly");
+    const listOnly = listOnlyParam === "true" || listOnlyParam === "1";
+
     const filters = {
       category: searchParams.get("category") || undefined,
       search: searchParams.get("search") || undefined,
@@ -43,6 +46,7 @@ export async function GET(req: NextRequest) {
       page,
       limit,
       lang: searchParams.get("lang") || "en",
+      listOnly,
     };
 
     const cacheKey = [
@@ -56,6 +60,7 @@ export async function GET(req: NextRequest) {
       String(filters.minPrice ?? ""),
       String(filters.maxPrice ?? ""),
       filters.sort ?? "createdAt",
+      String(filters.listOnly ?? false),
     ];
     const result = await unstable_cache(
       () => productsService.findAll(filters),

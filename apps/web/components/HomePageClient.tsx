@@ -1066,14 +1066,14 @@ export function HomePageClient({
             direction="prev"
             onClick={handlePreviousTrustedBy}
             isMobile={true}
-            className="bg-transparent border-black border-solid [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
+            className="bg-transparent border border-black border-solid shadow-none hover:shadow-none hover:border-black [&_img]:brightness-0 [&_img]:hover:brightness-0 [&_img]:hover:saturate-[100%] [&_img]:hover:invert-[65%] [&_img]:hover:sepia-[42%] [&_img]:hover:saturate-[1400%] [&_img]:hover:hue-rotate-[170deg] [&_img]:hover:brightness-[0.92] [&_img]:hover:contrast-[1.04]"
             ariaLabel="Previous partner"
           />
           <FeaturedProductsNavigationArrow
             direction="next"
             onClick={handleNextTrustedBy}
             isMobile={true}
-            className="bg-transparent border-black border-solid [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
+            className="bg-transparent border border-black border-solid shadow-none hover:shadow-none hover:border-black [&_img]:brightness-0 [&_img]:hover:brightness-0 [&_img]:hover:saturate-[100%] [&_img]:hover:invert-[65%] [&_img]:hover:sepia-[42%] [&_img]:hover:saturate-[1400%] [&_img]:hover:hue-rotate-[170deg] [&_img]:hover:brightness-[0.92] [&_img]:hover:contrast-[1.04]"
             ariaLabel="Next partner"
           />
         </div>
