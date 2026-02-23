@@ -1329,13 +1329,13 @@ export function AdminMenuDrawer({ tabs, currentPath }: AdminMenuDrawerProps) {
           }}
         >
           <div
-            className="h-full min-h-screen w-1/2 min-w-[16rem] max-w-full bg-white flex flex-col shadow-2xl"
+            className="h-full min-h-screen w-1/2 min-w-[16rem] max-w-full bg-white flex flex-col shadow-2xl [direction:ltr]"
             role="dialog"
             aria-modal="true"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4">
-              <p className="text-lg font-semibold text-gray-900">Admin Navigation</p>
+              <p className="text-lg font-semibold text-gray-900 text-left whitespace-nowrap">Admin Navigation</p>
               <button
                 type="button"
                 onClick={() => {
@@ -1362,15 +1362,15 @@ export function AdminMenuDrawer({ tabs, currentPath }: AdminMenuDrawerProps) {
                   <button
                     key={tab.id}
                     onClick={() => handleNavigate(tab.path)}
-                    className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium ${
+                    className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm font-medium whitespace-nowrap ${
                       tab.isSubCategory ? 'pl-8' : ''
                     } ${
                       isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    <span className="flex items-center gap-3">
-                      <span className={isActive ? 'text-white' : 'text-gray-500'}>{tab.icon}</span>
-                      {tab.label}
+                    <span className="flex items-center gap-3 min-w-0">
+                      <span className={`flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-500'}`}>{tab.icon}</span>
+                      <span className="truncate">{tab.label}</span>
                     </span>
                     <svg className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

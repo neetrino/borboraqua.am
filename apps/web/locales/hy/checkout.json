@@ -11,6 +11,7 @@
     "phone": "Հեռախոս",
     "address": "Հասցե",
     "city": "Քաղաք",
+    "region": "Մարզ",
     "phoneNumber": "Հեռախոսահամար",
     "cardNumber": "Քարտի համար",
     "expiryDate": "Վավերականության ժամկետ",
@@ -21,6 +22,7 @@
     "phone": "+374XXXXXXXX",
     "address": "Փողոց, բնակարան, սենյակ և այլն",
     "city": "Քաղաք",
+    "selectRegion": "Ընտրել մարզ",
     "cardNumber": "1234 5678 9012 3456",
     "expiryDate": "ԱԱ/ՏՏ",
     "cvv": "123",
@@ -30,7 +32,8 @@
     "delivery": "Առաքում",
     "deliveryDescription": "Մենք կառաքենք ձեր պատվերը ձեր հասցեին",
     "loading": "Բեռնվում է...",
-    "enterCity": "Մուտքագրել քաղաք"
+    "enterCity": "Մուտքագրել քաղաք",
+    "selectRegion": "Ընտրեք մարզ"
   },
   "delivery": {
     "day": "Առաքման օր",
@@ -103,6 +106,7 @@
     "selectPaymentMethod": "Խնդրում ենք ընտրել վճարման եղանակ",
     "addressRequired": "Հասցեն պարտադիր է առաքման համար",
     "cityRequired": "Քաղաքը պարտադիր է առաքման համար",
+    "regionRequired": "Խնդրում ենք ընտրել առաքման մարզը",
     "phoneRequiredDelivery": "Հեռախոսահամարը պարտադիր է առաքման համար",
     "invalidPhoneFormat": "Անվավեր հեռախոսահամարի ձևաչափ",
     "cardNumberRequired": "Քարտի համարը պարտադիր է",

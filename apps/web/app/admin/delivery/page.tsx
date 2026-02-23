@@ -9,10 +9,9 @@ import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/glo
 import { useTranslation } from '../../../lib/i18n-client';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
 
-interface DeliveryLocation {
+interface DeliveryRegion {
   id?: string;
-  country: string;
-  city: string;
+  name: string;
   price: number;
 }
 
@@ -31,7 +30,7 @@ interface DeliveryTimeSlot {
 }
 
 interface DeliverySettings {
-  locations: DeliveryLocation[];
+  regions: DeliveryRegion[];
   schedule?: DeliverySchedule;
   timeSlots?: DeliveryTimeSlot[];
 }
@@ -43,7 +42,7 @@ export default function DeliveryPage() {
   const pathname = usePathname();
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [locations, setLocations] = useState<DeliveryLocation[]>([]);
+  const [regions, setRegions] = useState<DeliveryRegion[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [enabledWeekdays, setEnabledWeekdays] = useState<number[]>([2, 4]); // Default Tue & Thu
   const [timeSlots, setTimeSlots] = useState<DeliveryTimeSlot[]>([
@@ -71,7 +70,7 @@ export default function DeliveryPage() {
       setLoading(true);
       console.log('🚚 [ADMIN] Fetching delivery settings...');
       const data = await apiClient.get<DeliverySettings>('/api/v1/admin/delivery');
-      setLocations(data.locations || []);
+      setRegions(data.regions || []);
       const weekdays =
         data.schedule?.enabledWeekdays && data.schedule.enabledWeekdays.length > 0
           ? data.schedule.enabledWeekdays
@@ -81,10 +80,9 @@ export default function DeliveryPage() {
         setTimeSlots(data.timeSlots);
       }
       console.log('✅ [ADMIN] Delivery settings loaded:', data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ [ADMIN] Error fetching delivery settings:', err);
-      // Use defaults if error
-      setLocations([]);
+      setRegions([]);
     } finally {
       setLoading(false);
     }
@@ -93,9 +91,9 @@ export default function DeliveryPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      console.log('🚚 [ADMIN] Saving delivery settings...', { locations });
+      console.log('🚚 [ADMIN] Saving delivery settings...', { regions });
       await apiClient.put('/api/v1/admin/delivery', {
-        locations,
+        regions,
         schedule: {
           enabledWeekdays,
         },
@@ -105,9 +103,10 @@ export default function DeliveryPage() {
       console.log('✅ [ADMIN] Delivery settings saved');
       setEditingId(null);
       await fetchDeliverySettings();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { detail?: string } }; message?: string };
       console.error('❌ [ADMIN] Error saving delivery settings:', err);
-      const errorMessage = err.response?.data?.detail || err.message || 'Failed to save delivery settings';
+      const errorMessage = e.response?.data?.detail || e.message || 'Failed to save delivery settings';
       alert(t('admin.delivery.errorSaving').replace('{message}', errorMessage));
     } finally {
       setSaving(false);
@@ -135,21 +134,21 @@ export default function DeliveryPage() {
     });
   };
 
-  const handleAddLocation = () => {
-    setLocations([...locations, { country: '', city: '', price: 1000 }]);
+  const handleAddRegion = () => {
+    setRegions([...regions, { name: '', price: 1000 }]);
     setEditingId(`new-${Date.now()}`);
   };
 
-  const handleUpdateLocation = (index: number, field: keyof DeliveryLocation, value: string | number) => {
-    const updated = [...locations];
+  const handleUpdateRegion = (index: number, field: keyof DeliveryRegion, value: string | number) => {
+    const updated = [...regions];
     updated[index] = { ...updated[index], [field]: value };
-    setLocations(updated);
+    setRegions(updated);
   };
 
-  const handleDeleteLocation = (index: number) => {
-    if (confirm(t('admin.delivery.deleteLocation'))) {
-      const updated = locations.filter((_, i) => i !== index);
-      setLocations(updated);
+  const handleDeleteRegion = (index: number) => {
+    if (confirm(t('admin.delivery.deleteRegion'))) {
+      const updated = regions.filter((_, i) => i !== index);
+      setRegions(updated);
     }
   };
 
@@ -265,50 +264,37 @@ export default function DeliveryPage() {
               <h1 className="text-3xl font-bold text-gray-900">{t('admin.delivery.title')}</h1>
             </div>
 
-            {/* Delivery Locations */}
+            {/* Delivery Regions (Marzer) */}
             <Card className="p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900">{t('admin.delivery.deliveryPricesByLocation')}</h2>
+                <h2 className="text-xl font-semibold text-gray-900">{t('admin.delivery.deliveryPricesByRegion')}</h2>
                 <ProductPageButton
-                  onClick={handleAddLocation}
+                  onClick={handleAddRegion}
                   disabled={saving}
                   className="px-4 py-2 text-sm"
                 >
-                  {t('admin.delivery.addLocation')}
+                  {t('admin.delivery.addRegion')}
                 </ProductPageButton>
               </div>
-              
-              {locations.length === 0 ? (
+              {regions.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
-                  <p>{t('admin.delivery.noLocations')}</p>
+                  <p>{t('admin.delivery.noRegions')}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {locations.map((location, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                  {regions.map((region, index) => (
+                    <div key={region.id ?? index} className="border border-gray-200 rounded-lg p-4">
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
+                        <div className="md:col-span-2">
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {t('admin.delivery.country')}
+                            {t('admin.delivery.regionName')}
                           </label>
                           <input
                             type="text"
-                            value={location.country}
-                            onChange={(e) => handleUpdateLocation(index, 'country', e.target.value)}
+                            value={region.name}
+                            onChange={(e) => handleUpdateRegion(index, 'name', e.target.value)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder={t('admin.delivery.countryPlaceholder')}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {t('admin.delivery.city')}
-                          </label>
-                          <input
-                            type="text"
-                            value={location.city}
-                            onChange={(e) => handleUpdateLocation(index, 'city', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder={t('admin.delivery.cityPlaceholder')}
+                            placeholder={t('admin.delivery.regionNamePlaceholder')}
                           />
                         </div>
                         <div>
@@ -318,19 +304,19 @@ export default function DeliveryPage() {
                           <div className="flex items-center gap-2">
                             <input
                               type="number"
-                              value={location.price}
-                              onChange={(e) => handleUpdateLocation(index, 'price', parseFloat(e.target.value) || 0)}
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder={t('admin.delivery.pricePlaceholder')}
-                            min="0"
-                            step="100"
-                          />
+                              value={region.price}
+                              onChange={(e) => handleUpdateRegion(index, 'price', parseFloat(e.target.value) || 0)}
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder={t('admin.delivery.pricePlaceholder')}
+                              min={0}
+                              step={100}
+                            />
                             <ProductPageButton
                               variant="outline"
-                              onClick={() => handleDeleteLocation(index)}
+                              onClick={() => handleDeleteRegion(index)}
                               disabled={saving}
                               className="px-0.5 py-5 text-xs border-none !text-red-600 hover:!bg-red-50 hover:!text-red-600 border-none"
-                              title={t('admin.delivery.deleteLocation')}
+                              title={t('admin.delivery.deleteRegion')}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -480,7 +466,7 @@ export default function DeliveryPage() {
             <div className="flex gap-4">
               <ProductPageButton
                 onClick={handleSave}
-                disabled={saving || locations.length === 0}
+                disabled={saving || regions.length === 0}
                 className="px-6 py-2 text-sm"
               >
                 {saving ? t('admin.delivery.saving') : t('admin.delivery.saveSettings')}

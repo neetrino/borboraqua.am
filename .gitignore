@@ -28,3 +28,9 @@ temp/
 payment integration/
 Private/
 
+# Git filter-branch temp
+.git-rewrite/
+
+# Large binaries (GitHub 100MB limit)
+*.exe
+

@@ -531,13 +531,7 @@ export default function CartPage() {
           <div className="md:col-span-6">
             <span className="text-sm font-semibold text-gray-900 uppercase tracking-wide">{t('common.messages.product')}</span>
           </div>
-          <div className="md:col-span-2 text-center">
-            <span className="text-sm font-semibold text-gray-900 uppercase tracking-wide">{t('common.messages.quantity')}</span>
-          </div>
-          <div className="md:col-span-3 text-center">
-            <span className="text-sm font-semibold text-gray-900 uppercase tracking-wide">{t('common.messages.subtotal')}</span>
-          </div>
-          <div className="md:col-span-1"></div>
+          <div className="md:col-span-6" aria-hidden="true" />
         </div>
 
         {/* Table Body */}
@@ -592,13 +586,15 @@ export default function CartPage() {
                 </div>
               </div>
 
-              {/* Quantity */}
-              <div className="md:col-span-2 flex flex-col items-start md:items-center justify-center">
-                <p className="mb-2 text-xs font-semibold tracking-wide text-gray-500 uppercase md:hidden">
-                  {t('common.messages.quantity')}
-                </p>
-                <div className="flex items-center justify-center gap-2 w-full md:w-auto">
+              {/* Quantity + Price — նույն տողում, նույն ուղղությամբ */}
+              <div className="md:col-span-6 flex flex-row flex-wrap items-center justify-end md:justify-end gap-4 md:gap-6">
+                {/* Figma-style quantity pill — փոքրացված */}
+                <div
+                  className="h-[40px] min-w-[120px] rounded-[56px] bg-[rgba(255,255,255,0.36)] overflow-hidden flex items-center justify-between text-[#111827] text-sm font-[Inter,sans-serif]"
+                  role="group"
+                >
                   <button
+                    type="button"
                     onClick={() => {
                       const increment = item.orderQuantityIncrement || 1;
                       const newQuantity = Math.max(
@@ -608,28 +604,16 @@ export default function CartPage() {
                       handleUpdateQuantity(item.id, newQuantity);
                     }}
                     disabled={updatingItems.has(item.id)}
-                    className="w-9 h-9 flex-shrink-0 rounded-[12px] border border-white/40 bg-white/60 backdrop-blur-sm flex items-center justify-center hover:bg-white/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-full flex-1 flex items-center justify-center leading-5 text-[#111827] hover:bg-white/20 active:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     aria-label={t('common.ariaLabels.decreaseQuantity')}
                   >
-                    <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                    </svg>
+                    −
                   </button>
-                  <input
-                    type="number"
-                    min={item.minimumOrderQuantity || 1}
-                    max={item.variant.stock !== undefined ? item.variant.stock : undefined}
-                    step={item.orderQuantityIncrement || 1}
-                    value={item.quantity}
-                    onChange={(e) => {
-                      const newQuantity = parseInt(e.target.value) || (item.minimumOrderQuantity || 1);
-                      handleUpdateQuantity(item.id, newQuantity);
-                    }}
-                    disabled={updatingItems.has(item.id)}
-                    className="w-20 h-9 text-right border border-white/40 bg-white/60 backdrop-blur-sm rounded-[12px] focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/60 disabled:opacity-50 font-medium pl-2 pr-5"
-                    title={item.variant.stock !== undefined ? t('common.messages.availableQuantity').replace('{stock}', item.variant.stock.toString()) : ''}
-                  />
+                  <span className="flex-1 flex items-center justify-center font-bold leading-5 min-w-[2ch]">
+                    {item.quantity}
+                  </span>
                   <button
+                    type="button"
                     onClick={() => {
                       const increment = item.orderQuantityIncrement || 1;
                       const newQuantity = item.quantity + increment;
@@ -639,23 +623,14 @@ export default function CartPage() {
                       }
                     }}
                     disabled={updatingItems.has(item.id) || (item.variant.stock !== undefined && item.quantity >= item.variant.stock)}
-                    className="w-9 h-9 flex-shrink-0 rounded-[12px] border border-white/40 bg-white/60 backdrop-blur-sm flex items-center justify-center hover:bg-white/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-full flex-1 flex items-center justify-center leading-5 text-[#111827] hover:bg-white/20 active:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     aria-label={t('common.ariaLabels.increaseQuantity')}
                     title={item.variant.stock !== undefined && item.quantity >= item.variant.stock ? t('common.messages.availableQuantity').replace('{stock}', item.variant.stock.toString()) : t('common.messages.addQuantity')}
                   >
-                    <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
+                    +
                   </button>
                 </div>
-              </div>
-
-              {/* Subtotal */}
-              <div className="md:col-span-3 flex flex-col md:flex-row md:items-center md:justify-start md:ml-10">
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 md:hidden">
-                  {t('common.messages.subtotal')}
-                </p>
-                <div className="flex flex-col gap-1 mt-1 md:mt-0">
+                <div className="flex flex-col gap-0.5 items-end">
                   <span className="text-lg font-semibold text-blue-600">
                     {formatPrice(item.total, currency)}
                   </span>

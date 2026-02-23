@@ -149,7 +149,7 @@ export default function ContactPage() {
                 <p>{t('contact.headquarter.hours.weekdays')}</p>
                 <p>{t('contact.headquarter.hours.saturday')}</p>
               </div>
-              <p className="text-black font-bold">
+              <p className="text-black font-bold whitespace-pre-line">
                 {address}
               </p>
             </div>
@@ -244,10 +244,10 @@ export default function ContactPage() {
         </div>
       </div>
 
-      {/* Bottom Section: Map */}
+      {/* Bottom Section: Map - Dzoragyugh, Gegharkunik, Armenia */}
       <div className="w-full h-[500px] bg-gray-100">
         <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3048.1234567890123!2d44.5150!3d40.1812!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x406aa2dab8fc8b5b%3A0x3d1479ab4e9b8c5e!2sAbovyan%20St%2C%20Yerevan%2C%20Armenia!5e0!3m2!1sen!2sam!4v1234567890123!5m2!1sen!2sam"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2476.5!2d45.19861!3d40.16944!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sDzoragyugh%2C%20Gegharkunik%2C%20Armenia!5e0!3m2!1sen!2sam"
           width="100%"
           height="100%"
           style={{ border: 0 }}

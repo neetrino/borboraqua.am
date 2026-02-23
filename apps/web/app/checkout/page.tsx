@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -60,6 +60,12 @@ interface DeliveryTimeSlotConfig {
   enabled: boolean;
 }
 
+interface DeliveryRegionOption {
+  id: string;
+  name: string;
+  price: number;
+}
+
 type CheckoutFormData = {
   firstName: string;
   lastName: string;
@@ -68,7 +74,7 @@ type CheckoutFormData = {
   shippingMethod: 'pickup' | 'delivery';
   paymentMethod: 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery';
   shippingAddress?: string;
-  shippingCity?: string;
+  shippingRegionId?: string;
   shippingPostalCode?: string;
   shippingPhone?: string;
   deliveryDay?: string;
@@ -89,6 +95,9 @@ export default function CheckoutPage() {
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
   const [deliveryPrice, setDeliveryPrice] = useState<number | null>(null);
   const [loadingDeliveryPrice, setLoadingDeliveryPrice] = useState(false);
+  const [deliveryRegions, setDeliveryRegions] = useState<DeliveryRegionOption[]>([]);
+  const [regionDropdownOpen, setRegionDropdownOpen] = useState(false);
+  const regionDropdownRef = useRef<HTMLDivElement>(null);
   const [enabledWeekdays, setEnabledWeekdays] = useState<number[] | null>(null);
   const [deliveryTimeSlots, setDeliveryTimeSlots] = useState<DeliveryTimeSlotConfig[]>([]);
   const [calendarMonth, setCalendarMonth] = useState<Date>(() => {
@@ -155,7 +164,7 @@ export default function CheckoutPage() {
     }),
     // Shipping address fields - required only for delivery
     shippingAddress: z.string().optional(),
-    shippingCity: z.string().optional(),
+    shippingRegionId: z.string().optional(),
     shippingPostalCode: z.string().optional(),
     shippingPhone: z.string().optional(),
     // Delivery date & time - required only for home delivery
@@ -167,10 +176,10 @@ export default function CheckoutPage() {
     message: t('checkout.errors.addressRequired'),
     path: ['shippingAddress'],
   }).refine((data) => {
-    return data.shippingCity && data.shippingCity.trim().length > 0;
+    return data.shippingRegionId && data.shippingRegionId.trim().length > 0;
   }, {
-    message: t('checkout.errors.cityRequired'),
-    path: ['shippingCity'],
+    message: t('checkout.errors.regionRequired'),
+    path: ['shippingRegionId'],
   }).refine((data) => {
     // User must pick a delivery day
     return !!data.deliveryDay;
@@ -201,7 +210,7 @@ export default function CheckoutPage() {
       shippingMethod: 'delivery',
       paymentMethod: 'cash_on_delivery',
       shippingAddress: '',
-      shippingCity: '',
+      shippingRegionId: '',
       shippingPostalCode: '',
       shippingPhone: '',
       deliveryDay: '',
@@ -211,9 +220,10 @@ export default function CheckoutPage() {
 
   const paymentMethod = watch('paymentMethod');
   const shippingMethod = watch('shippingMethod');
-  const shippingCity = watch('shippingCity');
+  const shippingRegionId = watch('shippingRegionId');
   const deliveryDay = watch('deliveryDay');
   const deliveryTimeSlot = watch('deliveryTimeSlot');
+  const selectedRegion = deliveryRegions.find((r) => r.id === shippingRegionId);
 
   const availableDeliveryDays: DeliveryDayOption[] = useMemo(() => {
     // Calculate enabled delivery days for the currently visible calendar month.
@@ -300,24 +310,31 @@ export default function CheckoutPage() {
     fetchDeliverySettings();
   }, []);
 
-  // Fetch delivery price when city changes
+  // Fetch delivery regions for checkout dropdown
+  useEffect(() => {
+    const fetchRegions = async () => {
+      try {
+        const res = await apiClient.get<{ regions: DeliveryRegionOption[] }>('/api/v1/delivery/regions');
+        setDeliveryRegions(res.regions || []);
+      } catch (err) {
+        console.error('❌ [CHECKOUT] Error fetching delivery regions:', err);
+        setDeliveryRegions([]);
+      }
+    };
+    fetchRegions();
+  }, []);
+
+  // Fetch delivery price when region changes
   useEffect(() => {
     const fetchDeliveryPrice = async () => {
-      if (shippingCity && shippingCity.trim().length > 0) {
+      if (shippingRegionId && shippingRegionId.trim().length > 0) {
         setLoadingDeliveryPrice(true);
         try {
-          console.log('🚚 [CHECKOUT] Fetching delivery price for city:', shippingCity);
           const response = await apiClient.get<{ price: number }>('/api/v1/delivery/price', {
-            params: {
-              city: shippingCity.trim(),
-              country: 'Armenia',
-            },
+            params: { regionId: shippingRegionId.trim() },
           });
-          console.log('✅ [CHECKOUT] Delivery price fetched:', response.price);
           setDeliveryPrice(response.price);
-        } catch (err: any) {
-          console.error('❌ [CHECKOUT] Error fetching delivery price:', err);
-          // Don't set default price - keep it null so it doesn't add to total
+        } catch {
           setDeliveryPrice(null);
         } finally {
           setLoadingDeliveryPrice(false);
@@ -327,13 +344,24 @@ export default function CheckoutPage() {
       }
     };
 
-    // Debounce the API call
     const timeoutId = setTimeout(() => {
       fetchDeliveryPrice();
-    }, 500);
+    }, 300);
 
-        return () => clearTimeout(timeoutId);
-  }, [shippingCity]);
+    return () => clearTimeout(timeoutId);
+  }, [shippingRegionId]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (regionDropdownRef.current && !regionDropdownRef.current.contains(e.target as Node)) {
+        setRegionDropdownOpen(false);
+      }
+    };
+    if (regionDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [regionDropdownOpen]);
 
   useEffect(() => {
     // Wait for auth to finish loading before checking
@@ -471,11 +499,8 @@ export default function CheckoutPage() {
                 console.log('📝 [CHECKOUT] Set shippingAddress:', fullAddress);
               }
               
-              if (defaultAddress.city) {
-                setValue('shippingCity', defaultAddress.city);
-                console.log('📝 [CHECKOUT] Set shippingCity:', defaultAddress.city);
-              }
-              
+              // Region (marz) is not auto-filled from saved address; user selects from dropdown
+
               // Use address phone if available, otherwise use user phone
               if (defaultAddress.phone) {
                 setValue('shippingPhone', defaultAddress.phone);
@@ -648,12 +673,12 @@ export default function CheckoutPage() {
     // Validate shipping address (always required since delivery is always selected)
     const formData = watch();
     const hasShippingAddress = formData.shippingAddress && formData.shippingAddress.trim().length > 0;
-    const hasShippingCity = formData.shippingCity && formData.shippingCity.trim().length > 0;
-    
-    if (!hasShippingAddress || !hasShippingCity) {
+    const hasShippingRegion = formData.shippingRegionId && formData.shippingRegionId.trim().length > 0;
+
+    if (!hasShippingAddress || !hasShippingRegion) {
       console.log('[Checkout] Shipping address validation failed:', {
         hasShippingAddress,
-        hasShippingCity
+        hasShippingRegion,
       });
       setError(t('checkout.errors.fillShippingAddress'));
       // Scroll to shipping address section
@@ -691,15 +716,16 @@ export default function CheckoutPage() {
         cartId = 'guest-cart'; // Keep as guest-cart for API to recognize
       }
 
-      // Prepare shipping address (always delivery)
-      const shippingAddress = data.shippingAddress && 
-        data.shippingCity && 
+      // Prepare shipping address (always delivery): address, region (marz), regionId, phone
+      const selectedRegionName = deliveryRegions.find((r) => r.id === data.shippingRegionId)?.name;
+      const shippingAddress = data.shippingAddress &&
+        data.shippingRegionId &&
         data.phone
         ? {
             address: data.shippingAddress,
-            city: data.shippingCity,
+            regionId: data.shippingRegionId,
+            region: selectedRegionName ?? '',
             phone: data.phone,
-            // Store delivery scheduling info together with the address
             ...(data.deliveryDay ? { deliveryDay: data.deliveryDay } : {}),
             ...(data.deliveryTimeSlot ? { deliveryTimeSlot: data.deliveryTimeSlot } : {}),
           }
@@ -992,13 +1018,13 @@ export default function CheckoutPage() {
               <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
               <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.shippingAddress')}</h2>
-                {(error && error.includes('shipping address')) || (errors.shippingAddress || errors.shippingCity) ? (
+                {(error && error.includes('shipping address')) || (errors.shippingAddress || errors.shippingRegionId) ? (
                   <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-[12px]">
                     <p className="text-sm text-red-600">
-                      {error && error.includes('shipping address') 
-                        ? error 
-                        : (errors.shippingAddress?.message || 
-                           errors.shippingCity?.message)}
+                      {error && error.includes('shipping address')
+                        ? error
+                        : (errors.shippingAddress?.message ||
+                           errors.shippingRegionId?.message)}
                     </p>
                   </div>
                 ) : null}
@@ -1015,7 +1041,7 @@ export default function CheckoutPage() {
                           if (error && error.includes('shipping address')) {
                             setError(null);
                           }
-                        }
+                        },
                       })}
                       disabled={isSubmitting}
                       className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
@@ -1024,25 +1050,44 @@ export default function CheckoutPage() {
                       <p className="mt-1 text-xs text-red-600">{errors.shippingAddress.message}</p>
                     )}
                   </div>
-                  <div>
+                  <div ref={regionDropdownRef} className="relative">
+                    <input type="hidden" {...register('shippingRegionId')} />
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      {t('checkout.form.city')}
+                      {t('checkout.form.region')}
                     </label>
-                    <input
-                      type="text"
-                      placeholder={t('checkout.placeholders.city')}
-                      {...register('shippingCity', {
-                        onChange: () => {
-                          if (error && error.includes('shipping address')) {
-                            setError(null);
-                          }
-                        }
-                      })}
+                    <button
+                      type="button"
                       disabled={isSubmitting}
-                      className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50"
-                    />
-                    {errors.shippingCity?.message && (
-                      <p className="mt-1 text-xs text-red-600">{errors.shippingCity.message}</p>
+                      onClick={() => setRegionDropdownOpen((v) => !v)}
+                      className="w-full px-4 py-2.5 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-left text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50 flex items-center justify-between"
+                    >
+                      <span className={selectedRegion ? '' : 'text-gray-500'}>
+                        {selectedRegion ? `${selectedRegion.name} — ${formatPrice(selectedRegion.price, currency)}` : t('checkout.placeholders.selectRegion')}
+                      </span>
+                      <svg className={`w-4 h-4 text-gray-500 transition-transform ${regionDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {regionDropdownOpen && (
+                      <div className="absolute z-20 mt-1 w-full rounded-[12px] border border-white/50 bg-white/100 backdrop-blur-md shadow-lg py-1 max-h-56 overflow-auto">
+                        {deliveryRegions.map((region) => (
+                          <button
+                            key={region.id}
+                            type="button"
+                            onClick={() => {
+                              setValue('shippingRegionId', region.id);
+                              if (error && error.includes('shipping address')) setError(null);
+                              setRegionDropdownOpen(false);
+                            }}
+                            className="w-full px-4 py-2.5 text-left text-gray-900 hover:bg-white/60 focus:bg-white/60 focus:outline-none transition-colors"
+                          >
+                            {region.name} — {formatPrice(region.price, currency)}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {errors.shippingRegionId?.message && (
+                      <p className="mt-1 text-xs text-red-600">{errors.shippingRegionId.message}</p>
                     )}
                   </div>
                 </div>
@@ -1238,68 +1283,67 @@ export default function CheckoutPage() {
                 {paymentMethods.map((method) => (
                   <label
                     key={method.id}
-                    className={`flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
+                    className={`flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
                       paymentMethod === method.id
                         ? 'border-[#1AC0FD] bg-[#E8F9FE] shadow-sm'
                         : 'border-gray-200 bg-white/60 hover:border-gray-300 hover:bg-white/80'
                     }`}
                   >
-                    <input
-                      type="radio"
-                      {...register('paymentMethod')}
-                      value={method.id}
-                      checked={paymentMethod === method.id}
-                      onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery')}
-                      className="w-5 h-5 text-[#1AC0FD] focus:ring-[#1AC0FD] shrink-0"
-                      disabled={isSubmitting}
-                    />
-                    <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {method.logos ? (
-                          <div className="flex items-center gap-1">
-                            {method.logos.map((src, i) => (
-                              <div
-                                key={`${method.id}-${src}`}
-                                className="w-11 h-8 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0"
-                              >
-                                {logoErrors[`${method.id}-${i}`] ? (
-                                  <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                  </svg>
-                                ) : (
-                                  <img
-                                    src={src}
-                                    alt=""
-                                    className="w-full h-full object-contain p-1"
-                                    loading="lazy"
-                                    onError={() => setLogoErrors((prev) => ({ ...prev, [`${method.id}-${i}`]: true }))}
-                                  />
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="w-14 h-10 bg-white rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm">
-                            {!method.logo || logoErrors[method.id] ? (
-                              <svg className="w-7 h-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                              </svg>
-                            ) : (
-                              <img
-                                src={method.logo}
-                                alt={method.name}
-                                className="w-full h-full object-contain p-1.5"
-                                loading="lazy"
-                                onError={() => setLogoErrors((prev) => ({ ...prev, [method.id]: true }))}
-                              />
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-gray-900">{method.name}</div>
-                        <div className="text-sm text-gray-600 mt-0.5">{method.description}</div>
-                      </div>
+                    {/* Mobile: text on top; Desktop: same row as logos */}
+                    <div className="flex-1 min-w-0 order-1 md:order-2">
+                      <div className="font-semibold text-gray-900">{method.name}</div>
+                      <div className="text-sm text-gray-600 mt-0.5">{method.description}</div>
+                    </div>
+                    <div className="flex items-center gap-4 flex-shrink-0 order-2 md:order-1">
+                      <input
+                        type="radio"
+                        {...register('paymentMethod')}
+                        value={method.id}
+                        checked={paymentMethod === method.id}
+                        onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery')}
+                        className="w-5 h-5 text-[#1AC0FD] focus:ring-[#1AC0FD] shrink-0"
+                        disabled={isSubmitting}
+                      />
+                      {method.logos ? (
+                        <div className="flex items-center gap-1">
+                          {method.logos.map((src, i) => (
+                            <div
+                              key={`${method.id}-${src}`}
+                              className="w-11 h-8 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0"
+                            >
+                              {logoErrors[`${method.id}-${i}`] ? (
+                                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                </svg>
+                              ) : (
+                                <img
+                                  src={src}
+                                  alt=""
+                                  className="w-full h-full object-contain p-1"
+                                  loading="lazy"
+                                  onError={() => setLogoErrors((prev) => ({ ...prev, [`${method.id}-${i}`]: true }))}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="w-14 h-10 bg-white rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm">
+                          {!method.logo || logoErrors[method.id] ? (
+                            <svg className="w-7 h-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                          ) : (
+                            <img
+                              src={method.logo}
+                              alt={method.name}
+                              className="w-full h-full object-contain p-1.5"
+                              loading="lazy"
+                              onError={() => setLogoErrors((prev) => ({ ...prev, [method.id]: true }))}
+                            />
+                          )}
+                        </div>
+                      )}
                     </div>
                   </label>
                 ))}
@@ -1326,8 +1370,8 @@ export default function CheckoutPage() {
                       {loadingDeliveryPrice
                         ? t('checkout.shipping.loading')
                         : deliveryPrice !== null
-                          ? formatPrice(deliveryPrice, currency) + (shippingCity ? ` (${shippingCity})` : ` (${t('checkout.shipping.delivery')})`)
-                          : t('checkout.shipping.enterCity')}
+                          ? formatPrice(deliveryPrice, currency) + (selectedRegion ? ` (${selectedRegion.name})` : ` (${t('checkout.shipping.delivery')})`)
+                          : t('checkout.shipping.selectRegion')}
                     </span>
                   </div>
                   <div className="border-t border-white/20 pt-4">
