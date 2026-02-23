@@ -556,14 +556,14 @@ function ProfilePageContent() {
       setSelectedOrder(data);
 
       // Fetch shipping price if delivery method and shipping is 0
-      if (data.shippingMethod === 'delivery' && data.shippingAddress?.city && data.totals?.shipping === 0) {
+      const shipAddr = data.shippingAddress;
+      const hasRegionOrCity = shipAddr?.regionId || shipAddr?.city;
+      if (data.shippingMethod === 'delivery' && hasRegionOrCity && data.totals?.shipping === 0) {
         try {
-          const deliveryPriceResponse = await apiClient.get<{ price: number }>('/api/v1/delivery/price', {
-            params: {
-              city: data.shippingAddress.city,
-              country: 'Armenia',
-            },
-          });
+          const params: Record<string, string> = shipAddr.regionId
+            ? { regionId: String(shipAddr.regionId) }
+            : { city: String(shipAddr.city) };
+          const deliveryPriceResponse = await apiClient.get<{ price: number }>('/api/v1/delivery/price', { params });
           setShippingPrice(deliveryPriceResponse.price);
         } catch (err) {
           console.error('Error fetching delivery price:', err);
@@ -1005,15 +1005,15 @@ function ProfilePageContent() {
       {activeTab === 'addresses' && (
         <div className="space-y-6">
           <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">{t('profile.addresses.title')}</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">{t('profile.addresses.title')}</h2>
               <ProductPageButton
                 onClick={() => {
                   resetAddressForm();
                   setShowAddressForm(!showAddressForm);
                   setEditingAddress(null);
                 }}
-                className="h-11 px-6"
+                className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs md:text-sm whitespace-nowrap self-start sm:self-auto"
               >
                 {showAddressForm ? t('profile.addresses.form.cancel') : `+ ${t('profile.addresses.addNew')}`}
               </ProductPageButton>
@@ -1513,11 +1513,13 @@ function ProfilePageContent() {
                                 {selectedOrder.shippingAddress.firstName && selectedOrder.shippingAddress.lastName && (
                                   <p>{selectedOrder.shippingAddress.firstName} {selectedOrder.shippingAddress.lastName}</p>
                                 )}
-                                {selectedOrder.shippingAddress.addressLine1 && <p>{selectedOrder.shippingAddress.addressLine1}</p>}
-                                {selectedOrder.shippingAddress.addressLine2 && <p>{selectedOrder.shippingAddress.addressLine2}</p>}
-                                {selectedOrder.shippingAddress.city && (
+                                {(selectedOrder.shippingAddress.address || selectedOrder.shippingAddress.addressLine1) && (
+                                  <p>{selectedOrder.shippingAddress.address || selectedOrder.shippingAddress.addressLine1}</p>
+                                )}
+                                {selectedOrder.shippingAddress.addressLine2 && !selectedOrder.shippingAddress.address && <p>{selectedOrder.shippingAddress.addressLine2}</p>}
+                                {(selectedOrder.shippingAddress.region || selectedOrder.shippingAddress.city) && (
                                   <p>
-                                    {selectedOrder.shippingAddress.city}
+                                    {selectedOrder.shippingAddress.region || selectedOrder.shippingAddress.city}
                                     {selectedOrder.shippingAddress.postalCode && `, ${selectedOrder.shippingAddress.postalCode}`}
                                   </p>
                                 )}

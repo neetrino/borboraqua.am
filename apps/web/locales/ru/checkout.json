@@ -11,6 +11,7 @@
     "phone": "Телефон",
     "address": "Адрес",
     "city": "Город",
+    "region": "Регион (марз)",
     "phoneNumber": "Номер телефона",
     "cardNumber": "Номер карты",
     "expiryDate": "Срок действия",
@@ -21,6 +22,7 @@
     "phone": "+374XXXXXXXX",
     "address": "Улица, квартира, офис и т.д.",
     "city": "Город",
+    "selectRegion": "Выберите регион",
     "cardNumber": "1234 5678 9012 3456",
     "expiryDate": "ММ/ГГ",
     "cvv": "123",
@@ -30,7 +32,8 @@
     "delivery": "Доставка",
     "deliveryDescription": "Мы доставим ваш заказ по вашему адресу",
     "loading": "Загрузка...",
-    "enterCity": "Введите город"
+    "enterCity": "Введите город",
+    "selectRegion": "Выберите регион"
   },
   "delivery": {
     "day": "День доставки",
@@ -103,6 +106,7 @@
     "selectPaymentMethod": "Пожалуйста, выберите способ оплаты",
     "addressRequired": "Адрес обязателен для доставки",
     "cityRequired": "Город обязателен для доставки",
+    "regionRequired": "Пожалуйста, выберите регион доставки",
     "phoneRequiredDelivery": "Номер телефона обязателен для доставки",
     "invalidPhoneFormat": "Неверный формат номера телефона",
     "cardNumberRequired": "Номер карты обязателен",

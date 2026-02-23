@@ -11,6 +11,7 @@
     "phone": "Phone",
     "address": "Address",
     "city": "City",
+    "region": "Region (Marz)",
     "phoneNumber": "Phone Number",
     "cardNumber": "Card Number",
     "expiryDate": "Expiry Date",
@@ -21,6 +22,7 @@
     "phone": "+374XXXXXXXX",
     "address": "Street address, apartment, suite, etc.",
     "city": "City",
+    "selectRegion": "Select region",
     "cardNumber": "1234 5678 9012 3456",
     "expiryDate": "MM/YY",
     "cvv": "123",
@@ -30,7 +32,8 @@
     "delivery": "Delivery",
     "deliveryDescription": "We'll deliver your order to your address",
     "loading": "Loading...",
-    "enterCity": "Enter city"
+    "enterCity": "Enter city",
+    "selectRegion": "Select a region"
   },
   "delivery": {
     "day": "Delivery day",
@@ -103,6 +106,7 @@
     "selectPaymentMethod": "Please select a payment method",
     "addressRequired": "Address is required for delivery",
     "cityRequired": "City is required for delivery",
+    "regionRequired": "Please select a delivery region",
     "phoneRequiredDelivery": "Phone number is required for delivery",
     "invalidPhoneFormat": "Invalid phone number format",
     "cardNumberRequired": "Card number is required",

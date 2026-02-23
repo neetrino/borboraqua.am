@@ -4982,11 +4982,11 @@ class AdminService {
   }
 
   /**
-   * Get delivery settings (locations + optional schedule)
+   * Get delivery settings (regions + optional schedule)
    */
   async getDeliverySettings() {
     console.log('🚚 [ADMIN SERVICE] getDeliverySettings called');
-    
+
     const setting = await db.settings.findUnique({
       where: { key: 'delivery-locations' },
     });
@@ -4994,9 +4994,8 @@ class AdminService {
     if (!setting) {
       console.log('✅ [ADMIN SERVICE] Delivery settings not found, returning defaults');
       return {
-        locations: [],
+        regions: [],
         schedule: {
-          // Default: Tuesday (2) and Thursday (4)
           enabledWeekdays: [2, 4],
         },
         timeSlots: [
@@ -5007,16 +5006,15 @@ class AdminService {
     }
 
     const value = setting.value as {
+      regions?: Array<{ id: string; name: string; price: number }>;
       locations?: Array<{ id?: string; country: string; city: string; price: number }>;
-      schedule?: {
-        enabledWeekdays?: number[];
-      };
+      schedule?: { enabledWeekdays?: number[] };
       timeSlots?: Array<{ id: string; label: { en: string; hy: string; ru: string }; enabled: boolean }>;
     };
 
     const enabledWeekdays =
-      Array.isArray(value.schedule?.enabledWeekdays) && value.schedule!.enabledWeekdays.length > 0
-        ? value.schedule!.enabledWeekdays
+      Array.isArray(value.schedule?.enabledWeekdays) && value.schedule.enabledWeekdays.length > 0
+        ? value.schedule.enabledWeekdays
         : [2, 4];
 
     const timeSlots = Array.isArray(value.timeSlots) && value.timeSlots.length > 0
@@ -5026,22 +5024,37 @@ class AdminService {
           { id: 'second_half', label: { en: 'Afternoon (13:00 - 18:00)', hy: 'Երեկոյան (13:00 - 18:00)', ru: 'День (13:00 - 18:00)' }, enabled: true },
         ];
 
-    console.log('✅ [ADMIN SERVICE] Delivery settings loaded:', value);
+    let regions = value.regions || [];
+    if (regions.length === 0 && Array.isArray(value.locations) && value.locations.length > 0) {
+      regions = value.locations.map((loc, i) => ({
+        id: loc.id || `region-${Date.now()}-${i}`,
+        name: loc.city || '',
+        price: loc.price ?? 0,
+      }));
+    }
+
+    console.log('✅ [ADMIN SERVICE] Delivery settings loaded:', { regionsCount: regions.length });
     return {
-      locations: value.locations || [],
-      schedule: {
-        enabledWeekdays,
-      },
+      regions,
+      schedule: { enabledWeekdays },
       timeSlots,
     };
   }
 
   /**
-   * Get delivery price for a specific city
+   * Get delivery regions for public (checkout dropdown). Returns id, name, price.
    */
-  async getDeliveryPrice(city: string, country: string = 'Armenia') {
-    console.log('🚚 [ADMIN SERVICE] getDeliveryPrice called:', { city, country });
-    
+  async getDeliveryRegions(): Promise<Array<{ id: string; name: string; price: number }>> {
+    const settings = await this.getDeliverySettings();
+    return settings.regions || [];
+  }
+
+  /**
+   * Get delivery price for a region by id
+   */
+  async getDeliveryPriceByRegionId(regionId: string): Promise<number | null> {
+    console.log('🚚 [ADMIN SERVICE] getDeliveryPriceByRegionId called:', regionId);
+
     const setting = await db.settings.findUnique({
       where: { key: 'delivery-locations' },
     });
@@ -5051,69 +5064,66 @@ class AdminService {
       return null;
     }
 
-    const value = setting.value as { locations?: Array<{ country: string; city: string; price: number }> };
-    const locations = value.locations || [];
-
-    // Find matching location (case-insensitive)
-    const location = locations.find(
-      (loc) => 
-        loc.city.toLowerCase().trim() === city.toLowerCase().trim() &&
-        loc.country.toLowerCase().trim() === country.toLowerCase().trim()
-    );
-
-    if (location) {
-      console.log('✅ [ADMIN SERVICE] Delivery price found:', location.price);
-      return location.price;
+    const value = setting.value as {
+      regions?: Array<{ id: string; name: string; price: number }>;
+      locations?: Array<{ id?: string; city: string; price: number }>;
+    };
+    const regions = value.regions || [];
+    if (regions.length === 0 && Array.isArray(value.locations)) {
+      const loc = value.locations.find((l) => l.id === regionId);
+      if (loc) return loc.price;
+      return null;
     }
 
-    // If no exact match, try to find by city only (case-insensitive)
-    const cityMatch = locations.find(
-      (loc) => loc.city.toLowerCase().trim() === city.toLowerCase().trim()
-    );
-
-    if (cityMatch) {
-      console.log('✅ [ADMIN SERVICE] Delivery price found by city:', cityMatch.price);
-      return cityMatch.price;
+    const region = regions.find((r) => r.id === regionId);
+    if (region) {
+      console.log('✅ [ADMIN SERVICE] Delivery price found:', region.price);
+      return region.price;
     }
-
-    // Return null if no match found - don't return default price
-    console.log('⚠️ [ADMIN SERVICE] No delivery price found for city:', city);
+    console.log('⚠️ [ADMIN SERVICE] No delivery price found for regionId:', regionId);
     return null;
   }
 
   /**
-   * Update delivery settings (locations + optional schedule)
+   * Get delivery price by region name (for backward compat with orders that have city/region name only)
+   */
+  async getDeliveryPriceByRegionName(regionName: string): Promise<number | null> {
+    const regions = await this.getDeliveryRegions();
+    const name = String(regionName || '').trim().toLowerCase();
+    if (!name) return null;
+    const region = regions.find((r) => r.name.trim().toLowerCase() === name);
+    return region ? region.price : null;
+  }
+
+  /**
+   * Update delivery settings (regions + optional schedule)
    */
   async updateDeliverySettings(data: {
-    locations: Array<{ id?: string; country: string; city: string; price: number }>;
-    schedule?: {
-      enabledWeekdays?: number[];
-    };
+    regions: Array<{ id?: string; name: string; price: number }>;
+    schedule?: { enabledWeekdays?: number[] };
     timeSlots?: Array<{ id: string; label: { en: string; hy: string; ru: string }; enabled: boolean }>;
   }) {
     console.log('🚚 [ADMIN SERVICE] updateDeliverySettings called:', data);
-    
-    // Validate locations
-    if (!Array.isArray(data.locations)) {
+
+    if (!Array.isArray(data.regions)) {
       throw {
         status: 400,
         type: "https://api.shop.am/problems/validation-error",
         title: "Validation Error",
-        detail: "Locations must be an array",
+        detail: "Regions must be an array",
       };
     }
 
-    // Validate each location
-    for (const location of data.locations) {
-      if (!location.country || !location.city) {
+    for (const region of data.regions) {
+      if (!region.name || String(region.name).trim() === '') {
         throw {
           status: 400,
           type: "https://api.shop.am/problems/validation-error",
           title: "Validation Error",
-          detail: "Each location must have country and city",
+          detail: "Each region must have a name",
         };
       }
-      if (typeof location.price !== 'number' || location.price < 0) {
+      if (typeof region.price !== 'number' || region.price < 0) {
         throw {
           status: 400,
           type: "https://api.shop.am/problems/validation-error",
@@ -5123,11 +5133,10 @@ class AdminService {
       }
     }
 
-    // Normalise schedule
     const enabledWeekdays = Array.isArray(data.schedule?.enabledWeekdays)
       ? Array.from(
           new Set(
-            data.schedule!.enabledWeekdays
+            data.schedule.enabledWeekdays
               .map((d) => Number(d))
               .filter((d) => Number.isInteger(d) && d >= 0 && d <= 6),
           ),
@@ -5135,13 +5144,11 @@ class AdminService {
       : [2, 4];
 
     if (enabledWeekdays.length === 0) {
-      // Fallback to default Tue/Thu if admin clears all days
       enabledWeekdays.push(2, 4);
     }
 
-    // Validate time slots
     const timeSlots = Array.isArray(data.timeSlots) && data.timeSlots.length > 0
-      ? data.timeSlots.map(slot => ({
+      ? data.timeSlots.map((slot) => ({
           id: slot.id,
           label: {
             en: slot.label?.en || '',
@@ -5155,8 +5162,7 @@ class AdminService {
           { id: 'second_half', label: { en: 'Afternoon (13:00 - 18:00)', hy: 'Երեկոյան (13:00 - 18:00)', ru: 'День (13:00 - 18:00)' }, enabled: true },
         ];
 
-    // Ensure at least one time slot is enabled
-    if (!timeSlots.some(slot => slot.enabled)) {
+    if (!timeSlots.some((slot) => slot.enabled)) {
       throw {
         status: 400,
         type: "https://api.shop.am/problems/validation-error",
@@ -5165,10 +5171,9 @@ class AdminService {
       };
     }
 
-    // Generate IDs for new locations
-    const locationsWithIds = data.locations.map((location, index) => ({
-      ...location,
-      id: location.id || `location-${Date.now()}-${index}`,
+    const regionsWithIds = data.regions.map((region, index) => ({
+      ...region,
+      id: region.id || `region-${Date.now()}-${index}`,
     }));
 
     try {
@@ -5176,10 +5181,8 @@ class AdminService {
         where: { key: 'delivery-locations' },
         update: {
           value: {
-            locations: locationsWithIds,
-            schedule: {
-              enabledWeekdays,
-            },
+            regions: regionsWithIds,
+            schedule: { enabledWeekdays },
             timeSlots,
           },
           updatedAt: new Date(),
@@ -5187,30 +5190,27 @@ class AdminService {
         create: {
           key: 'delivery-locations',
           value: {
-            locations: locationsWithIds,
-            schedule: {
-              enabledWeekdays,
-            },
+            regions: regionsWithIds,
+            schedule: { enabledWeekdays },
             timeSlots,
           },
-          description: 'Delivery prices, schedule, and time slots by country and city',
+          description: 'Delivery regions (marzer) with prices, schedule, and time slots',
         },
       });
 
       console.log('✅ [ADMIN SERVICE] Delivery settings updated:', setting);
       return {
-        locations: locationsWithIds,
-        schedule: {
-          enabledWeekdays,
-        },
+        regions: regionsWithIds,
+        schedule: { enabledWeekdays },
         timeSlots,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string; code?: string };
       // Check for encoding errors (WIN1251 vs UTF-8 mismatch)
-      if (error?.message?.includes('encoding') || 
-          error?.message?.includes('WIN1251') || 
-          error?.message?.includes('UTF8') ||
-          error?.code === '22P05') {
+      if (err?.message?.includes('encoding') || 
+          err?.message?.includes('WIN1251') ||
+          err?.message?.includes('UTF8') ||
+          err?.code === '22P05') {
         console.error('❌ [ADMIN SERVICE] Database encoding error:', error);
         throw {
           status: 500,

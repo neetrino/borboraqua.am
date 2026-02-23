@@ -8,7 +8,7 @@ import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } fr
 import { useAuth } from '../lib/auth/AuthContext';
 import { useTranslation } from '../lib/i18n-client';
 
-import { Header, Footer, Button, addToCart, FeaturedProductCard, type FeaturedProduct, FeaturedProductsNavigationArrow } from '../components/icons/global/global';
+import { Header, Footer, Button, addToCart, FeaturedProductCard, type FeaturedProduct, FeaturedProductsNavigationArrow } from './icons/global/global';
 import { DraggableBulb } from '../components/DraggableBulb';
 
 // Local image paths - Images stored in public/assets/home/
@@ -954,14 +954,14 @@ export function HomePageClient({
         </div>
         {/* Mobile Stats Cards */}
         <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[1900px] w-full max-w-[400px] min-[728px]:max-w-[700px] px-4">
-          <div className="h-[227px] relative rounded-[30px] shrink-0 w-[calc(50%-4px)] min-w-0 overflow-hidden">
+          <div className="h-[227px] relative rounded-[30px] shrink-0 w-[calc(38%-4px)] min-w-0 overflow-hidden">
             <img
               alt=""
               className="absolute h-[149.05%] left-[-49.49%] max-w-none top-[-32.36%] w-[149.49%]"
               src={img5}
             />
           </div>
-          <div className="h-[227px] relative shrink-0 w-[calc(50%-4px)] min-w-0">
+          <div className="h-[227px] relative shrink-0 w-[calc(62%-4px)] min-w-0">
             <div className="absolute bg-[#1ac0fd] inset-0 rounded-[30px]" />
             <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[70%_6%_18%_40%] min-[728px]:inset-[65%_6%_18%_40%] justify-center leading-[0] text-[40px] min-[728px]:text-[50px] text-center text-white tracking-[-0.9px] uppercase">
               <p className="leading-[36px] min-[728px]:leading-[45px] whitespace-pre-wrap">98%</p>
@@ -979,7 +979,7 @@ export function HomePageClient({
           </div>
         </div>
         <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[2150px] w-full max-w-[400px] min-[728px]:max-w-[700px] px-4">
-          <div className="h-[227px] relative shrink-0 w-[calc(50%-4px)] min-w-0">
+          <div className="h-[227px] relative shrink-0 w-[calc(62%-4px)] min-w-0">
             <div className="absolute bg-white inset-0 rounded-[30px]" />
             <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[65%_6%_18%_26%] min-[728px]:inset-[60%_6%_18%_26%] justify-center leading-[0] text-[#0f172a] text-[40px] min-[728px]:text-[50px] text-center tracking-[-0.9px] uppercase">
               <p className="leading-[36px] min-[728px]:leading-[45px] whitespace-pre-wrap">100%</p>
@@ -994,7 +994,7 @@ export function HomePageClient({
               <p className="leading-[24px] min-[728px]:leading-[24px] whitespace-pre-wrap">{t('home.cards.balancedHydration.source')}</p>
             </div>
           </div>
-          <div className="h-[227px] relative rounded-[30px] shrink-0 w-[calc(50%-4px)] min-w-0 overflow-hidden">
+          <div className="h-[227px] relative rounded-[30px] shrink-0 w-[calc(38%-4px)] min-w-0 overflow-hidden">
             <img
               alt=""
               className="absolute h-[101.64%] left-[-13.07%] max-w-none top-[-1.52%] w-[126.15%]"
@@ -1060,8 +1060,26 @@ export function HomePageClient({
           </div>
         </div>
 
-        {/* Mobile Trusted By Navigation - same handlers as desktop */}
+        {/* Mobile Trusted By Navigation - visible only < 728px */}
         <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-1/2 top-[2600px] w-full max-w-[470px] min-[728px]:hidden px-4 z-20">
+          <FeaturedProductsNavigationArrow
+            direction="prev"
+            onClick={handlePreviousTrustedBy}
+            isMobile={true}
+            className="bg-transparent border border-black border-solid shadow-none hover:shadow-none hover:border-black [&_img]:brightness-0 [&_img]:hover:brightness-0 [&_img]:hover:saturate-[100%] [&_img]:hover:invert-[65%] [&_img]:hover:sepia-[42%] [&_img]:hover:saturate-[1400%] [&_img]:hover:hue-rotate-[170deg] [&_img]:hover:brightness-[0.92] [&_img]:hover:contrast-[1.04]"
+            ariaLabel="Previous partner"
+          />
+          <FeaturedProductsNavigationArrow
+            direction="next"
+            onClick={handleNextTrustedBy}
+            isMobile={true}
+            className="bg-transparent border border-black border-solid shadow-none hover:shadow-none hover:border-black [&_img]:brightness-0 [&_img]:hover:brightness-0 [&_img]:hover:saturate-[100%] [&_img]:hover:invert-[65%] [&_img]:hover:sepia-[42%] [&_img]:hover:saturate-[1400%] [&_img]:hover:hue-rotate-[170deg] [&_img]:hover:brightness-[0.92] [&_img]:hover:contrast-[1.04]"
+            ariaLabel="Next partner"
+          />
+        </div>
+
+        {/* Tablet Trusted By Navigation - visible 728px to xl (before desktop layout) */}
+        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-1/2 top-[2600px] w-full max-w-[760px] hidden min-[728px]:flex xl:hidden px-6 z-20">
           <FeaturedProductsNavigationArrow
             direction="prev"
             onClick={handlePreviousTrustedBy}

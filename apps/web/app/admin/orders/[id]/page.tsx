@@ -154,14 +154,16 @@ export default function OrderDetailPage() {
       const response = await apiClient.get<OrderDetails>(`/api/v1/admin/orders/${id}`);
       setOrder(response);
 
-      if (response.shippingMethod === 'delivery' && response.shippingAddress?.city) {
+      const shipAddr = response.shippingAddress as { regionId?: string; city?: string } | undefined;
+      if (response.shippingMethod === 'delivery' && (shipAddr?.regionId || shipAddr?.city)) {
         const currentShipping = response.totals?.shipping ?? response.shippingAmount ?? 0;
         if (currentShipping === 0) {
           setLoadingDeliveryPrice(true);
           try {
-            const deliveryResponse = await apiClient.get<{ price: number }>('/api/v1/delivery/price', {
-              params: { city: response.shippingAddress.city as string, country: 'Armenia' },
-            });
+            const params = shipAddr.regionId
+              ? { regionId: shipAddr.regionId }
+              : { city: shipAddr.city };
+            const deliveryResponse = await apiClient.get<{ price: number }>('/api/v1/delivery/price', { params });
             setDeliveryPrice(deliveryResponse.price);
           } catch {
             setDeliveryPrice(null);
@@ -464,6 +466,9 @@ export default function OrderDetailPage() {
                       {order.shippingAddress.addressLine2 != null && `, ${String(order.shippingAddress.addressLine2)}`}
                     </p>
                   )}
+                  {(order.shippingAddress.region != null && order.shippingAddress.region !== '') && (
+                    <p><span className="font-medium">{t('checkout.form.region')}:</span> {String(order.shippingAddress.region)}</p>
+                  )}
                   {order.shippingAddress.city != null && order.shippingAddress.city !== '' && (
                     <p><span className="font-medium">{t('checkout.form.city')}:</span> {String(order.shippingAddress.city)}</p>
                   )}
@@ -629,8 +634,8 @@ export default function OrderDetailPage() {
                                 ? t('common.cart.free')
                                 : loadingDeliveryPrice
                                   ? t('checkout.shipping.loading')
-                                  : order.shippingAddress?.city
-                                    ? `${formatPrice(ship, currency)} (${order.shippingAddress.city})`
+                                  : (order.shippingAddress?.region ?? order.shippingAddress?.city)
+                                    ? `${formatPrice(ship, currency)} (${order.shippingAddress?.region ?? order.shippingAddress?.city})`
                                     : t('checkout.shipping.enterCity')}
                             </td>
                           </tr>
