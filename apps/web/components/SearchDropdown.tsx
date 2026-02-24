@@ -73,7 +73,7 @@ export function SearchDropdown({
                       : 'hover:bg-white/15 text-white/95'
                   }`}
                 >
-                  <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-white/20">
+                  <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-white">
                     {result.image ? (
                       <img
                         src={result.image}
@@ -81,7 +81,7 @@ export function SearchDropdown({
                         className="h-full w-full object-contain"
                       />
                     ) : (
-                      <div className="h-full w-full bg-white/10" />
+                      <div className="h-full w-full bg-gray-100" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -94,7 +94,7 @@ export function SearchDropdown({
                       </div>
                     )}
                     <div className="mt-1 flex items-baseline gap-2">
-                      <span className="font-bold text-[15px] text-[#b3e5fc]">
+                      <span className="font-bold text-[15px] text-[#1ac0fd]">
                         {formatPrice(result.price)}
                       </span>
                       {result.salePrice != null && result.salePrice > result.price && (
@@ -123,7 +123,7 @@ export function SearchDropdown({
                 onClose();
               }
             }}
-            className="block w-full rounded-lg py-2 text-center text-sm font-medium text-[#b3e5fc] hover:bg-white/15"
+            className="block w-full rounded-lg py-2 text-center text-sm font-medium text-[#1ac0fd] hover:bg-white/15"
           >
             {t('home.search.seeAll') || 'Տեսնել բոլորը'}
           </button>
