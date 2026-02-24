@@ -41,7 +41,7 @@
 - [x] Next.js 16, Prisma, Neon, monorepo
 - [x] Կատալոգ, ապրանք, ատրիբուտներ
 - [x] Auth (JWT), զամբյուղ
-- [x] Meilisearch որոնում
+- [x] Instant search (Prisma) որոնում
 - [x] Checkout, վճարումներ (Ameriabank, Idram, Telcell, FastShift)
 - [x] EHDM (ֆիսկալ կտրոն) — ինտեգրացիա ecrm.taxservice.am, ցուցադրում ադմին/կլիենտ
 - [ ] Ադմին-պանել (ապրանքներ/պատվերներ)

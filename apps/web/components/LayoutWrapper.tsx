@@ -8,6 +8,9 @@ import { Breadcrumb } from './Breadcrumb';
 import { useAuth } from '../lib/auth/AuthContext';
 import { useTranslation } from '../lib/i18n-client';
 import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } from '../lib/language';
+import { formatPrice as formatPriceCurrency, getStoredCurrency } from '../lib/currency';
+import { useInstantSearch } from '../hooks/useInstantSearch';
+import { SearchDropdown } from './SearchDropdown';
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,7 +24,6 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
 
   // State for header navigation
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -30,6 +32,26 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchModalRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const {
+    query: searchQuery,
+    setQuery: setSearchQuery,
+    results: searchResults,
+    loading: searchLoading,
+    error: searchError,
+    selectedIndex: searchSelectedIndex,
+    handleKeyDown: handleSearchKeyDown,
+    clearSearch,
+  } = useInstantSearch({
+    debounceMs: 200,
+    minQueryLength: 1,
+    maxResults: 5,
+  });
+
+  const closeSearchModal = () => {
+    clearSearch();
+    setShowSearchModal(false);
+  };
 
   // Close language menu and user menu when clicking outside
   useEffect(() => {
@@ -41,7 +63,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         setShowUserMenu(false);
       }
       if (searchModalRef.current && !searchModalRef.current.contains(event.target as Node)) {
-        setShowSearchModal(false);
+        closeSearchModal();
       }
     };
 
@@ -76,7 +98,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && showSearchModal) {
-        setShowSearchModal(false);
+        closeSearchModal();
       }
     };
 
@@ -85,6 +107,32 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       document.removeEventListener('keydown', handleEscape);
     };
   }, [showSearchModal]);
+
+  /**
+   * Handle search submit (Enter): go to selected result or to catalog with query
+   */
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (searchSelectedIndex >= 0 && searchResults[searchSelectedIndex]) {
+      const result = searchResults[searchSelectedIndex];
+      router.push(`/products/${encodeURIComponent(result.slug)}`);
+      closeSearchModal();
+      return;
+    }
+    const params = new URLSearchParams();
+    if (q) params.set('search', q);
+    router.push(params.toString() ? `/products?${params.toString()}` : '/products');
+    closeSearchModal();
+  };
+
+  const handleSearchResultClick = (result: { slug: string }) => {
+    router.push(`/products/${encodeURIComponent(result.slug)}`);
+    closeSearchModal();
+  };
+
+  const formatPriceForSearch = (price: number) =>
+    formatPriceCurrency(price, getStoredCurrency());
 
   /**
    * Handle language change
@@ -100,23 +148,6 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const handleLogout = () => {
     logout();
     router.push('/');
-  };
-
-  /**
-   * Handle search
-   */
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const query = searchQuery.trim();
-    const params = new URLSearchParams();
-
-    if (query) {
-      params.set('search', query);
-    }
-
-    setShowSearchModal(false);
-    const queryString = params.toString();
-    router.push(queryString ? `/products?${queryString}` : '/products');
   };
 
   if (isHomePage) {
@@ -163,9 +194,21 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         t={t}
         showSearchModal={showSearchModal}
         setShowSearchModal={setShowSearchModal}
+        closeSearchModal={closeSearchModal}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         handleSearch={handleSearch}
+        searchResults={searchResults}
+        searchLoading={searchLoading}
+        searchError={searchError}
+        searchSelectedIndex={searchSelectedIndex}
+        handleSearchKeyDown={handleSearchKeyDown}
+        onSearchResultClick={handleSearchResultClick}
+        formatPriceForSearch={formatPriceForSearch}
+        onSearchSeeAll={(q) => {
+          router.push(`/products?search=${encodeURIComponent(q)}`);
+          closeSearchModal();
+        }}
       />
       
       {/* Spacer section at the top - increases page height */}
@@ -213,7 +256,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       {showSearchModal && (
         <div 
           className="hidden xl:flex fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[200] items-start justify-center pt-16 px-4"
-          onClick={() => setShowSearchModal(false)}
+          onClick={() => closeSearchModal()}
         >
           <div
             ref={searchModalRef}
@@ -221,19 +264,21 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
             onClick={(e) => e.stopPropagation()}
           >
             <form onSubmit={handleSearch} className="relative">
-              {/* Search Input with glassy effect */}
               <div className="relative">
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
                   placeholder={t('home.search.placeholder')}
                   className="w-full h-14 pl-14 pr-4 bg-[#60b3e8]/80 backdrop-blur-md border-2 border-white/90 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white text-lg placeholder:text-white/70 text-white shadow-lg"
                   autoFocus
                   autoComplete="off"
+                  aria-controls="search-results"
+                  aria-expanded={showSearchModal && (searchResults.length > 0 || searchLoading)}
+                  aria-autocomplete="list"
                 />
-                {/* Search Icon inside input */}
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -241,6 +286,22 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
             </form>
+            <SearchDropdown
+              results={searchResults}
+              loading={searchLoading}
+              error={searchError}
+              isOpen={showSearchModal}
+              selectedIndex={searchSelectedIndex}
+              query={searchQuery}
+              onResultClick={handleSearchResultClick}
+              onClose={closeSearchModal}
+              onSeeAll={(q) => {
+                router.push(`/products?search=${encodeURIComponent(q)}`);
+                closeSearchModal();
+              }}
+              t={t}
+              formatPrice={formatPriceForSearch}
+            />
           </div>
         </div>
       )}
