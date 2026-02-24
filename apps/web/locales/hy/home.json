@@ -132,7 +132,11 @@
     }
   },
   "search": {
-    "placeholder": "Որոնել ապրանքներ..."
+    "placeholder": "Որոնել ապրանքներ...",
+    "seeAll": "Տեսնել բոլորը",
+    "searching": "Փնտրում...",
+    "noResults": "Արտադրանք չի գտնվել",
+    "resultsLabel": "Որոնման արդյունքներ"
   },
   "errors": {
     "noVariantsAvailable": "Տարբերակներ չկան",

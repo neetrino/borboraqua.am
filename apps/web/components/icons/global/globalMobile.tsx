@@ -453,7 +453,7 @@ export function MobileSearch({
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
               placeholder={t('home.search.placeholder')}
-              className="w-full h-12 pl-12 pr-4 bg-[#62b3e8]/80 backdrop-blur-md border-2 border-white/90 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white text-base placeholder:text-white/70 text-white shadow-lg pointer-events-auto relative z-[104] touch-manipulation"
+              className="w-full h-12 pl-12 pr-4 bg-white/10 backdrop-blur-xl border border-white/30 rounded-full focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/50 text-base placeholder:text-white/80 text-white shadow-lg pointer-events-auto relative z-[104] touch-manipulation"
               autoFocus
               autoComplete="off"
               aria-controls="search-results-mobile"

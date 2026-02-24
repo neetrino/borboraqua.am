@@ -132,7 +132,11 @@
     }
   },
   "search": {
-    "placeholder": "Search products..."
+    "placeholder": "Search products...",
+    "seeAll": "See all",
+    "searching": "Searching...",
+    "noResults": "No products found",
+    "resultsLabel": "Search results"
   },
   "errors": {
     "noVariantsAvailable": "No variants available",
