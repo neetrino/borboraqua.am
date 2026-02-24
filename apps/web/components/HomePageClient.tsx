@@ -8,6 +8,9 @@ import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } fr
 import { useAuth } from '../lib/auth/AuthContext';
 import { useTranslation } from '../lib/i18n-client';
 
+import { useInstantSearch } from '../hooks/useInstantSearch';
+import { SearchDropdown } from './SearchDropdown';
+
 import { Header, Footer, Button, addToCart, FeaturedProductCard, type FeaturedProduct, FeaturedProductsNavigationArrow } from './icons/global/global';
 import { DraggableBulb } from '../components/DraggableBulb';
 
@@ -119,10 +122,29 @@ export function HomePageClient({
 
   // State for header navigation
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  
+  const {
+    query: searchQuery,
+    setQuery: setSearchQuery,
+    results: searchResults,
+    loading: searchLoading,
+    error: searchError,
+    selectedIndex: searchSelectedIndex,
+    handleKeyDown: handleSearchKeyDown,
+    clearSearch,
+  } = useInstantSearch({
+    debounceMs: 200,
+    minQueryLength: 1,
+    maxResults: 5,
+  });
+
+  const closeSearchModal = () => {
+    clearSearch();
+    setShowSearchModal(false);
+  };
   
   // State for language and currency
   const [language, setLanguage] = useState<LanguageCode>('en');
@@ -207,7 +229,7 @@ export function HomePageClient({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchModalRef.current && !searchModalRef.current.contains(event.target as Node)) {
-        setShowSearchModal(false);
+        closeSearchModal();
       }
     };
 
@@ -228,7 +250,7 @@ export function HomePageClient({
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && showSearchModal) {
-        setShowSearchModal(false);
+        closeSearchModal();
       }
     };
 
@@ -337,21 +359,29 @@ export function HomePageClient({
   };
 
   /**
-   * Handle search
+   * Handle search submit (Enter): go to selected result or to catalog with query
    */
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const query = searchQuery.trim();
-    const params = new URLSearchParams();
-
-    if (query) {
-      params.set('search', query);
+    const q = searchQuery.trim();
+    if (searchSelectedIndex >= 0 && searchResults[searchSelectedIndex]) {
+      const result = searchResults[searchSelectedIndex];
+      router.push(`/products/${encodeURIComponent(result.slug)}`);
+      closeSearchModal();
+      return;
     }
-
-    setShowSearchModal(false);
-    const queryString = params.toString();
-    router.push(queryString ? `/products?${queryString}` : '/products');
+    const params = new URLSearchParams();
+    if (q) params.set('search', q);
+    router.push(params.toString() ? `/products?${params.toString()}` : '/products');
+    closeSearchModal();
   };
+
+  const handleSearchResultClick = (result: { slug: string }) => {
+    router.push(`/products/${encodeURIComponent(result.slug)}`);
+    closeSearchModal();
+  };
+
+  const formatPriceForSearch = (price: number) => formatPrice(price, getStoredCurrency());
 
   /**
    * Handle carousel navigation - 3 modes: 0 (products 0-2), 3 (products 3-5), 6 (products 6-8)
@@ -686,7 +716,7 @@ export function HomePageClient({
         {showSearchModal && (
           <div 
             className="fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[100] flex items-start justify-center pt-16 px-4"
-            onClick={() => setShowSearchModal(false)}
+            onClick={() => closeSearchModal()}
             style={{ touchAction: 'none' }}
           >
             <div
@@ -696,20 +726,22 @@ export function HomePageClient({
               style={{ touchAction: 'auto' }}
             >
               <form onSubmit={handleSearch} className="relative z-[102]">
-                {/* Search Input with glassy effect */}
                 <div className="relative z-[103]">
                   <input
                     ref={searchInputRef}
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
                     placeholder={t('home.search.placeholder')}
-                    className="w-full h-12 pl-12 pr-4 bg-[#62b3e8]/80 backdrop-blur-md border-2 border-white/90 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white text-base placeholder:text-white/70 text-white shadow-lg pointer-events-auto relative z-[104] touch-manipulation"
+                    className="w-full h-12 pl-12 pr-4 bg-white/10 backdrop-blur-xl border border-white/30 rounded-full focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/50 text-base placeholder:text-white/80 text-white shadow-lg pointer-events-auto relative z-[104] touch-manipulation"
                     autoFocus
                     autoComplete="off"
+                    aria-controls="search-results-home-mobile"
+                    aria-expanded={showSearchModal && (searchResults.length > 0 || searchLoading)}
+                    aria-autocomplete="list"
                     style={{ WebkitAppearance: 'none', WebkitTapHighlightColor: 'transparent' }}
                   />
-                  {/* Search Icon inside input */}
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-[105]">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -717,6 +749,23 @@ export function HomePageClient({
                   </div>
                 </div>
               </form>
+              <SearchDropdown
+                results={searchResults}
+                loading={searchLoading}
+                error={searchError}
+                isOpen={showSearchModal}
+                selectedIndex={searchSelectedIndex}
+                query={searchQuery}
+                onResultClick={handleSearchResultClick}
+                onClose={closeSearchModal}
+                onSeeAll={(q) => {
+                  router.push(`/products?search=${encodeURIComponent(q)}`);
+                  closeSearchModal();
+                }}
+                t={t}
+                formatPrice={formatPriceForSearch}
+                className="mt-1"
+              />
             </div>
           </div>
         )}
@@ -1908,7 +1957,7 @@ export function HomePageClient({
       {showSearchModal && (
         <div 
           className="fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[200] flex items-start justify-center pt-16 md:pt-20 px-4"
-          onClick={() => setShowSearchModal(false)}
+          onClick={() => closeSearchModal()}
         >
           <div
             ref={searchModalRef}
@@ -1916,17 +1965,21 @@ export function HomePageClient({
             onClick={(e) => e.stopPropagation()}
           >
             <form onSubmit={handleSearch} className="relative">
-              {/* Search Input with glassy effect */}
               <div className="relative">
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
                   placeholder={t('home.search.placeholder')}
-                  className="w-full h-12 md:h-14 pl-12 md:pl-14 pr-4 bg-[#62b3e8]/80 backdrop-blur-md border-2 border-white/90 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white text-base md:text-lg placeholder:text-white/70 text-white shadow-lg"
+                  className="w-full h-12 md:h-14 pl-12 md:pl-14 pr-4 bg-white/10 backdrop-blur-xl border border-white/30 rounded-full focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-white/50 text-base md:text-lg placeholder:text-white/80 text-white shadow-lg"
+                  autoFocus
+                  autoComplete="off"
+                  aria-controls="search-results-home-desktop"
+                  aria-expanded={showSearchModal && (searchResults.length > 0 || searchLoading)}
+                  aria-autocomplete="list"
                 />
-                {/* Search Icon inside input */}
                 <div className="absolute left-4 md:left-5 top-1/2 -translate-y-1/2 pointer-events-none">
                   <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1934,6 +1987,22 @@ export function HomePageClient({
                 </div>
               </div>
             </form>
+            <SearchDropdown
+              results={searchResults}
+              loading={searchLoading}
+              error={searchError}
+              isOpen={showSearchModal}
+              selectedIndex={searchSelectedIndex}
+              query={searchQuery}
+              onResultClick={handleSearchResultClick}
+              onClose={closeSearchModal}
+              onSeeAll={(q) => {
+                router.push(`/products?search=${encodeURIComponent(q)}`);
+                closeSearchModal();
+              }}
+              t={t}
+              formatPrice={formatPriceForSearch}
+            />
           </div>
         </div>
       )}

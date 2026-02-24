@@ -130,7 +130,11 @@
     }
   },
   "search": {
-    "placeholder": "Поиск товаров..."
+    "placeholder": "Поиск товаров...",
+    "seeAll": "Смотреть все",
+    "searching": "Поиск...",
+    "noResults": "Товары не найдены",
+    "resultsLabel": "Результаты поиска"
   },
   "errors": {
     "noVariantsAvailable": "Варианты недоступны",

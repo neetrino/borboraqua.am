@@ -42,21 +42,21 @@ export function SearchDropdown({
       id="search-results"
       role="listbox"
       aria-label={t('home.search.resultsLabel') || 'Search results'}
-      className={`absolute left-0 right-0 top-full z-[210] mt-1 max-h-[min(70vh,400px)] overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg ${className}`}
+      className={`absolute left-0 right-0 top-full z-[210] mt-1 max-h-[min(70vh,400px)] overflow-y-auto rounded-xl border border-white/30 bg-white/10 backdrop-blur-xl shadow-lg ${className}`}
     >
       <div className="p-2">
         {loading && (
-          <div className="py-6 text-center text-sm text-gray-500">
+          <div className="py-6 text-center text-sm text-white/90">
             {t('home.search.searching') || 'Փնտրում...'}
           </div>
         )}
         {error && !loading && (
-          <div className="py-4 text-center text-sm text-red-600">
+          <div className="py-4 text-center text-sm text-red-200">
             {error}
           </div>
         )}
         {!loading && !error && results.length === 0 && query.trim() && (
-          <div className="py-6 text-center text-sm text-gray-500">
+          <div className="py-6 text-center text-sm text-white/90">
             {t('home.search.noResults') || 'Արտադրանք չի գտնվել'}
           </div>
         )}
@@ -67,13 +67,13 @@ export function SearchDropdown({
                 <button
                   type="button"
                   onClick={() => onResultClick(result)}
-                  className={`flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors ${
+                  className={`flex w-full items-center gap-4 rounded-lg p-3 text-left transition-colors ${
                     index === selectedIndex
-                      ? 'bg-[#1ac0fd]/15 text-gray-900'
-                      : 'hover:bg-gray-50 text-gray-800'
+                      ? 'bg-white/25 text-white'
+                      : 'hover:bg-white/15 text-white/95'
                   }`}
                 >
-                  <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                  <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-white/20">
                     {result.image ? (
                       <img
                         src={result.image}
@@ -81,24 +81,24 @@ export function SearchDropdown({
                         className="h-full w-full object-contain"
                       />
                     ) : (
-                      <div className="h-full w-full bg-gray-200" />
+                      <div className="h-full w-full bg-white/10" />
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium text-gray-900 line-clamp-1">
+                    <div className="font-semibold text-[15px] leading-tight text-white line-clamp-2">
                       {result.name}
                     </div>
                     {result.category && (
-                      <div className="text-xs text-gray-500 uppercase tracking-wide">
+                      <div className="text-xs font-medium text-white/80 uppercase tracking-wide mt-0.5">
                         {result.category}
                       </div>
                     )}
-                    <div className="mt-0.5 flex items-baseline gap-2">
-                      <span className="font-semibold text-[#1ac0fd]">
+                    <div className="mt-1 flex items-baseline gap-2">
+                      <span className="font-bold text-[15px] text-[#b3e5fc]">
                         {formatPrice(result.price)}
                       </span>
                       {result.salePrice != null && result.salePrice > result.price && (
-                        <span className="text-xs text-gray-400 line-through">
+                        <span className="text-xs font-medium text-white/60 line-through">
                           {formatPrice(result.salePrice)}
                         </span>
                       )}
@@ -111,7 +111,7 @@ export function SearchDropdown({
         )}
       </div>
       {query.trim() && !loading && (
-        <div className="border-t border-gray-100 p-2">
+        <div className="border-t border-white/20 p-2">
           <button
             type="button"
             onClick={() => {
@@ -123,7 +123,7 @@ export function SearchDropdown({
                 onClose();
               }
             }}
-            className="block w-full rounded-lg py-2 text-center text-sm font-medium text-[#1ac0fd] hover:bg-[#1ac0fd]/10"
+            className="block w-full rounded-lg py-2 text-center text-sm font-medium text-[#b3e5fc] hover:bg-white/15"
           >
             {t('home.search.seeAll') || 'Տեսնել բոլորը'}
           </button>
