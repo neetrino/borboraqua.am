@@ -7,7 +7,7 @@
 
 ## Նկարագրություն
 
-**borboraqua.am** — e-commerce պլատֆորմ (ինտերնետ-խանութ). Ապրանքների կատալոգ, զամբյուղ, պատվերներ, ադմին-ֆունկցիաներ, որոնում (Meilisearch), JWT-auth։ Հոսթինգ՝ Vercel, DB՝ PostgreSQL (Neon), Prisma։
+**borboraqua.am** — e-commerce պլատֆորմ (ինտերնետ-խանութ). Ապրանքների կատալոգ, զամբյուղ, պատվերներ, ադմին-ֆունկցիաներ, որոնում (instant search, Prisma), JWT-auth։ Հոսթինգ՝ Vercel, DB՝ PostgreSQL (Neon), Prisma։
 
 ## Թիրախային լսարան
 
@@ -18,7 +18,7 @@
 1. Կատալոգ, ապրանքի էջ, զամբյուղ, checkout — բարձր
 2. Աուտենտիֆիկացիա, պատվերների պատմություն — բարձր
 3. Ադմին: ապրանքներ, պատվերներ, ատրիբուտներ — միջին
-4. Որոնում (Meilisearch), ֆիլտրներ — միջին
+4. Որոնում (instant search), ֆիլտրներ — միջին
 5. i18n, SEO — միջին
 
 ## Stack (որոշված)
@@ -27,7 +27,7 @@
 - **Backend:** Next.js API Routes, Prisma, PostgreSQL (Neon)
 - **Monorepo:** Turborepo, workspaces (apps/web, packages/db, packages/ui, packages/design-tokens)
 - **Auth:** JWT (bcryptjs, jsonwebtoken)
-- **Search:** Meilisearch
+- **Search:** Prisma (instant search)
 - **Deploy:** Vercel
 
 ## Դիզայն
@@ -40,7 +40,7 @@
 - [ ] Email (Resend / SendGrid / այլ)
 - [x] Աուտենտիֆիկացիա (JWT)
 - [ ] Ֆայլերի պահոց (Cloudflare R2 — optional)
-- [x] Meilisearch
+- [x] Instant search (Prisma)
 
 ## Կոնտենտի լեզու
 

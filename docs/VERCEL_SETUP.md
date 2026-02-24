@@ -44,8 +44,6 @@ Monorepo (Turborepo): в репозитории есть `apps/web` и паке�
 | `DIRECT_URL` | по желанию | Прямой URL для миграций (Neon) |
 | `JWT_SECRET` | да | Секрет для JWT |
 | `JWT_EXPIRES_IN` | нет | Например `7d` |
-| `MEILISEARCH_HOST` | если есть поиск | URL Meilisearch |
-| `MEILISEARCH_API_KEY` | если есть поиск | Ключ Meilisearch |
 | `APP_URL` | да | URL сайта, например `https://borboraqua.am` |
 | `NEXT_PUBLIC_API_URL` | по желанию | Публичный URL API (если нужен с клиента) |
 | `NODE_ENV` | нет | Vercel ставит `production` сам |

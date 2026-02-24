@@ -8,6 +8,7 @@ import { type CurrencyCode, getStoredCurrency, setStoredCurrency } from '../../.
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { useTranslation } from '../../../lib/i18n-client';
 import { apiClient } from '../../../lib/api-client';
+import { SearchDropdown } from '../../SearchDropdown';
 
 // Local image paths
 const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
@@ -356,27 +357,46 @@ interface MobileSearchProps {
   t: (key: string) => string;
   showSearchModal: boolean;
   setShowSearchModal: (show: boolean) => void;
+  closeSearchModal?: () => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   handleSearch: (e: React.FormEvent) => void;
+  searchResults?: Array<{ id: string; name: string; description: string | null; price: number; salePrice: number | null; image: string | null; category: string; slug: string; type: string }>;
+  searchLoading?: boolean;
+  searchError?: string | null;
+  searchSelectedIndex?: number;
+  handleSearchKeyDown?: (e: React.KeyboardEvent) => void;
+  onSearchResultClick?: (result: { slug: string }) => void;
+  formatPriceForSearch?: (price: number) => string;
+  onSearchSeeAll?: (query: string) => void;
 }
 
 export function MobileSearch({
   t,
   showSearchModal,
   setShowSearchModal,
+  closeSearchModal,
   searchQuery,
   setSearchQuery,
   handleSearch,
+  searchResults = [],
+  searchLoading = false,
+  searchError = null,
+  searchSelectedIndex = -1,
+  handleSearchKeyDown,
+  onSearchResultClick,
+  formatPriceForSearch,
+  onSearchSeeAll,
 }: MobileSearchProps) {
   const searchModalRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const onClose = closeSearchModal ?? (() => setShowSearchModal(false));
 
   // Handle click outside for search modal
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchModalRef.current && !searchModalRef.current.contains(event.target as Node)) {
-        setShowSearchModal(false);
+        onClose();
       }
     };
 
@@ -387,7 +407,7 @@ export function MobileSearch({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showSearchModal, setShowSearchModal]);
+  }, [showSearchModal, onClose]);
 
   // Focus search input when modal opens
   useEffect(() => {
@@ -400,7 +420,7 @@ export function MobileSearch({
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && showSearchModal) {
-        setShowSearchModal(false);
+        onClose();
       }
     };
 
@@ -408,14 +428,14 @@ export function MobileSearch({
     return () => {
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [showSearchModal, setShowSearchModal]);
+  }, [showSearchModal, onClose]);
 
   if (!showSearchModal) return null;
 
   return (
     <div 
       className="xl:hidden fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[200] flex items-start justify-center pt-16 px-4"
-      onClick={() => setShowSearchModal(false)}
+      onClick={() => onClose()}
       style={{ touchAction: 'none' }}
     >
       <div
@@ -425,20 +445,22 @@ export function MobileSearch({
         style={{ touchAction: 'auto' }}
       >
         <form onSubmit={handleSearch} className="relative z-[102]">
-          {/* Search Input with glassy effect */}
           <div className="relative z-[103]">
             <input
               ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
               placeholder={t('home.search.placeholder')}
               className="w-full h-12 pl-12 pr-4 bg-[#62b3e8]/80 backdrop-blur-md border-2 border-white/90 rounded-full focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white text-base placeholder:text-white/70 text-white shadow-lg pointer-events-auto relative z-[104] touch-manipulation"
               autoFocus
               autoComplete="off"
+              aria-controls="search-results-mobile"
+              aria-expanded={showSearchModal && (searchResults.length > 0 || searchLoading)}
+              aria-autocomplete="list"
               style={{ WebkitAppearance: 'none', WebkitTapHighlightColor: 'transparent' }}
             />
-            {/* Search Icon inside input */}
             <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-[105]">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -446,6 +468,22 @@ export function MobileSearch({
             </div>
           </div>
         </form>
+        {onSearchResultClick && formatPriceForSearch && (
+          <SearchDropdown
+            results={searchResults}
+            loading={searchLoading}
+            error={searchError}
+            isOpen={showSearchModal}
+            selectedIndex={searchSelectedIndex}
+            query={searchQuery}
+            onResultClick={onSearchResultClick}
+            onClose={onClose}
+            onSeeAll={onSearchSeeAll}
+            t={t}
+            formatPrice={formatPriceForSearch}
+            className="mt-1"
+          />
+        )}
       </div>
     </div>
   );
