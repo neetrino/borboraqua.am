@@ -7,7 +7,8 @@
     "personal": "Personal Information",
     "addresses": "Addresses",
     "password": "Change Password",
-    "orders": "Orders"
+    "orders": "Orders",
+    "deleteAccount": "Delete account"
   },
   "dashboard": {
     "loading": "Loading dashboard...",
@@ -154,6 +155,18 @@
     "itemsAdded": "item(s) added to cart",
     "skipped": "skipped",
     "failedToAdd": "Failed to add items to cart. Please try again."
+  },
+  "deleteAccount": {
+    "title": "Delete account",
+    "dangerZone": "Danger zone",
+    "description": "Once you delete your account, there is no going back. Your profile data and saved addresses will be removed. Orders history may be retained for legal purposes.",
+    "confirmLabel": "Type your password to confirm:",
+    "checkboxLabel": "I understand that this action cannot be undone.",
+    "button": "Delete my account",
+    "deleting": "Deleting...",
+    "cancel": "Cancel",
+    "success": "Your account has been deleted.",
+    "failed": "Failed to delete account. Please check your password."
   },
   "common": {
     "loading": "Loading profile...",
