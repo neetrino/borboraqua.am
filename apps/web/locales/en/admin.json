@@ -761,7 +761,7 @@
     "assignedUsers": "Assigned users",
     "redemptions": "Redemptions",
     "used": "used",
-    "remaining": "Remaining: {remaining}/{quantity}",
+    
     "empty": "No coupons yet",
     "fields": {
       "name": "Name",
@@ -775,7 +775,7 @@
       "discountType": "Discount Type",
       "discountTypeDescription": "Choose percentage or fixed amount",
       "discountValue": "Discount Value",
-      "discountValueDescription": "Discount amount (percentage or amount)",
+      "discountValueDescription": "Discount amount (percentage)",
       "selectUsers": "Select Users",
       "selectUsersDescription": "Select users who can use this coupon (empty = all users)",
       "active": "Active",
@@ -786,6 +786,9 @@
       "fixed": "Fixed amount"
     },
     "status": {
+      "used": "used",
+      "expired": "expired",
+      "not_used": "not used",
       "active": "active",
       "inactive": "inactive"
     },

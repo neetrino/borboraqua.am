@@ -107,11 +107,21 @@ class CouponsService {
       },
     });
 
+    const now = new Date();
     return {
-      data: coupons.map((coupon) => ({
-        ...coupon,
-        status: coupon.isActive ? "active" : "inactive",
-      })),
+      data: coupons.map((coupon) => {
+        const expired = coupon.expiresAt < now;
+        const used = coupon.remainingQuantity <= 0;
+        const status: "used" | "expired" | "not_used" = expired
+          ? "expired"
+          : used
+            ? "used"
+            : "not_used";
+        return {
+          ...coupon,
+          status,
+        };
+      }),
     };
   }
 

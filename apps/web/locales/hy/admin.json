@@ -752,7 +752,7 @@
     "assignedUsers": "Կցված օգտատերեր",
     "redemptions": "Օգտագործումներ",
     "used": "օգտագործված",
-    "remaining": "Մնացել է: {remaining}/{quantity}",
+
     "empty": "Կուպոններ դեռ չկան",
     "fields": {
       "name": "Անվանում",
@@ -766,7 +766,7 @@
       "discountType": "Զեղչի տիպ",
       "discountTypeDescription": "Ընտրեք տոկոսային կամ ֆիքսված գումար",
       "discountValue": "Զեղչի արժեք",
-      "discountValueDescription": "Զեղչի չափը (տոկոս կամ գումար)",
+      "discountValueDescription": "Զեղչի չափը (տոկոս)",
       "selectUsers": "Ընտրել օգտատերեր",
       "selectUsersDescription": "Ընտրեք օգտատերեր, որոնք կարող են օգտագործել այս կուպոնը (դատարկ = բոլոր օգտատերերը)",
       "active": "Ակտիվ",
@@ -777,6 +777,9 @@
       "fixed": "Ֆիքսված գումար"
     },
     "status": {
+      "used": "օգտագործված",
+      "expired": "ժամկետն անցել է",
+      "not_used": "չօգտագործված",
       "active": "ակտիվ",
       "inactive": "ոչ ակտիվ"
     },

@@ -17,6 +17,8 @@ interface AdminUser {
   roles?: string[];
 }
 
+type CouponStatus = 'used' | 'expired' | 'not_used';
+
 interface CouponItem {
   id: string;
   name: string;
@@ -25,6 +27,7 @@ interface CouponItem {
   quantity: number;
   remainingQuantity: number;
   isActive: boolean;
+  status: CouponStatus;
   discountType: 'FIXED' | 'PERCENT';
   discountValue: number;
   singleUse: boolean;
@@ -249,13 +252,6 @@ export default function AdminCouponsPage() {
   };
 
 
-  const toggleStatus = async (coupon: CouponItem) => {
-    await apiClient.patch(`/api/v1/admin/coupons/${coupon.id}/status`, {
-      isActive: !coupon.isActive,
-    });
-    await fetchData();
-  };
-
   const handleEdit = (coupon: CouponItem) => {
     setEditingCoupon({
       ...coupon,
@@ -374,7 +370,6 @@ export default function AdminCouponsPage() {
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <p className="font-semibold">{coupon.name} ({coupon.code})</p>
-                        <p className="text-sm text-gray-600">{t('admin.coupons.remaining').replace('{remaining}', String(coupon.remainingQuantity)).replace('{quantity}', String(coupon.quantity))}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
@@ -400,30 +395,19 @@ export default function AdminCouponsPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => toggleStatus(coupon)}
-                          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                            coupon.isActive
-                              ? 'bg-green-500'
-                              : 'bg-gray-300'
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            coupon.status === 'used'
+                              ? 'bg-gray-200 text-gray-700'
+                              : coupon.status === 'expired'
+                                ? 'bg-amber-100 text-amber-800'
+                                : 'bg-green-100 text-green-800'
                           }`}
-                          title={coupon.isActive ? t('admin.coupons.status.inactive') : t('admin.coupons.status.active')}
-                          aria-label={coupon.isActive ? t('admin.coupons.status.active') : t('admin.coupons.status.inactive')}
+                          aria-label={t(`admin.coupons.status.${coupon.status}`)}
                         >
-                          <span
-                            className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform duration-200 ${
-                              coupon.isActive ? 'translate-x-[18px]' : 'translate-x-0.5'
-                            }`}
-                          />
-                        </button>
+                          {t(`admin.coupons.status.${coupon.status}`)}
+                        </span>
                       </div>
-                    </div>
-                    <div className="text-sm text-gray-700">
-                      {t('admin.coupons.assignedUsers')}: {coupon.assignments.length} | {t('admin.coupons.redemptions')}: {coupon.redemptions.length}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {coupon.assignments.slice(0, 6).map((a) => `${a.user.email || a.user.phone || a.user.id}${a.usedAt ? ` (${t('admin.coupons.used')})` : ''}`).join(', ')}
                     </div>
                   </div>
                 ))}
