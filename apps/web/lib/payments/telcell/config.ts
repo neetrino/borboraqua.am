@@ -1,5 +1,5 @@
 import type { TelcellConfig } from "./types";
-import { TELCELL_API_URL_TEST, TELCELL_API_URL_LIVE } from "./constants";
+import { TELCELL_API_BASE_URL } from "./constants";
 
 function getTelcellConfig(): TelcellConfig {
   const isTest = process.env.TELCELL_TEST_MODE === "true";
@@ -9,7 +9,8 @@ function getTelcellConfig(): TelcellConfig {
   const shopKey = isTest
     ? (process.env.TELCELL_SHOP_KEY ?? "")
     : (process.env.TELCELL_LIVE_SHOP_KEY ?? "");
-  const apiUrl = isTest ? TELCELL_API_URL_TEST : TELCELL_API_URL_LIVE;
+  // Telcell: test և live — նույն endpoint (https://telcellmoney.am/invoices)
+  const apiUrl = TELCELL_API_BASE_URL;
 
   return { isTest, shopId, shopKey, apiUrl };
 }

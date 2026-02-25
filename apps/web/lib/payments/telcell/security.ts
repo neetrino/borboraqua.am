@@ -4,8 +4,8 @@ import { TELCELL_CURRENCY, TELCELL_ACTION_POST_INVOICE } from "./constants";
 
 /**
  * Security code for PostInvoice redirect.
- * MD5(shop_key + issuer + currency + price + product + issuer_id + valid_days)
- * All concatenated as strings.
+ * WEB Магазинный шлюз v1.2: PHP example = MD5(shop_key + issuer + currency + price + product + issuer_id + valid_days [+ ssn]).
+ * product/issuer_id in the same form as sent (base64). We omit optional ssn.
  */
 export function getTelcellSecurityCode(
   shopKey: string,
@@ -22,22 +22,33 @@ export function getTelcellSecurityCode(
 
 /**
  * Verify checksum from RESULT_URL callback.
- * MD5(shop_key + invoice + issuer_id + payment_id + currency + sum + time + status)
+ * WEB v1.2 (our flow): MD5(ключ + invoice + issuer_id + payment_id + currency + sum + time + status) — no buyer.
+ * Fallback: with buyer for v2 (POST bill) callback format.
  */
 export function verifyTelcellResultChecksum(
   shopKey: string,
   invoice: string,
   issuerId: string,
   paymentId: string,
+  buyer: string,
   currency: string,
   sum: string,
   time: string,
   status: string,
   receivedChecksum: string
 ): boolean {
-  const str = shopKey + invoice + issuerId + paymentId + currency + sum + time + status;
-  const expected = createHash("md5").update(str, "utf8").digest("hex");
-  return (receivedChecksum ?? "").toLowerCase() === expected.toLowerCase();
+  const withBuyer =
+    createHash("md5")
+      .update(shopKey + invoice + issuerId + paymentId + buyer + currency + sum + time + status, "utf8")
+      .digest("hex")
+      .toLowerCase() === (receivedChecksum ?? "").toLowerCase();
+  if (withBuyer) return true;
+  const withoutBuyer =
+    createHash("md5")
+      .update(shopKey + invoice + issuerId + paymentId + currency + sum + time + status, "utf8")
+      .digest("hex")
+      .toLowerCase() === (receivedChecksum ?? "").toLowerCase();
+  return withoutBuyer;
 }
 
 /**

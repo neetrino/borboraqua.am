@@ -22,19 +22,88 @@ function decodeIssuerId(issuerId: string): string {
  * Checksum = MD5(shop_key + invoice + issuer_id + payment_id + currency + sum + time + status).
  * Returns nothing; updates order/payment in DB. Throw on invalid checksum.
  */
+type OrderWithPayments = {
+  id: string;
+  number: string;
+  userId: string | null;
+  total: unknown;
+  currency: string;
+  payments: { id: string; provider: string }[];
+};
+
+/** Telcell callback currency code → our DB currency (WEB v1.2: AMD = 51) */
+const TELCELL_CURRENCY_TO_OUR: Record<string, string> = { "51": "AMD", "֏": "AMD" };
+
+/**
+ * Resolve order from callback params. Doc: issuer_id = «код заказа в системе магазина».
+ * We send issuer_id = base64(order.id). Telcell may echo back plain order id (not base64) — try id(raw) first.
+ * Then id(decoded), number(decoded), number(raw). Fallback: sum + currency (51 → AMD).
+ */
+async function findOrderByTelcellCallback(
+  issuerIdRaw: string,
+  sum: string,
+  currency: string
+): Promise<OrderWithPayments | null> {
+  const decoded = decodeIssuerId(issuerIdRaw);
+  const orderCurrency = TELCELL_CURRENCY_TO_OUR[currency] ?? currency;
+
+  const byIdRaw = await db.order.findFirst({
+    where: { id: issuerIdRaw },
+    include: { payments: true },
+  });
+  if (byIdRaw) return byIdRaw as OrderWithPayments;
+
+  const byIdDecoded = await db.order.findFirst({
+    where: { id: decoded },
+    include: { payments: true },
+  });
+  if (byIdDecoded) return byIdDecoded as OrderWithPayments;
+
+  const byNumberDecoded = await db.order.findFirst({
+    where: { number: decoded },
+    include: { payments: true },
+  });
+  if (byNumberDecoded) return byNumberDecoded as OrderWithPayments;
+
+  if (issuerIdRaw !== decoded) {
+    const byNumberRaw = await db.order.findFirst({
+      where: { number: issuerIdRaw },
+      include: { payments: true },
+    });
+    if (byNumberRaw) return byNumberRaw as OrderWithPayments;
+  }
+
+  const sumNum = parseFloat(sum);
+  if (Number.isFinite(sumNum) && orderCurrency) {
+    const pending = await db.order.findMany({
+      where: {
+        paymentStatus: "pending",
+        currency: orderCurrency,
+        total: sumNum,
+        payments: {
+          some: { provider: PAYMENT_PROVIDER, status: "pending" },
+        },
+      },
+      include: { payments: true },
+    });
+    if (pending.length === 1) return pending[0] as OrderWithPayments;
+  }
+  return null;
+}
+
 export async function handleTelcellResult(params: Record<string, string>): Promise<void> {
   const config = getConfig();
   const issuerIdRaw = params.issuer_id ?? "";
-  const orderId = decodeIssuerId(issuerIdRaw);
   const status = (params.status ?? "").trim();
   const invoice = params.invoice ?? "";
   const paymentId = params.payment_id ?? "";
+  const buyer = params.buyer ?? "";
   const currency = params.currency ?? "";
   const sum = params.sum ?? "";
   const time = params.time ?? "";
   const checksum = params.checksum ?? "";
 
-  if (!orderId || !checksum) {
+  if (!issuerIdRaw || !checksum) {
     throw new Error("Missing issuer_id or checksum");
   }
 
@@ -43,6 +112,7 @@ export async function handleTelcellResult(params: Record<string, string>): Promi
     invoice,
     issuerIdRaw,
     paymentId,
+    buyer,
     currency,
     sum,
     time,
@@ -53,15 +123,16 @@ export async function handleTelcellResult(params: Record<string, string>): Promi
     throw new Error("Telcell checksum invalid");
   }
 
-  const order = await db.order.findFirst({
-    where: { id: orderId },
-    include: { payments: true },
-  });
+  const order = await findOrderByTelcellCallback(issuerIdRaw, sum, currency);
   if (!order) {
-    const byNumber = await db.order.findFirst({ where: { number: orderId }, include: { payments: true } });
-    if (!byNumber) throw new Error("Order not found");
-    await updateOrderPayment(byNumber, status, paymentId, params);
-    return;
+    console.error("[telcell_result] Order not found. Callback params:", {
+      issuer_id: issuerIdRaw,
+      invoice,
+      status,
+      sum,
+      currency,
+    });
+    throw new Error("Order not found");
   }
   await updateOrderPayment(order, status, paymentId, params);
 }
