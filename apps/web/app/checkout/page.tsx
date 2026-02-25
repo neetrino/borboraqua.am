@@ -277,6 +277,54 @@ export default function CheckoutPage() {
     return results;
   }, [calendarMonth, enabledWeekdays, language]);
 
+  // Auto-advance to next month if current month has no available delivery days
+  useEffect(() => {
+    if (availableDeliveryDays.length === 0 && enabledWeekdays && enabledWeekdays.length > 0) {
+      const now = new Date();
+      const minAllowedDateTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      const monthEnd = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0);
+      monthEnd.setHours(23, 59, 59, 999);
+      
+      // If the month has completely passed (all days in the month are before minAllowedDateTime),
+      // advance to next month
+      if (monthEnd.getTime() < minAllowedDateTime.getTime()) {
+        const nextMonth = new Date(calendarMonth);
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        setCalendarMonth(nextMonth);
+        return;
+      }
+      
+      // If we're in the current month but no delivery days are available,
+      // check if all enabled weekdays in this month have passed
+      const monthStart = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
+      let allEnabledDaysPassed = true;
+      const cursor = new Date(monthStart);
+      
+      while (cursor <= monthEnd) {
+        const dayOfWeek = cursor.getDay();
+        const dateCopy = new Date(cursor);
+        dateCopy.setHours(0, 0, 0, 0);
+        
+        if (enabledWeekdays.includes(dayOfWeek)) {
+          // If this enabled weekday hasn't passed the minimum date, don't advance
+          if (dateCopy.getTime() >= minAllowedDateTime.getTime()) {
+            allEnabledDaysPassed = false;
+            break;
+          }
+        }
+        
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      
+      // If all enabled weekdays in the month have passed, advance to next month
+      if (allEnabledDaysPassed) {
+        const nextMonth = new Date(calendarMonth);
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        setCalendarMonth(nextMonth);
+      }
+    }
+  }, [availableDeliveryDays, enabledWeekdays, calendarMonth]);
+
   // Fetch delivery schedule (enabled weekdays) and time slots once
   useEffect(() => {
     const fetchDeliverySettings = async () => {
@@ -309,6 +357,23 @@ export default function CheckoutPage() {
 
     fetchDeliverySettings();
   }, []);
+
+  // Set default delivery day and time slot when available
+  useEffect(() => {
+    // Only set defaults if they haven't been set yet
+    if (!deliveryDay && availableDeliveryDays.length > 0) {
+      const firstAvailableDay = availableDeliveryDays[0];
+      setValue('deliveryDay', firstAvailableDay.date);
+    }
+
+    // Only set default time slot if delivery day is set and time slot is not set
+    if (deliveryDay && !deliveryTimeSlot && deliveryTimeSlots.length > 0) {
+      const firstEnabledSlot = deliveryTimeSlots.find(slot => slot.enabled);
+      if (firstEnabledSlot) {
+        setValue('deliveryTimeSlot', firstEnabledSlot.id);
+      }
+    }
+  }, [availableDeliveryDays, deliveryTimeSlots, deliveryDay, deliveryTimeSlot, setValue]);
 
   // Fetch delivery regions for checkout dropdown
   useEffect(() => {

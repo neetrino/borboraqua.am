@@ -2704,7 +2704,7 @@ class AdminService {
         create: {
           key: 'currencyRates',
           value: data.currencyRates,
-          description: 'Currency exchange rates relative to USD (USD, AMD, EUR, RUB, GEL)',
+          description: 'Currency exchange rates relative to USD (USD, AMD, EUR, RUB, GEL). Note: Stored as USD-based internally, but displayed as AMD-based in admin UI.',
         },
       });
       console.log('✅ [ADMIN SERVICE] Currency rates updated:', data.currencyRates);

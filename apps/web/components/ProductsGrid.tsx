@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FeaturedProductCard, type FeaturedProduct, addToCart } from './icons/global/global';
 import { useTranslation } from '../lib/i18n-client';
 import { useAuth } from '../lib/auth/AuthContext';
-import { formatPrice, getStoredCurrency } from '../lib/currency';
+import { formatPrice, getStoredCurrency, initializeCurrencyRates } from '../lib/currency';
 
 interface Product {
   id: string;
@@ -55,6 +55,20 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
   // Initialize currency from localStorage after mount to prevent hydration mismatch
   useEffect(() => {
     setCurrency(getStoredCurrency());
+    // Initialize currency rates from API
+    initializeCurrencyRates().catch(console.error);
+    
+    // Listen for currency rates updates
+    const handleCurrencyRatesUpdate = () => {
+      console.log('💱 [PRODUCTS GRID] Currency rates updated, reloading rates...');
+      initializeCurrencyRates(true).catch(console.error);
+    };
+    
+    window.addEventListener('currency-rates-updated', handleCurrencyRatesUpdate);
+    
+    return () => {
+      window.removeEventListener('currency-rates-updated', handleCurrencyRatesUpdate);
+    };
   }, []);
 
   // Detect mobile screen size using matchMedia for accurate responsive detection even with zoom

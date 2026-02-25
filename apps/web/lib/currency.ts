@@ -103,8 +103,9 @@ export function formatPrice(price: number, currency: CurrencyCode = 'AMD'): stri
   
   // Use cached rates if available (client-side only), otherwise use default rates
   // On server-side, currencyRatesCache will be null, so it will use default rates
-  let amdRate: number;
-  let targetRate: number;
+  // Note: currencyRatesCache contains USD-based rates (1 USD = X currency)
+  let amdRate: number; // 1 USD = X AMD
+  let targetRate: number; // 1 USD = X target currency
   
   if (typeof window !== 'undefined' && currencyRatesCache) {
     amdRate = currencyRatesCache['AMD'] ?? CURRENCIES['AMD'].rate;
@@ -115,14 +116,29 @@ export function formatPrice(price: number, currency: CurrencyCode = 'AMD'): stri
   }
   
   // Convert from AMD to target currency via USD
-  // AMD -> USD: divide by AMD rate
-  // USD -> Target: multiply by target rate
-  const usdPrice = price / amdRate;
-  const convertedPrice = usdPrice * targetRate;
+  // currencyRatesCache contains: { USD: 1, AMD: X, EUR: Y, ... }
+  // where AMD = X means "1 USD = X AMD"
+  // So: 1 AMD = 1/X USD
+  // And: 1 USD = targetRate target currency
+  // Therefore: 1 AMD = (1/X) * targetRate target currency
+  // Or: price AMD = (price / X) * targetRate target currency
+  const usdPrice = price / amdRate; // Convert AMD to USD
+  const convertedPrice = usdPrice * targetRate; // Convert USD to target currency
   
-  // Show all currencies without decimals (remove .00)
-  const minimumFractionDigits = 0;
-  const maximumFractionDigits = 0;
+  // Show currencies with appropriate decimal places
+  // For small values (< 1), show 2-4 decimals, otherwise show 0-2 decimals
+  let minimumFractionDigits = 0;
+  let maximumFractionDigits = 2;
+  
+  if (convertedPrice < 1 && convertedPrice > 0) {
+    // For small values, show more decimals (up to 4)
+    minimumFractionDigits = 2;
+    maximumFractionDigits = 4;
+  } else if (convertedPrice >= 1 && convertedPrice < 10) {
+    // For values between 1 and 10, show 1-2 decimals
+    minimumFractionDigits = 1;
+    maximumFractionDigits = 2;
+  }
   
   const formatted = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -131,9 +147,16 @@ export function formatPrice(price: number, currency: CurrencyCode = 'AMD'): stri
     maximumFractionDigits,
   }).format(convertedPrice);
   
-  // Debug logging (only in development)
-  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-    console.log(`💱 [formatPrice] ${price} AMD → ${convertedPrice.toFixed(2)} ${currency}`);
+  // Debug logging (always enabled to help debug currency conversion)
+  if (typeof window !== 'undefined') {
+    console.log(`💱 [formatPrice] ${price} AMD → ${convertedPrice.toFixed(4)} ${currency}`, {
+      amdRate,
+      targetRate,
+      usdPrice: usdPrice.toFixed(4),
+      convertedPrice: convertedPrice.toFixed(4),
+      cache: currencyRatesCache,
+      price,
+    });
   }
   
   return formatted;

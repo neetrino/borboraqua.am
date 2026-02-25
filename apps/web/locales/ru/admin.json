@@ -539,9 +539,10 @@
     "siteNamePlaceholder": "Мой магазин",
     "siteDescriptionPlaceholder": "Описание вашего магазина",
     "currencyRates": "Курсы валют",
-    "currencyRatesDescription": "Установите курсы валют относительно USD. Эти курсы используются для конвертации цен товаров.",
+    "currencyRatesDescription": "Установите курсы валют относительно AMD. Эти курсы используются для конвертации цен товаров.",
     "baseCurrency": "Базовая валюта (всегда 1)",
-    "rateToUSD": "Курс к USD (1 USD = указанное значение)"
+    "rateToUSD": "Курс к USD (1 USD = указанное значение)",
+    "rateToAMD": "Курс к AMD (1 валюта = указанное AMD)"
   },
   "quickSettings": {
     "title": "Быстрые настройки",
