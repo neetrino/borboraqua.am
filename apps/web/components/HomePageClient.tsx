@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '../lib/api-client';
-import { formatPrice, getStoredCurrency, setStoredCurrency, type CurrencyCode } from '../lib/currency';
+import { formatPrice, getStoredCurrency, setStoredCurrency, initializeCurrencyRates, type CurrencyCode } from '../lib/currency';
 import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } from '../lib/language';
 import { useAuth } from '../lib/auth/AuthContext';
 import { useTranslation } from '../lib/i18n-client';
@@ -286,6 +286,9 @@ export function HomePageClient({
     setLanguage(getStoredLanguage());
     setCurrency(getStoredCurrency());
 
+    // Initialize currency rates from API
+    initializeCurrencyRates().catch(console.error);
+
     // Listen for updates
     const handleLanguageUpdate = () => {
       setLanguage(getStoredLanguage());
@@ -293,13 +296,19 @@ export function HomePageClient({
     const handleCurrencyUpdate = () => {
       setCurrency(getStoredCurrency());
     };
+    const handleCurrencyRatesUpdate = () => {
+      console.log('💱 [HOMEPAGE] Currency rates updated, reloading rates...');
+      initializeCurrencyRates(true).catch(console.error);
+    };
 
     window.addEventListener('language-updated', handleLanguageUpdate);
     window.addEventListener('currency-updated', handleCurrencyUpdate);
+    window.addEventListener('currency-rates-updated', handleCurrencyRatesUpdate);
 
     return () => {
       window.removeEventListener('language-updated', handleLanguageUpdate);
       window.removeEventListener('currency-updated', handleCurrencyUpdate);
+      window.removeEventListener('currency-rates-updated', handleCurrencyRatesUpdate);
     };
   }, []);
 
@@ -381,7 +390,7 @@ export function HomePageClient({
     closeSearchModal();
   };
 
-  const formatPriceForSearch = (price: number) => formatPrice(price, getStoredCurrency());
+  const formatPriceForSearch = (price: number) => formatPrice(price, currency);
 
   /**
    * Handle carousel navigation - 3 modes: 0 (products 0-2), 3 (products 3-5), 6 (products 6-8)
@@ -953,7 +962,7 @@ export function HomePageClient({
                     onAddToCart={handleAddToCart}
                     onProductClick={handleOpenProduct}
                     formatPrice={formatPrice}
-                    currency={getStoredCurrency()}
+                    currency={currency}
                     isMobile={true}
                   />
                 ))}
@@ -971,7 +980,7 @@ export function HomePageClient({
                     onAddToCart={handleAddToCart}
                     onProductClick={handleOpenProduct}
                     formatPrice={formatPrice}
-                    currency={getStoredCurrency()}
+                    currency={currency}
                     isMobile={true}
                   />
                 ))}
@@ -1404,7 +1413,6 @@ export function HomePageClient({
               <div className="flex gap-[32px] lg:gap-[32px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
                 {(() => {
                   const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 3);
-                  const currency = getStoredCurrency();
                   return visibleProducts.map((product) => (
                     <FeaturedProductCard
                       key={product.id}

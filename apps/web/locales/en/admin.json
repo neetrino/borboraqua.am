@@ -543,9 +543,10 @@
     "savedSuccess": "Settings saved successfully!",
     "errorSaving": "Error: {message}",
     "currencyRates": "Currency Exchange Rates",
-    "currencyRatesDescription": "Set currency exchange rates relative to USD. These rates are used to convert product prices.",
+    "currencyRatesDescription": "Set currency exchange rates relative to AMD. These rates are used to convert product prices.",
     "baseCurrency": "Base currency (always 1)",
     "rateToUSD": "Rate to USD (1 USD = specified value)",
+    "rateToAMD": "Rate to AMD (1 currency = specified AMD)",
     "siteNamePlaceholder": "My Shop",
     "siteDescriptionPlaceholder": "Your shop description"
   },

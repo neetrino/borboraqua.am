@@ -5,7 +5,7 @@ import type { MouseEvent } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '../../../lib/api-client';
-import { formatPrice, getStoredCurrency } from '../../../lib/currency';
+import { formatPrice, getStoredCurrency, initializeCurrencyRates } from '../../../lib/currency';
 import { getStoredLanguage, type LanguageCode } from '../../../lib/language';
 import { t, getProductText } from '../../../lib/i18n';
 import { useAuth } from '../../../lib/auth/AuthContext';
@@ -302,6 +302,9 @@ export default function ProductPage({ params }: ProductPageProps) {
     if (!slug || RESERVED_ROUTES.includes(slug.toLowerCase())) return;
 
     fetchProduct();
+    
+    // Initialize currency rates from API
+    initializeCurrencyRates().catch(console.error);
 
     const handleCurrencyUpdate = () => setCurrency(getStoredCurrency());
     const handleLanguageUpdate = () => {
@@ -311,6 +314,8 @@ export default function ProductPage({ params }: ProductPageProps) {
     };
     // Listen for currency rates updates to force re-render
     const handleCurrencyRatesUpdate = () => {
+      console.log('💱 [PRODUCT PAGE] Currency rates updated, reloading rates...');
+      initializeCurrencyRates(true).catch(console.error);
       // Force re-render by updating currency state
       setCurrency(getStoredCurrency());
     };

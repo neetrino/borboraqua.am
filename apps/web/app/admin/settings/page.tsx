@@ -30,11 +30,11 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings>({
     defaultCurrency: 'AMD',
     currencyRates: {
-      USD: 1,
-      AMD: 400,
-      EUR: 0.92,
-      RUB: 90,
-      GEL: 2.7,
+      AMD: 1,
+      USD: 0.0025, // 1 AMD = 0.0025 USD (1 USD = 400 AMD)
+      EUR: 0.0023, // 1 AMD = 0.0023 EUR (1 EUR = 434.78 AMD)
+      RUB: 0.225, // 1 AMD = 0.225 RUB (1 RUB = 4.44 AMD)
+      GEL: 0.00675, // 1 AMD = 0.00675 GEL (1 GEL = 148.15 AMD)
     },
   });
 
@@ -53,37 +53,117 @@ export default function SettingsPage() {
     }
   }, [isLoggedIn, isAdmin]);
 
+  // Convert USD-based rates to AMD-based rates for display
+  // USD-based: 1 USD = X currency (e.g., 1 USD = 400 AMD means AMD = 400)
+  // AMD-based: 1 AMD = X currency (e.g., 1 AMD = 0.0025 USD means USD = 0.0025)
+  const convertUSDToAMDBased = (usdBasedRates: Record<string, number>): Record<string, number> => {
+    const amdRate = usdBasedRates.AMD || 400; // 1 USD = X AMD (e.g., 400 means 1 USD = 400 AMD)
+    const usdValue = 1 / amdRate; // 1 AMD = 1/amdRate USD (e.g., 1/400 = 0.0025 means 1 AMD = 0.0025 USD)
+    
+    const amdBased: Record<string, number> = {
+      AMD: 1, // Base currency
+    };
+    
+    // For each currency, calculate: 1 currency = X AMD
+    // If 1 USD = amdRate AMD, then 1 AMD = 1/amdRate USD
+    if (usdBasedRates.USD !== undefined) {
+      amdBased.USD = usdValue; // 1 AMD = usdValue USD
+    }
+    if (usdBasedRates.EUR !== undefined) {
+      // 1 USD = amdRate AMD, 1 USD = eurRate EUR
+      // So 1 EUR = amdRate / eurRate AMD
+      // And 1 AMD = eurRate / amdRate EUR
+      const eurRate = usdBasedRates.EUR; // 1 USD = eurRate EUR
+      amdBased.EUR = eurRate / amdRate; // 1 AMD = eurRate / amdRate EUR
+    }
+    if (usdBasedRates.RUB !== undefined) {
+      const rubRate = usdBasedRates.RUB; // 1 USD = rubRate RUB
+      amdBased.RUB = rubRate / amdRate; // 1 AMD = rubRate / amdRate RUB
+    }
+    if (usdBasedRates.GEL !== undefined) {
+      const gelRate = usdBasedRates.GEL; // 1 USD = gelRate GEL
+      amdBased.GEL = gelRate / amdRate; // 1 AMD = gelRate / amdRate GEL
+    }
+    
+    return amdBased;
+  };
+
+  // Convert AMD-based rates to USD-based rates for storage
+  // AMD-based: 1 AMD = X currency (e.g., 1 AMD = 0.0027 USD means USD = 0.0027)
+  // USD-based: 1 USD = X currency (e.g., 1 USD = 370.37 AMD means AMD = 370.37)
+  const convertAMDBasedToUSD = (amdBasedRates: Record<string, number>): Record<string, number> => {
+    const usdValue = amdBasedRates.USD; // 1 AMD = X USD (e.g., 0.0027 means 1 AMD = 0.0027 USD)
+    if (!usdValue || usdValue <= 0) {
+      throw new Error('USD rate is required and must be greater than 0');
+    }
+    const amdRate = 1 / usdValue; // 1 USD = 1/usdValue AMD (e.g., if 1 AMD = 0.0027 USD, then 1 USD = 370.37 AMD)
+    
+    const usdBased: Record<string, number> = {
+      USD: 1, // Base currency
+      AMD: amdRate, // 1 USD = amdRate AMD
+    };
+    
+    // For each currency, calculate back to USD-based
+    // If amdBasedRates.EUR = 0.0023, that means "1 AMD = 0.0023 EUR"
+    // So: 1 EUR = 1 / 0.0023 = 434.78 AMD
+    // And: 1 USD = amdRate AMD, so 1 USD = amdRate / (1/eurValue) = amdRate * eurValue EUR
+    if (amdBasedRates.EUR !== undefined && amdBasedRates.EUR > 0) {
+      const eurValue = amdBasedRates.EUR; // 1 AMD = eurValue EUR
+      // 1 EUR = 1/eurValue AMD
+      // 1 USD = amdRate AMD
+      // So: 1 USD = amdRate / (1/eurValue) = amdRate * eurValue EUR
+      usdBased.EUR = amdRate * eurValue; // 1 USD = amdRate * eurValue EUR
+    }
+    if (amdBasedRates.RUB !== undefined && amdBasedRates.RUB > 0) {
+      const rubValue = amdBasedRates.RUB; // 1 AMD = rubValue RUB
+      usdBased.RUB = amdRate * rubValue; // 1 USD = amdRate * rubValue RUB
+    }
+    if (amdBasedRates.GEL !== undefined && amdBasedRates.GEL > 0) {
+      const gelValue = amdBasedRates.GEL; // 1 AMD = gelValue GEL
+      usdBased.GEL = amdRate * gelValue; // 1 USD = amdRate * gelValue GEL
+    }
+    
+    return usdBased;
+  };
+
   const fetchSettings = async () => {
     try {
       setLoading(true);
       console.log('⚙️ [ADMIN] Fetching settings...');
       const data = await apiClient.get<Settings>('/api/v1/admin/settings');
+      const usdBasedRates = data.currencyRates || {
+        USD: 1,
+        AMD: 400,
+        EUR: 0.92,
+        RUB: 90,
+        GEL: 2.7,
+      };
+      
+      // Convert to AMD-based for display
+      const amdBasedRates = convertUSDToAMDBased(usdBasedRates);
+      
       setSettings({
         defaultCurrency: data.defaultCurrency || 'AMD',
         globalDiscount: data.globalDiscount,
         categoryDiscounts: data.categoryDiscounts,
         brandDiscounts: data.brandDiscounts,
-        currencyRates: data.currencyRates || {
-          USD: 1,
-          AMD: 400,
-          EUR: 0.92,
-          RUB: 90,
-          GEL: 2.7,
-        },
+        currencyRates: amdBasedRates,
       });
       console.log('✅ [ADMIN] Settings loaded:', data);
     } catch (err: any) {
       console.error('❌ [ADMIN] Error fetching settings:', err);
-      // Use defaults if error
+      // Use defaults if error (1 USD = 400 AMD)
+      const defaultUSDRates = {
+        USD: 1,
+        AMD: 400,
+        EUR: 0.92,
+        RUB: 90,
+        GEL: 2.7,
+      };
+      const amdBasedRates = convertUSDToAMDBased(defaultUSDRates);
       setSettings({
         defaultCurrency: 'AMD',
-        currencyRates: {
-          USD: 1,
-          AMD: 400,
-          EUR: 0.92,
-          RUB: 90,
-          GEL: 2.7,
-        },
+        currencyRates: amdBasedRates,
       });
     } finally {
       setLoading(false);
@@ -95,14 +175,36 @@ export default function SettingsPage() {
     try {
       console.log('⚙️ [ADMIN] Saving settings...', settings);
 
-      // Ensure all currency rates have valid values before saving
-      const currencyRatesToSave = {
-        USD: 1,
-        AMD: settings.currencyRates?.AMD ?? 400,
-        EUR: settings.currencyRates?.EUR ?? 0.92,
-        RUB: settings.currencyRates?.RUB ?? 90,
-        GEL: settings.currencyRates?.GEL ?? 2.7,
+      // Convert AMD-based rates back to USD-based for storage
+      // Ensure all required rates are present
+      if (!settings.currencyRates?.USD || settings.currencyRates.USD <= 0) {
+        alert(t('admin.settings.errorSaving').replace('{message}', 'USD rate is required and must be greater than 0'));
+        setSaving(false);
+        return;
+      }
+      
+      const amdBasedRates: Record<string, number> = {
+        AMD: 1,
+        USD: settings.currencyRates.USD,
       };
+      
+      // Add optional rates if they exist and are valid
+      if (settings.currencyRates.EUR !== undefined && settings.currencyRates.EUR > 0) {
+        amdBasedRates.EUR = settings.currencyRates.EUR;
+      }
+      if (settings.currencyRates.RUB !== undefined && settings.currencyRates.RUB > 0) {
+        amdBasedRates.RUB = settings.currencyRates.RUB;
+      }
+      if (settings.currencyRates.GEL !== undefined && settings.currencyRates.GEL > 0) {
+        amdBasedRates.GEL = settings.currencyRates.GEL;
+      }
+      
+      const currencyRatesToSave = convertAMDBasedToUSD(amdBasedRates);
+      
+      console.log('🔍 [ADMIN] Conversion debug:', {
+        amdBasedRates,
+        currencyRatesToSave,
+      });
 
       await apiClient.put('/api/v1/admin/settings', {
         defaultCurrency: settings.defaultCurrency,
@@ -258,17 +360,17 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  USD (US Dollar)
+                  AMD (Armenian Dram)
                 </label>
                 <input
                   type="number"
                   step="0.01"
-                  value={settings.currencyRates?.USD || 1}
+                  value={settings.currencyRates?.AMD || 1}
                   onChange={(e) => setSettings({
                     ...settings,
                     currencyRates: {
                       ...settings.currencyRates,
-                      USD: parseFloat(e.target.value) || 1,
+                      AMD: parseFloat(e.target.value) || 1,
                     },
                   })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -278,12 +380,12 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  AMD (Armenian Dram)
+                  USD (US Dollar)
                 </label>
                 <input
                   type="number"
                   step="0.01"
-                  value={settings.currencyRates?.AMD ?? ''}
+                  value={settings.currencyRates?.USD ?? ''}
                   onChange={(e) => {
                     const inputValue = e.target.value;
                     if (inputValue === '') {
@@ -291,37 +393,53 @@ export default function SettingsPage() {
                         ...settings,
                         currencyRates: {
                           ...settings.currencyRates,
-                          AMD: undefined as any,
+                          USD: undefined as any,
                         },
                       });
                     } else {
-                      const numValue = parseFloat(inputValue);
-                      if (!isNaN(numValue) && numValue > 0) {
-                        setSettings({
-                          ...settings,
-                          currencyRates: {
-                            ...settings.currencyRates,
-                            AMD: numValue,
-                          },
-                        });
+                      // Allow typing "0", "0.", "0.1" etc.
+                      // Only validate when we have a complete number
+                      if (inputValue === '0' || inputValue.startsWith('0.')) {
+                        // Allow intermediate states like "0", "0.", "0.1"
+                        const numValue = parseFloat(inputValue);
+                        if (!isNaN(numValue) && numValue >= 0) {
+                          setSettings({
+                            ...settings,
+                            currencyRates: {
+                              ...settings.currencyRates,
+                              USD: numValue,
+                            },
+                          });
+                        }
+                      } else {
+                        const numValue = parseFloat(inputValue);
+                        if (!isNaN(numValue) && numValue > 0) {
+                          setSettings({
+                            ...settings,
+                            currencyRates: {
+                              ...settings.currencyRates,
+                              USD: numValue,
+                            },
+                          });
+                        }
                       }
                     }
                   }}
                   onBlur={(e) => {
-                    if (e.target.value === '' && settings.currencyRates?.AMD === undefined) {
+                    if (e.target.value === '' && settings.currencyRates?.USD === undefined) {
                       setSettings({
                         ...settings,
                         currencyRates: {
                           ...settings.currencyRates,
-                          AMD: 400,
+                          USD: 0.0025,
                         },
                       });
                     }
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="400"
+                  placeholder="0.0025"
                 />
-                <p className="text-xs text-gray-500 mt-1">{t('admin.settings.rateToUSD')}</p>
+                <p className="text-xs text-gray-500 mt-1">{t('admin.settings.rateToAMD')}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -342,15 +460,29 @@ export default function SettingsPage() {
                         },
                       });
                     } else {
-                      const numValue = parseFloat(inputValue);
-                      if (!isNaN(numValue) && numValue > 0) {
-                        setSettings({
-                          ...settings,
-                          currencyRates: {
-                            ...settings.currencyRates,
-                            EUR: numValue,
-                          },
-                        });
+                      // Allow typing "0", "0.", "0.1" etc.
+                      if (inputValue === '0' || inputValue.startsWith('0.')) {
+                        const numValue = parseFloat(inputValue);
+                        if (!isNaN(numValue) && numValue >= 0) {
+                          setSettings({
+                            ...settings,
+                            currencyRates: {
+                              ...settings.currencyRates,
+                              EUR: numValue,
+                            },
+                          });
+                        }
+                      } else {
+                        const numValue = parseFloat(inputValue);
+                        if (!isNaN(numValue) && numValue > 0) {
+                          setSettings({
+                            ...settings,
+                            currencyRates: {
+                              ...settings.currencyRates,
+                              EUR: numValue,
+                            },
+                          });
+                        }
                       }
                     }
                   }}
@@ -360,15 +492,15 @@ export default function SettingsPage() {
                         ...settings,
                         currencyRates: {
                           ...settings.currencyRates,
-                          EUR: 0.92,
+                          EUR: 0.0023,
                         },
                       });
                     }
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="0.92"
+                  placeholder="0.0023"
                 />
-                <p className="text-xs text-gray-500 mt-1">{t('admin.settings.rateToUSD')}</p>
+                <p className="text-xs text-gray-500 mt-1">{t('admin.settings.rateToAMD')}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -389,15 +521,29 @@ export default function SettingsPage() {
                         },
                       });
                     } else {
-                      const numValue = parseFloat(inputValue);
-                      if (!isNaN(numValue) && numValue > 0) {
-                        setSettings({
-                          ...settings,
-                          currencyRates: {
-                            ...settings.currencyRates,
-                            RUB: numValue,
-                          },
-                        });
+                      // Allow typing "0", "0.", "0.1" etc.
+                      if (inputValue === '0' || inputValue.startsWith('0.')) {
+                        const numValue = parseFloat(inputValue);
+                        if (!isNaN(numValue) && numValue >= 0) {
+                          setSettings({
+                            ...settings,
+                            currencyRates: {
+                              ...settings.currencyRates,
+                              RUB: numValue,
+                            },
+                          });
+                        }
+                      } else {
+                        const numValue = parseFloat(inputValue);
+                        if (!isNaN(numValue) && numValue > 0) {
+                          setSettings({
+                            ...settings,
+                            currencyRates: {
+                              ...settings.currencyRates,
+                              RUB: numValue,
+                            },
+                          });
+                        }
                       }
                     }
                   }}
@@ -407,15 +553,15 @@ export default function SettingsPage() {
                         ...settings,
                         currencyRates: {
                           ...settings.currencyRates,
-                          RUB: 90,
+                          RUB: 0.225,
                         },
                       });
                     }
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="90"
+                  placeholder="0.225"
                 />
-                <p className="text-xs text-gray-500 mt-1">{t('admin.settings.rateToUSD')}</p>
+                <p className="text-xs text-gray-500 mt-1">{t('admin.settings.rateToAMD')}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -436,15 +582,29 @@ export default function SettingsPage() {
                         },
                       });
                     } else {
-                      const numValue = parseFloat(inputValue);
-                      if (!isNaN(numValue) && numValue > 0) {
-                        setSettings({
-                          ...settings,
-                          currencyRates: {
-                            ...settings.currencyRates,
-                            GEL: numValue,
-                          },
-                        });
+                      // Allow typing "0", "0.", "0.1" etc.
+                      if (inputValue === '0' || inputValue.startsWith('0.')) {
+                        const numValue = parseFloat(inputValue);
+                        if (!isNaN(numValue) && numValue >= 0) {
+                          setSettings({
+                            ...settings,
+                            currencyRates: {
+                              ...settings.currencyRates,
+                              GEL: numValue,
+                            },
+                          });
+                        }
+                      } else {
+                        const numValue = parseFloat(inputValue);
+                        if (!isNaN(numValue) && numValue > 0) {
+                          setSettings({
+                            ...settings,
+                            currencyRates: {
+                              ...settings.currencyRates,
+                              GEL: numValue,
+                            },
+                          });
+                        }
                       }
                     }
                   }}
@@ -454,15 +614,15 @@ export default function SettingsPage() {
                         ...settings,
                         currencyRates: {
                           ...settings.currencyRates,
-                          GEL: 2.7,
+                          GEL: 0.00675,
                         },
                       });
                     }
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="2.7"
+                  placeholder="0.00675"
                 />
-                <p className="text-xs text-gray-500 mt-1">{t('admin.settings.rateToUSD')}</p>
+                <p className="text-xs text-gray-500 mt-1">{t('admin.settings.rateToAMD')}</p>
               </div>
             </div>
           </div>
