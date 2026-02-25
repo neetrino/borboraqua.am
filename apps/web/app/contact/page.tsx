@@ -30,7 +30,7 @@ const MapPinIcon = () => (
 
 export default function ContactPage() {
   const { t } = useTranslation();
-  const [language, setLanguage] = useState<'en' | 'ru' | 'am'>('en');
+  const [language, setLanguage] = useState<'en' | 'ru' | 'am'>('am');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -45,7 +45,7 @@ export default function ContactPage() {
     if (mappedLang === 'am' || mappedLang === 'ru' || mappedLang === 'en') {
       setLanguage(mappedLang as 'en' | 'ru' | 'am');
     } else {
-      setLanguage('en');
+      setLanguage('am');
     }
   }, []);
 

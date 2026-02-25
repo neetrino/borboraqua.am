@@ -91,7 +91,7 @@ async function getProducts(
   limit: number = 24
 ): Promise<ProductsResponse> {
   try {
-    let language: string = 'en';
+    let language: string = 'hy';
     try {
       const cookieStore = await cookies();
       const langCookie = cookieStore.get('shop_language');
@@ -164,7 +164,7 @@ export default async function ProductsPage({ searchParams }: any) {
   const normalizedProducts = productsData.data;
 
   // Get language for translations - try cookies first, then fallback
-  let language: string = 'en';
+  let language: string = 'hy';
   try {
     const cookieStore = await cookies();
     const langCookie = cookieStore.get('shop_language');

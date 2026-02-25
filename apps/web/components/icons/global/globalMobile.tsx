@@ -37,7 +37,7 @@ export function MobileHeader({
   isLoggedIn,
   isAdmin,
 }: MobileHeaderProps) {
-  const [language, setLanguage] = useState<LanguageCode>('en');
+  const [language, setLanguage] = useState<LanguageCode>('hy');
   const [currency, setCurrency] = useState<CurrencyCode>('AMD');
   const [showLangCurrencyMenu, setShowLangCurrencyMenu] = useState(false);
   const langCurrencyMenuRef = useRef<HTMLDivElement | null>(null);
@@ -631,7 +631,7 @@ export function TopHeaderBar({
   setShowSearchModal,
   setShowMobileMenu,
 }: TopHeaderBarProps) {
-  const [language, setLanguage] = useState<LanguageCode>('en');
+  const [language, setLanguage] = useState<LanguageCode>('hy');
   const [currency, setCurrency] = useState<CurrencyCode>('AMD');
   const [showLangCurrencyMenu, setShowLangCurrencyMenu] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, right: 0 });

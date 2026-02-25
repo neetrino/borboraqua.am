@@ -16,17 +16,17 @@ export async function generateMetadata({
 }: BlogArticlePageProps): Promise<Metadata> {
   const { slug } = await params;
   // Get language from cookies (server-side) first, then fallback
-  let lang: string = 'en';
+  let lang: string = 'hy';
   try {
     const cookieStore = await cookies();
     const langCookie = cookieStore.get('shop_language');
     if (langCookie && langCookie.value && ['hy', 'en', 'ru'].includes(langCookie.value)) {
       lang = langCookie.value;
     } else {
-      lang = getStoredLanguage() || 'en';
+      lang = getStoredLanguage() || 'hy';
     }
   } catch {
-    lang = getStoredLanguage() || 'en';
+    lang = getStoredLanguage() || 'hy';
   }
   const post = await blogService.getBySlug(slug, lang);
 
@@ -65,17 +65,17 @@ export default async function BlogArticlePage({
 }: BlogArticlePageProps) {
   const { slug } = await params;
   // Get language from cookies (server-side) first, then fallback
-  let lang: string = 'en';
+  let lang: string = 'hy';
   try {
     const cookieStore = await cookies();
     const langCookie = cookieStore.get('shop_language');
     if (langCookie && langCookie.value && ['hy', 'en', 'ru'].includes(langCookie.value)) {
       lang = langCookie.value;
     } else {
-      lang = getStoredLanguage() || 'en';
+      lang = getStoredLanguage() || 'hy';
     }
   } catch {
-    lang = getStoredLanguage() || 'en';
+    lang = getStoredLanguage() || 'hy';
   }
   const post = await blogService.getBySlug(slug, lang);
 

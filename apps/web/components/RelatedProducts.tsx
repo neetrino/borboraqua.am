@@ -60,8 +60,8 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set());
   const [isMobile, setIsMobile] = useState(false);
-  // Initialize language with 'en' to match server-side default and prevent hydration mismatch
-  const [language, setLanguage] = useState<LanguageCode>('en');
+  // Initialize language with default to match server-side and prevent hydration mismatch
+  const [language, setLanguage] = useState<LanguageCode>('hy');
   // Initialize currency with 'AMD' to match server-side default and prevent hydration mismatch
   const [currency, setCurrency] = useState<'USD' | 'AMD' | 'EUR' | 'RUB' | 'GEL'>('AMD');
 

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { unstable_cache } from "next/cache";
 import { productsService } from "../lib/services/products.service";
-import { HomePageClient } from "../components/HomePageClient";
+import HomePageClient from "../components/HomePageClient";
 
 const HOME_PRODUCTS_REVALIDATE = 60;
 
