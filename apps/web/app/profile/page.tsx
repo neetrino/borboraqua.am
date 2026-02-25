@@ -95,15 +95,15 @@ interface OrderDetails {
 
 function ProfilePageContent() {
   const router = useRouter();
-  const { isLoggedIn, isLoading: authLoading, user: authUser } = useAuth();
+  const { isLoggedIn, isLoading: authLoading, user: authUser, logout } = useAuth();
   const { t } = useTranslation();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get('tab') as 'dashboard' | 'personal' | 'addresses' | 'password' | 'orders') || 'dashboard';
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'personal' | 'addresses' | 'password' | 'orders'>(initialTab);
+  const initialTab = (searchParams.get('tab') as 'dashboard' | 'personal' | 'addresses' | 'password' | 'orders' | 'deleteAccount') || 'dashboard';
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'personal' | 'addresses' | 'password' | 'orders' | 'deleteAccount'>(initialTab);
 
   // Personal info form
   const [personalInfo, setPersonalInfo] = useState({
@@ -136,6 +136,13 @@ function ProfilePageContent() {
     confirmPassword: '',
   });
   const [savingPassword, setSavingPassword] = useState(false);
+
+  // Delete account
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteConfirmChecked, setDeleteConfirmChecked] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Dashboard
   const [dashboardData, setDashboardData] = useState<{
@@ -232,7 +239,7 @@ function ProfilePageContent() {
   // Update tab from URL query parameter
   useEffect(() => {
     const tab = searchParams.get('tab');
-    if (tab && ['dashboard', 'personal', 'addresses', 'password', 'orders'].includes(tab)) {
+    if (tab && ['dashboard', 'personal', 'addresses', 'password', 'orders', 'deleteAccount'].includes(tab)) {
       setActiveTab(tab as typeof activeTab);
     }
   }, [searchParams]);
@@ -473,6 +480,34 @@ function ProfilePageContent() {
       setError(err.message || t('profile.password.failedToChange'));
     } finally {
       setSavingPassword(false);
+    }
+  };
+
+  const handleDeleteAccount = async (e: FormEvent) => {
+    e.preventDefault();
+    setDeleteError(null);
+    if (!deleteConfirmChecked) {
+      setDeleteError(t('profile.deleteAccount.checkboxLabel'));
+      return;
+    }
+    if (!deletePassword.trim()) {
+      setDeleteError(t('profile.deleteAccount.confirmLabel'));
+      return;
+    }
+    setDeletingAccount(true);
+    try {
+      await apiClient.delete('/api/v1/users/profile', {
+        body: JSON.stringify({ password: deletePassword }),
+      });
+      setShowDeleteModal(false);
+      setDeletePassword('');
+      setDeleteConfirmChecked(false);
+      logout();
+      router.push('/');
+    } catch (err: any) {
+      setDeleteError(err.message || t('profile.deleteAccount.failed'));
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -1261,6 +1296,85 @@ function ProfilePageContent() {
             </div>
           </form>
         </Card>
+      )}
+
+      {/* Delete account Tab */}
+      {activeTab === 'deleteAccount' && (
+        <Card className="p-6 border-red-100">
+          <h2 className="text-lg font-semibold text-red-800 mb-2">{t('profile.deleteAccount.dangerZone')}</h2>
+          <p className="text-sm text-gray-600 mb-4">{t('profile.deleteAccount.description')}</p>
+          <ProductPageButton
+            variant="outline"
+            className="border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
+            onClick={() => {
+              setShowDeleteModal(true);
+              setDeleteError(null);
+              setDeletePassword('');
+              setDeleteConfirmChecked(false);
+            }}
+          >
+            {t('profile.deleteAccount.button')}
+          </ProductPageButton>
+        </Card>
+      )}
+
+      {/* Delete account confirmation modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[9999] overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="delete-account-title">
+          <div
+            className="fixed inset-0 bg-gray-900/80"
+            onClick={() => !deletingAccount && setShowDeleteModal(false)}
+          />
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div
+              className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 id="delete-account-title" className="text-xl font-semibold text-gray-900 mb-2">{t('profile.deleteAccount.title')}</h2>
+              <p className="text-sm text-gray-600 mb-4">{t('profile.deleteAccount.description')}</p>
+              <form onSubmit={handleDeleteAccount} className="space-y-4">
+                <Input
+                  label={t('profile.deleteAccount.confirmLabel')}
+                  type="password"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                />
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={deleteConfirmChecked}
+                    onChange={(e) => setDeleteConfirmChecked(e.target.checked)}
+                    className="mt-1 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                  />
+                  <span className="text-sm text-gray-700">{t('profile.deleteAccount.checkboxLabel')}</span>
+                </label>
+                {deleteError && (
+                  <p className="text-sm text-red-600" role="alert">{deleteError}</p>
+                )}
+                <div className="flex gap-3 pt-2">
+                  <ProductPageButton
+                    type="button"
+                    variant="outline"
+                    onClick={() => !deletingAccount && setShowDeleteModal(false)}
+                    disabled={deletingAccount}
+                    className="flex-1"
+                  >
+                    {t('profile.deleteAccount.cancel')}
+                  </ProductPageButton>
+                  <ProductPageButton
+                    type="submit"
+                    disabled={deletingAccount}
+                    className="flex-1 border-red-300 text-red-700 hover:bg-red-50 hover:border-red-400"
+                  >
+                    {deletingAccount ? t('profile.deleteAccount.deleting') : t('profile.deleteAccount.button')}
+                  </ProductPageButton>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Order Details Modal */}

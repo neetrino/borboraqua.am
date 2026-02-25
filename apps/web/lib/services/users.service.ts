@@ -17,10 +17,11 @@ class UsersService {
         locale: true,
         roles: true,
         addresses: true,
+        deletedAt: true,
       },
     });
 
-    if (!user) {
+    if (!user || user.deletedAt) {
       throw {
         status: 404,
         type: "https://api.shop.am/problems/not-found",
@@ -322,6 +323,72 @@ class UsersService {
       },
       recentOrders,
     };
+  }
+
+  /**
+   * Delete user account (soft delete: set deletedAt and clear PII).
+   * Requires current password for confirmation.
+   */
+  async deleteAccount(userId: string, password: string) {
+    if (!password || typeof password !== "string" || password.trim() === "") {
+      throw {
+        status: 400,
+        type: "https://api.shop.am/problems/validation-error",
+        title: "Validation Error",
+        detail: "Password is required to confirm account deletion",
+      };
+    }
+
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { id: true, passwordHash: true, deletedAt: true },
+    });
+
+    if (!user || user.deletedAt) {
+      throw {
+        status: 404,
+        type: "https://api.shop.am/problems/not-found",
+        title: "User not found",
+      };
+    }
+
+    if (!user.passwordHash) {
+      throw {
+        status: 400,
+        type: "https://api.shop.am/problems/validation-error",
+        title: "Cannot delete account",
+        detail: "Account cannot be deleted without password verification",
+      };
+    }
+
+    const isValid = await bcrypt.compare(password.trim(), user.passwordHash);
+    if (!isValid) {
+      throw {
+        status: 401,
+        type: "https://api.shop.am/problems/unauthorized",
+        title: "Invalid password",
+        detail: "The password is incorrect",
+      };
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.address.deleteMany({ where: { userId } });
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          deletedAt: new Date(),
+          email: null,
+          phone: null,
+          firstName: null,
+          lastName: null,
+          passwordHash: null,
+          passwordResetToken: null,
+          passwordResetExpires: null,
+        },
+      });
+    });
+
+    return { success: true };
   }
 }
 
