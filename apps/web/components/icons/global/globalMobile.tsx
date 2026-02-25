@@ -732,23 +732,23 @@ export function TopHeaderBar({
       className="xl:hidden fixed top-0 left-0 right-0 w-full z-[100] border-b shadow-sm overflow-x-hidden overflow-y-visible" 
       style={{ 
         paddingTop: 'env(safe-area-inset-top, 0px)',
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.3), rgba(55, 105, 205, 0.08), rgba(75, 135, 225, 0.08))',
-        backdropFilter: 'blur(40px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-        borderColor: 'rgba(255, 255, 255, 0.5)',
+        backgroundColor: 'rgba(255, 255, 255, 0.16)',
+        backdropFilter: 'blur(40px)',
+        WebkitBackdropFilter: 'blur(40px)',
+        boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05), 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(0, 0, 0, 0)',
       }}
     >
-      <div className="relative flex items-center justify-between pl-4 pr-4 py-3 h-[73px] w-full">
+      <div className="mx-auto flex h-[84px] w-full max-w-[430px] items-center justify-between px-5 pt-5">
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Hamburger Menu Button */}
           <button
             onClick={() => setShowMobileMenu(true)}
-            className="bg-transparent border border-black cursor-pointer flex items-center justify-center p-3 rounded-full w-[49px] h-[49px] transition-all duration-300 hover:bg-black hover:border-black hover:scale-110 active:scale-95"
+            className="bg-[rgba(170,214,245,0.38)] border border-[rgba(255,255,255,0.72)] border-solid shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_2px_6px_rgba(88,149,209,0.16)] cursor-pointer flex items-center justify-center rounded-full w-[49px] h-[49px] transition-all duration-300 hover:bg-[rgba(170,214,245,0.5)] hover:border-white/85 active:scale-95"
           >
             <div className="flex items-center justify-center">
               <div className="-scale-y-100 flex-none rotate-180">
                 <div className="h-[12px] relative w-[18px]">
-                  <img className="block max-w-none size-full brightness-0" alt="" src={imgVector3} />
+                  <img className="block max-w-none size-full" style={{ filter: 'brightness(0) invert(1)', dropShadow: '0 1px 1px rgba(34, 85, 132, 0.45)' }} alt="" src={imgVector3} />
                 </div>
               </div>
             </div>
@@ -756,12 +756,12 @@ export function TopHeaderBar({
           {/* Search Button */}
           <button
             onClick={() => setShowSearchModal(true)}
-            className="bg-transparent border border-black cursor-pointer flex items-center justify-center p-3 rounded-full transition-all duration-300 hover:bg-white/10 hover:border-white/80 hover:scale-110 active:scale-95"
+            className="bg-[rgba(170,214,245,0.38)] border border-[rgba(255,255,255,0.72)] border-solid shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_2px_6px_rgba(88,149,209,0.16)] cursor-pointer flex items-center justify-center rounded-full w-[49px] h-[49px] transition-all duration-300 hover:bg-[rgba(170,214,245,0.5)] hover:border-white/85 active:scale-95"
           >
             <div className="flex items-center justify-center">
               <div className="-scale-y-100 flex-none rotate-180">
                 <div className="relative size-[20px]">
-                  <img className="block max-w-none size-full brightness-0" alt="" src={imgVector2} />
+                  <img className="block max-w-none size-full" style={{ filter: 'brightness(0) invert(1)', dropShadow: '0 1px 1px rgba(34, 85, 132, 0.45)' }} alt="" src={imgVector2} />
                 </div>
               </div>
             </div>
@@ -773,23 +773,23 @@ export function TopHeaderBar({
           <button
             ref={buttonRef}
             onClick={() => setShowLangCurrencyMenu(!showLangCurrencyMenu)}
-            className="bg-[#1ac0fd] rounded-[70px] flex items-center gap-2 px-3 py-2 transition-all duration-200 hover:bg-[#6bb8dc] active:scale-95"
+            className="h-[48px] min-w-[159px] bg-[#00d1ff] rounded-[70px] flex items-center justify-center gap-2 px-[18px] transition-all duration-200 hover:bg-[#00bde8] active:scale-95"
             aria-expanded={showLangCurrencyMenu}
           >
             {/* Globe Icon */}
             <img 
               src={imgLanguageIcon} 
               alt="Language" 
-              className="w-4 h-4 block"
+              className="w-[19px] h-[19px] block"
               style={{ filter: 'brightness(0) invert(1)' }}
             />
             {/* Language / Currency Text */}
-            <span className="text-white text-sm font-medium whitespace-nowrap">
+            <span className="text-white text-[16px] leading-[18px] font-bold whitespace-nowrap">
               {getLanguageDisplayCode(language)} / {currency}
             </span>
             {/* Dropdown Arrow */}
             <svg 
-              className={`w-3 h-3 text-white transition-transform duration-200 ${showLangCurrencyMenu ? 'rotate-180' : ''}`}
+              className={`w-[13px] h-[13px] text-white transition-transform duration-200 ${showLangCurrencyMenu ? 'rotate-180' : ''}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
