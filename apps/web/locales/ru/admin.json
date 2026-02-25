@@ -754,7 +754,6 @@
     "assignedUsers": "Назначенные пользователи",
     "redemptions": "Использования",
     "used": "использован",
-    "remaining": "Осталось: {remaining}/{quantity}",
     "empty": "Купонов пока нет",
     "fields": {
       "name": "Название",
@@ -768,7 +767,7 @@
       "discountType": "Тип скидки",
       "discountTypeDescription": "Выберите процент или фиксированную сумму",
       "discountValue": "Размер скидки",
-      "discountValueDescription": "Размер скидки (процент или сумма)",
+      "discountValueDescription": "Размер скидки (процент)",
       "selectUsers": "Выбрать пользователей",
       "selectUsersDescription": "Выберите пользователей, которые могут использовать этот купон (пусто = все пользователи)",
       "active": "Активен",
@@ -779,6 +778,9 @@
       "fixed": "Фиксированная сумма"
     },
     "status": {
+      "used": "использован",
+      "expired": "истёк",
+      "not_used": "не использован",
       "active": "активен",
       "inactive": "неактивен"
     },
