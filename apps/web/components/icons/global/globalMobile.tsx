@@ -732,13 +732,14 @@ export function TopHeaderBar({
       className="xl:hidden fixed top-0 left-0 right-0 w-full z-[100] border-b shadow-sm overflow-x-hidden overflow-y-visible" 
       style={{ 
         paddingTop: 'env(safe-area-inset-top, 0px)',
-        backgroundColor: 'rgba(255, 255, 255, 0.16)',
-        backdropFilter: 'blur(40px)',
-        WebkitBackdropFilter: 'blur(40px)',
+        background: 'linear-gradient(135deg, rgba(55, 105, 205, 0.08), rgba(75, 135, 225, 0.08))',
+        backdropFilter: 'blur(40px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
         boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05), 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(0, 0, 0, 0)',
       }}
     >
-      <div className="mx-auto flex h-[84px] w-full max-w-[430px] items-center justify-between px-5 pt-5">
+      <div className="mx-auto flex h-[84px] w-full max-w-[430px] md:max-w-[768px] items-center justify-between px-5 pt-5">
+        {/* Left side - Menu & Search Icons */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Hamburger Menu Button */}
           <button
@@ -768,7 +769,7 @@ export function TopHeaderBar({
           </button>
         </div>
 
-        {/* Language & Currency Selector */}
+        {/* Right side - Language & Currency Selector */}
         <div className="relative z-[200] flex-shrink-0" ref={langCurrencyMenuRef}>
           <button
             ref={buttonRef}
