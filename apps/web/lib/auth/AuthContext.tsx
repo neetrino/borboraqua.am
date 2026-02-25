@@ -354,13 +354,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 /**
+ * Default auth context value (used when context is undefined, e.g., during SSR)
+ */
+const defaultAuthContext: AuthContextType = {
+  user: null,
+  token: null,
+  isLoggedIn: false,
+  isLoading: true,
+  isAdmin: false,
+  roles: [],
+  login: async () => {
+    throw new Error('AuthProvider not initialized');
+  },
+  register: async () => {
+    throw new Error('AuthProvider not initialized');
+  },
+  logout: () => {
+    throw new Error('AuthProvider not initialized');
+  },
+};
+
+/**
  * Hook to use auth context
+ * Returns default values during SSR to prevent hydration errors
  */
 export function useAuth() {
   const context = useContext(AuthContext);
+  
+  // During SSR or when context is undefined, return default values
+  // This prevents "useAuth must be used within an AuthProvider" errors
+  // during server-side rendering
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    // Only throw in development if we're on the client side
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.warn('useAuth called outside AuthProvider, using default values');
+    }
+    return defaultAuthContext;
   }
+  
   return context;
 }
 

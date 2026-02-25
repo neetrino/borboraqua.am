@@ -18,6 +18,9 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: 'Shop - Professional E-commerce',
   description: 'Modern e-commerce platform',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export const viewport = {
