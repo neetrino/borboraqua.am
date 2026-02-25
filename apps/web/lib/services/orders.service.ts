@@ -1,5 +1,6 @@
 import { db } from "@white-shop/db";
 import { sendOrderNotificationToAdmin } from "@/lib/email-templates/order-admin-notification";
+import { couponsService, type CheckoutCouponValidationResult } from "@/lib/services/coupons.service";
 
 /**
  * Get next order number (P100, P101, ...) and increment in DB (transaction).
@@ -69,6 +70,7 @@ class OrdersService {
       const {
         cartId,
         items: guestItems,
+        couponCode,
         email,
         phone,
         firstName,
@@ -454,7 +456,28 @@ class OrdersService {
 
       // Calculate totals
       const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const discountAmount = 0; // TODO: Implement discount/coupon logic
+      let couponValidation: CheckoutCouponValidationResult | null = null;
+      const normalizedCouponCode =
+        typeof couponCode === "string" ? couponCode.trim() : "";
+
+      if (normalizedCouponCode) {
+        if (!userId) {
+          throw {
+            status: 401,
+            type: "https://api.shop.am/problems/unauthorized",
+            title: "Unauthorized",
+            detail: "Login is required to use a personal coupon",
+          };
+        }
+
+        couponValidation = await couponsService.validateForUser({
+          code: normalizedCouponCode,
+          userId,
+          subtotal,
+        });
+      }
+
+      const discountAmount = couponValidation?.discountAmount || 0;
       const shippingAmount = 0; // Shipping is calculated from delivery price API, not hardcoded
       const taxAmount = 0; // TODO: Calculate tax if needed
       const total = subtotal - discountAmount + shippingAmount + taxAmount;
@@ -505,6 +528,7 @@ class OrdersService {
               customerPhone: phone,
               customerLocale: locale || 'en',
               shippingMethod,
+              couponCode: couponValidation?.code || null,
               shippingAddress: shippingAddress ? JSON.parse(JSON.stringify(shippingAddress)) : null,
               billingAddress: shippingAddress ? JSON.parse(JSON.stringify(shippingAddress)) : null,
               items: {
@@ -534,6 +558,14 @@ class OrdersService {
               items: true,
             },
           });
+
+          if (couponValidation && userId) {
+            await couponsService.redeemCouponInCheckout(tx, {
+              couponValidation,
+              userId,
+              orderId: newOrder.id,
+            });
+          }
 
           // Update stock for all variants
           console.log('📦 [ORDERS SERVICE] Updating stock for variants:', cartItems.map(item => ({

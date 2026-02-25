@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum CouponDiscountType {
+  FIXED
+  PERCENT
+}
+
 // ============================================
 // USER MODEL
 // ============================================
@@ -30,9 +35,11 @@ model User {
   updatedAt            DateTime  @updatedAt
 
   // Relations
-  carts  Cart[]
-  orders Order[]
-  reviews ProductReview[]
+  carts             Cart[]
+  orders            Order[]
+  reviews           ProductReview[]
+  couponAssignments CouponAssignment[]
+  couponRedemptions CouponRedemption[]
 
   @@index([deletedAt])
   @@map("users")
@@ -348,6 +355,61 @@ model Cart {
   @@map("carts")
 }
 
+model Coupon {
+  id                String             @id @default(cuid())
+  name              String
+  code              String             @unique
+  expiresAt         DateTime
+  quantity          Int
+  remainingQuantity Int
+  isActive          Boolean            @default(true)
+  discountType      CouponDiscountType @default(FIXED)
+  discountValue     Float
+  singleUse         Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  assignments CouponAssignment[]
+  redemptions CouponRedemption[]
+
+  @@index([isActive, expiresAt])
+  @@map("coupons")
+}
+
+model CouponAssignment {
+  id        String   @id @default(cuid())
+  couponId  String
+  userId    String
+  isActive  Boolean  @default(true)
+  assignedAt DateTime @default(now())
+  usedAt    DateTime?
+  useCount  Int      @default(0)
+
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([couponId, userId])
+  @@index([userId, isActive])
+  @@map("coupon_assignments")
+}
+
+model CouponRedemption {
+  id             String   @id @default(cuid())
+  couponId       String
+  userId         String
+  orderId        String   @unique
+  discountAmount Float
+  redeemedAt     DateTime @default(now())
+
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order  Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([couponId, redeemedAt(sort: Desc)])
+  @@index([userId, redeemedAt(sort: Desc)])
+  @@map("coupon_redemptions")
+}
+
 model CartItem {
   id            String   @id @default(cuid())
   cartId        String
@@ -388,6 +450,7 @@ model Order {
   shippingAddress   Json?
   shippingMethod    String?
   trackingNumber    String?
+  couponCode        String?
   notes             String?      @db.Text
   adminNotes        String?      @db.Text
   ipAddress         String?
@@ -403,7 +466,8 @@ model Order {
   updatedAt         DateTime     @updatedAt
 
   // Relations
-  user User? @relation(fields: [userId], references: [id])
+  user             User?             @relation(fields: [userId], references: [id])
+  couponRedemption CouponRedemption?
 
   @@index([userId])
   @@index([status, createdAt(sort: Desc)])

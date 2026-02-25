@@ -67,9 +67,17 @@
   "summary": {
     "items": "Items",
     "subtotal": "Subtotal",
+    "discount": "Coupon discount",
     "shipping": "Shipping",
     "tax": "Tax",
     "total": "Total"
+  },
+  "coupon": {
+    "label": "Promo code",
+    "placeholder": "Enter your coupon code",
+    "apply": "Apply",
+    "applying": "Applying...",
+    "applied": "Coupon {code} applied"
   },
   "buttons": {
     "placeOrder": "Place Order",
@@ -119,7 +127,10 @@
     "failedToCreateOrder": "Failed to create order. Please try again.",
     "paymentInitFailed": "Payment could not be started. Please try again.",
     "deliveryDayRequired": "Please select a delivery day",
-    "deliveryTimeRequired": "Please select a delivery time slot"
+    "deliveryTimeRequired": "Please select a delivery time slot",
+    "couponRequired": "Please enter coupon code",
+    "couponLoginRequired": "Login is required to use this coupon",
+    "invalidCoupon": "Coupon is invalid"
   }
 }
 

@@ -43,6 +43,17 @@ interface Cart {
   itemsCount: number;
 }
 
+interface CouponValidationResponse {
+  data: {
+    couponId: string;
+    code: string;
+    discountAmount: number;
+    discountType: 'FIXED' | 'PERCENT';
+    discountValue: number;
+    singleUse: boolean;
+  };
+}
+
 type DeliveryTimeSlot = string;
 
 type DeliveryDayOption = {
@@ -94,6 +105,10 @@ export default function CheckoutPage() {
   const [language, setLanguage] = useState(getStoredLanguage());
   const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
   const [deliveryPrice, setDeliveryPrice] = useState<number | null>(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponValidationResponse['data'] | null>(null);
   const [loadingDeliveryPrice, setLoadingDeliveryPrice] = useState(false);
   const [deliveryRegions, setDeliveryRegions] = useState<DeliveryRegionOption[]>([]);
   const [regionDropdownOpen, setRegionDropdownOpen] = useState(false);
@@ -224,6 +239,9 @@ export default function CheckoutPage() {
   const deliveryDay = watch('deliveryDay');
   const deliveryTimeSlot = watch('deliveryTimeSlot');
   const selectedRegion = deliveryRegions.find((r) => r.id === shippingRegionId);
+  const cartSubtotal = cart?.totals?.subtotal || 0;
+  const couponDiscount = appliedCoupon?.discountAmount || 0;
+  const finalCheckoutTotal = Math.max(0, cartSubtotal + (deliveryPrice !== null ? deliveryPrice : 0) - couponDiscount);
 
   const availableDeliveryDays: DeliveryDayOption[] = useMemo(() => {
     // Calculate enabled delivery days for the currently visible calendar month.
@@ -427,6 +445,15 @@ export default function CheckoutPage() {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [regionDropdownOpen]);
+
+  useEffect(() => {
+    if (!appliedCoupon) {
+      return;
+    }
+    if (couponCode.trim().toUpperCase() !== appliedCoupon.code.toUpperCase()) {
+      setAppliedCoupon(null);
+    }
+  }, [couponCode, appliedCoupon]);
 
   useEffect(() => {
     // Wait for auth to finish loading before checking
@@ -725,6 +752,41 @@ export default function CheckoutPage() {
     }
   }
 
+  async function handleApplyCoupon() {
+    const trimmedCode = couponCode.trim();
+    if (!trimmedCode) {
+      setCouponError(t('checkout.errors.couponRequired'));
+      setAppliedCoupon(null);
+      return;
+    }
+
+    if (!isLoggedIn) {
+      setCouponError(t('checkout.errors.couponLoginRequired'));
+      setAppliedCoupon(null);
+      return;
+    }
+
+    try {
+      setApplyingCoupon(true);
+      setCouponError(null);
+      const response = await apiClient.post<CouponValidationResponse>('/api/v1/coupons/validate', {
+        code: trimmedCode,
+        subtotal: cartSubtotal,
+      });
+      setAppliedCoupon(response.data);
+      setCouponCode(response.data.code);
+    } catch (err: any) {
+      const message =
+        err instanceof ApiError
+          ? err.message
+          : t('checkout.errors.invalidCoupon');
+      setCouponError(message);
+      setAppliedCoupon(null);
+    } finally {
+      setApplyingCoupon(false);
+    }
+  }
+
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('[Checkout] handlePlaceOrder called', { 
@@ -826,6 +888,7 @@ export default function CheckoutPage() {
       }>('/api/v1/orders/checkout', {
         cartId: cartId,
         ...(items ? { items } : {}),
+        ...(couponCode.trim() ? { couponCode: couponCode.trim() } : {}),
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
@@ -1424,11 +1487,51 @@ export default function CheckoutPage() {
               <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
               <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.orderSummary')}</h2>
+                <div className="mb-5">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    {t('checkout.coupon.label')}
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(event) => {
+                        setCouponCode(event.target.value);
+                        setCouponError(null);
+                      }}
+                      placeholder={t('checkout.coupon.placeholder')}
+                      className="flex-1 px-3 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all"
+                      disabled={isSubmitting || applyingCoupon}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={isSubmitting || applyingCoupon}
+                      className="px-4 py-2 rounded-[12px] bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] text-white text-sm font-medium shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+                    >
+                      {applyingCoupon ? t('checkout.coupon.applying') : t('checkout.coupon.apply')}
+                    </button>
+                  </div>
+                  {couponError && (
+                    <p className="mt-2 text-xs text-red-600">{couponError}</p>
+                  )}
+                  {appliedCoupon && !couponError && (
+                    <p className="mt-2 text-xs text-green-700">
+                      {t('checkout.coupon.applied').replace('{code}', appliedCoupon.code)}
+                    </p>
+                  )}
+                </div>
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between text-gray-600">
                     <span>{t('checkout.summary.subtotal')}</span>
                     <span>{formatPrice(cart.totals.subtotal, currency)}</span>
                   </div>
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-green-700">
+                      <span>{t('checkout.summary.discount')}</span>
+                      <span>-{formatPrice(couponDiscount, currency)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-gray-600">
                     <span>{t('checkout.summary.shipping')}</span>
                     <span>
@@ -1443,11 +1546,7 @@ export default function CheckoutPage() {
                     <div className="flex justify-between text-lg font-bold text-gray-900">
                       <span>{t('checkout.summary.total')}</span>
                       <span>
-                        {formatPrice(
-                          cart.totals.subtotal + 
-                          (deliveryPrice !== null ? deliveryPrice : 0),
-                          currency
-                        )}
+                        {formatPrice(finalCheckoutTotal, currency)}
                       </span>
                     </div>
                   </div>
