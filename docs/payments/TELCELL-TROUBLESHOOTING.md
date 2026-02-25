@@ -8,7 +8,7 @@ Telcell-ը **վճարումից հետո** մեր սերվերին GET/POST requ
 
 - **Մեր endpoint:** `https://<ձեր-դոմեն>/wc-api/telcell_result`
 - **Հարց support-ին.**  
-  - Test (proto_test2) environment-ում RESULT_URL-ը գրանցված է՞ ձեր դոմենի վրա։  
+  - Test environment-ում RESULT_URL-ը գրանցված է՞ ձեր դոմենի վրա։  
   - Եթե աշխատում եք localhost-ով — Telcell-ը RESULT_URL չի կարող հասնել, order-ը միշտ կմնա pending։  
   - Պահանջել հաստատել, թե **ճիշտ ինչ URL** են նրանք օգտագործում RESULT_URL-ի համար (GET/POST, query vs body).
 
@@ -24,7 +24,7 @@ Telcell-ը **վճարումից հետո** մեր սերվերին GET/POST requ
 
 ## 3. Test vs Live
 
-- Ձեր URL-ը **proto_test2** (test) է։  
+- PostInvoice request-ը **միշտ** գնում է `https://telcellmoney.am/invoices` (test և live — նույն URL, տե՛ս `TELCELL-URL-DIFF.md`).
 - Test environment-ում Telcell-ը կարող է **չուղարկել** RESULT_URL կամ օգտագործել **այլ shop_id/shop_key**։
 - **Հարց support-ին.**  
   Test mode-ում RESULT_URL և REDIRECT_URL call-երն իրականում կատարվում են՞, և եթե այո — որ URL-ներով (full URL)։
