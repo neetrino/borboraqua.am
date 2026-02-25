@@ -3,7 +3,7 @@
   "subtitle": "Войдите в свой аккаунт, чтобы продолжить",
   "form": {
     "emailOrPhone": "Email или Телефон",
-    "emailOrPhonePlaceholder": "your@email.com или +7 XXX XXX XX XX",
+    "emailOrPhonePlaceholder": "your@email.com",
     "password": "Пароль",
     "passwordPlaceholder": "••••••••",
     "rememberMe": "Запомнить меня",

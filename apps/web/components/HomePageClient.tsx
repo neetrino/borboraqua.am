@@ -147,7 +147,7 @@ export function HomePageClient({
   };
   
   // State for language and currency
-  const [language, setLanguage] = useState<LanguageCode>('en');
+  const [language, setLanguage] = useState<LanguageCode>('hy');
   const [currency, setCurrency] = useState<CurrencyCode>('AMD');
   const [showLangCurrencyMenu, setShowLangCurrencyMenu] = useState(false);
   const langCurrencyMenuRef = useRef<HTMLDivElement | null>(null);
@@ -1834,7 +1834,7 @@ export function HomePageClient({
       </div>
 
       {/* Decorative bubbles — bulb.svg, float + drag */}
-      <div className="absolute flex top-[43.44%] right-[71%] bottom-[43.57%] left-0 items-center justify-center overflow-hidden pointer-events-none">
+      <div className="absolute z-[30] flex top-[43.44%] right-[71%] bottom-[43.57%] left-0 items-center justify-center overflow-visible pointer-events-none">
         <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-2 size-[385px] flex items-center justify-center" maxDrag={110} />
       </div>
 
@@ -2011,3 +2011,5 @@ export function HomePageClient({
     </div>
   );
 }
+
+export default HomePageClient;

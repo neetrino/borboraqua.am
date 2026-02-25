@@ -115,9 +115,9 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currency, setCurrency] = useState(getStoredCurrency());
   // Language state - used in handleLanguageUpdate function (setLanguage)
-  // Initialize with 'en' to match server-side default and prevent hydration mismatch
+  // Initialize with default language to match server-side and prevent hydration mismatch
   // eslint-disable-next-line no-unused-vars
-  const [language, setLanguage] = useState<LanguageCode>('en');
+  const [language, setLanguage] = useState<LanguageCode>('hy');
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);

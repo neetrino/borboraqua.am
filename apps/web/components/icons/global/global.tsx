@@ -224,7 +224,7 @@ export function Header({
   // Cart count state
   const [cartCount, setCartCount] = useState<number>(0);
   // Language and currency state
-  const [language, setLanguage] = useState<LanguageCode>('en');
+  const [language, setLanguage] = useState<LanguageCode>('hy');
   const [currency, setCurrency] = useState<CurrencyCode>('AMD');
   const [showLangCurrencyMenu, setShowLangCurrencyMenu] = useState(false);
   const langCurrencyMenuRef = useRef<HTMLDivElement | null>(null);

@@ -7,11 +7,13 @@ export const LANGUAGES = {
 
 export type LanguageCode = keyof typeof LANGUAGES;
 
+/** Default site language when user has not chosen one */
+export const DEFAULT_LANGUAGE: LanguageCode = 'hy';
+
 const LANGUAGE_STORAGE_KEY = 'shop_language';
 
 export function getStoredLanguage(): LanguageCode {
-  // Default to English on first load / server-side (changed from 'hy' to 'en')
-  if (typeof window === 'undefined') return 'en';
+  if (typeof window === 'undefined') return DEFAULT_LANGUAGE;
   try {
     const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (stored && stored in LANGUAGES) {
@@ -20,8 +22,7 @@ export function getStoredLanguage(): LanguageCode {
   } catch {
     // Ignore errors
   }
-  // Fallback language when nothing is stored (changed from 'hy' to 'en')
-  return 'en';
+  return DEFAULT_LANGUAGE;
 }
 
 export function setStoredLanguage(language: LanguageCode, options?: { skipReload?: boolean }): void {
