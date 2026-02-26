@@ -433,12 +433,6 @@ export function HomePageFooter() {
                 >
                   <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.deliveryTerms')}</p>
                 </div>
-                <div
-                  onClick={() => router.push('/refund-policy')}
-                  className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
-                >
-                  <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.policies.refundPolicy')}</p>
-                </div>
               </div>
             </div>
 
