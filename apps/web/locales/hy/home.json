@@ -5,7 +5,8 @@
     "aboutUs": "ՄԵՐ ՄԱՍԻՆ",
     "contactUs": "ԿԱՊ",
     "blog": "ԲԼՈԳ",
-    "delivery": "ԱՌԱՔՈՒՄ"
+    "delivery": "ԱՌԱՔՈՒՄ",
+    "questions": "ՀԱՐՑԵՐ"
   },
   "hero": {
     "experiencePurity": " Որակ, որին կարող եք վստահել",
@@ -127,7 +128,8 @@
       "title": "Մեյնու",
       "aboutUs": "Մեր մասին",
       "contact": "Կապ",
-      "shop": "Խանութ"
+      "shop": "Խանութ",
+      "faq": "Հաճախ տրվող հարցեր"
     }
   },
   "search": {

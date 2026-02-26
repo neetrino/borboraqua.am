@@ -153,6 +153,12 @@ export function HomePageHeader() {
               <p className="leading-[20px]">{t('home.navigation.contactUs')}</p>
             </div>
             <div
+              onClick={() => router.push('/faq')}
+              className="flex flex-col justify-center relative shrink-0 cursor-pointer"
+            >
+              <p className="leading-[20px]">{t('home.navigation.questions')}</p>
+            </div>
+            <div
               onClick={() => router.push('/delivery-terms')}
               className="flex flex-col justify-center relative shrink-0 cursor-pointer"
             >
@@ -461,6 +467,12 @@ export function HomePageFooter() {
                   className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
                 >
                   <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.shop')}</p>
+                </div>
+                <div
+                  onClick={() => router.push('/faq')}
+                  className="flex font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white whitespace-nowrap cursor-pointer hover:opacity-80 transition-opacity"
+                >
+                  <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px]">{t('home.footer.siteMap.faq')}</p>
                 </div>
               </div>
             </div>
