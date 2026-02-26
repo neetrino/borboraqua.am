@@ -9,6 +9,7 @@ import { useAuth } from '../../../lib/auth/AuthContext';
 import { useTranslation } from '../../../lib/i18n-client';
 import { apiClient } from '../../../lib/api-client';
 import { SearchDropdown } from '../../SearchDropdown';
+import type { SearchResult } from '../../../hooks/useInstantSearch';
 
 // Local image paths
 const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
@@ -361,7 +362,7 @@ interface MobileSearchProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   handleSearch: (e: React.FormEvent) => void;
-  searchResults?: Array<{ id: string; name: string; description: string | null; price: number; salePrice: number | null; image: string | null; category: string; slug: string; type: string }>;
+  searchResults?: SearchResult[];
   searchLoading?: boolean;
   searchError?: string | null;
   searchSelectedIndex?: number;
@@ -738,7 +739,7 @@ export function TopHeaderBar({
         boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05), 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(0, 0, 0, 0)',
       }}
     >
-      <div className="mx-auto flex h-[84px] w-full max-w-[430px] md:max-w-[768px] items-center justify-between px-5 pt-5">
+      <div className="mx-auto flex h-[64px] w-full max-w-[430px] md:max-w-[768px] items-center justify-between px-5 pt-0">
         {/* Left side - Menu & Search Icons */}
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Hamburger Menu Button */}
@@ -749,7 +750,7 @@ export function TopHeaderBar({
             <div className="flex items-center justify-center">
               <div className="-scale-y-100 flex-none rotate-180">
                 <div className="h-[12px] relative w-[18px]">
-                  <img className="block max-w-none size-full" style={{ filter: 'brightness(0) invert(1)', dropShadow: '0 1px 1px rgba(34, 85, 132, 0.45)' }} alt="" src={imgVector3} />
+                  <img className="block max-w-none size-full" style={{ filter: 'brightness(0) invert(1) drop-shadow(0 1px 1px rgba(34, 85, 132, 0.45))' }} alt="" src={imgVector3} />
                 </div>
               </div>
             </div>
@@ -762,7 +763,7 @@ export function TopHeaderBar({
             <div className="flex items-center justify-center">
               <div className="-scale-y-100 flex-none rotate-180">
                 <div className="relative size-[20px]">
-                  <img className="block max-w-none size-full" style={{ filter: 'brightness(0) invert(1)', dropShadow: '0 1px 1px rgba(34, 85, 132, 0.45)' }} alt="" src={imgVector2} />
+                  <img className="block max-w-none size-full" style={{ filter: 'brightness(0) invert(1) drop-shadow(0 1px 1px rgba(34, 85, 132, 0.45))' }} alt="" src={imgVector2} />
                 </div>
               </div>
             </div>

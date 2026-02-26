@@ -789,25 +789,6 @@ export function HomePageClient({
           </div>
         </div>
 
-        {/* Mobile Decorative Background Images */}
-        <div className="absolute h-[312px] left-0 right-0 top-[789px] w-full">
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <img alt="" className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash3} />
-          </div>
-        </div>
-        <div className="absolute flex h-[312px] items-center justify-center left-0 right-0 top-[1098px] w-full overflow-hidden pointer-events-none">
-          <div className="-scale-y-100 flex-none w-full h-full">
-            <div className="h-full relative w-full">
-              <div className="absolute inset-0 overflow-hidden">
-                <img
-                  alt=""
-                  className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full"
-                  src={imgDanielSinocaAancLsb0SU0Unsplash3}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
         {/* Mobile Footer Background Images - Removed */}
 
         {/* Mobile Decorative Ellipses and Shapes */}
@@ -833,13 +814,7 @@ export function HomePageClient({
       
         
         {/* Third Mobile Shape */}
-        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(50%-200px)] mix-blend-luminosity size-[400px] top-[1580px]">
-          <div className="flex-none rotate-[-120deg]">
-            <div className="relative size-[300px]">
-              <img alt="" className="block max-w-none size-full" src={imgShape} />
-            </div>
-          </div>
-        </div>
+       
         
         <div className="-translate-x-1/2 absolute h-[438px] left-[calc(50%-302px)] top-[650px] w-[464px]">
           <div className="absolute inset-[-83.33%_-78.66%]">
@@ -848,22 +823,17 @@ export function HomePageClient({
         </div>
 
 
-        {/* Mobile Featured Products — bulb.svg (medium, small, medium), float + drag */}
-          <div className="absolute flex items-center justify-center left-[67.21%] right-[-23.97%] top-[calc(.09%+958px)] bottom-[calc(100%-82.65%)]">
-            <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-0 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} />
-          </div>
-          <div className="absolute flex items-center justify-center left-[47.67%] right-[4.12%] top-[calc(13.72%+958px)] bottom-[calc(100%-81.17%)]">
-            <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 flex-none rotate-[100.79deg] size-[50px]" maxDrag={50} />
-          </div>
-        {/* Left decorative bubble near Featured Products - fixed 200px from left on all mobile widths */}
+        {/* Left decorative bubble near Featured Products - fixed 200px from left on all mobile widths (2 bubbles removed for mobile) */}
+      
        
-
-       
-
-        {/* Mobile Hero — bulb.svg centered, float + drag */}
-        <div className="-translate-x-1/2 absolute flex items-center justify-center left-1/2 top-[190px] sm:top-[220px] md:top-[240px] w-full max-w-[440px] z-[2]">
+          <div className="absolute flex items-center justify-center left-[57.67%] right-[4.12%] top-[calc(13.72%+958px)] bottom-[calc(100%-81.17%)]">
+            <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 flex-none rotate-[100.79deg] size-[90px]" maxDrag={50} />
+          </div>
+          <div className="absolute flex items-end justify-center top-[190px] sm:top-[220px] md:top-[240px] w-full max-w-[440px] z-[2] translate-x-8 sm:translate-x-44 md:translate-x-52">
           <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-1 size-[320px] sm:size-[360px] md:size-[400px] flex items-center justify-center" maxDrag={110} />
-        </div>
+        </div>       
+
+       
 
 
         {/* Mobile Hero Text */}
@@ -877,7 +847,7 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Hero Text Bottom Gradient Overlay */}
-        <div className="absolute bg-gradient-to-b blur-[40px] from-[rgba(98,179,232,0.85)] h-[150px] left-0 right-0 opacity-75 to-[rgba(221,216,216,0.6)] top-[520px] z-0" />
+
 
         {/* Mobile Experience Purity Label */}
         <div className="absolute content-stretch flex gap-[12px] items-center left-[32px] right-4 top-[261px] max-w-[calc(100%-32px)] z-[10]">
@@ -896,8 +866,8 @@ export function HomePageClient({
           </div>
         </div>
 
-        {/* Mobile Hero Section Bottom Gradient Overlay */}
-        <div className="absolute bg-gradient-to-b blur-[40px] from-[rgba(98,179,232,0.8)] h-[150px] left-0 right-0 opacity-70 to-[rgba(221,216,216,0.6)] top-[700px] z-0" />
+        
+
 
         {/* Mobile CTA Buttons */}
         <div className="-translate-x-1/2 absolute content-stretch flex flex-col min-[728px]:flex-row gap-[8px] min-[728px]:gap-[12px] h-[136px] min-[728px]:h-[60px] items-center justify-end left-1/2 pt-[16px] min-[728px]:pt-0 top-[600px] min-[728px]:top-[680px] w-full max-w-[430px] min-[728px]:max-w-[600px] px-4 z-10">
@@ -939,7 +909,7 @@ export function HomePageClient({
         </div>
 
         {/* Left bulb — after Featured title, float + drag */}
-        <div className="absolute flex items-center justify-center -left-20 right-auto top-[calc(0%+965px)] bottom-auto z-10 max-w-[130px] overflow-visible">
+        <div className="absolute flex items-end justify-center left-2 right-auto top-[calc(0%+865px)] bottom-auto z-10 max-w-[130px] overflow-visible">
           <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-7 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} />
         </div>
 
@@ -1010,16 +980,9 @@ export function HomePageClient({
             </div>
           </button>
         </div>
-        {/* Mobile Stats Cards */}
-        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[1900px] w-full max-w-[400px] min-[728px]:max-w-[700px] px-4">
-          <div className="h-[227px] relative rounded-[30px] shrink-0 w-[calc(38%-4px)] min-w-0 overflow-hidden">
-            <img
-              alt=""
-              className="absolute h-[149.05%] left-[-49.49%] max-w-none top-[-32.36%] w-[149.49%]"
-              src={img5}
-            />
-          </div>
-          <div className="h-[227px] relative shrink-0 w-[calc(62%-4px)] min-w-0">
+        {/* Mobile Stats Cards — full width on mobile */}
+        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[1900px] w-full max-w-[calc(100%-2rem)] min-[728px]:max-w-[min(92vw,960px)] xl:max-w-[700px] px-4">
+          <div className="h-[240px] min-[728px]:h-[227px] relative shrink-0 w-full xl:w-[calc(62%-4px)] min-w-0">
             <div className="absolute bg-[#1ac0fd] inset-0 rounded-[30px]" />
             <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[70%_6%_18%_40%] min-[728px]:inset-[65%_6%_18%_40%] justify-center leading-[0] text-[40px] min-[728px]:text-[50px] text-center text-white tracking-[-0.9px] uppercase">
               <p className="leading-[36px] min-[728px]:leading-[45px] whitespace-pre-wrap">98%</p>
@@ -1036,8 +999,8 @@ export function HomePageClient({
             </div>
           </div>
         </div>
-        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[2150px] w-full max-w-[400px] min-[728px]:max-w-[700px] px-4">
-          <div className="h-[227px] relative shrink-0 w-[calc(62%-4px)] min-w-0">
+        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[2150px] w-full max-w-[calc(100%-2rem)] min-[728px]:max-w-[min(92vw,960px)] xl:max-w-[700px] px-4">
+          <div className="h-[240px] min-[728px]:h-[227px] relative shrink-0 w-full xl:w-[calc(62%-4px)] min-w-0">
             <div className="absolute bg-white inset-0 rounded-[30px]" />
             <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[65%_6%_18%_26%] min-[728px]:inset-[60%_6%_18%_26%] justify-center leading-[0] text-[#0f172a] text-[40px] min-[728px]:text-[50px] text-center tracking-[-0.9px] uppercase">
               <p className="leading-[36px] min-[728px]:leading-[45px] whitespace-pre-wrap">100%</p>
@@ -1051,13 +1014,6 @@ export function HomePageClient({
             <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[84.65%_8.65%_6.46%_44.71%] min-[728px]:inset-[82%_8%_6%_44%] italic justify-center leading-[0] text-[#1ac0fd] text-[14px] min-[728px]:text-[16px] text-right">
               <p className="leading-[24px] min-[728px]:leading-[24px] whitespace-pre-wrap">{t('home.cards.balancedHydration.source')}</p>
             </div>
-          </div>
-          <div className="h-[227px] relative rounded-[30px] shrink-0 w-[calc(38%-4px)] min-w-0 overflow-hidden">
-            <img
-              alt=""
-              className="absolute h-[101.64%] left-[-13.07%] max-w-none top-[-1.52%] w-[126.15%]"
-              src={img6}
-            />
           </div>
         </div>
 
