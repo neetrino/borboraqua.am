@@ -5,7 +5,8 @@
     "aboutUs": "ABOUT US",
     "contactUs": "CONTACT US",
     "blog": "BLOG",
-    "delivery": "DELIVERY"
+    "delivery": "DELIVERY",
+    "questions": "QUESTIONS"
   },
   "hero": {
     "experiencePurity": "Quality you can trust.",
@@ -127,7 +128,8 @@
       "title": "Menu",
       "aboutUs": "About Us",
       "contact": "Contact",
-      "shop": "Shop"
+      "shop": "Shop",
+      "faq": "Frequently Asked Questions"
     }
   },
   "search": {

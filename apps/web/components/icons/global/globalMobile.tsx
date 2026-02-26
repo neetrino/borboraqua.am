@@ -346,7 +346,16 @@ export function MobileMenu({
             }}
             className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            CONTACT
+            {t('home.navigation.contactUs')}
+          </button>
+          <button
+            onClick={() => {
+              router.push('/faq');
+              setShowMobileMenu(false);
+            }}
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
+          >
+            {t('home.navigation.questions')}
           </button>
         </nav>
       </div>
