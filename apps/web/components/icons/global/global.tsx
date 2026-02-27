@@ -136,14 +136,18 @@ const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColor
 // Footer/background wave PNG from Figma, saved locally in public/assets/home
 const imgDanielSinocaAancLsb0SU0Unsplash1 = "/assets/home/banner/imgDanielWave.webp";
 const imgIcon2 = "/assets/home/imgIcon2.svg";
-const imgSvg = "/assets/home/imgSvg.svg";
-const imgSvg1 = "/assets/home/imgSvg1.svg";
-const imgGroup = "/assets/home/imgGroup.svg";
-const imgLink = "/assets/home/imgLink.svg";
-const imgGroup2122 = "/assets/home/imgGroup2122.svg";
-const imgGroup2121 = "/assets/home/imgGroup2121.svg";
-const imgGroup2124 = "/assets/home/imgGroup2124.svg";
-const imgGroup2123 = "/assets/home/imgGroup2123.svg";
+// Social media icons
+const socialInstagram = "/assets/home/skill-icons_instagram.svg";
+const socialFacebook = "/assets/home/logos_facebook.svg";
+const socialWhatsapp = "/assets/home/logos_whatsapp-icon.svg";
+const socialTelegram = "/assets/home/logos_telegram.svg";
+// Payment logos from payments directory
+const paymentVisa = "/assets/payments/Visa_logo_wiki.svg";
+const paymentMastercard = "/assets/payments/Mastercard-logo.svg";
+const paymentArca = "/assets/payments/Arca_logo_wiki.svg";
+const paymentIdram = "/assets/payments/Idram_logo_wiki.svg";
+const paymentFastshift = "/assets/payments/Fastshift_logo_wiki.svg";
+const paymentTelcell = "/assets/payments/Telcell_logo_wiki.svg";
 const img4 = "/assets/home/img4.svg";
 // Currency dropdown arrow from Figma (node-id: 92:731)
 const imgCurrencyArrow = "http://localhost:3845/assets/1df18b1c925444bdbdca1d804466e1927b561a35.svg";
@@ -337,16 +341,16 @@ export function Header({
               <p className="leading-[20px]">{t('home.navigation.blog')}</p>
             </div>
             <div
+              onClick={() => router.push('/questions')}
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/questions') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
+            >
+              <p className="leading-[20px]">{t('home.navigation.questions')}</p>
+            </div>
+            <div
               onClick={() => router.push('/contact')}
               className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/contact') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.contactUs')}</p>
-            </div>
-            <div
-              onClick={() => router.push('/faq')}
-              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/faq') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
-            >
-              <p className="leading-[20px]">{t('home.navigation.questions')}</p>
             </div>
           </div>
 
@@ -366,9 +370,20 @@ export function Header({
                   className="w-4 h-4 block"
                   style={{ filter: 'brightness(0) invert(1)' }}
                 />
-                {/* Language / Currency Text */}
+                {/* Language Text */}
                 <span className="text-white text-sm font-medium whitespace-nowrap">
-                  {getLanguageDisplayCode(language)} / {currency}
+                  {getLanguageDisplayCode(language)} /
+                </span>
+                {/* Currency Vector Icon */}
+                <img 
+                  src="/assets/icons/vector12.svg" 
+                  alt="Currency" 
+                  className="w-4 h-4 block"
+                  style={{ filter: 'brightness(0) invert(1)' }}
+                />
+                {/* Currency Text */}
+                <span className="text-white text-sm font-medium whitespace-nowrap">
+                  {currency}
                 </span>
                 {/* Dropdown Arrow */}
                 <svg 
@@ -517,7 +532,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
   return (
     <>
       {/* Footer */}
-      <div className={` z-[9999] relative h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 w-full ${isHomePage ? 'overflow-hidden mt-[5550px] lg:mt-[5550px] md:mt-[5000px] sm:mt-[4000px]' : 'overflow-visible'}`}>
+      <div className={` z-[9999] relative h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 w-full ${isHomePage ? 'overflow-hidden mt-[5380px] lg:mt-[5380px] md:mt-[4820px] sm:mt-[3830px]' : 'overflow-visible'}`}>
         {/* Footer transition gradient - seamless blend with page background (only for non-home pages) */}
         {!isHomePage && (
           <div className="absolute top-0 left-0 right-0 h-[250px] z-[1]"/>
@@ -599,7 +614,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                     <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">{t('home.footer.siteMap.shop')}</p>
                   </div>
                   <div
-                    onClick={() => router.push('/faq')}
+                    onClick={() => router.push('/questions')}
                     className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
                   >
                     <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">{t('home.footer.siteMap.faq')}</p>
@@ -680,28 +695,18 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
           </div>
 
           {/* Social Media Icons */}
-          <div className="absolute content-stretch flex gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center left-[-90px] lg:left-[-90px] md:left-[-120px] sm:left-[-150px] pt-[7px] lg:pt-[7px] md:pt-[8px] sm:pt-[8px] top-[295px] lg:top-[295px] md:top-[332px] sm:top-[332px] w-[300px] lg:w-[300px] md:w-[336px] sm:w-[336px]">
-            <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
-              <div className="relative shrink-0 size-[18px] lg:size-[18px] md:size-[20px] sm:size-[20px]">
-                <img alt="Social" className="block max-w-none size-full" src={imgSvg} onClick={() => window.open('https://www.instagram.com/borbor_aqua/', '_blank')} />
-              </div>
+          <div className="absolute content-stretch flex gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] h-[32px] lg:h-[32px] md:h-[36px] sm:h-[36px] items-center left-[-90px] lg:left-[-90px] md:left-[-120px] sm:left-[-150px] pt-[7px] lg:pt-[7px] md:pt-[8px] sm:pt-[8px] top-[295px] lg:top-[295px] md:top-[332px] sm:top-[332px] w-[300px] lg:w-[300px] md:w-[336px] sm:w-[336px]">
+            <div className="relative shrink-0 size-[28px] lg:size-[28px] md:size-[32px] sm:size-[32px] cursor-pointer hover:opacity-80 transition-opacity">
+              <img alt="Instagram" className="block max-w-none size-full" src={socialInstagram} onClick={() => window.open('https://www.instagram.com/borbor_aqua/', '_blank')} />
             </div>
-            <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
-              <div className="relative shrink-0 size-[18px] lg:size-[18px] md:size-[20px] sm:size-[20px]">
-                <img alt="Social" className="block max-w-none size-full" src={imgSvg1} onClick={() => window.open('https://www.facebook.com/borbor.aqua', '_blank')} />
-              </div>
+            <div className="relative shrink-0 size-[28px] lg:size-[28px] md:size-[32px] sm:size-[32px] cursor-pointer hover:opacity-80 transition-opacity">
+              <img alt="Facebook" className="block max-w-none size-full" src={socialFacebook} onClick={() => window.open('https://www.facebook.com/borbor.aqua', '_blank')} />
             </div>
-            <div className="border border-solid border-white content-stretch flex items-center justify-center p-px relative rounded-[9999px] shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
-              <div className="grid-cols-[max-content] grid-rows-[max-content] inline-grid items-[start] justify-items-[start] leading-[0] relative shrink-0">
-                <div className="col-1 ml-0 mt-0 relative row-1 size-[16px] lg:size-[16px] md:size-[18px] sm:size-[18px] overflow-hidden">
-                  <div className="absolute inset-0">
-                    <img alt="Social" className="block max-w-none size-full" src={imgGroup} />
-                  </div>
-                </div>
-              </div>
+            <div className="relative shrink-0 size-[28px] lg:size-[28px] md:size-[32px] sm:size-[32px] cursor-pointer hover:opacity-80 transition-opacity">
+              <img alt="WhatsApp" className="block max-w-none size-full" src={socialWhatsapp} />
             </div>
-            <div className="relative shrink-0 size-[36px] lg:size-[36px] md:size-[40px] sm:size-[40px]">
-              <img alt="Social" className="block max-w-none size-full" src={imgLink}   />
+            <div className="relative shrink-0 size-[28px] lg:size-[28px] md:size-[32px] sm:size-[32px] cursor-pointer hover:opacity-80 transition-opacity">
+              <img alt="Telegram" className="block max-w-none size-full" src={socialTelegram} />
             </div>
           </div>
         </div>
@@ -730,16 +735,22 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
             <div className="relative shrink-0">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[13px] items-center justify-end relative">
                 <div className="h-[24.998px] relative shrink-0 w-[77.198px]">
-                  <img alt="Payment" className="block max-w-none size-full" src={imgGroup2122} />
+                  <img alt="Visa" className="block max-w-none size-full object-contain" src={paymentVisa} />
                 </div>
                 <div className="h-[29.209px] relative shrink-0 w-[48.946px]">
-                  <img alt="Payment" className="block max-w-none size-full" src={imgGroup2121} />
+                  <img alt="Mastercard" className="block max-w-none size-full object-contain" src={paymentMastercard} />
                 </div>
                 <div className="h-[25.209px] relative shrink-0 w-[98.706px]">
-                  <img alt="Payment" className="block max-w-none size-full" src={imgGroup2124} />
+                  <img alt="Arca" className="block max-w-none size-full object-contain" src={paymentArca} />
                 </div>
                 <div className="h-[25px] relative shrink-0 w-[87.735px]">
-                  <img alt="Payment" className="block max-w-none size-full" src={imgGroup2123} />
+                  <img alt="Idram" className="block max-w-none size-full object-contain" src={paymentIdram} />
+                </div>
+                <div className="h-[25px] relative shrink-0 w-[87.735px]">
+                  <img alt="Fastshift" className="block max-w-none size-full object-contain" src={paymentFastshift} />
+                </div>
+                <div className="h-[25px] relative shrink-0 w-[87.735px]">
+                  <img alt="Telcell" className="block max-w-none size-full object-contain" src={paymentTelcell} />
                 </div>
               </div>
             </div>
@@ -1000,22 +1011,22 @@ export function FeaturedProductCard({
             <div className="w-full h-full bg-gray-300 rounded-lg" />
           )}
         </div>
-        {/* Content Section - Compact layout */}
+        {/* Content Section - Compact layout: title, then category and price on same row below */}
         <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative">
-          <div className="flex items-start justify-between w-full gap-2">
-            <div className="flex flex-col items-start flex-1 min-w-0 pr-2 overflow-hidden">
-              {/* Title - large, bold, dark */}
-              <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[16px] text-black w-full">
-                <p className="leading-[24px] break-words w-full line-clamp-2">{product.title}</p>
-              </div>
-              {/* Category - below title, smaller, lighter gray */}
-              {product.category && (
-                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[12px] text-[#737373] mt-1 w-full tracking-[1.2px] uppercase">
+          <div className="flex flex-col items-start w-full gap-0">
+            {/* Title - large, bold, dark */}
+            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[16px] text-black w-full">
+              <p className="leading-[24px] break-words w-full line-clamp-2">{product.title}</p>
+            </div>
+            {/* Category and price - same row, price on the right */}
+            <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
+              {product.category ? (
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[12px] text-[#737373] tracking-[1.2px] uppercase min-w-0">
                   <p className="leading-[16px] break-words line-clamp-1">{product.category}</p>
                 </div>
+              ) : (
+                <div className="shrink-0" />
               )}
-            </div>
-            <div className="flex flex-col items-start flex-shrink-0">
               <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[16px] whitespace-nowrap">
                 <p className="leading-[22px]">{formatPrice(product.price, currency)}</p>
               </div>
@@ -1061,20 +1072,21 @@ export function FeaturedProductCard({
           <div className="w-full h-full bg-gray-300 rounded-lg" />
         )}
       </div>
-      {/* Content Section - Uniform layout */}
+      {/* Content Section - Title, then category and price on same row (same direction) */}
       <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px]">
-        <div className="flex items-start justify-between w-full gap-2">
-          <div className="flex flex-col items-start flex-1 min-w-0 pr-2 overflow-hidden">
-            <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full">
-              <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full">{product.title}</p>
-            </div>
-            {product.category && (
-              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-gray-500 mt-1 w-full">
+        <div className="flex flex-col items-start w-full gap-0">
+          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full">
+            <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full">{product.title}</p>
+          </div>
+          {/* Category and price - same row, price on the right */}
+          <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
+            {product.category ? (
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-gray-500 min-w-0">
                 <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] break-words">{product.category}</p>
               </div>
+            ) : (
+              <div className="shrink-0" />
             )}
-          </div>
-          <div className="flex flex-col items-start flex-shrink-0">
             <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] whitespace-nowrap">
               <p className="leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px]">{formatPrice(product.price, currency)}</p>
             </div>
