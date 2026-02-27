@@ -53,7 +53,7 @@ export default function SupportPage() {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('support.quickLinks.title')}</h2>
           <div className="space-y-3">
             <Link
-              href="/faq"
+              href="/questions"
               className="block text-blue-600 hover:text-blue-700 hover:underline"
             >
               {t('support.quickLinks.faq')}

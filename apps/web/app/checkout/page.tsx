@@ -1318,10 +1318,10 @@ export default function CheckoutPage() {
                                 className={`w-8 h-8 mx-auto flex items-center justify-center rounded-full text-sm border backdrop-blur-md
                                   ${!isEnabled 
                                     ? 'border-white/30 bg-white/50 text-gray-300 cursor-default' 
-                                    : 'cursor-pointer hover:bg-purple-50'}
+                                    : 'cursor-pointer hover:bg-[#00B7FF]/10'}
                                   ${
                                     isSelected
-                                      ? 'bg-purple-600 text-white border-purple-600 hover:bg-purple-700'
+                                      ? 'bg-[#00B7FF] text-white border-[#00B7FF] hover:bg-[#00A5E6]'
                                       : isEnabled
                                         ? 'text-gray-900 border-white/30 bg-white/50'
                                         : ''
@@ -1358,7 +1358,7 @@ export default function CheckoutPage() {
                               key={slot.id}
                               className={`flex items-center p-3 border-2 rounded-[20px] cursor-pointer backdrop-blur-md ${
                                 deliveryTimeSlot === slot.id
-                                  ? 'border-purple-600 bg-purple-50'
+                                  ? 'border-[#00B7FF] bg-[#00B7FF]/10'
                                   : 'border-white/30 bg-white/50 hover:bg-white/60'
                               }`}
                             >
@@ -1373,7 +1373,7 @@ export default function CheckoutPage() {
                                     e.target.value as DeliveryTimeSlot
                                   )
                                 }
-                                className="mr-3 w-4 h-4 rounded-full bg-white/50 backdrop-blur-md border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 accent-purple-600 disabled:opacity-50"
+                                className="mr-3 w-4 h-4 rounded-full bg-white/50 backdrop-blur-md border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 accent-[#00B7FF] disabled:opacity-50"
                                 disabled={isSubmitting || !deliveryDay}
                               />
                               <div className="flex-1">

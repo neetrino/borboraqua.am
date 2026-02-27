@@ -561,9 +561,20 @@ export function HomePageClient({
                 className="w-4 h-4 block"
                 style={{ filter: 'brightness(0) invert(1)' }}
               />
-              {/* Language / Currency Text */}
+              {/* Language Text */}
               <span className="text-white text-sm font-medium whitespace-nowrap">
-                {getLanguageDisplayCode(language)} / {currency}
+                {getLanguageDisplayCode(language)} /
+              </span>
+              {/* Currency Vector Icon */}
+              <img 
+                src="/assets/icons/vector12.svg" 
+                alt="Currency" 
+                className="w-4 h-4 block"
+                style={{ filter: 'brightness(0) invert(1)' }}
+              />
+              {/* Currency Text */}
+              <span className="text-white text-sm font-medium whitespace-nowrap">
+                {currency}
               </span>
               {/* Dropdown Arrow */}
               <svg 
@@ -718,7 +729,7 @@ export function HomePageClient({
                 </button>
                 <button
                   onClick={() => {
-                    router.push('/faq');
+                    router.push('/questions');
                     setShowMobileMenu(false);
                   }}
                   className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
@@ -971,7 +982,7 @@ export function HomePageClient({
         <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1750px] w-[241px]">
           <button
             onClick={() => router.push('/products')}
-            className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] items-center px-[34px] py-[12px] relative rounded-[9999px] shrink-0 transition-all duration-300 hover:border-[#1ac0fd] hover:bg-[#1ac0fd]/5 hover:shadow-md hover:shadow-[#1ac0fd]/20 hover:scale-105 active:scale-95"
+            className="bg-[#FFFFFF] border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] items-center px-[34px] py-[12px] relative rounded-[9999px] shrink-0 transition-all duration-300 hover:border-[#1ac0fd] hover:bg-[#1ac0fd]/5 hover:shadow-md hover:shadow-[#1ac0fd]/20 hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#0f172a] text-[16px] text-center whitespace-nowrap">
               <p className="leading-[24px]">{t('home.featuredProducts.viewAllProducts')}</p>
@@ -1198,7 +1209,7 @@ export function HomePageClient({
       {/* Desktop Version - Only for extra large screens (zoom-independent) */}
       <div
         ref={containerRef}
-        className={`${isDesktopScreen ? 'block' : 'hidden xl:block'} bg-white relative w-full mx-auto h-[6170px] home-page-container overflow-x-hidden overflow-y-hidden`}
+        className={`${isDesktopScreen ? 'block' : 'hidden xl:block'} bg-white relative w-full mx-auto h-[6000px] home-page-container overflow-x-hidden overflow-y-hidden`}
       >
       <Header
         router={router}
@@ -1438,7 +1449,7 @@ export function HomePageClient({
           <div className="absolute content-stretch flex flex-col items-center left-[20px] lg:left-[20px] md:left-[16px] sm:left-[12px] right-[20px] lg:right-[20px] md:right-[16px] sm:right-[12px] top-[560px] lg:top-[560px] md:top-[380px] sm:top-[330px]">
             <div
               onClick={() => router.push('/products')}
-              className="border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[7px] lg:gap-[7px] md:gap-[6px] sm:gap-[4px] items-center px-[30px] lg:px-[30px] md:px-[28px] sm:px-[20px] py-[10px] lg:py-[10px] md:py-[10px] sm:py-[8px] relative rounded-[9999px] shrink-0 cursor-pointer hover:border-[#00d1ff] hover:bg-[#00d1ff]/5 transition-all"
+              className="bg-[#FFFFFF] border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[7px] lg:gap-[7px] md:gap-[6px] sm:gap-[4px] items-center px-[30px] lg:px-[30px] md:px-[28px] sm:px-[20px] py-[10px] lg:py-[10px] md:py-[10px] sm:py-[8px] relative rounded-[9999px] shrink-0 cursor-pointer hover:border-[#00d1ff] hover:bg-[#00d1ff]/5 transition-all"
             >
               <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#0f172a] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center whitespace-nowrap">
                 <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{t('home.featuredProducts.viewAllProducts')}</p>
@@ -1727,7 +1738,7 @@ export function HomePageClient({
               />
             </div>
           </div>
-          {/* Pagination Dots */}
+          {/* Pagination Dots - visible by default (gray when inactive) */}
           <div className="absolute content-stretch flex h-[39px] lg:h-[49px] items-center justify-center left-[24px] pt-[26px] lg:pt-[32px] right-[24px] top-[162px] lg:top-[202px] z-[100]">
             <div className="flex items-center gap-[10px] lg:gap-[12px] relative shrink-0">
               <button
@@ -1736,7 +1747,7 @@ export function HomePageClient({
                 className={`rounded-[9999px] transition-all duration-300 ${
                   trustedByIndex === 0
                     ? 'bg-[#00d1ff] h-[8px] w-[19px] lg:h-[10px] lg:w-[24px]'
-                    : 'bg-white size-[8px] lg:size-[10px] hover:bg-[#00d1ff]/50 cursor-pointer'
+                    : 'bg-gray-400 size-[8px] lg:size-[10px] hover:bg-[#00d1ff]/60 cursor-pointer'
                 }`}
                 aria-label="Show first partner"
               />
@@ -1746,7 +1757,7 @@ export function HomePageClient({
                 className={`rounded-[9999px] transition-all duration-300 ${
                   trustedByIndex === 1
                     ? 'bg-[#00d1ff] h-[8px] w-[19px] lg:h-[10px] lg:w-[24px]'
-                    : 'bg-white size-[8px] lg:size-[10px] hover:bg-[#00d1ff]/50 cursor-pointer'
+                    : 'bg-gray-400 size-[8px] lg:size-[10px] hover:bg-[#00d1ff]/60 cursor-pointer'
                 }`}
                 aria-label="Show second partner"
               />
@@ -1756,7 +1767,7 @@ export function HomePageClient({
                 className={`rounded-[9999px] transition-all duration-300 ${
                   trustedByIndex === 2
                     ? 'bg-[#00d1ff] h-[8px] w-[19px] lg:h-[10px] lg:w-[24px]'
-                    : 'bg-white size-[8px] lg:size-[10px] hover:bg-[#00d1ff]/50 cursor-pointer'
+                    : 'bg-gray-400 size-[8px] lg:size-[10px] hover:bg-[#00d1ff]/60 cursor-pointer'
                 }`}
                 aria-label={t('home.trustedBy.showThirdPartner')}
               />
@@ -1878,15 +1889,15 @@ export function HomePageClient({
           <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[65.4%_0_16.48%_57.22%] justify-center leading-[0] text-[#0f172a] text-[0px] tracking-[-0.9px] uppercase whitespace-nowrap">
             <p className="leading-[40px] mb-0 text-[53px]">{t('home.waterEnergySection.pure')}</p>
             <p className="leading-[40px] mb-0 text-[53px]">{t('home.waterEnergySection.energy')}</p>
-            <p className="font-['Montserrat',sans-serif] font-normal leading-[16px] text-[13px]">{t('home.waterEnergySection.subtitle')}</p>
+            <p className="font-['Montserrat',sans-serif] font-normal leading-[16px] text-[13px] capitalize tracking-[0.05em]">{t('home.waterEnergySection.subtitle')}</p> 
           </div>
           <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[29.76%_62.8%_62.88%_0] justify-center leading-[0] text-[#09c1ff] text-[53px] tracking-[-0.9px] uppercase whitespace-nowrap">
             <p className="leading-[40px]">{t('home.waterEnergySection.balance')}</p>
           </div>
         </div>
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-normal inset-[22.39%_62.8%_72.01%_7.99%] justify-center leading-[15px] text-[#0f172a] text-[13px] text-right tracking-[-0.9px] uppercase whitespace-nowrap">
-          <p className="mb-0">{t('home.waterEnergySection.descriptionLine1')}</p>
-          <p className="mb-0">{t('home.waterEnergySection.descriptionLine2')}</p>
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-normal inset-[22.39%_62.8%_72.01%_7.99%] justify-center leading-[15px] text-[#0f172a] text-[13px] text-right tracking-[0.05em] whitespace-nowrap">
+          <p className="mb-0 capitalize">{t('home.waterEnergySection.descriptionLine1')}</p>
+          <p className="mb-0 capitalize">{t('home.waterEnergySection.descriptionLine2')}</p>
         </div>
       </div>
 

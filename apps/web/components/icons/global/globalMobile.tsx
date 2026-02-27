@@ -168,9 +168,20 @@ export function MobileHeader({
             className="w-4 h-4 block"
             style={{ filter: 'brightness(0) invert(1)' }}
           />
-          {/* Language / Currency Text */}
+          {/* Language Text */}
           <span className="text-white text-sm font-medium whitespace-nowrap">
-            {getLanguageDisplayCode(language)} / {currency}
+            {getLanguageDisplayCode(language)} /
+          </span>
+          {/* Currency Vector Icon */}
+          <img 
+            src="/assets/icons/vector12.svg" 
+            alt="Currency" 
+            className="w-4 h-4 block"
+            style={{ filter: 'brightness(0) invert(1)' }}
+          />
+          {/* Currency Text */}
+          <span className="text-white text-sm font-medium whitespace-nowrap">
+            {currency}
           </span>
           {/* Dropdown Arrow */}
           <svg 
@@ -341,21 +352,21 @@ export function MobileMenu({
           </button>
           <button
             onClick={() => {
+              router.push('/questions');
+              setShowMobileMenu(false);
+            }}
+            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
+          >
+            {t('home.navigation.questions')}
+          </button>
+          <button
+            onClick={() => {
               router.push('/contact');
               setShowMobileMenu(false);
             }}
             className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
             {t('home.navigation.contactUs')}
-          </button>
-          <button
-            onClick={() => {
-              router.push('/faq');
-              setShowMobileMenu(false);
-            }}
-            className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
-          >
-            {t('home.navigation.questions')}
           </button>
         </nav>
       </div>
@@ -794,9 +805,20 @@ export function TopHeaderBar({
               className="w-[19px] h-[19px] block"
               style={{ filter: 'brightness(0) invert(1)' }}
             />
-            {/* Language / Currency Text */}
+            {/* Language Text */}
             <span className="text-white text-[16px] leading-[18px] font-bold whitespace-nowrap">
-              {getLanguageDisplayCode(language)} / {currency}
+              {getLanguageDisplayCode(language)} /
+            </span>
+            {/* Currency Vector Icon */}
+            <img 
+              src="/assets/icons/vector12.svg" 
+              alt="Currency" 
+              className="w-[19px] h-[19px] block"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
+            {/* Currency Text */}
+            <span className="text-white text-[16px] leading-[18px] font-bold whitespace-nowrap">
+              {currency}
             </span>
             {/* Dropdown Arrow */}
             <svg 

@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../lib/i18n-client';
 
 type SortOption = 'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'name-desc';
-type PriceFilter = 'all' | 'low' | 'high';
 
 interface ProductsHeroProps {
   total?: number;
@@ -16,7 +15,6 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
   const searchParams = useSearchParams();
   const { t } = useTranslation();
   const [sortBy, setSortBy] = useState<SortOption>('default');
-  const [priceFilter, setPriceFilter] = useState<PriceFilter>('all');
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -29,13 +27,8 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
   // Load from URL params
   useEffect(() => {
     const sortParam = searchParams.get('sort') as SortOption;
-    const priceParam = searchParams.get('price') as PriceFilter;
-
     if (sortParam && sortOptions.some(opt => opt.value === sortParam)) {
       setSortBy(sortParam);
-    }
-    if (priceParam && ['all', 'low', 'high'].includes(priceParam)) {
-      setPriceFilter(priceParam);
     }
   }, [searchParams]);
 
@@ -68,29 +61,6 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
     router.push(`/products?${params.toString()}`);
   };
 
-  const handlePriceFilterChange = (filter: PriceFilter) => {
-    setPriceFilter(filter);
-    
-    const params = new URLSearchParams(searchParams.toString());
-    if (filter === 'all') {
-      params.delete('price');
-    } else {
-      params.set('price', filter);
-      // Apply sort based on filter
-      if (filter === 'low') {
-        params.set('sort', 'price-asc');
-        setSortBy('price-asc');
-      } else if (filter === 'high') {
-        params.set('sort', 'price-desc');
-        setSortBy('price-desc');
-      }
-    }
-    params.delete('page');
-    
-    router.push(`/products?${params.toString()}`);
-  };
-
-
   return (
     <div className="relative w-full" data-node-id="4:1680">
       {/* Hero Section Container - Compact Layout */}
@@ -104,60 +74,7 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
         
         {/* Right: Filters Container */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto sm:ml-auto">
-        {/* Price Filter Tabs */}
-        <div className="relative flex-shrink-0 w-full sm:w-auto" data-name="Tab" data-node-id="4:1706">
-          <div className="bg-[rgba(250,254,255,0.33)] h-9 overflow-hidden rounded-full w-full sm:w-72 md:w-80 relative min-w-0">
-            {/* Active tab background */}
-            <div
-              className="absolute bg-[#00d1ff] rounded-full transition-all duration-300"
-              style={{
-                left: priceFilter === 'all' ? '1%' : priceFilter === 'low' ? '30%' : '63%',
-                right: priceFilter === 'all' ? '70%' : priceFilter === 'low' ? '37%' : '3%',
-                top: '7.74%',
-                bottom: '8.93%',
-              }}
-              data-name="Rectangle"
-              data-node-id="4:1707"
-            />
-            
-            {/* Tab buttons */}
-            <div className="relative h-full flex items-center">
-              <button
-                onClick={() => handlePriceFilterChange('all')}
-                className="absolute left-[9.16%] right-[84.91%] font-['Montserrat',sans-serif] font-semibold text-xs text-center top-1/2 -translate-y-1/2 z-10 whitespace-nowrap"
-                data-node-id="4:1708"
-              >
-                <span className={priceFilter === 'all' ? 'text-white' : 'text-[#1b1f21]'}>
-                  {t('products.hero.all')}
-                </span>
-              </button>
-              
-              <button
-                onClick={() => handlePriceFilterChange('low')}
-                className="absolute left-[33.69%] right-[44.47%] font-['Montserrat',sans-serif] font-semibold text-xs text-center top-1/2 -translate-y-1/2 z-10 whitespace-nowrap"
-                data-node-id="4:1709"
-              >
-                <span className={priceFilter === 'low' ? 'text-white' : 'text-[#1b1f21]'}>
-                  <span className="hidden sm:inline whitespace-nowrap">{t('products.hero.lowPrice')}</span>
-                  <span className="sm:hidden whitespace-nowrap">{t('products.hero.low')}</span>
-                </span>
-              </button>
-              
-              <button
-                onClick={() => handlePriceFilterChange('high')}
-                className="absolute left-[66.58%] right-[10.24%] font-['Montserrat',sans-serif] font-semibold text-xs text-center top-1/2 -translate-y-1/2 z-10 whitespace-nowrap"
-                data-node-id="4:1710"
-              >
-                <span className={priceFilter === 'high' ? 'text-white' : 'text-[#1b1f21]'}>
-                  <span className="hidden sm:inline whitespace-nowrap">{t('products.hero.highPrice')}</span>
-                  <span className="sm:hidden whitespace-nowrap">{t('products.hero.high')}</span>
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Sort by dropdown */}
+        {/* Sort by dropdown */}
         <div className="flex items-center w-full sm:w-auto" data-name="Sort by" data-node-id="4:1682">
           <div className="relative w-full sm:w-auto" ref={sortDropdownRef}>
             <button
@@ -167,7 +84,7 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
               data-node-id="4:1683"
             >
               <span className="font-['Montserrat',sans-serif] font-semibold text-xs text-[rgba(0,0,0,0.87)]">
-                {sortOptions.find(opt => opt.value === sortBy)?.label || (sortBy === 'price-asc' || sortBy === 'price-desc' ? t('products.hero.default') : t('products.hero.sortBy'))}
+                {sortOptions.find(opt => opt.value === sortBy)?.label ?? t('products.hero.sortBy')}
               </span>
               <svg
                 width="14"

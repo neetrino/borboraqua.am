@@ -104,7 +104,7 @@ interface Product {
 
 
 // Reserved routes that should not be treated as product slugs
-const RESERVED_ROUTES = ['admin', 'login', 'register', 'cart', 'checkout', 'profile', 'orders', 'categories', 'products', 'about', 'contact', 'delivery', 'shipping', 'returns', 'faq', 'support', 'stores', 'privacy', 'terms'];
+const RESERVED_ROUTES = ['admin', 'login', 'register', 'cart', 'checkout', 'profile', 'orders', 'categories', 'products', 'about', 'contact', 'delivery', 'shipping', 'returns', 'faq', 'questions', 'support', 'stores', 'privacy', 'terms'];
 
 
 export default function ProductPage({ params }: ProductPageProps) {
