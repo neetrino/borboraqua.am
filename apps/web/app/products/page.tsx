@@ -23,6 +23,9 @@ interface Product {
   compareAtPrice: number | null;
   image: string | null;
   inStock: boolean;
+  minimumOrderQuantity?: number;
+  orderQuantityIncrement?: number;
+  defaultVariantId?: string | null;
   brand: {
     id: string;
     name: string;
@@ -61,6 +64,9 @@ function trimProductForGrid(p: {
   originalPrice?: number | null;
   image?: string | null;
   inStock?: boolean;
+  minimumOrderQuantity?: number;
+  orderQuantityIncrement?: number;
+  defaultVariantId?: string | null;
   brand?: { id: string; name: string } | null;
   colors?: Array<{ value: string; imageUrl?: string | null; colors?: string[] | null }>;
   labels?: unknown[];
@@ -76,6 +82,9 @@ function trimProductForGrid(p: {
     compareAtPrice: p.compareAtPrice ?? p.originalPrice ?? null,
     image: p.image ?? null,
     inStock: p.inStock ?? true,
+    minimumOrderQuantity: p.minimumOrderQuantity ?? 1,
+    orderQuantityIncrement: p.orderQuantityIncrement ?? 1,
+    defaultVariantId: p.defaultVariantId ?? null,
     brand: p.brand ?? null,
     labels: (p.labels ?? []) as Product['labels'],
     colors,
@@ -118,17 +127,6 @@ async function getProducts(
         if (!raw.data || !Array.isArray(raw.data)) {
           return { data: [], meta: { total: 0, page: 1, limit: 24, totalPages: 0 } };
         }
-        
-        // Debug: log first product to see if category is present
-        if (process.env.NODE_ENV === 'development' && raw.data.length > 0) {
-          console.log('[SHOP PAGE] First product from API:', {
-            id: raw.data[0].id,
-            title: raw.data[0].title,
-            category: raw.data[0].category,
-            hasCategory: !!raw.data[0].category,
-          });
-        }
-        
         return {
           data: raw.data.map(trimProductForGrid),
           meta: raw.meta,

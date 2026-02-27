@@ -241,6 +241,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     category: product.category ?? undefined,
     minimumOrderQuantity: product.minimumOrderQuantity,
     orderQuantityIncrement: product.orderQuantityIncrement,
+    defaultVariantId: product.defaultVariantId ?? null,
     price: product.price,
     image: product.image,
     inStock: product.inStock,

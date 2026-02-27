@@ -616,15 +616,6 @@ export default function CheckoutPage() {
   async function fetchCart() {
     try {
       setLoading(true);
-      
-      // If user is logged in, fetch from API
-      if (isLoggedIn) {
-        const response = await apiClient.get<{ cart: Cart }>('/api/v1/cart');
-        setCart(response.cart);
-        return;
-      }
-
-      // If guest, load from localStorage
       if (typeof window === 'undefined') {
         setCart(null);
         setLoading(false);
@@ -652,25 +643,27 @@ export default function CheckoutPage() {
             const productData = await apiClient.get<{
               id: string;
               slug: string;
-              translations?: Array<{ title: string; locale: string }>;
+              title?: string;
+              translations?: Array<{ title?: string; slug?: string; locale: string }>;
               media?: Array<{ url?: string; src?: string } | string>;
               variants?: Array<{
-                _id: string;
+                _id?: unknown;
                 id: string;
                 sku: string;
                 price: number;
               }>;
-            }>(`/api/v1/products/${item.productSlug}`);
+            }>(`/api/v1/products/${item.productSlug}`, {
+              params: { lang: language }
+            });
 
             const variant = productData.variants?.find(v => 
-              (v._id?.toString() || v.id) === item.variantId
+              (v._id != null ? String(v._id) : v.id) === item.variantId
             ) || productData.variants?.[0];
 
             if (!variant) {
               return { item: null, shouldRemove: true };
             }
 
-            // Get translation for current language, fallback to first available
             const translation = productData.translations?.find((t: { locale: string }) => t.locale === language) 
               || productData.translations?.[0];
             const imageUrl = productData.media?.[0] 
@@ -679,16 +672,19 @@ export default function CheckoutPage() {
                   : productData.media[0].url || productData.media[0].src)
               : null;
 
+            const productTitle = translation?.title || productData.translations?.[0]?.title || productData.title || '';
+            const productSlug = translation?.slug || productData.translations?.[0]?.slug || productData.slug || item.productSlug || '';
+
             return {
               item: {
                 id: `${item.productId}-${item.variantId}-${index}`,
                 variant: {
-                  id: variant._id?.toString() || variant.id,
+                  id: variant._id != null ? String(variant._id) : variant.id,
                   sku: variant.sku || '',
                   product: {
                     id: productData.id,
-                    title: translation?.title || 'Product',
-                    slug: productData.slug,
+                    title: productTitle,
+                    slug: productSlug,
                     image: imageUrl,
                   },
                 },
@@ -830,17 +826,22 @@ export default function CheckoutPage() {
       }
 
       let cartId = cart.id;
-      let items = undefined;
+      let items: Array<{ productId: string; variantId: string; quantity: number }> | undefined;
 
-      // If guest checkout, send items directly
-      if (!isLoggedIn && cart.id === 'guest-cart') {
-        console.log('[Checkout] Guest checkout - sending items directly...');
+      // When cart is guest-cart (from localStorage), always send items — for both guest and logged-in users
+      // (logged-in user may still have guest cart if they added items before login)
+      if (cart.id === 'guest-cart' && cart.items?.length) {
         items = cart.items.map(item => ({
           productId: item.variant.product.id,
           variantId: item.variant.id,
           quantity: item.quantity,
         }));
-        cartId = 'guest-cart'; // Keep as guest-cart for API to recognize
+        cartId = 'guest-cart';
+      }
+
+      if (cart.id === 'guest-cart' && (!items || items.length === 0)) {
+        setError(t('checkout.errors.cartEmpty'));
+        return;
       }
 
       // Prepare shipping address (always delivery): address, region (marz), regionId, phone

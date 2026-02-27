@@ -1295,32 +1295,16 @@ export default function ProductPage({ params }: ProductPageProps) {
 
     const checkCart = async () => {
       try {
-        if (!isLoggedIn) {
-          // Guest cart - check localStorage
-          if (typeof window === 'undefined') {
-            setIsVariantInCart(false);
-            return;
-          }
-          
-          const stored = localStorage.getItem('shop_cart_guest');
-          if (stored) {
-            const guestCart: Array<{ variantId: string }> = JSON.parse(stored);
-            const isInCart = guestCart.some((item) => item.variantId === currentVariant.id);
-            setIsVariantInCart(isInCart);
-            console.log('🛒 [CART CHECK] Guest cart - variant in cart:', isInCart, currentVariant.id);
-          } else {
-            setIsVariantInCart(false);
-          }
+        if (typeof window === 'undefined') {
+          setIsVariantInCart(false);
+          return;
+        }
+        const stored = localStorage.getItem('shop_cart_guest');
+        if (stored) {
+          const guestCart: Array<{ variantId: string }> = JSON.parse(stored);
+          setIsVariantInCart(guestCart.some((item) => item.variantId === currentVariant.id));
         } else {
-          // Logged-in user - check API
-          const currentLang = getStoredLanguage();
-          const response = await apiClient.get<{ cart: { items: Array<{ variant: { id: string } }> } }>('/api/v1/cart', {
-            params: { lang: currentLang }
-          });
-          
-          const isInCart = response.cart?.items?.some((item) => item.variant?.id === currentVariant.id) || false;
-          setIsVariantInCart(isInCart);
-          console.log('🛒 [CART CHECK] Logged-in cart - variant in cart:', isInCart, currentVariant.id);
+          setIsVariantInCart(false);
         }
       } catch (error) {
         console.error('❌ [CART CHECK] Error checking cart:', error);
@@ -1339,7 +1323,7 @@ export default function ProductPage({ params }: ProductPageProps) {
       window.addEventListener('cart-updated', handleCartUpdate);
       return () => window.removeEventListener('cart-updated', handleCartUpdate);
     }
-  }, [currentVariant?.id, isLoggedIn]);
+  }, [currentVariant?.id]);
   
   const price = currentVariant?.price || 0;
   const originalPrice = currentVariant?.originalPrice;

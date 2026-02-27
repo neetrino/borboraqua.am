@@ -8,6 +8,8 @@
  * Otherwise, use empty string to make relative requests to Next.js API routes.
  */
 
+import { logger } from './logger';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 const AUTH_TOKEN_KEY = 'auth_token';
 
@@ -125,7 +127,7 @@ class ApiClient {
       return url.toString();
     } catch (error) {
       // Fallback: manual URL construction if URL constructor fails
-      console.error('❌ [API CLIENT] URL construction error:', error, { baseUrl, endpoint, fullUrl });
+      logger.error('❌ [API CLIENT] URL construction error:', error, { baseUrl, endpoint, fullUrl });
       
       let url = fullUrl;
       if (params && Object.keys(params).length > 0) {
@@ -182,7 +184,7 @@ class ApiClient {
   private handleUnauthorized() {
     if (typeof window === 'undefined') return;
     
-    console.warn('⚠️ [API CLIENT] Unauthorized (401) - clearing auth data');
+    logger.warn('⚠️ [API CLIENT] Unauthorized (401) - clearing auth data');
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
     
@@ -203,7 +205,7 @@ class ApiClient {
     // Reduced timeout for faster failure - 10 seconds for product details, 15 seconds for other requests
     const timeout = endpoint.includes('/products/') ? 10000 : 15000;
     
-    console.log('🌐 [API CLIENT] GET request:', { url, endpoint, baseUrl: this.baseUrl });
+    logger.log('🌐 [API CLIENT] GET request:', { url, endpoint, baseUrl: this.baseUrl });
     
     let response: Response;
     try {
@@ -230,19 +232,19 @@ class ApiClient {
       
       // Լոգավորում ենք response status-ը անվտանգ կերպով
       try {
-        console.log('🌐 [API CLIENT] GET response status:', response.status, response.statusText || '');
+        logger.log('🌐 [API CLIENT] GET response status:', response.status, response.statusText || '');
       } catch (logError) {
         // Եթե console.log-ը ձախողվի, շարունակում ենք
-        console.warn('⚠️ [API CLIENT] Failed to log response status');
+        logger.warn('⚠️ [API CLIENT] Failed to log response status');
       }
     } catch (networkError: any) {
       // Ստուգում ենք timeout սխալը
       if (networkError.message?.includes('timeout') || networkError.message?.includes('Request timeout')) {
-        console.error('⏱️ [API CLIENT] Request timeout:', networkError.message);
+        logger.error('⏱️ [API CLIENT] Request timeout:', networkError.message);
         throw networkError;
       }
       
-      console.error('❌ [API CLIENT] Network error during fetch:', networkError);
+      logger.error('❌ [API CLIENT] Network error during fetch:', networkError);
       
       // Ստուգում ենք, արդյոք սա կապի մերժման սխալ է
       const isConnectionRefused = networkError.message?.includes('Failed to fetch') || 
@@ -264,7 +266,7 @@ class ApiClient {
             `1. Համոզվեք, որ Next.js dev server-ը գործարկված է (npm run dev)\n` +
             `2. Ստուգեք, որ API route-ը գոյություն ունի: ${url}\n\n`;
         
-        console.error('❌ [API CLIENT]', errorMessage);
+        logger.error('❌ [API CLIENT]', errorMessage);
         throw new Error(errorMessage);
       }
       
@@ -275,7 +277,7 @@ class ApiClient {
       // Retry on 429 (Too Many Requests) errors
       if (response.status === 429 && retryCount < maxRetries) {
         const delay = retryDelay * (retryCount + 1); // Exponential backoff
-        console.warn(`⚠️ [API CLIENT] Rate limited, retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
+        logger.warn(`⚠️ [API CLIENT] Rate limited, retrying in ${delay}ms... (attempt ${retryCount + 1}/${maxRetries})`);
         await new Promise(resolve => setTimeout(resolve, delay));
         return this.get<T>(endpoint, options, retryCount + 1);
       }
@@ -287,11 +289,11 @@ class ApiClient {
       
       // Log 404 as warning (expected situation - resource doesn't exist)
       if (this.shouldLogWarning(response.status)) {
-        console.warn(`⚠️ [API CLIENT] GET Not Found (404): ${url}`);
+        logger.warn(`⚠️ [API CLIENT] GET Not Found (404): ${url}`);
       }
       // Log other errors (except 401 which is expected)
       else if (this.shouldLogError(response.status)) {
-        console.error(`❌ [API CLIENT] GET Error: ${response.status} ${response.statusText}`, {
+        logger.error(`❌ [API CLIENT] GET Error: ${response.status} ${response.statusText}`, {
           url,
           status: response.status,
           statusText: response.statusText,
@@ -314,30 +316,30 @@ class ApiClient {
             errorData = JSON.parse(errorText);
             // Log 404 as warning, other errors (except 401) as error
             if (isNotFound) {
-              console.warn('⚠️ [API CLIENT] GET Not Found response:', errorData);
+              logger.warn('⚠️ [API CLIENT] GET Not Found response:', errorData);
             } else if (!isUnauthorized) {
-              console.error('❌ [API CLIENT] GET Error response (JSON):', errorData);
+              logger.error('❌ [API CLIENT] GET Error response (JSON):', errorData);
             }
           } catch (parseErr) {
             // If JSON parse fails, use text as is
             if (isNotFound) {
-              console.warn('⚠️ [API CLIENT] GET Not Found response (text):', errorText);
+              logger.warn('⚠️ [API CLIENT] GET Not Found response (text):', errorText);
             } else if (!isUnauthorized) {
-              console.error('❌ [API CLIENT] GET Error response (text):', errorText);
+              logger.error('❌ [API CLIENT] GET Error response (text):', errorText);
             }
           }
         } else if (errorText) {
           if (isNotFound) {
-            console.warn('⚠️ [API CLIENT] GET Not Found response (text):', errorText);
+            logger.warn('⚠️ [API CLIENT] GET Not Found response (text):', errorText);
           } else if (!isUnauthorized) {
-            console.error('❌ [API CLIENT] GET Error response (text):', errorText);
+            logger.error('❌ [API CLIENT] GET Error response (text):', errorText);
           }
         }
       } catch (e) {
         if (isNotFound) {
-          console.warn('⚠️ [API CLIENT] Failed to read 404 response:', e);
+          logger.warn('⚠️ [API CLIENT] Failed to read 404 response:', e);
         } else if (!isUnauthorized) {
-          console.error('❌ [API CLIENT] Failed to read error response:', e);
+          logger.error('❌ [API CLIENT] Failed to read error response:', e);
         }
       }
       
@@ -352,11 +354,11 @@ class ApiClient {
       }
 
       const contentType = response.headers?.get('content-type');
-      console.log('🌐 [API CLIENT] Response content-type:', contentType);
+      logger.log('🌐 [API CLIENT] Response content-type:', contentType);
       
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
-        console.error('❌ [API CLIENT] GET Non-JSON response:', {
+        logger.error('❌ [API CLIENT] GET Non-JSON response:', {
           contentType,
           status: response.status,
           text: text?.substring(0, 200) || '', // First 200 chars
@@ -365,17 +367,17 @@ class ApiClient {
       }
       
       const jsonData = await response.json();
-      console.log('✅ [API CLIENT] GET Response parsed successfully');
+      logger.log('✅ [API CLIENT] GET Response parsed successfully');
       
       if (!jsonData) {
-        console.warn('⚠️ [API CLIENT] Response data is null or undefined');
+        logger.warn('⚠️ [API CLIENT] Response data is null or undefined');
         return null as T;
       }
       
       return jsonData;
     } catch (parseError: any) {
-      console.error('❌ [API CLIENT] GET JSON parse error:', parseError);
-      console.error('❌ [API CLIENT] Parse error stack:', parseError.stack);
+      logger.error('❌ [API CLIENT] GET JSON parse error:', parseError);
+      logger.error('❌ [API CLIENT] Parse error stack:', parseError.stack);
       if (parseError.message && parseError.message.includes('Expected JSON')) {
         throw parseError;
       }
@@ -387,7 +389,7 @@ class ApiClient {
     try {
       const url = this.buildUrl(endpoint, options?.params);
       
-      console.log('📤 [API CLIENT] POST request:', { url, data: data ? 'provided' : 'none' });
+      logger.log('📤 [API CLIENT] POST request:', { url, data: data ? 'provided' : 'none' });
       
       // Add timeout for POST requests - 10 seconds for cart operations, 15 seconds for others
       const timeout = endpoint.includes('/cart/') ? 10000 : 15000;
@@ -412,7 +414,7 @@ class ApiClient {
         throw fetchError;
       }
 
-      console.log('📥 [API CLIENT] Response status:', response.status, response.statusText);
+      logger.log('📥 [API CLIENT] Response status:', response.status, response.statusText);
 
       if (!response.ok) {
         let errorText = '';
@@ -433,20 +435,20 @@ class ApiClient {
             try {
               errorData = JSON.parse(errorText);
               if (this.shouldLogError(response.status)) {
-                console.error('❌ [API CLIENT] POST Error response (JSON):', errorData);
+                logger.error('❌ [API CLIENT] POST Error response (JSON):', errorData);
               }
             } catch (parseErr) {
               // If JSON parse fails, use text as is
               if (this.shouldLogError(response.status)) {
-                console.error('❌ [API CLIENT] POST Error response (text):', errorText);
+                logger.error('❌ [API CLIENT] POST Error response (text):', errorText);
               }
             }
           } else if (errorText && this.shouldLogError(response.status)) {
-            console.error('❌ [API CLIENT] POST Error response (text):', errorText);
+            logger.error('❌ [API CLIENT] POST Error response (text):', errorText);
           }
         } catch (e) {
           if (this.shouldLogError(response.status)) {
-            console.error('❌ [API CLIENT] Failed to read error response:', e);
+            logger.error('❌ [API CLIENT] Failed to read error response:', e);
           }
         }
         
@@ -457,16 +459,16 @@ class ApiClient {
 
       try {
         const jsonData = await response.json();
-        console.log('✅ [API CLIENT] Response parsed successfully');
+        logger.log('✅ [API CLIENT] Response parsed successfully');
         return jsonData;
       } catch (parseError) {
-        console.error('❌ [API CLIENT] JSON parse error:', parseError);
+        logger.error('❌ [API CLIENT] JSON parse error:', parseError);
         throw new Error(`Failed to parse response: ${parseError}`);
       }
     } catch (error: any) {
       // Handle network errors, URL construction errors, etc.
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        console.error('❌ [API CLIENT] Network error:', error);
+        logger.error('❌ [API CLIENT] Network error:', error);
         const errorMsg = this.baseUrl
           ? `Network error: Unable to connect to API. Please check if the API server is running at ${this.baseUrl}`
           : `Network error: Unable to connect to Next.js API routes. Please check if the Next.js server is running.`;
@@ -484,7 +486,7 @@ class ApiClient {
       }
       
       // Otherwise wrap in a generic error
-      console.error('❌ [API CLIENT] POST request failed:', error);
+      logger.error('❌ [API CLIENT] POST request failed:', error);
       throw new Error(`API request failed: ${error.message || String(error)}`);
     }
   }
@@ -492,7 +494,7 @@ class ApiClient {
   async put<T>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
     const url = this.buildUrl(endpoint, options?.params);
     
-    console.log('📤 [API CLIENT] PUT request:', { url, endpoint, hasData: !!data });
+    logger.log('📤 [API CLIENT] PUT request:', { url, endpoint, hasData: !!data });
     
     const response = await fetch(url, {
       method: 'PUT',
@@ -501,7 +503,7 @@ class ApiClient {
       ...options,
     });
 
-    console.log('📥 [API CLIENT] PUT response status:', response.status, response.statusText);
+    logger.log('📥 [API CLIENT] PUT response status:', response.status, response.statusText);
 
     if (!response.ok) {
       let errorText = '';
@@ -511,11 +513,11 @@ class ApiClient {
       
       // Log 404 as warning (expected situation - resource doesn't exist)
       if (this.shouldLogWarning(response.status)) {
-        console.warn(`⚠️ [API CLIENT] PUT Not Found (404): ${url}`);
+        logger.warn(`⚠️ [API CLIENT] PUT Not Found (404): ${url}`);
       }
       // Log other errors (except 401 which is expected)
       else if (this.shouldLogError(response.status)) {
-        console.error(`❌ [API CLIENT] PUT Error: ${response.status} ${response.statusText}`, {
+        logger.error(`❌ [API CLIENT] PUT Error: ${response.status} ${response.statusText}`, {
           url,
           status: response.status,
           statusText: response.statusText,
@@ -537,9 +539,9 @@ class ApiClient {
             errorData = JSON.parse(errorText);
             // Log 404 as warning, other errors (except 401) as error
             if (isNotFound) {
-              console.warn('⚠️ [API CLIENT] PUT Not Found response:', errorData);
+              logger.warn('⚠️ [API CLIENT] PUT Not Found response:', errorData);
             } else if (!isUnauthorized) {
-              console.error('❌ [API CLIENT] PUT Error response (JSON):', {
+              logger.error('❌ [API CLIENT] PUT Error response (JSON):', {
                 url,
                 status: response.status,
                 statusText: response.statusText,
@@ -557,9 +559,9 @@ class ApiClient {
           } catch (parseErr) {
             // If JSON parse fails, use text as is
             if (isNotFound) {
-              console.warn('⚠️ [API CLIENT] PUT Not Found response (text):', errorText);
+              logger.warn('⚠️ [API CLIENT] PUT Not Found response (text):', errorText);
             } else if (!isUnauthorized) {
-              console.error('❌ [API CLIENT] PUT Error response (text):', {
+              logger.error('❌ [API CLIENT] PUT Error response (text):', {
                 url,
                 status: response.status,
                 statusText: response.statusText,
@@ -569,9 +571,9 @@ class ApiClient {
           }
         } else if (errorText) {
           if (isNotFound) {
-            console.warn('⚠️ [API CLIENT] PUT Not Found response (text):', errorText);
+            logger.warn('⚠️ [API CLIENT] PUT Not Found response (text):', errorText);
           } else if (!isUnauthorized) {
-            console.error('❌ [API CLIENT] PUT Error response (text):', {
+            logger.error('❌ [API CLIENT] PUT Error response (text):', {
               url,
               status: response.status,
               statusText: response.statusText,
@@ -581,9 +583,9 @@ class ApiClient {
         }
       } catch (e) {
         if (isNotFound) {
-          console.warn('⚠️ [API CLIENT] Failed to read 404 response:', e);
+          logger.warn('⚠️ [API CLIENT] Failed to read 404 response:', e);
         } else if (!isUnauthorized) {
-          console.error('❌ [API CLIENT] Failed to read error response:', {
+          logger.error('❌ [API CLIENT] Failed to read error response:', {
             url,
             status: response.status,
             error: e,
@@ -598,10 +600,10 @@ class ApiClient {
 
     try {
       const jsonData = await response.json();
-      console.log('✅ [API CLIENT] PUT Response parsed successfully');
+      logger.log('✅ [API CLIENT] PUT Response parsed successfully');
       return jsonData;
     } catch (parseError) {
-      console.error('❌ [API CLIENT] PUT JSON parse error:', {
+      logger.error('❌ [API CLIENT] PUT JSON parse error:', {
         url,
         status: response.status,
         error: parseError,
@@ -633,20 +635,20 @@ class ApiClient {
           try {
             errorData = JSON.parse(errorText);
             if (this.shouldLogError(response.status)) {
-              console.error('❌ [API CLIENT] PATCH Error response (JSON):', errorData);
+              logger.error('❌ [API CLIENT] PATCH Error response (JSON):', errorData);
             }
           } catch (parseErr) {
             // If JSON parse fails, use text as is
             if (this.shouldLogError(response.status)) {
-              console.error('❌ [API CLIENT] PATCH Error response (text):', errorText);
+              logger.error('❌ [API CLIENT] PATCH Error response (text):', errorText);
             }
           }
         } else if (errorText && this.shouldLogError(response.status)) {
-          console.error('❌ [API CLIENT] PATCH Error response (text):', errorText);
+          logger.error('❌ [API CLIENT] PATCH Error response (text):', errorText);
         }
       } catch (e) {
         if (this.shouldLogError(response.status)) {
-          console.error('❌ [API CLIENT] Failed to read error response:', e);
+          logger.error('❌ [API CLIENT] Failed to read error response:', e);
         }
       }
       
@@ -658,7 +660,7 @@ class ApiClient {
     try {
       return await response.json();
     } catch (parseError) {
-      console.error('❌ [API CLIENT] PATCH JSON parse error:', parseError);
+      logger.error('❌ [API CLIENT] PATCH JSON parse error:', parseError);
       throw new Error(`Failed to parse response: ${parseError}`);
     }
   }
@@ -685,7 +687,7 @@ class ApiClient {
           try {
             errorData = JSON.parse(errorText);
             if (this.shouldLogError(response.status)) {
-              console.error('❌ [API CLIENT] DELETE Error response:', {
+              logger.error('❌ [API CLIENT] DELETE Error response:', {
                 status: response.status,
                 statusText: response.statusText,
                 url: url,
@@ -704,7 +706,7 @@ class ApiClient {
           } catch (parseErr) {
             // If JSON parse fails, use text as is
             if (this.shouldLogError(response.status)) {
-              console.error('❌ [API CLIENT] DELETE Error response (text, parse failed):', {
+              logger.error('❌ [API CLIENT] DELETE Error response (text, parse failed):', {
                 status: response.status,
                 statusText: response.statusText,
                 url: url,
@@ -714,14 +716,14 @@ class ApiClient {
             }
           }
         } else if (errorText && this.shouldLogError(response.status)) {
-          console.error('❌ [API CLIENT] DELETE Error response (text):', {
+          logger.error('❌ [API CLIENT] DELETE Error response (text):', {
             status: response.status,
             statusText: response.statusText,
             url: url,
             errorText: errorText,
           });
         } else if (this.shouldLogError(response.status)) {
-          console.error('❌ [API CLIENT] DELETE Error response (no body):', {
+          logger.error('❌ [API CLIENT] DELETE Error response (no body):', {
             status: response.status,
             statusText: response.statusText,
             url: url,
@@ -729,7 +731,7 @@ class ApiClient {
         }
       } catch (e) {
         if (this.shouldLogError(response.status)) {
-          console.error('❌ [API CLIENT] Failed to read error response:', {
+          logger.error('❌ [API CLIENT] Failed to read error response:', {
             status: response.status,
             statusText: response.statusText,
             url: url,

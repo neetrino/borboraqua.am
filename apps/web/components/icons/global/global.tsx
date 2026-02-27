@@ -50,11 +50,13 @@ export async function addToCart({
     return false;
   }
 
-  // If user is not logged in, handle guest cart or redirect to login
-  if (!isLoggedIn) {
-    try {
-      // Try guest cart first
-      const stored = localStorage.getItem('shop_cart_guest');
+  // Cart is always in localStorage (no DB)
+  try {
+    if (typeof window === 'undefined') {
+      if (onError) onError(new Error('Cart is not available'));
+      return false;
+    }
+    const stored = localStorage.getItem('shop_cart_guest');
       const cart = stored ? JSON.parse(stored) : [];
       
       // If we have variantId, use it, otherwise try defaultVariantId, otherwise get from product details
@@ -100,79 +102,18 @@ export async function addToCart({
       window.dispatchEvent(new Event('cart-updated'));
       if (onSuccess) onSuccess();
       return true;
-    } catch (error) {
-      // If guest cart fails, redirect to login
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
-      return false;
-    }
-  }
-
-  // Logged in user - use API
-  try {
-    // If we have variantId, use it, otherwise try defaultVariantId, otherwise get from product details
-    let finalVariantId = variantId || product.defaultVariantId || undefined;
-
-    // If no variantId provided, get from product details
-    if (!finalVariantId) {
-      interface ProductDetails {
-        id: string;
-        slug: string;
-        variants?: Array<{
-          id: string;
-          sku: string;
-          price: number;
-          stock: number;
-          available: boolean;
-        }>;
-      }
-
-      const encodedSlug = encodeURIComponent(product.slug.trim());
-      const productDetails = await apiClient.get<ProductDetails>(`/api/v1/products/${encodedSlug}`);
-
-      if (!productDetails.variants || productDetails.variants.length === 0) {
-        if (onError) onError(new Error(t('home.errors.noVariantsAvailable')));
-        return false;
-      }
-
-      finalVariantId = productDetails.variants[0].id;
-    }
-
-    await apiClient.post('/api/v1/cart/items', {
-      productId: product.id,
-      variantId: finalVariantId,
-      quantity,
-    });
-
-    // Trigger cart update event
-    window.dispatchEvent(new Event('cart-updated'));
-    if (onSuccess) onSuccess();
-    return true;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ [ADD TO CART] Error:', error);
-
-    // Check if error is about product not found
-    if (error?.message?.includes('does not exist') || error?.message?.includes('404') || error?.status === 404) {
+    const err = error as { message?: string; status?: number; response?: { data?: { detail?: string; title?: string } } };
+    if (err?.message?.includes('404') || err?.status === 404) {
       if (onError) onError(new Error(t('home.errors.productNotFound')));
       return false;
     }
-
-    // Check if error is about insufficient stock
-    if (
-      error.response?.data?.detail?.includes('No more stock available') ||
-      error.response?.data?.detail?.includes('exceeds available stock') ||
-      error.response?.data?.title === 'Insufficient stock'
-    ) {
+    if (err?.response?.data?.detail?.includes('stock') || err?.response?.data?.title === 'Insufficient stock') {
       if (onError) onError(new Error(t('home.errors.noMoreStockAvailable')));
       return false;
     }
-
-    // If error is about authorization, redirect to login
-    if (error.message?.includes('401') || error.message?.includes('Unauthorized') || error?.status === 401) {
-      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
-      return false;
-    }
-
-    if (onError) onError(error);
+    if (onError) onError(error instanceof Error ? error : new Error(String(error)));
     return false;
   }
 }
@@ -230,54 +171,29 @@ export function Header({
   const langCurrencyMenuRef = useRef<HTMLDivElement | null>(null);
   const imgLanguageIcon = "/assets/home/Vector.svg";
 
-  // Fetch cart count
+  // Fetch cart count (always from localStorage)
   useEffect(() => {
-    async function fetchCartCount() {
+    function fetchCartCount() {
       try {
-        if (isLoggedIn) {
-          // If user is logged in, fetch from API
-          const response = await apiClient.get<{ cart: { itemsCount?: number; items?: Array<{ quantity: number }> } }>('/api/v1/cart');
-          const itemsCount = response.cart.itemsCount || response.cart.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-          setCartCount(itemsCount);
-        } else {
-          // If guest, load from localStorage
-          if (typeof window === 'undefined') {
-            setCartCount(0);
-            return;
-          }
-
-          const CART_KEY = 'shop_cart_guest';
-          const stored = localStorage.getItem(CART_KEY);
-          if (!stored) {
-            setCartCount(0);
-            return;
-          }
-
-          const guestCart: Array<{ quantity: number }> = JSON.parse(stored);
-          const count = guestCart.reduce((sum, item) => sum + item.quantity, 0);
-          setCartCount(count);
-        }
-      } catch (error) {
-        console.error('Error fetching cart count:', error);
+        if (typeof window === 'undefined') { setCartCount(0); return; }
+        const CART_KEY = 'shop_cart_guest';
+        const stored = localStorage.getItem(CART_KEY);
+        if (!stored) { setCartCount(0); return; }
+        const guestCart: Array<{ quantity: number }> = JSON.parse(stored);
+        setCartCount(guestCart.reduce((sum, item) => sum + item.quantity, 0));
+      } catch {
         setCartCount(0);
       }
     }
-
     fetchCartCount();
-
-    // Listen to cart-updated event
-    const handleCartUpdate = () => {
-      fetchCartCount();
-    };
-
+    const handleCartUpdate = () => fetchCartCount();
     window.addEventListener('cart-updated', handleCartUpdate);
     window.addEventListener('auth-updated', handleCartUpdate);
-
     return () => {
       window.removeEventListener('cart-updated', handleCartUpdate);
       window.removeEventListener('auth-updated', handleCartUpdate);
     };
-  }, [isLoggedIn]);
+  }, []);
 
   // Initialize language and currency from storage
   useEffect(() => {

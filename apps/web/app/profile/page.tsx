@@ -638,27 +638,43 @@ function ProfilePageContent() {
       // Add each item from the order to cart
       for (const item of selectedOrder.items) {
         try {
-          // Get variant details to find productId
           interface VariantDetails {
             id: string;
             productId: string;
+            productSlug?: string;
             stock: number;
             available: boolean;
           }
 
           const variantDetails = await apiClient.get<VariantDetails>(`/api/v1/products/variants/${item.variantId}`);
-          
           if (!variantDetails.available || variantDetails.stock < item.quantity) {
             console.warn(`[Profile][ReOrder] Item ${item.productTitle} is not available or insufficient stock`);
             skippedCount++;
             continue;
           }
+          if (!variantDetails.productSlug) {
+            console.warn(`[Profile][ReOrder] No productSlug for variant ${item.variantId}`);
+            skippedCount++;
+            continue;
+          }
 
-          await apiClient.post('/api/v1/cart/items', {
-            productId: variantDetails.productId,
-            variantId: item.variantId,
-            quantity: item.quantity,
-          });
+          const CART_KEY = 'shop_cart_guest';
+          const stored = typeof window !== 'undefined' ? localStorage.getItem(CART_KEY) : null;
+          const cart: Array<{ productId: string; productSlug?: string; variantId: string; quantity: number }> = stored ? JSON.parse(stored) : [];
+          const existing = cart.find((i) => i.productId === variantDetails.productId && i.variantId === item.variantId);
+          if (existing) {
+            existing.quantity += item.quantity;
+          } else {
+            cart.push({
+              productId: variantDetails.productId,
+              productSlug: variantDetails.productSlug,
+              variantId: item.variantId,
+              quantity: item.quantity,
+            });
+          }
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
+          }
           addedCount++;
           console.log('[Profile][ReOrder] Added item to cart:', item.productTitle);
         } catch (error: any) {
