@@ -134,12 +134,13 @@ export default function CartPage() {
                 const productData = await apiClient.get<{
                   id: string;
                   slug: string;
+                  title?: string;
                   minimumOrderQuantity?: number;
                   orderQuantityIncrement?: number;
                   translations?: Array<{ title: string; locale: string }>;
                   media?: Array<{ url?: string; src?: string } | string>;
                   variants?: Array<{
-                    _id: string;
+                    _id?: unknown;
                     id: string;
                     sku: string;
                     price: number;
@@ -151,7 +152,7 @@ export default function CartPage() {
                 });
 
                 const variant = productData.variants?.find(v => 
-                  (v._id?.toString() || v.id) === item.variantId
+                  (v._id != null ? String(v._id) : v.id) === item.variantId
                 ) || productData.variants?.[0];
 
                 if (!variant) {
@@ -159,7 +160,7 @@ export default function CartPage() {
                   return { item: null, shouldRemove: true };
                 }
 
-                // Get translation for current language, fallback to first available
+                // Get translation for current language, fallback to first available; then API-level title/slug (production-safe)
                 const translation = productData.translations?.find((t: { locale: string }) => t.locale === currentLang) 
                   || productData.translations?.[0];
                 const imageUrl = productData.media?.[0] 
@@ -168,17 +169,20 @@ export default function CartPage() {
                       : productData.media[0].url || productData.media[0].src)
                   : null;
 
+                const productTitle = translation?.title || productData.title || '';
+                const productSlug = productData.slug || item.productSlug || '';
+
                 return {
                   item: {
                     id: `${item.productId}-${item.variantId}-${index}`,
                     variant: {
-                      id: variant._id?.toString() || variant.id,
+                      id: variant._id != null ? String(variant._id) : variant.id,
                       sku: variant.sku || '',
                       stock: variant.stock !== undefined ? variant.stock : undefined,
                       product: {
                         id: productData.id,
-                        title: translation?.title || t('common.messages.product'),
-                        slug: productData.slug,
+                        title: productTitle,
+                        slug: productSlug,
                         image: imageUrl,
                       },
                     },
