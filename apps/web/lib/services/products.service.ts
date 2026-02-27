@@ -381,7 +381,7 @@ class ProductsService {
             },
           },
         });
-        missingCategories.forEach((cat) => {
+        missingCategories.forEach((cat: { id: string; translations?: Array<{ locale: string; title: string }> }) => {
           categoriesMap.set(cat.id, {
             id: cat.id,
             translations: cat.translations || [],

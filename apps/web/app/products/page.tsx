@@ -1,4 +1,4 @@
-import { getStoredLanguage } from '../../lib/language';
+import { getStoredLanguage, type LanguageCode } from '../../lib/language';
 import { t } from '../../lib/i18n';
 import { cookies } from 'next/headers';
 import { unstable_cache } from 'next/cache';
@@ -162,12 +162,12 @@ export default async function ProductsPage({ searchParams }: any) {
   const normalizedProducts = productsData.data;
 
   // Get language for translations - try cookies first, then fallback
-  let language: string = 'hy';
+  let language: LanguageCode = 'hy';
   try {
     const cookieStore = await cookies();
     const langCookie = cookieStore.get('shop_language');
-    if (langCookie && langCookie.value && ['hy', 'en', 'ru'].includes(langCookie.value)) {
-      language = langCookie.value;
+    if (langCookie?.value && ['hy', 'en', 'ru'].includes(langCookie.value)) {
+      language = langCookie.value as LanguageCode;
     } else {
       language = getStoredLanguage();
     }
