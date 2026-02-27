@@ -515,9 +515,9 @@ export function HomePageClient({
     <div className="w-full bg-white overflow-x-hidden">
       {/* Mobile / Tablet Version - Visible up to xl, but hidden on desktop screens (zoom-independent) */}
       <div className={`${isDesktopScreen ? 'hidden' : 'xl:hidden'} bg-white relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden max-w-full`}>
-        {/* Mobile Header (hidden when menu/search popups are open) */}
+        {/* Mobile Header (hidden when menu/search popups are open) - sticky when scrolling */}
         {!showMobileMenu && !showSearchModal && (
-        <div className="absolute content-stretch flex items-center justify-between left-4 right-4 top-[35px] z-50 max-w-full">
+        <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 pt-[35px] pb-3 max-w-full">
           <div className="content-stretch flex gap-[6px] items-center relative shrink-0">
             {/* Mobile Menu Button (Hamburger) */}
             <button
