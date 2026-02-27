@@ -68,7 +68,8 @@ export async function addToCart({
           id: string;
           slug: string;
           variants?: Array<{
-            id: string;
+            id?: string;
+            _id?: unknown;
             sku: string;
             price: number;
             stock: number;
@@ -76,7 +77,12 @@ export async function addToCart({
           }>;
         }
 
-        const encodedSlug = encodeURIComponent(product.slug.trim());
+        const slug = (product.slug || '').trim();
+        if (!slug) {
+          if (onError) onError(new Error('Product slug is required'));
+          return false;
+        }
+        const encodedSlug = encodeURIComponent(slug);
         const productDetails = await apiClient.get<ProductDetails>(`/api/v1/products/${encodedSlug}`);
 
         if (!productDetails.variants || productDetails.variants.length === 0) {
@@ -84,16 +90,23 @@ export async function addToCart({
           return false;
         }
 
-        finalVariantId = productDetails.variants[0].id;
+        const firstVariant = productDetails.variants[0];
+        finalVariantId = typeof firstVariant.id === 'string' ? firstVariant.id : (firstVariant._id != null ? String(firstVariant._id) : undefined);
+        if (!finalVariantId) {
+          if (onError) onError(new Error('Could not get variant ID'));
+          return false;
+        }
       }
 
-      const existing = cart.find((i: any) => i.variantId === finalVariantId);
+      // Match by both productId and variantId so different products never merge (production-safe)
+      const existing = cart.find((i: { productId?: string; variantId?: string }) => i.productId === product.id && i.variantId === finalVariantId);
       if (existing) {
         existing.quantity += quantity;
       } else {
+        const slug = (product.slug || '').trim();
         cart.push({
           productId: product.id,
-          productSlug: product.slug,
+          productSlug: slug || undefined,
           variantId: finalVariantId,
           quantity,
         });
@@ -288,7 +301,7 @@ export function Header({
     <>
       {/* Header Section - Navigation Bar */}
       <div className={`fixed ${bgClass} backdrop-blur-[15px] content-stretch flex flex-col h-[66px] md:h-[60px] sm:h-[52px] items-center justify-center left-1/2 px-[28px] md:px-[22px] sm:px-[14px] rounded-[64px] md:rounded-[56px] sm:rounded-[40px] ${topPosition} translate-x-[-50%] w-[1200px] xl:w-[1200px] lg:w-[1100px] md:w-[90%] sm:w-[95%] z-[150] border ${borderClass} ${shadowClass}`}>
-        <div className="content-stretch flex gap-[110px] lg:gap-[100px] md:gap-[70px] sm:gap-[16px] h-[42px] md:h-[38px] sm:h-[34px] items-center justify-center relative shrink-0">
+        <div className="content-stretch flex gap-[70px] lg:gap-[60px] md:gap-[45px] sm:gap-[12px] h-[42px] md:h-[38px] sm:h-[34px] items-center justify-center relative shrink-0">
           {/* Logo */}
           <div
             onClick={() => router.push('/')}
@@ -328,6 +341,12 @@ export function Header({
               className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/contact') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
             >
               <p className="leading-[20px]">{t('home.navigation.contactUs')}</p>
+            </div>
+            <div
+              onClick={() => router.push('/faq')}
+              className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname.startsWith('/faq') ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
+            >
+              <p className="leading-[20px]">{t('home.navigation.questions')}</p>
             </div>
           </div>
 
@@ -578,6 +597,12 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                     className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
                   >
                     <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">{t('home.footer.siteMap.shop')}</p>
+                  </div>
+                  <div
+                    onClick={() => router.push('/faq')}
+                    className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
+                  >
+                    <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">{t('home.footer.siteMap.faq')}</p>
                   </div>
                 </div>
               </div>
