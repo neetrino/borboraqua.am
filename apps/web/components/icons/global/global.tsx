@@ -66,7 +66,8 @@ export async function addToCart({
           id: string;
           slug: string;
           variants?: Array<{
-            id: string;
+            id?: string;
+            _id?: unknown;
             sku: string;
             price: number;
             stock: number;
@@ -74,7 +75,12 @@ export async function addToCart({
           }>;
         }
 
-        const encodedSlug = encodeURIComponent(product.slug.trim());
+        const slug = (product.slug || '').trim();
+        if (!slug) {
+          if (onError) onError(new Error('Product slug is required'));
+          return false;
+        }
+        const encodedSlug = encodeURIComponent(slug);
         const productDetails = await apiClient.get<ProductDetails>(`/api/v1/products/${encodedSlug}`);
 
         if (!productDetails.variants || productDetails.variants.length === 0) {
@@ -82,16 +88,23 @@ export async function addToCart({
           return false;
         }
 
-        finalVariantId = productDetails.variants[0].id;
+        const firstVariant = productDetails.variants[0];
+        finalVariantId = typeof firstVariant.id === 'string' ? firstVariant.id : (firstVariant._id != null ? String(firstVariant._id) : undefined);
+        if (!finalVariantId) {
+          if (onError) onError(new Error('Could not get variant ID'));
+          return false;
+        }
       }
 
-      const existing = cart.find((i: any) => i.variantId === finalVariantId);
+      // Match by both productId and variantId so different products never merge (production-safe)
+      const existing = cart.find((i: { productId?: string; variantId?: string }) => i.productId === product.id && i.variantId === finalVariantId);
       if (existing) {
         existing.quantity += quantity;
       } else {
+        const slug = (product.slug || '').trim();
         cart.push({
           productId: product.id,
-          productSlug: product.slug,
+          productSlug: slug || undefined,
           variantId: finalVariantId,
           quantity,
         });
@@ -118,7 +131,8 @@ export async function addToCart({
         id: string;
         slug: string;
         variants?: Array<{
-          id: string;
+          id?: string;
+          _id?: unknown;
           sku: string;
           price: number;
           stock: number;
@@ -126,7 +140,12 @@ export async function addToCart({
         }>;
       }
 
-      const encodedSlug = encodeURIComponent(product.slug.trim());
+      const slug = (product.slug || '').trim();
+      if (!slug) {
+        if (onError) onError(new Error(t('home.errors.productNotFound')));
+        return false;
+      }
+      const encodedSlug = encodeURIComponent(slug);
       const productDetails = await apiClient.get<ProductDetails>(`/api/v1/products/${encodedSlug}`);
 
       if (!productDetails.variants || productDetails.variants.length === 0) {
@@ -134,7 +153,12 @@ export async function addToCart({
         return false;
       }
 
-      finalVariantId = productDetails.variants[0].id;
+      const firstVariant = productDetails.variants[0];
+      finalVariantId = typeof firstVariant.id === 'string' ? firstVariant.id : (firstVariant._id != null ? String(firstVariant._id) : undefined);
+      if (!finalVariantId) {
+        if (onError) onError(new Error(t('home.errors.noVariantsAvailable')));
+        return false;
+      }
     }
 
     await apiClient.post('/api/v1/cart/items', {
