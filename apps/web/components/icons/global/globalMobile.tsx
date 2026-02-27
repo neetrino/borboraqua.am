@@ -886,54 +886,29 @@ export function MobileBottomNavigation() {
   const rafId = useRef<number | null>(null);
   const iconRefs = useRef<(HTMLImageElement | null)[]>([]);
 
-  // Fetch cart count
+  // Fetch cart count (always from localStorage)
   useEffect(() => {
-    async function fetchCartCount() {
+    function fetchCartCount() {
       try {
-        if (isLoggedIn) {
-          // If user is logged in, fetch from API
-          const response = await apiClient.get<{ cart: { itemsCount?: number; items?: Array<{ quantity: number }> } }>('/api/v1/cart');
-          const itemsCount = response.cart.itemsCount || response.cart.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
-          setCartCount(itemsCount);
-        } else {
-          // If guest, load from localStorage
-          if (typeof window === 'undefined') {
-            setCartCount(0);
-            return;
-          }
-
-          const CART_KEY = 'shop_cart_guest';
-          const stored = localStorage.getItem(CART_KEY);
-          if (!stored) {
-            setCartCount(0);
-            return;
-          }
-
-          const guestCart: Array<{ quantity: number }> = JSON.parse(stored);
-          const count = guestCart.reduce((sum, item) => sum + item.quantity, 0);
-          setCartCount(count);
-        }
-      } catch (error) {
-        console.error('Error fetching cart count:', error);
+        if (typeof window === 'undefined') { setCartCount(0); return; }
+        const CART_KEY = 'shop_cart_guest';
+        const stored = localStorage.getItem(CART_KEY);
+        if (!stored) { setCartCount(0); return; }
+        const guestCart: Array<{ quantity: number }> = JSON.parse(stored);
+        setCartCount(guestCart.reduce((sum, item) => sum + item.quantity, 0));
+      } catch {
         setCartCount(0);
       }
     }
-
     fetchCartCount();
-
-    // Listen to cart-updated event
-    const handleCartUpdate = () => {
-      fetchCartCount();
-    };
-
+    const handleCartUpdate = () => fetchCartCount();
     window.addEventListener('cart-updated', handleCartUpdate);
     window.addEventListener('auth-updated', handleCartUpdate);
-
     return () => {
       window.removeEventListener('cart-updated', handleCartUpdate);
       window.removeEventListener('auth-updated', handleCartUpdate);
     };
-  }, [isLoggedIn]);
+  }, []);
 
   // Smooth scroll tracking with requestAnimationFrame for 60fps
   // Apple-style color transition: white -> light blue gradient on scroll

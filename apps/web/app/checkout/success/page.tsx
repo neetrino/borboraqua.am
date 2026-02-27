@@ -1,8 +1,10 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useTranslation } from '../../../lib/i18n-client';
+
+const CART_KEY = 'shop_cart_guest';
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
@@ -10,6 +12,13 @@ function CheckoutSuccessContent() {
   const { t } = useTranslation();
 
   const orderNumber = searchParams?.get('order') || '';
+
+  // Clear guest cart when thank you page is shown (after successful order / return from payment)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(CART_KEY);
+    window.dispatchEvent(new Event('cart-updated'));
+  }, []);
   const successWithNumber = t('checkout.status.successWithNumber').replace('{orderNumber}', orderNumber);
 
   return (

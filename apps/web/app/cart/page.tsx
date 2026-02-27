@@ -48,7 +48,7 @@ interface Cart {
 const CART_KEY = 'shop_cart_guest';
 
 export default function CartPage() {
-  const { isLoggedIn } = useAuth();
+  useAuth();
   const { t } = useTranslation();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,22 +95,17 @@ export default function CartPage() {
       window.removeEventListener('cart-updated', handleCartUpdate);
       window.removeEventListener('auth-updated', handleAuthUpdate);
     };
-  }, [isLoggedIn]);
+  }, []);
 
   async function fetchCart() {
     try {
       setLoading(true);
-      
-      // Եթե օգտատերը գրանցված չէ, օգտագործում ենք localStorage
-      if (!isLoggedIn) {
-        if (typeof window === 'undefined') {
-          setCart(null);
-          setLoading(false);
-          return;
-        }
-
-        try {
-          const stored = localStorage.getItem(CART_KEY);
+      if (typeof window === 'undefined') {
+        setCart(null);
+        setLoading(false);
+        return;
+      }
+      const stored = localStorage.getItem(CART_KEY);
           const guestCart: Array<{ productId: string; productSlug?: string; variantId: string; quantity: number }> = stored ? JSON.parse(stored) : [];
           
           if (guestCart.length === 0) {
@@ -137,7 +132,7 @@ export default function CartPage() {
                   title?: string;
                   minimumOrderQuantity?: number;
                   orderQuantityIncrement?: number;
-                  translations?: Array<{ title: string; locale: string }>;
+                  translations?: Array<{ title?: string; slug?: string; locale: string }>;
                   media?: Array<{ url?: string; src?: string } | string>;
                   variants?: Array<{
                     _id?: unknown;
@@ -160,7 +155,6 @@ export default function CartPage() {
                   return { item: null, shouldRemove: true };
                 }
 
-                // Get translation for current language, fallback to first available; then API-level title/slug (production-safe)
                 const translation = productData.translations?.find((t: { locale: string }) => t.locale === currentLang) 
                   || productData.translations?.[0];
                 const imageUrl = productData.media?.[0] 
@@ -169,8 +163,8 @@ export default function CartPage() {
                       : productData.media[0].url || productData.media[0].src)
                   : null;
 
-                const productTitle = translation?.title || productData.title || '';
-                const productSlug = productData.slug || item.productSlug || '';
+                const productTitle = translation?.title || productData.translations?.[0]?.title || productData.title || '';
+                const productSlug = translation?.slug || productData.translations?.[0]?.slug || productData.slug || item.productSlug || '';
 
                 return {
                   item: {
@@ -230,34 +224,19 @@ export default function CartPage() {
           const subtotal = validItems.reduce((sum, item) => sum + item.total, 0);
           const itemsCount = validItems.reduce((sum, item) => sum + item.quantity, 0);
 
-          setCart({
-            id: 'guest-cart',
-            items: validItems,
-            totals: {
-              subtotal,
-              discount: 0,
-              shipping: 0,
-              tax: 0,
-              total: subtotal,
-              currency: 'AMD',
-            },
-            itemsCount,
-          });
-        } catch (error) {
-          console.error('Error loading guest cart:', error);
-          setCart(null);
-        } finally {
-          setLoading(false);
-        }
-        return;
-      }
-
-      // Եթե օգտատերը գրանցված է, օգտագործում ենք API
-      const currentLang = getStoredLanguage();
-      const response = await apiClient.get<{ cart: Cart }>('/api/v1/cart', {
-        params: { lang: currentLang }
+      setCart({
+        id: 'guest-cart',
+        items: validItems,
+        totals: {
+          subtotal,
+          discount: 0,
+          shipping: 0,
+          tax: 0,
+          total: subtotal,
+          currency: 'AMD',
+        },
+        itemsCount,
       });
-      setCart(response.cart);
     } catch (error) {
       console.error('Error fetching cart:', error);
       setCart(null);
@@ -294,36 +273,19 @@ export default function CartPage() {
     });
 
     try {
-      // Եթե օգտատերը գրանցված չէ, օգտագործում ենք localStorage
-      if (!isLoggedIn) {
-        if (typeof window === 'undefined') return;
-
-        const stored = localStorage.getItem(CART_KEY);
-        const guestCart: Array<{ productId: string; productSlug?: string; variantId: string; quantity: number }> = stored ? JSON.parse(stored) : [];
-        
-        // itemId-ն ունի format: `${productId}-${variantId}-${index}`
-        const parts = itemId.split('-');
-        if (parts.length >= 2) {
-          const productId = parts[0];
-          const variantId = parts.slice(1, -1).join('-'); // variantId-ն կարող է պարունակել '-'
-          
-          const updatedCart = guestCart.filter(
-            item => !(item.productId === productId && item.variantId === variantId)
-          );
-          
-          localStorage.setItem(CART_KEY, JSON.stringify(updatedCart));
-          // Dispatch event for other components (header, etc.) - but our handler won't re-fetch
-          // because isLocalUpdateRef.current is true
-          window.dispatchEvent(new Event('cart-updated'));
-        }
-        return;
+      if (typeof window === 'undefined') return;
+      const stored = localStorage.getItem(CART_KEY);
+      const guestCart: Array<{ productId: string; productSlug?: string; variantId: string; quantity: number }> = stored ? JSON.parse(stored) : [];
+      const parts = itemId.split('-');
+      if (parts.length >= 2) {
+        const productId = parts[0];
+        const variantId = parts.slice(1, -1).join('-');
+        const updatedCart = guestCart.filter(
+          item => !(item.productId === productId && item.variantId === variantId)
+        );
+        localStorage.setItem(CART_KEY, JSON.stringify(updatedCart));
+        window.dispatchEvent(new Event('cart-updated'));
       }
-
-      // For logged-in users, delete from API
-      await apiClient.delete(`/api/v1/cart/items/${itemId}`);
-      // Dispatch event for other components (header, etc.) - but our handler won't re-fetch
-      // because isLocalUpdateRef.current is true
-      window.dispatchEvent(new Event('cart-updated'));
     } catch (error) {
       console.error('Error removing item:', error);
       // Revert optimistic update on error
@@ -406,69 +368,33 @@ export default function CartPage() {
     setUpdatingItems(prev => new Set(prev).add(itemId));
 
     try {
-      // Եթե օգտատերը գրանցված չէ, օգտագործում ենք localStorage
-      if (!isLoggedIn) {
-        if (typeof window === 'undefined') return;
-
-        const stored = localStorage.getItem(CART_KEY);
-        const guestCart: Array<{ productId: string; productSlug?: string; variantId: string; quantity: number }> = stored ? JSON.parse(stored) : [];
-        
-        // itemId-ն ունի format: `${productId}-${variantId}-${index}`
-        const parts = itemId.split('-');
-        if (parts.length >= 2) {
-          const productId = parts[0];
-          const variantId = parts.slice(1, -1).join('-'); // variantId-ն կարող է պարունակել '-'
-          
-          const item = guestCart.find(
-            item => item.productId === productId && item.variantId === variantId
-          );
-          
-          if (item) {
-            // Check stock for guest cart
-            if (cartItem.variant.stock !== undefined && quantity > cartItem.variant.stock) {
-              alert(`Մատչելի քանակը ${cartItem.variant.stock} հատ է: Դուք չեք կարող ավելացնել ավելի շատ քանակ:`);
-              // Revert optimistic update
-              fetchCart();
-              setUpdatingItems(prev => {
-                const next = new Set(prev);
-                next.delete(itemId);
-                return next;
-              });
-              return;
-            }
-            
-            item.quantity = quantity;
-            localStorage.setItem(CART_KEY, JSON.stringify(guestCart));
-            // Dispatch event for other components (header, etc.) - but our handler won't re-fetch
-            // because isLocalUpdateRef.current is true
-            window.dispatchEvent(new Event('cart-updated'));
+      if (typeof window === 'undefined') return;
+      const stored = localStorage.getItem(CART_KEY);
+      const guestCart: Array<{ productId: string; productSlug?: string; variantId: string; quantity: number }> = stored ? JSON.parse(stored) : [];
+      const parts = itemId.split('-');
+      if (parts.length >= 2) {
+        const productId = parts[0];
+        const variantId = parts.slice(1, -1).join('-');
+        const item = guestCart.find(
+          i => i.productId === productId && i.variantId === variantId
+        );
+        if (item) {
+          if (cartItem.variant.stock !== undefined && quantity > cartItem.variant.stock) {
+            alert(`Մատչելի քանակը ${cartItem.variant.stock} հատ է: Դուք չեք կարող ավելացնել ավելի շատ քանակ:`);
+            fetchCart();
+            setUpdatingItems(prev => { const next = new Set(prev); next.delete(itemId); return next; });
+            return;
           }
+          item.quantity = quantity;
+          localStorage.setItem(CART_KEY, JSON.stringify(guestCart));
+          window.dispatchEvent(new Event('cart-updated'));
         }
-        
-        setUpdatingItems(prev => {
-          const next = new Set(prev);
-          next.delete(itemId);
-          return next;
-        });
-        return;
       }
-
-      // For logged-in users, update via API
-      await apiClient.patch(
-        `/api/v1/cart/items/${itemId}`,
-        { quantity }
-      );
-
-      // Dispatch event for other components (header, etc.) - but our handler won't re-fetch
-      // because isLocalUpdateRef.current is true
-      window.dispatchEvent(new Event('cart-updated'));
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error updating quantity:', error);
-      // Revert optimistic update on error
       fetchCart();
-      
-      // Show user-friendly error message
-      const errorMessage = error?.detail || error?.message || t('common.messages.failedToUpdateQuantity');
+      const err = error as { detail?: string; message?: string };
+      const errorMessage = err?.detail || err?.message || t('common.messages.failedToUpdateQuantity');
       if (errorMessage.includes('stock') || errorMessage.includes('exceeds')) {
         alert(t('common.alerts.stockInsufficient').replace('{message}', errorMessage));
       } else {

@@ -10,11 +10,13 @@ export async function GET(
     
     const variant = await db.productVariant.findUnique({
       where: { id },
-      select: {
-        id: true,
-        productId: true,
-        stock: true,
-        published: true,
+      include: {
+        product: {
+          select: {
+            id: true,
+            translations: { select: { slug: true } },
+          },
+        },
       },
     });
 
@@ -31,12 +33,14 @@ export async function GET(
       );
     }
 
-    // Calculate available based on stock > 0 and published === true
     const available = variant.stock > 0 && variant.published === true;
+    const productSlug =
+      (variant as { product?: { translations?: Array<{ slug?: string }> } }).product?.translations?.[0]?.slug ?? "";
 
     return NextResponse.json({
       id: variant.id,
       productId: variant.productId,
+      productSlug: productSlug || undefined,
       stock: variant.stock,
       available: available,
     });

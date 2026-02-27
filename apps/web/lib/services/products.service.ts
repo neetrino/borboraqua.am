@@ -381,7 +381,7 @@ class ProductsService {
             },
           },
         });
-        missingCategories.forEach((cat) => {
+        missingCategories.forEach((cat: { id: string; translations?: Array<{ locale: string; title: string }> }) => {
           categoriesMap.set(cat.id, {
             id: cat.id,
             translations: cat.translations || [],
@@ -818,10 +818,7 @@ class ProductsService {
       product = await db.product.findFirst({
         where: {
           translations: {
-            some: {
-              slug,
-              locale: lang,
-            },
+            some: { slug },
           },
           published: true,
           deletedAt: null,
@@ -851,12 +848,7 @@ class ProductsService {
         try {
           product = await db.product.findFirst({
             where: {
-              translations: {
-                some: {
-                  slug,
-                  locale: lang,
-                },
-              },
+              translations: { some: { slug } },
               published: true,
               deletedAt: null,
             },
@@ -872,12 +864,7 @@ class ProductsService {
               // Retry the query after creating the column
               product = await db.product.findFirst({
                 where: {
-                  translations: {
-                    some: {
-                      slug,
-                      locale: lang,
-                    },
-                  },
+                  translations: { some: { slug } },
                   published: true,
                   deletedAt: null,
                 },
@@ -898,12 +885,7 @@ class ProductsService {
                 };
                 product = await db.product.findFirst({
                   where: {
-                    translations: {
-                      some: {
-                        slug,
-                        locale: lang,
-                      },
-                    },
+                    translations: { some: { slug } },
                     published: true,
                     deletedAt: null,
                   },
@@ -927,12 +909,7 @@ class ProductsService {
             };
             product = await db.product.findFirst({
               where: {
-                translations: {
-                  some: {
-                    slug,
-                    locale: lang,
-                  },
-                },
+                translations: { some: { slug } },
                 published: true,
                 deletedAt: null,
               },
@@ -951,12 +928,7 @@ class ProductsService {
           // Retry the query after creating the column
           product = await db.product.findFirst({
             where: {
-              translations: {
-                some: {
-                  slug,
-                  locale: lang,
-                },
-              },
+              translations: { some: { slug } },
               published: true,
               deletedAt: null,
             },
@@ -977,12 +949,7 @@ class ProductsService {
             };
             product = await db.product.findFirst({
               where: {
-                translations: {
-                  some: {
-                    slug,
-                    locale: lang,
-                  },
-                },
+                translations: { some: { slug } },
                 published: true,
                 deletedAt: null,
               },
@@ -1007,12 +974,7 @@ class ProductsService {
         try {
           product = await db.product.findFirst({
             where: {
-              translations: {
-                some: {
-                  slug,
-                  locale: lang,
-                },
-              },
+              translations: { some: { slug } },
               published: true,
               deletedAt: null,
             },
@@ -1039,12 +1001,7 @@ class ProductsService {
           if (retryError?.code === 'P2021' || retryError?.message?.includes('product_attributes')) {
             product = await db.product.findFirst({
               where: {
-                translations: {
-                  some: {
-                    slug,
-                    locale: lang,
-                  },
-                },
+                translations: { some: { slug } },
                 published: true,
                 deletedAt: null,
               },
@@ -1121,10 +1078,16 @@ class ProductsService {
       }
     }
 
+    const firstTranslation = translations[0] || null;
     return {
       id: product.id,
-      slug: translation?.slug || "",
-      title: translation?.title || "",
+      slug: translation?.slug || firstTranslation?.slug || "",
+      title: translation?.title || firstTranslation?.title || "",
+      translations: translations.map((t: { locale: string; slug?: string; title?: string }) => ({
+        locale: t.locale,
+        slug: t.slug ?? "",
+        title: t.title ?? "",
+      })),
       subtitle: translation?.subtitle || null,
       description: translation?.descriptionHtml || null,
       brand: product.brand
