@@ -310,7 +310,7 @@ export function MobileMenu({
             }}
             className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            HOME
+            {t('home.navigation.home')}
           </button>
           <button
             onClick={() => {
@@ -319,7 +319,7 @@ export function MobileMenu({
             }}
             className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            SHOP
+            {t('home.navigation.shop')}
           </button>
           <button
             onClick={() => {
@@ -328,7 +328,7 @@ export function MobileMenu({
             }}
             className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            ABOUT US
+            {t('home.navigation.aboutUs')}
           </button>
           <button
             onClick={() => {
@@ -337,7 +337,7 @@ export function MobileMenu({
             }}
             className="text-left text-gray-900 font-bold text-lg uppercase tracking-wide hover:text-gray-700 transition-colors"
           >
-            BLOG
+            {t('home.navigation.blog')}
           </button>
           <button
             onClick={() => {
