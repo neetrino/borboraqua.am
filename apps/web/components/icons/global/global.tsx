@@ -554,7 +554,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0" />
         <div className="absolute h-[400px] lg:h-[400px] md:h-[400px] sm:h-[350px] left-[calc(50%+0.5px)] top-[200px] lg:top-[200px] md:top-[180px] sm:top-[120px] translate-x-[-50%] w-[1080px] lg:w-[1080px] md:w-[90%] sm:w-[95%] relative z-10 px-[20px] lg:px-[20px] md:px-[40px] sm:px-[20px]">
-          <div className="absolute content-stretch flex gap-[100px] lg:gap-[100px] md:gap-[80px] sm:gap-[50px] items-start justify-start left-[calc(50%-16px)] top-0 translate-x-[-50%] flex-col md:flex-row sm:flex-col">
+          <div className="absolute content-stretch flex gap-[100px] lg:gap-[100px] md:gap-[80px] sm:gap-[50px] items-start justify-start left-[calc(50%-16px)] top-[100px] translate-x-[-50%] flex-col md:flex-row sm:flex-col">
             {/* Column 1: Logo + Description */}
             <div className="flex flex-col h-[280px] lg:h-[280px] md:h-[280px] sm:h-auto relative shrink-0 w-[300px] lg:w-[300px] md:w-[45%] sm:w-full gap-[12px] lg:gap-[12px] md:gap-[14px] sm:gap-[14px]">
               <div className="content-stretch flex h-[14px] items-center left-0 top-0 w-[300px] lg:w-[300px] md:w-full sm:w-full">
@@ -567,20 +567,6 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                   <p className="leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] break-words">
                     {t('home.footer.description')}
                   </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-[9px] lg:gap-[9px] md:gap-[8px] sm:gap-[6px] left-0 relative cursor-pointer" onClick={() => router.push('/about')}>
-                <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] whitespace-nowrap">
-                  <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{t('home.footer.more')}</p>
-                </div>
-                <div className="content-stretch flex flex-col items-start relative shrink-0">
-                  <div className="flex items-center justify-center relative shrink-0">
-                    <div className="flex-none scale-y-[-100%]">
-                      <div className="h-[28px] relative w-[24.02px]">
-                        <img alt="Icon" className="block max-w-none size-full" src={imgIcon2} />
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -733,23 +719,23 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
               </div>
             </div>
             <div className="relative shrink-0">
-              <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-[13px] items-center justify-end relative">
-                <div className="h-[24.998px] relative shrink-0 w-[77.198px]">
+              <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex gap-2 items-center justify-end relative">
+                <div className="h-4 w-[50px] relative shrink-0">
                   <img alt="Visa" className="block max-w-none size-full object-contain" src={paymentVisa} />
                 </div>
-                <div className="h-[29.209px] relative shrink-0 w-[48.946px]">
+                <div className="h-4 w-8 relative shrink-0">
                   <img alt="Mastercard" className="block max-w-none size-full object-contain" src={paymentMastercard} />
                 </div>
-                <div className="h-[25.209px] relative shrink-0 w-[98.706px]">
+                <div className="h-4 w-16 relative shrink-0">
                   <img alt="Arca" className="block max-w-none size-full object-contain" src={paymentArca} />
                 </div>
-                <div className="h-[25px] relative shrink-0 w-[87.735px]">
+                <div className="h-4 w-14 relative shrink-0">
                   <img alt="Idram" className="block max-w-none size-full object-contain" src={paymentIdram} />
                 </div>
-                <div className="h-[25px] relative shrink-0 w-[87.735px]">
+                <div className="h-4 w-14 relative shrink-0">
                   <img alt="Fastshift" className="block max-w-none size-full object-contain" src={paymentFastshift} />
                 </div>
-                <div className="h-[25px] relative shrink-0 w-[87.735px]">
+                <div className="h-4 w-14 relative shrink-0">
                   <img alt="Telcell" className="block max-w-none size-full object-contain" src={paymentTelcell} />
                 </div>
               </div>
