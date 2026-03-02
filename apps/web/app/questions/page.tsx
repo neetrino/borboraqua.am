@@ -1,8 +1,14 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from '../../lib/i18n-client';
-import { borboraquaFaqCategories } from './questions';
+
+/** FAQ category ids and number of questions (must match locale JSON structure) */
+const FAQ_CATEGORIES = [
+  { id: 'delivery', questionCount: 1 },
+  { id: 'water', questionCount: 6 },
+  { id: 'payment', questionCount: 3 },
+] as const;
 
 function ChevronIcon({ open }: { open: boolean }) {
   return (
@@ -30,10 +36,17 @@ export default function QuestionsPage() {
   const { t } = useTranslation();
   const [openKeys, setOpenKeys] = useState<Set<string>>(new Set());
 
-  const faqs = borboraquaFaqCategories.map((cat) => ({
-    category: cat.title,
-    questions: cat.questions.map((item) => ({ q: item.q, a: item.a })),
-  }));
+  const faqs = useMemo(
+    () =>
+      FAQ_CATEGORIES.map((cat) => ({
+        category: t(`faq.categories.${cat.id}.title`),
+        questions: Array.from({ length: cat.questionCount }, (_, i) => ({
+          q: t(`faq.categories.${cat.id}.questions.${i}.q`),
+          a: t(`faq.categories.${cat.id}.questions.${i}.a`),
+        })),
+      })),
+    [t]
+  );
 
   const toggle = useCallback((key: string) => {
     setOpenKeys((prev) => {
@@ -45,8 +58,8 @@ export default function QuestionsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+    <div className="policy-page">
+      <div className="policy-page-inner">
         <div className="overflow-hidden bg-white/60 backdrop-blur-md border border-white/40 shadow-lg shadow-gray-200/50 rounded-xl">
           {/* Form-like header */}
           <div className="px-6 sm:px-8 pt-8 pb-6 border-b border-white/50">

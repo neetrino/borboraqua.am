@@ -1,6 +1,5 @@
 'use client';
 
-import { Card } from '@shop/ui';
 import { useTranslation } from '../../lib/i18n-client';
 
 /**
@@ -11,14 +10,16 @@ export default function TermsPage() {
   return (
     <div className="policy-page">
       <div className="policy-page-inner">
-        <h1 className="text-4xl font-bold text-gray-900">{t('terms.title')}</h1>
-        <p className="text-gray-600">
-          {t('terms.lastUpdated')}{' '}
-          {new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
-      
-        <div className="mt-8 space-y-6">
-        <Card className="p-6">
+        <div className="overflow-hidden bg-white/60 backdrop-blur-md border border-white/40 shadow-lg shadow-gray-200/50 rounded-xl">
+          <div className="px-6 sm:px-8 pt-8 pb-6 border-b border-white/50">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{t('terms.title')}</h1>
+            <p className="text-gray-600 text-sm sm:text-base">
+              {t('terms.lastUpdated')}{' '}
+              {new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+          </div>
+
+          <div className="px-4 sm:px-6 pb-8 pt-6">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">{t('terms.generalProvisions.title')}</h2>
           <ul className="list-disc list-inside text-gray-600 space-y-2 ml-4">
             <li>{t('terms.generalProvisions.item1')}</li>
@@ -97,7 +98,7 @@ export default function TermsPage() {
             <li>{t('terms.privacyAndDataProtection.item2')}</li>
             <li>{t('terms.privacyAndDataProtection.item3')}</li>
           </ul>
-        </Card>
+          </div>
         </div>
       </div>
     </div>

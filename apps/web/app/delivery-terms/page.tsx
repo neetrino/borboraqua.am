@@ -1,6 +1,5 @@
 'use client';
 
-import { Card } from '@shop/ui';
 import { useTranslation } from '../../lib/i18n-client';
 
 /**
@@ -11,14 +10,16 @@ export default function DeliveryTermsPage() {
   return (
     <div className="policy-page">
       <div className="policy-page-inner">
-        <h1 className="text-4xl font-bold text-gray-900">{t('delivery-terms.title')}</h1>
-        <p className="text-gray-600">
-          {t('delivery-terms.lastUpdated')}{' '}
-          {new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
+        <div className="overflow-hidden bg-white/60 backdrop-blur-md border border-white/40 shadow-lg shadow-gray-200/50 rounded-xl">
+          <div className="px-6 sm:px-8 pt-8 pb-6 border-b border-white/50">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{t('delivery-terms.title')}</h1>
+            <p className="text-gray-600 text-sm sm:text-base">
+              {t('delivery-terms.lastUpdated')}{' '}
+              {new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+          </div>
 
-        <div className="mt-8 space-y-6">
-          <Card className="p-6">
+          <div className="px-4 sm:px-6 pb-8 pt-6">
             <div className="space-y-4">
               <p className="text-gray-600">{t('delivery-terms.intro.line1')}</p>
               <p className="text-gray-600">{t('delivery-terms.intro.line2')}</p>
@@ -51,7 +52,7 @@ export default function DeliveryTermsPage() {
               <p>{t('delivery-terms.officeHours.satHolidays')}</p>
               <p>{t('delivery-terms.officeHours.sun')}</p>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>

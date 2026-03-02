@@ -1,4 +1,61 @@
 {
   "title": "Frequently Asked Questions",
-  "description": "Find answers about delivery, water and payment."
+  "description": "Find answers about delivery, water and payment.",
+  "categories": {
+    "delivery": {
+      "title": "Delivery",
+      "questions": {
+        "0": {
+          "q": "Why don't I get an EHDM receipt at delivery?",
+          "a": "New Aqua LLC does not provide EHDM receipts because the sale is not made at a point of sale, and the law prohibits delivery vehicles from having mobile EHDM devices. New Aqua LLC records sales with tax invoices (invoice waybills) downloaded from the accounting software to the RA SRC e-invoicing system. Not presenting a tax invoice physically does not mean the sale is not recorded. New Aqua LLC provides electronic and/or printed copies of e-invoicing invoices on request. Please indicate when placing an order if you want to receive a printed invoice in person at delivery."
+        }
+      }
+    },
+    "water": {
+      "title": "Water",
+      "questions": {
+        "0": {
+          "q": "How many days after installing the bottle should the water be consumed?",
+          "a": "After installing a new bottle, it is advisable to consume it within 25 days at most, because once opened the water in the bottle is in contact with air (air enters the dispenser tanks and then into the bottle). The 25-day period we recommend is not normative; it is based on our experience."
+        },
+        "1": {
+          "q": "Why do I sometimes see white flakes in the water when using Borbor Aqua?",
+          "a": "The most common cause of white flakes is the mineral composition of the water. Especially in cold weather (or in the dispenser's cold water tank), mineral salt molecules in the water tend to cluster together; it is these clusters that we sometimes see as flakes. The mineral composition of Borbor Aqua (and many other natural spring waters from mountainous areas) is such that clustering occurs more quickly at low temperatures, and after returning to room temperature the clusters do not fully dissolve. It is important to remember that white flakes from this cause are not a sign of contamination; they are simply related to mineral composition and temperature variation."
+        },
+        "2": {
+          "q": "When pouring water from the dispenser tap into a glass I see particles or white flakes, but they are not in the bottle. What is the cause?",
+          "a": "When the dispenser tanks are half empty and a new bottle is installed, water turbulence occurs (you can notice this when a lot of water flows into the tanks after installing the bottle and many bubbles appear). That turbulence lifts dust/contamination from the bottom of the cold water tank, as well as mineral salt clusters (white flakes) formed at low temperature (the tank is a cooler). These rise above the water collection level and reach the taps, so the particles/flakes are noticed right after changing the bottle. Tip: do not take water from the taps after the bottle is empty so the tanks do not empty. Install a new full bottle immediately. When the tanks are full, the chance of air (and contamination) entering is reduced. Also, empty dispenser tanks heating and cooling can damage the tank metal."
+        },
+        "3": {
+          "q": "Sanitary cleaning of the dispenser",
+          "a": "Dispensers are not hermetic and do not self-clean. The upper part of the dispenser (the rod and its surroundings) is most at risk of contamination. The taps and the drip tray underneath are also often contaminated. The water tanks (especially the cold water tank) are in contact with air; that air enters the tank and then appears as bubbles inside the bottle when water flows from the bottle into the tank. The more contaminated or dusty the room air, the higher the chance of the cold water tank becoming contaminated. The dispenser should be sanitized at least twice a year."
+        },
+        "4": {
+          "q": "White flakes in the cold water tank",
+          "a": "White flakes can also form when ice forms in the cold water tank. This should be prevented using the temperature regulator at the back of the dispenser."
+        },
+        "5": {
+          "q": "Sometimes newly installed water has a chlorine smell. What is the cause?",
+          "a": "Some dishonest customers fill our bottles with tap water and place them on the dispenser. Filling our bottles with other water is prohibited by contract. When we notice a customer has not ordered water for a long time, we ask them to return our bottles. Unfortunately, many of those bottles already have a tap water smell. All bottles are checked before refilling; if a bottle has a strong chlorine smell we scrap it, but a slight smell cannot be 100% detected. In those rare cases the smell is transferred to the water. We continuously improve control of empty bottle returns to eliminate this issue."
+        }
+      }
+    },
+    "payment": {
+      "title": "Payment",
+      "questions": {
+        "0": {
+          "q": "What payment options are available for my order?",
+          "a": "• Cash\n• Bank card (ArCa, Visa, MasterCard)\n• Idram\n• TelCell\n• FastShift"
+        },
+        "1": {
+          "q": "How can I use the Rocket Line 0% service?",
+          "a": "You can use the Rocket Line 0% service if you are an Idram payment system user and an IDBank customer. Based on your credit history, the bank assigns you a limit within which you can use Rocket Line 0% to pay off the cost of a purchased dispenser interest-free over 3 months."
+        },
+        "2": {
+          "q": "If I paid online (idram or ArCa/Visa/MasterCard) but the order is cancelled, how is the amount refunded?",
+          "a": "The amount is refunded within 2–3 business days to the same Idram account or bank account from which the payment was made."
+        }
+      }
+    }
+  }
 }
