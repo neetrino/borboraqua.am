@@ -982,8 +982,8 @@ export function FeaturedProductCard({
         onClick={() => onProductClick(product)}
         className="flex flex-col items-center gap-0 w-full cursor-pointer product-card-hover product-card-compact  z-[11] isolate rounded-[45px] p-2"
       >
-        {/* Image Container - Same bottom alignment as home page card, -10% overlap */}
-        <div className={`${isRelated ? (isMobile ? 'h-[180px]' : 'md:h-[300px]') : (isMobile ? 'h-[220px]' : 'md:h-[440px]')}   w-full relative product-image-container flex items-end justify-center bg-transparent rounded-lg overflow-visible min-h-0 -mb-[10%]`}>
+        {/* Image Container - fixed height, does not grow with img/title */}
+        <div className={`${isRelated ? (isMobile ? 'h-[160px]' : 'md:h-[260px]') : (isMobile ? 'h-[180px]' : 'md:h-[340px]')} w-full relative product-image-container flex items-end justify-center bg-transparent rounded-lg overflow-hidden min-h-0 mb-3 shrink-0 flex-shrink-0`}>
           {product.image ? (
             <img
               
@@ -997,12 +997,12 @@ export function FeaturedProductCard({
             <div className="w-full h-full bg-gray-300 rounded-lg" />
           )}
         </div>
-        {/* Content Section - Compact layout: title, then category and price on same row below */}
-        <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative">
-          <div className="flex flex-col items-start w-full gap-0">
-            {/* Title - large, bold, dark */}
-            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[16px] text-black w-full">
-              <p className="leading-[24px] break-words w-full line-clamp-2">{product.title}</p>
+        {/* Content Section - fixed layout, does not grow card */}
+        <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative min-h-0 min-w-0">
+          <div className="flex flex-col items-start w-full gap-0 min-h-0">
+            {/* Title - large, bold, dark, single line */}
+            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[16px] text-black w-full min-h-0">
+              <p className="leading-[24px] break-words w-full line-clamp-1">{product.title}</p>
             </div>
             {/* Category and price - same row, price on the right */}
             <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
@@ -1045,8 +1045,8 @@ export function FeaturedProductCard({
       onClick={() => onProductClick(product)}
       className="flex flex-col items-center gap-0 w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2 overflow-visible"
     >
-      {/* Image area: overflow visible so bottle can extend beyond card; bottle stands with shadow (240/216 = 300/270 * 0.8 calm state) */}
-      <div className="h-[240px] lg:h-[240px] md:h-[240px] sm:h-[216px] w-full relative product-image-container product-image-container-home flex items-end justify-center bg-transparent overflow-visible min-h-0">
+      {/* Image area: fixed height, does not grow with img/title */}
+      <div className="h-[240px] lg:h-[240px] md:h-[240px] sm:h-[216px] w-full relative product-image-container product-image-container-home flex items-end justify-center bg-transparent overflow-visible min-h-0 mb-3 shrink-0 flex-shrink-0">
         {product.image ? (
           <img
             alt={product.title}
@@ -1058,11 +1058,11 @@ export function FeaturedProductCard({
           <div className="w-full h-full bg-gray-300 rounded-lg" />
         )}
       </div>
-      {/* Content Section - Title, then category and price on same row (same direction) */}
-      <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px]">
-        <div className="flex flex-col items-start w-full gap-0">
-          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full">
-            <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full">{product.title}</p>
+      {/* Content Section - fixed layout, does not grow card */}
+      <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0">
+        <div className="flex flex-col items-start w-full gap-0 min-h-0">
+          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full min-h-0">
+            <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full line-clamp-1">{product.title}</p>
           </div>
           {/* Category and price - same row, price on the right */}
           <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">

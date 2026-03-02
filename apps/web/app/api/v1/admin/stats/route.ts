@@ -14,11 +14,21 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: NextRequest) {
   try {
-    console.log("📊 [ADMIN STATS] Request received:", { url: req.url });
+    const authHeader = req.headers.get("authorization");
+    console.log("📊 [ADMIN STATS] Request received:", { 
+      url: req.url,
+      hasAuthHeader: !!authHeader,
+      authHeaderPreview: authHeader ? authHeader.substring(0, 30) + '...' : 'none',
+    });
     const user = await authenticateToken(req);
     
     if (!user || !requireAdmin(user)) {
-      console.log("❌ [ADMIN STATS] Unauthorized or not admin");
+      console.log("❌ [ADMIN STATS] Unauthorized or not admin", {
+        hasUser: !!user,
+        userId: user?.id,
+        userRoles: user?.roles,
+        isAdmin: user ? requireAdmin(user) : false,
+      });
       return NextResponse.json(
         {
           type: "https://api.shop.am/problems/forbidden",

@@ -21,6 +21,7 @@ export async function authenticateToken(
     const token = authHeader?.split(" ")[1]; // Bearer TOKEN
 
     if (!token) {
+      console.log("🔍 [AUTH] No token provided in Authorization header");
       return null;
     }
 
@@ -29,9 +30,22 @@ export async function authenticateToken(
       return null;
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
-      userId: string;
-    };
+    let decoded: { userId: string };
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET) as {
+        userId: string;
+      };
+      console.log("✅ [AUTH] Token verified successfully, userId:", decoded.userId);
+    } catch (jwtError) {
+      if (jwtError instanceof jwt.JsonWebTokenError) {
+        console.log("❌ [AUTH] Invalid JWT token:", jwtError.message);
+      } else if (jwtError instanceof jwt.TokenExpiredError) {
+        console.log("❌ [AUTH] Token expired:", jwtError.expiredAt);
+      } else {
+        console.log("❌ [AUTH] JWT verification error:", jwtError);
+      }
+      return null;
+    }
 
     const user = await db.user.findUnique({
       where: { id: decoded.userId },
@@ -46,9 +60,27 @@ export async function authenticateToken(
       },
     });
 
-    if (!user || user.blocked || user.deletedAt) {
+    if (!user) {
+      console.log("❌ [AUTH] User not found for userId:", decoded.userId);
       return null;
     }
+
+    if (user.blocked) {
+      console.log("❌ [AUTH] User is blocked:", decoded.userId);
+      return null;
+    }
+
+    if (user.deletedAt) {
+      console.log("❌ [AUTH] User is deleted:", decoded.userId);
+      return null;
+    }
+
+    console.log("✅ [AUTH] User authenticated successfully:", {
+      id: user.id,
+      email: user.email,
+      phone: user.phone,
+      roles: user.roles,
+    });
 
     return {
       id: user.id,
@@ -58,12 +90,7 @@ export async function authenticateToken(
       roles: user.roles,
     };
   } catch (error) {
-    if (
-      error instanceof jwt.JsonWebTokenError ||
-      error instanceof jwt.TokenExpiredError
-    ) {
-      return null;
-    }
+    console.error("❌ [AUTH] Unexpected error during authentication:", error);
     throw error;
   }
 }
@@ -73,8 +100,17 @@ export async function authenticateToken(
  */
 export function requireAdmin(user: AuthUser | null): boolean {
   if (!user) {
+    console.log("❌ [AUTH] requireAdmin: User is null");
     return false;
   }
-  return user.roles.includes("admin");
+  
+  const isAdmin = user.roles.includes("admin");
+  console.log("🔍 [AUTH] requireAdmin check:", {
+    userId: user.id,
+    roles: user.roles,
+    isAdmin,
+  });
+  
+  return isAdmin;
 }
 
