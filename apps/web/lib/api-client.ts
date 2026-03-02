@@ -156,7 +156,15 @@ class ApiClient {
       const token = getAuthToken();
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
+        logger.log('🔑 [API CLIENT] Token added to request headers', {
+          tokenLength: token.length,
+          tokenPreview: token.substring(0, 20) + '...',
+        });
+      } else {
+        logger.warn('⚠️ [API CLIENT] No token found in localStorage for authenticated request');
       }
+    } else {
+      logger.log('🔓 [API CLIENT] Auth skipped for this request');
     }
 
     return headers as globalThis.HeadersInit;
@@ -205,7 +213,16 @@ class ApiClient {
     // Reduced timeout for faster failure - 10 seconds for product details, 15 seconds for other requests
     const timeout = endpoint.includes('/products/') ? 10000 : 15000;
     
-    logger.log('🌐 [API CLIENT] GET request:', { url, endpoint, baseUrl: this.baseUrl });
+    // Debug: Check token before request
+    const token = getAuthToken();
+    logger.log('🌐 [API CLIENT] GET request:', { 
+      url, 
+      endpoint, 
+      baseUrl: this.baseUrl,
+      hasToken: !!token,
+      tokenLength: token?.length,
+      skipAuth: options?.skipAuth,
+    });
     
     let response: Response;
     try {
@@ -301,11 +318,6 @@ class ApiClient {
         });
       }
       
-      // Handle 401 Unauthorized - clear token and redirect
-      if (isUnauthorized) {
-        this.handleUnauthorized();
-      }
-      
       try {
         const text = await response.text();
         errorText = text || '';
@@ -340,6 +352,23 @@ class ApiClient {
           logger.warn('⚠️ [API CLIENT] Failed to read 404 response:', e);
         } else if (!isUnauthorized) {
           logger.error('❌ [API CLIENT] Failed to read error response:', e);
+        }
+      }
+      
+      // Handle 401 Unauthorized - clear token and redirect
+      if (isUnauthorized) {
+        this.handleUnauthorized();
+      }
+      
+      // Handle 403 Forbidden - might be due to invalid token signature
+      // Check server logs for "invalid signature" - if so, clear token
+      if (response.status === 403 && endpoint.includes('/admin/')) {
+        // For admin endpoints, 403 usually means invalid token or not admin
+        // If we have a token but getting 403, it might be invalid signature
+        const token = getAuthToken();
+        if (token) {
+          logger.warn('⚠️ [API CLIENT] 403 Forbidden with token present - token might be invalid (wrong JWT_SECRET). Please log out and log back in.');
+          // Don't auto-clear for 403 as it might be legitimate (not admin), but log warning
         }
       }
       

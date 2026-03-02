@@ -2369,6 +2369,13 @@ class AdminService {
           // Delete variants that are no longer in the list
           const variantsToDelete = Array.from(existingVariantIds).filter(id => !incomingVariantIds.has(id));
           if (variantsToDelete.length > 0) {
+            // Remove cart items that reference these variants (FK constraint)
+            const deletedCartItems = await tx.cartItem.deleteMany({
+              where: { variantId: { in: variantsToDelete } },
+            });
+            if (deletedCartItems.count > 0) {
+              console.log(`🛒 [ADMIN SERVICE] Removed ${deletedCartItems.count} cart item(s) referencing deleted variants`);
+            }
             await tx.productVariant.deleteMany({
               where: {
                 id: { in: variantsToDelete },

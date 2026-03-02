@@ -91,7 +91,15 @@ export default function AdminPanel() {
 
   const fetchStats = useCallback(async () => {
     try {
-      console.log('📊 [ADMIN] Fetching statistics...');
+      // Debug: Check auth state before making request
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      console.log('📊 [ADMIN] Fetching statistics...', {
+        isLoggedIn,
+        isAdmin,
+        hasToken: !!token,
+        tokenLength: token?.length,
+        userRoles: user?.roles,
+      });
       setStatsLoading(true);
       
       const data = await apiClient.get<Stats>('/api/v1/admin/stats');
@@ -211,14 +219,29 @@ export default function AdminPanel() {
 
   // Fetch stats and activity
   useEffect(() => {
+    console.log('🔍 [ADMIN] Auth state check:', {
+      isLoading,
+      isLoggedIn,
+      isAdmin,
+      userId: user?.id,
+      userRoles: user?.roles,
+    });
+    
     if (!isLoading && isLoggedIn && isAdmin) {
+      console.log('✅ [ADMIN] Auth check passed, fetching data...');
       fetchStats();
       fetchActivity();
       fetchRecentOrders();
       fetchTopProducts();
       fetchUserActivity();
+    } else {
+      console.log('⚠️ [ADMIN] Auth check failed, not fetching data:', {
+        isLoading,
+        isLoggedIn,
+        isAdmin,
+      });
     }
-  }, [isLoading, isLoggedIn, isAdmin, fetchStats, fetchActivity, fetchRecentOrders, fetchTopProducts, fetchUserActivity]);
+  }, [isLoading, isLoggedIn, isAdmin, fetchStats, fetchActivity, fetchRecentOrders, fetchTopProducts, fetchUserActivity, user]);
 
   useEffect(() => {
     if (!isLoading) {

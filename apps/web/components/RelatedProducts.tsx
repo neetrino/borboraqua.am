@@ -377,7 +377,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                 return visibleProducts.map((product) => {
                   const featuredProduct = convertToFeaturedProduct(product);
                   return (
-                    <div key={product.id} className={isMobile ? "w-full" : "max-w-[280px] w-full"}>
+                    <div key={product.id} className={isMobile ? "w-full min-w-0 max-w-[50%]" : "w-[280px] min-w-[280px] max-w-[280px] flex-shrink-0"}>
                       <FeaturedProductCard
                         product={featuredProduct}
                         router={router}
