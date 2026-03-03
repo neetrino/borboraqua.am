@@ -750,6 +750,7 @@ export function TopHeaderBar({
 
   return (
     <div 
+      data-hide-on-product-zoom
       className="xl:hidden fixed top-0 left-0 right-0 w-full z-[100] border-b shadow-sm overflow-x-hidden overflow-y-visible" 
       style={{ 
         paddingTop: 'env(safe-area-inset-top, 0px)',

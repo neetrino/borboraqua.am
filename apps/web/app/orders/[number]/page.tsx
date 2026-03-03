@@ -8,6 +8,7 @@ import { formatPrice, getStoredCurrency, convertPrice } from '../../../lib/curre
 import { getStoredLanguage } from '../../../lib/language';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { useTranslation } from '../../../lib/i18n-client';
+import { ArrowLeft } from 'lucide-react';
 import { EhdmReceiptBlock, type EhdmReceiptData } from '../../../components/EhdmReceiptBlock';
 
 // Helper function to get color hex/rgb from color name
@@ -214,6 +215,15 @@ export default function OrderPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 rounded"
+          aria-label={t('common.back') || 'Back'}
+        >
+          <ArrowLeft className="w-5 h-5" aria-hidden />
+          <span>{t('common.back') || 'Back'}</span>
+        </button>
         <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('orders.title').replace('{number}', order.number)}</h1>
         <p className="text-gray-600">
           {t('orders.placedOn').replace('{date}', new Date(order.createdAt).toLocaleDateString())}

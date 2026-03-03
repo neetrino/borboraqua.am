@@ -248,8 +248,8 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     brand: product.brand,
   });
 
-  // Limit products: 9 on desktop, 8 on mobile
-  const displayProducts = isMobile ? sortedProducts.slice(0, 8) : sortedProducts.slice(0, 9);
+  // Limit products: 12 on desktop, 8 on mobile
+  const displayProducts = isMobile ? sortedProducts.slice(0, 8) : sortedProducts.slice(0, 12);
 
   return (
     <div className={getGridClasses()}>

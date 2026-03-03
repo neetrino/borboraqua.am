@@ -9,7 +9,6 @@ import { ProductPageButton } from '../../components/icons/global/globalMobile';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { apiClient } from '../../lib/api-client';
 import { formatPrice, type CurrencyCode } from '../../lib/currency';
-import { ProfileMenuDrawer } from '../../components/icons/global/globalMobile';
 import { UserAvatar } from '../../components/UserAvatar';
 import { useTranslation } from '../../lib/i18n-client';
 import { getStoredLanguage } from '../../lib/language';
@@ -771,13 +770,25 @@ function ProfilePageContent() {
             </div>
           </Card>
 
-          {/* Mobile Menu */}
-          <div className="lg:hidden">
-            <ProfileMenuDrawer
-              tabs={tabs}
-              activeTab={activeTab}
-              onSelect={(tabId) => handleTabChange(tabId as typeof activeTab)}
-            />
+          {/* Mobile: buttons to open each section — side by side */}
+          <div className="lg:hidden grid grid-cols-2 gap-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => handleTabChange(tab.id)}
+                className={`flex items-center justify-center gap-2 px-3 py-3 rounded-lg text-sm font-medium transition-all border ${
+                  activeTab === tab.id
+                    ? 'bg-gray-900 text-white border-gray-900'
+                    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
+                }`}
+              >
+                <span className={`flex-shrink-0 ${activeTab === tab.id ? 'text-white' : 'text-gray-500'}`}>
+                  {tab.icon}
+                </span>
+                <span className="text-left truncate">{tab.label}</span>
+              </button>
+            ))}
           </div>
 
           {/* Desktop Sidebar Navigation */}
@@ -942,45 +953,6 @@ function ProfilePageContent() {
                     ))}
                   </div>
                 )}
-              </Card>
-
-              {/* Quick Actions */}
-              <Card className="p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('profile.dashboard.quickActions')}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <ProductPageButton
-                    variant="outline"
-                    onClick={() => handleTabChange('orders')}
-                    className="justify-start w-full text-sm py-2"
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    {t('profile.dashboard.viewAllOrders')}
-                  </ProductPageButton>
-                  <ProductPageButton
-                    variant="outline"
-                    onClick={() => handleTabChange('addresses')}
-                    className="justify-start w-full text-sm py-2"
-                  >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {t('profile.dashboard.manageAddresses')}
-                  </ProductPageButton>
-                  <Link href="/products">
-                    <ProductPageButton
-                      variant="outline"
-                      className="w-full justify-start text-sm py-2"
-                    >
-                      <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                      </svg>
-                      {t('profile.dashboard.continueShopping')}
-                    </ProductPageButton>
-                  </Link>
-                </div>
               </Card>
             </>
           ) : (

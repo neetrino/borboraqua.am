@@ -332,6 +332,16 @@ export default function ProductPage({ params }: ProductPageProps) {
 
 
 
+  // Hide header when product image zoom is open (body class for global CSS)
+  useEffect(() => {
+    if (showZoom) {
+      document.body.classList.add('product-zoom-open');
+    } else {
+      document.body.classList.remove('product-zoom-open');
+    }
+    return () => document.body.classList.remove('product-zoom-open');
+  }, [showZoom]);
+
   // Ensure currentImageIndex is valid
   useEffect(() => {
     if (images.length > 0 && currentImageIndex >= images.length) {
@@ -1866,16 +1876,16 @@ export default function ProductPage({ params }: ProductPageProps) {
             {/* Mobile: Brand name on top */}
             {product.brand && <p className="text-sm text-gray-500 mb-2 lg:mb-2">{product.brand.name}</p>}
             {/* Mobile: Smaller title */}
-            <h1 className="text-2xl lg:text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-xl lg:text-3xl font-bold text-gray-900 mb-4">
               {getProductText(language, product.id, 'title') || product.title}
             </h1>
             <div className="mb-6">
               <div className="flex flex-col gap-1">
                 {/* Mobile: Price layout - old price on right, new price on left */}
                 <div className="flex items-center gap-2 justify-between lg:justify-start">
-                  <p className="text-xl lg:text-3xl font-bold text-gray-900">{formatPrice(price, currency)}</p>
+                  <p className="text-xl lg:text-3xl font-bold text-[#1ac0fd]">{formatPrice(price, currency)}</p>
                   {discountPercent && discountPercent > 0 && (
-                    <span className="text-lg font-semibold text-blue-600">
+                    <span className="text-lg font-semibold text-[#1ac0fd]">
                       -{discountPercent}%
                     </span>
                   )}
@@ -2323,7 +2333,7 @@ export default function ProductPage({ params }: ProductPageProps) {
       </div>
       
       {showZoom && images.length > 0 && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4" onClick={() => setShowZoom(false)}>
+        <div className="fixed inset-0 bg-black bg-opacity-90 z-[9999] flex items-center justify-center p-4" onClick={() => setShowZoom(false)}>
           <img src={images[currentImageIndex]} alt="" className="max-w-full max-h-full object-contain" />
           <button 
             className="absolute top-4 right-4 text-white text-2xl"
