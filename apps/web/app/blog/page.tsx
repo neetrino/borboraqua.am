@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '../../lib/i18n-client';
 import { apiClient } from '../../lib/api-client';
+import { getBlogFromCache, setBlogCache } from '../../lib/blog-cache';
 import { BlogCard } from '../../components/BlogCard';
 import { BlogPagination } from '../../components/BlogPagination';
 
@@ -37,35 +38,43 @@ export default function BlogPage() {
   const [error, setError] = useState<string | null>(null);
 
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const limit = 6;
 
   useEffect(() => {
     let cancelled = false;
-    
-    async function loadPosts() {
+
+    async function loadPosts(backgroundRevalidate = false) {
       try {
-        setLoading(true);
-        setError(null);
-        
-        // 6 posts per page (3x2 grid layout)
-        const startTime = Date.now();
-        const response = await apiClient.get<BlogListResponse>('/api/v1/blog', {
-          params: { lang, page: currentPage, limit: 6 },
-        });
-        const duration = Date.now() - startTime;
-        if (duration > 1500) {
-          console.warn(`⚠️ [BLOG] Slow response: ${duration}ms`);
-        } else {
-          console.log(`✅ [BLOG] Loaded in ${duration}ms`);
+        if (!backgroundRevalidate) {
+          setLoading(true);
+          setError(null);
         }
-        
+
+        // Use cached blog list (like products/cart) for instant display
+        if (!backgroundRevalidate) {
+          const cached = getBlogFromCache(lang, currentPage, limit);
+          if (cached) {
+            setPosts(cached.data as PublicBlogPost[]);
+            setMeta(cached.meta);
+            setLoading(false);
+            loadPosts(true);
+            return;
+          }
+        }
+
+        const response = await apiClient.get<BlogListResponse>('/api/v1/blog', {
+          params: { lang, page: String(currentPage), limit: String(limit) },
+        });
+
         if (!cancelled) {
           setPosts(response.data || []);
           setMeta(response.meta || null);
+          setBlogCache(lang, currentPage, limit, response.data || [], response.meta || { total: 0, page: currentPage, limit, totalPages: 0 });
         }
       } catch (err: any) {
-        if (!cancelled) {
+        if (!cancelled && !backgroundRevalidate) {
           console.error('❌ [BLOG] Failed to load posts', err);
-          const errorMessage = err?.message?.includes('timeout') 
+          const errorMessage = err?.message?.includes('timeout')
             ? 'Request timeout. Please try again.'
             : t('blog.errorLoading');
           setError(errorMessage);
@@ -76,9 +85,9 @@ export default function BlogPage() {
         }
       }
     }
-    
+
     void loadPosts();
-    
+
     return () => {
       cancelled = true;
     };

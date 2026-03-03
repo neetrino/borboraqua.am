@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } from '../../../lib/language';
 import { type CurrencyCode, getStoredCurrency, setStoredCurrency } from '../../../lib/currency';
@@ -899,15 +900,10 @@ export function TopHeaderBar({
  * Moved from home page to be used across all pages
  */
 export function MobileBottomNavigation() {
-  const router = useRouter();
   const pathname = usePathname();
-  const { isLoggedIn } = useAuth();
+  useAuth();
   const [cartCount, setCartCount] = useState<number>(0);
-  const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [prevActiveIndex, setPrevActiveIndex] = useState<number | null>(null);
-  const navRef = useRef<HTMLDivElement>(null);
-  const rafId = useRef<number | null>(null);
-  const iconRefs = useRef<(HTMLImageElement | null)[]>([]);
 
   // Fetch cart count (always from localStorage)
   useEffect(() => {
@@ -933,71 +929,6 @@ export function MobileBottomNavigation() {
     };
   }, []);
 
-  // Smooth scroll tracking with requestAnimationFrame for 60fps
-  // Apple-style color transition: white -> light blue gradient on scroll
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    let ticking = false;
-    const DEBUG = false; // Set to true for scroll progress debugging
-
-    const updateScrollProgress = () => {
-      // Background is always blue gradient, icons are always white
-      // No scroll-based transitions needed
-      if (navRef.current) {
-        // Always use blue gradient colors (fixed)
-        const bgOpacity = 0.3; // Fixed opacity for blue gradient
-        const borderOpacity = 0.5; // Fixed border opacity
-        
-        // Blue gradient colors (Apple-style)
-        const r1 = 55;  // Light blue
-        const g1 = 105;
-        const b1 = 205;
-        
-        const r2 = 75;  // Lighter blue
-        const g2 = 135;
-        const b2 = 225;
-        
-        navRef.current.style.background = `linear-gradient(135deg, 
-          rgba(${r1}, ${g1}, ${b1}, ${bgOpacity}),
-          rgba(${r2}, ${g2}, ${b2}, ${bgOpacity})
-        )`;
-        navRef.current.style.borderColor = `rgba(255, 255, 255, ${borderOpacity})`;
-      }
-      
-      // Update icon colors - always white icons
-      iconRefs.current.forEach((iconRef) => {
-        if (iconRef) {
-          // Icons should always be white (invert = 1)
-          iconRef.style.filter = `brightness(0) invert(1)`;
-        }
-      });
-      
-      ticking = false;
-    };
-
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(updateScrollProgress);
-        ticking = true;
-      }
-    };
-
-    // Initial update
-    updateScrollProgress();
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-      if (rafId.current !== null) {
-        cancelAnimationFrame(rafId.current);
-        rafId.current = null;
-      }
-    };
-  }, []);
 
   // Determine active navigation index based on current pathname
   const getActiveIndex = () => {
@@ -1033,23 +964,19 @@ export function MobileBottomNavigation() {
       }}
     >
       <div 
-        ref={navRef}
         className="relative h-[72px] rounded-[999px] border overflow-hidden w-full"
         style={{
           background: 'linear-gradient(135deg, rgba(55, 105, 205, 0.3), rgba(75, 135, 225, 0.3))',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
           borderColor: 'rgba(255, 255, 255, 0.5)',
-          willChange: 'background, border-color',
-          transition: 'none', // Disable CSS transitions, we use RAF for smooth 60fps
-          boxShadow: 'none', // Remove any box shadow
         }}
       >
         <div className="-translate-x-1/2 -translate-y-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-1/2 w-full max-w-[400px] sm:max-w-[420px] md:max-w-[680px] px-3">
           <div className="content-stretch flex items-center justify-center gap-5 sm:gap-6 md:gap-12 relative shrink-0 w-full">
             {/* Home */}
-            <button
-              onClick={() => router.push('/')}
+            <Link
+              href="/"
               className="group h-[56px] w-[70px] relative flex items-center justify-center transition-transform duration-200 hover:-translate-y-1 active:scale-95"
             >
               {activeIndex === 0 && (
@@ -1059,16 +986,15 @@ export function MobileBottomNavigation() {
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
               <img 
-                ref={(el) => { iconRefs.current[0] = el; }}
                 className="relative block max-w-none size-[19px]" 
                 alt="" 
                 src={imgHomeVector}
-                style={{ filter: 'brightness(0) invert(1)', willChange: 'filter' }}
+                style={{ filter: 'brightness(0) invert(1)' }}
               />
-            </button>
+            </Link>
             {/* Shop */}
-            <button
-              onClick={() => router.push('/products')}
+            <Link
+              href="/products"
               className="group block cursor-pointer h-[56px] w-[56px] relative flex items-center justify-center opacity-90 hover:opacity-100 transition-transform duration-200 hover:scale-110 hover:-translate-y-1 active:scale-95"
             >
               {activeIndex === 1 && (
@@ -1078,16 +1004,15 @@ export function MobileBottomNavigation() {
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
               <img 
-                ref={(el) => { iconRefs.current[1] = el; }}
                 className="relative block max-w-none size-[28px]" 
                 alt="" 
                 src={imgVector1}
-                style={{ filter: 'brightness(0) invert(1)', willChange: 'filter' }}
+                style={{ filter: 'brightness(0) invert(1)' }}
               />
-            </button>
+            </Link>
             {/* Cart */}
-            <button
-              onClick={() => router.push('/cart')}
+            <Link
+              href="/cart"
               className="group block cursor-pointer h-[56px] w-[56px] relative flex items-center justify-center opacity-90 hover:opacity-100 transition-transform duration-200 hover:scale-110 hover:-translate-y-1 active:scale-95"
             >
               {activeIndex === 2 && (
@@ -1097,11 +1022,10 @@ export function MobileBottomNavigation() {
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
               <img 
-                ref={(el) => { iconRefs.current[2] = el; }}
                 className="relative block max-w-none h-[22.312px] w-[25px]" 
                 alt="" 
                 src={imgGroup2148}
-                style={{ filter: 'brightness(0) invert(1)', willChange: 'filter' }}
+                style={{ filter: 'brightness(0) invert(1)' }}
               />
               {/* Cart Count Badge */}
               {cartCount > 0 && (
@@ -1109,10 +1033,10 @@ export function MobileBottomNavigation() {
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
-            </button>
+            </Link>
             {/* Profile */}
-            <button
-              onClick={() => router.push('/profile')}
+            <Link
+              href="/profile"
               className="group block cursor-pointer h-[56px] w-[56px] relative flex items-center justify-center opacity-90 hover:opacity-100 transition-transform duration-200 hover:scale-110 hover:-translate-y-1 active:scale-95"
             >
               {activeIndex === 3 && (
@@ -1122,13 +1046,12 @@ export function MobileBottomNavigation() {
               )}
               <span className="absolute inset-0 rounded-full bg-white/15 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-250" />
               <img 
-                ref={(el) => { iconRefs.current[3] = el; }}
                 className="relative block max-w-none h-[22px] w-[18.526px]" 
                 alt="" 
                 src={imgGroup2149}
-                style={{ filter: 'brightness(0) invert(1)', willChange: 'filter' }}
+                style={{ filter: 'brightness(0) invert(1)' }}
               />
-            </button>
+            </Link>
           </div>
         </div>
       </div>

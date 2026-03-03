@@ -1,11 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { blogService } from '@/lib/services/blog.service';
+import { getBlogPostBySlugServer } from '@/lib/blog-server';
 import { getStoredLanguage } from '@/lib/language';
 import { BlogArticleContent } from '@/components/BlogArticleContent';
-
-export const dynamic = 'force-dynamic';
 
 interface BlogArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -28,7 +26,7 @@ export async function generateMetadata({
   } catch {
     lang = getStoredLanguage() || 'hy';
   }
-  const post = await blogService.getBySlug(slug, lang);
+  const post = await getBlogPostBySlugServer(slug, lang);
 
   if (!post) {
     return {
@@ -77,7 +75,7 @@ export default async function BlogArticlePage({
   } catch {
     lang = getStoredLanguage() || 'hy';
   }
-  const post = await blogService.getBySlug(slug, lang);
+  const post = await getBlogPostBySlugServer(slug, lang);
 
   if (!post) {
     notFound();

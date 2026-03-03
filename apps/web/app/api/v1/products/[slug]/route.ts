@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
 import { productsService } from "@/lib/services/products.service";
 
-export const dynamic = "force-dynamic";
+const PRODUCT_BY_SLUG_REVALIDATE = 120;
 
 export async function GET(
   req: NextRequest,
@@ -11,7 +12,11 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const lang = searchParams.get("lang") || "en";
     const { slug } = await params;
-    const result = await productsService.findBySlug(slug, lang);
+    const result = await unstable_cache(
+      () => productsService.findBySlug(slug, lang),
+      ["product-slug", slug, lang],
+      { revalidate: PRODUCT_BY_SLUG_REVALIDATE }
+    )();
     return NextResponse.json(result);
   } catch (error: any) {
     console.error("❌ [PRODUCTS] Error:", error);

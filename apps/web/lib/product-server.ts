@@ -6,7 +6,7 @@
 import { unstable_cache } from 'next/cache';
 import { productsService } from './services/products.service';
 
-const PRODUCT_REVALIDATE = 60;
+const PRODUCT_REVALIDATE = 120;
 
 export type ProductServer = {
   id: string;

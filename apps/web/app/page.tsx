@@ -1,12 +1,9 @@
 import { cookies } from "next/headers";
-import { unstable_cache } from "next/cache";
-import { productsService } from "../lib/services/products.service";
+import { getHomePageData } from "../lib/home-server";
 import HomePageClient from "../components/HomePageClient";
 
-const HOME_PRODUCTS_REVALIDATE = 60;
-
 /**
- * Home page: server-fetches featured and kids products (cached), then renders client UI.
+ * Home page: server-fetches featured and kids products (cached via home-server), then renders client UI.
  * Uses listOnly: true so payload stays under Next.js data cache limit (2MB).
  */
 export default async function HomePage() {
@@ -21,25 +18,7 @@ export default async function HomePage() {
     lang = "en";
   }
 
-  const getFeatured = () =>
-    productsService.findAll({ filter: "featured", limit: 9, page: 1, lang, listOnly: true });
-  const getKids = () =>
-    productsService.findAll({ search: "kids", limit: 10, page: 1, lang, listOnly: true });
-
-  const [featuredRes, kidsRes] = await Promise.all([
-    unstable_cache(getFeatured, ["home-featured", lang], {
-      revalidate: HOME_PRODUCTS_REVALIDATE,
-    })(),
-    unstable_cache(getKids, ["home-kids", lang], {
-      revalidate: HOME_PRODUCTS_REVALIDATE,
-    })(),
-  ]);
-
-  const featured = featuredRes.data ?? [];
-  let kids = kidsRes.data ?? [];
-  if (kids.length === 0 && featured.length > 0) {
-    kids = featured.slice(0, 10);
-  }
+  const { featured, kids } = await getHomePageData(lang);
 
   return (
     <HomePageClient

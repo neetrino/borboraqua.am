@@ -4,10 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { apiClient } from '../../lib/api-client';
+import { getCartFromCache, setCartCache } from '../../lib/cart-cache';
 import { formatPrice, getStoredCurrency } from '../../lib/currency';
 import { getStoredLanguage } from '../../lib/language';
 import { useTranslation } from '../../lib/i18n-client';
 import { useAuth } from '../../lib/auth/AuthContext';
+import { CART_KEY } from '../../lib/storageCounts';
 import { ProductPageButton } from '../../components/icons/global/globalMobile';
 
 interface CartItem {
@@ -44,8 +46,6 @@ interface Cart {
   };
   itemsCount: number;
 }
-
-const CART_KEY = 'shop_cart_guest';
 
 export default function CartPage() {
   useAuth();
@@ -97,9 +97,9 @@ export default function CartPage() {
     };
   }, []);
 
-  async function fetchCart() {
+  async function fetchCart(backgroundRevalidate = false) {
     try {
-      setLoading(true);
+      if (!backgroundRevalidate) setLoading(true);
       if (typeof window === 'undefined') {
         setCart(null);
         setLoading(false);
@@ -115,6 +115,18 @@ export default function CartPage() {
           }
 
           const currentLang = getStoredLanguage();
+          const guestCartJson = JSON.stringify(guestCart);
+
+          // Use cached cart view (like products cache) for instant display, then revalidate in background
+          if (!backgroundRevalidate) {
+            const cached = getCartFromCache(guestCartJson, currentLang);
+            if (cached) {
+              setCart(cached as Cart);
+              setLoading(false);
+              fetchCart(true);
+              return;
+            }
+          }
           type ProductPayload = {
             id: string;
             slug: string;
@@ -133,40 +145,42 @@ export default function CartPage() {
             }>;
           };
 
-          // Մեկ request յուրաքանչյուր unique slug-ի համար (ոչ յուրաքանչյուր cart line)
-          const slugToItemIndices = new Map<string, number[]>();
+          // 1. Unique Slugs Extraction — Set unique product slugs (N+1 խնդրից խուսափելու համար)
           const validGuestItems: Array<{ item: typeof guestCart[0]; index: number }> = [];
+          const uniqueSlugsSet = new Set<string>();
           guestCart.forEach((item, index) => {
-            if (!item.productSlug) {
-              return;
-            }
+            if (!item.productSlug) return;
             validGuestItems.push({ item, index });
-            const indices = slugToItemIndices.get(item.productSlug) ?? [];
-            indices.push(index);
-            slugToItemIndices.set(item.productSlug, indices);
+            uniqueSlugsSet.add(item.productSlug);
           });
+          const uniqueSlugs = Array.from(uniqueSlugsSet);
 
-          const uniqueSlugs = Array.from(slugToItemIndices.keys());
-          /** 404 = remove from cart; undefined = fetch error, keep in cart; otherwise product data */
-          const productBySlug = new Map<string, ProductPayload | '404'>();
-
-          await Promise.all(
-            uniqueSlugs.map(async (slug) => {
-              try {
-                const productData = await apiClient.get<ProductPayload>(`/api/v1/products/${slug}`, {
-                  params: { lang: currentLang },
-                });
-                productBySlug.set(slug, productData);
-              } catch (error: unknown) {
-                const err = error as { status?: number; statusCode?: number };
-                if (err?.status === 404 || err?.statusCode === 404) {
-                  productBySlug.set(slug, '404');
-                }
-                // այլ սխալի դեպքում slug-ը map-ում չենք դնում → get = undefined → shouldRemove: false
-              }
-            })
+          // 2. Parallel Fetching — Promise.allSettled (մեկ ձախողում ամբողջ batch-ը չի կոտրում)
+          const settled = await Promise.allSettled(
+            uniqueSlugs.map((slug) =>
+              apiClient.get<ProductPayload>(`/api/v1/products/${slug}`, {
+                params: { lang: currentLang },
+              })
+            )
           );
 
+          // 3. Data Mapping — Lookup Dictionary: slug → product data (կամ '404' / բացակա)
+          /** 404 = remove from cart; undefined = fetch error, keep in cart; otherwise product data */
+          const productBySlug = new Map<string, ProductPayload | '404'>();
+          // Robustness: մեկ ապրանքի fetch ձախողում էջը չի կոտրում, մնացածը ցուցադրվում են
+          uniqueSlugs.forEach((slug, i) => {
+            const result = settled[i];
+            if (result.status === 'fulfilled') {
+              productBySlug.set(slug, result.value);
+            } else {
+              const err = result.reason as { status?: number; statusCode?: number };
+              if (err?.status === 404 || err?.statusCode === 404) {
+                productBySlug.set(slug, '404');
+              }
+            }
+          });
+
+          // 4. Cart Population — line items-ը լցնում ենք Lookup Dictionary-ից (նույն slug = նույն տվյալը)
           const itemsWithDetails: Array<{ item: CartItem | null; shouldRemove: boolean }> = guestCart.map(() => ({ item: null, shouldRemove: false }));
 
           for (const { item, index } of validGuestItems) {
@@ -255,7 +269,7 @@ export default function CartPage() {
           const subtotal = validItems.reduce((sum, item) => sum + item.total, 0);
           const itemsCount = validItems.reduce((sum, item) => sum + item.quantity, 0);
 
-      setCart({
+      const cartData = {
         id: 'guest-cart',
         items: validItems,
         totals: {
@@ -267,7 +281,9 @@ export default function CartPage() {
           currency: 'AMD',
         },
         itemsCount,
-      });
+      };
+      setCartCache(guestCartJson, currentLang, cartData);
+      setCart(cartData);
     } catch (error) {
       console.error('Error fetching cart:', error);
       setCart(null);
