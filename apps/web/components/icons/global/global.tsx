@@ -1031,9 +1031,9 @@ export function FeaturedProductCard({
         {/* Content Section - fixed layout, does not grow card */}
         <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative min-h-0 min-w-0">
           <div className="flex flex-col items-start w-full gap-0 min-h-0">
-            {/* Title - large, bold, dark, single line */}
-            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[16px] text-black w-full min-h-0">
-              <p className="leading-[24px] break-words w-full line-clamp-1">{product.title}</p>
+            {/* Title - 2 lines max on desktop, fixed height so card does not grow */}
+            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[16px] text-black w-full h-[48px] min-h-[48px] overflow-hidden">
+              <p className="leading-[24px] break-words w-full line-clamp-2">{product.title}</p>
             </div>
             {/* Category and price - same row, price on the right */}
             <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
