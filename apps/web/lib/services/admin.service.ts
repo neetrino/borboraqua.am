@@ -13,7 +13,8 @@ import {
 class AdminService {
   /**
    * Ensure colors and imageUrl columns exist in attribute_values table
-   * This is a runtime migration that runs automatically when needed
+   * This is a runtime migration that runs automatically when needed.
+   * (P0 Security 3.6: raw SQL uses fixed strings only — no user input.)
    */
   private async ensureColorsColumnsExist() {
     try {

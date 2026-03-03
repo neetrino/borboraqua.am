@@ -2,6 +2,7 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// P0 Security 4.2: use Neon pooled URL (host -pooler) + ?connection_limit=N in DATABASE_URL
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")

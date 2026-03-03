@@ -4,11 +4,33 @@ const path = require('path');
 // Load root .env so DATABASE_URL and other vars are available (monorepo: app runs from apps/web)
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
+/** Security headers (P0 checklist 1.5). CORS allowlist is in middleware (3.3). */
+const securityHeaders = [
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  {
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js/React needs unsafe-eval in dev; tighten in prod if possible
+      "style-src 'self' 'unsafe-inline' https:",
+      "img-src 'self' data: https: blob:",
+      "font-src 'self' data:",
+      "connect-src 'self' https:",
+      "frame-ancestors 'self'",
+    ].join('; '),
+  },
+];
+
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@shop/ui', '@shop/design-tokens'],
   // Standalone output - prevents prerendering of 404 page
   output: 'standalone',
+  async headers() {
+    return [{ source: '/:path*', headers: securityHeaders }];
+  },
     typescript: {
     ignoreBuildErrors: true, // TypeScript errors won't stop build
   },     

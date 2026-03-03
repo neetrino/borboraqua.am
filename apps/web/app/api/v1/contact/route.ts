@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminService } from "@/lib/services/admin.service";
+import { validateOrigin } from "@/lib/csrf";
 
 /**
  * POST /api/v1/contact
  * Create a new contact message (public endpoint)
  */
 export async function POST(req: NextRequest) {
+  const csrf = validateOrigin(req);
+  if (csrf) return csrf;
   try {
     const body = await req.json();
     

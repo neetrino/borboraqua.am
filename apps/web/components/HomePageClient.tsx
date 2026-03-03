@@ -1889,7 +1889,7 @@ export function HomePageClient({
           <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[65.4%_0_16.48%_57.22%] justify-center leading-[0] text-[#0f172a] text-[0px] tracking-[-0.9px] uppercase whitespace-nowrap">
             <p className="leading-[40px] mb-0 text-[53px]">{t('home.waterEnergySection.pure')}</p>
             <p className="leading-[40px] mb-0 text-[53px]">{t('home.waterEnergySection.energy')}</p>
-            <p className="font-['Montserrat',sans-serif] font-normal leading-[16px] text-[13px] capitalize tracking-[0.05em]">{t('home.waterEnergySection.subtitle')}</p> 
+            <p className="font-['Montserrat',sans-serif] font-normal leading-[16px] text-[13px] capitalize tracking-[0.05em] mt-3">{t('home.waterEnergySection.subtitle')}</p> 
           </div>
           <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[29.76%_62.8%_62.88%_0] justify-center leading-[0] text-[#09c1ff] text-[53px] tracking-[-0.9px] uppercase whitespace-nowrap">
             <p className="leading-[40px]">{t('home.waterEnergySection.balance')}</p>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { processImageUrl } from '../lib/utils/image-utils';
 import { useTranslation } from '../lib/i18n-client';
+import { sanitizeHtml } from '../lib/sanitize';
 
 interface BlogPost {
   id: string;
@@ -76,9 +77,9 @@ export function BlogArticleContent({ post }: BlogArticleContentProps) {
       })
     : null;
 
-  // Process content for internal links and heading structure
-  const processedContent = ensureHeadingStructure(
-    processInternalLinks(post.contentHtml || '')
+  // Process content: internal links, heading structure, then sanitize for XSS (3.1a)
+  const processedContent = sanitizeHtml(
+    ensureHeadingStructure(processInternalLinks(post.contentHtml || ''))
   );
 
   return (
