@@ -83,6 +83,7 @@ export function MobileBottomNav() {
             <Link
               key={label}
               href={href || '#'}
+              prefetch={!!href && href !== '#'}
               onClick={onClick}
               className={`flex flex-1 flex-col items-center rounded-xl px-2 py-1 text-xs font-medium transition ${
                 isActive ? 'text-gray-900' : 'text-gray-500'

@@ -255,6 +255,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     <div className={getGridClasses()}>
       {displayProducts.map((product) => {
         const featuredProduct = convertToFeaturedProduct(product);
+        const productHref = product.slug ? `/products/${encodeURIComponent(product.slug.trim())}` : null;
         return (
           <FeaturedProductCard
             key={product.id}
@@ -265,6 +266,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
             isAddingToCart={addingToCart.has(product.id)}
             onAddToCart={handleAddToCart}
             onProductClick={handleOpenProduct}
+            productHref={productHref}
             formatPrice={(price: number, curr?: any) => formatPrice(price, curr || currency)}
             currency={currency}
             isMobile={isMobile || isTablet}

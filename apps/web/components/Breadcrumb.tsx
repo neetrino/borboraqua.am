@@ -114,6 +114,7 @@ export function Breadcrumb() {
             ) : (
               <Link
                 href={item.href}
+                prefetch
                 className="text-gray-500 hover:text-gray-700 transition-colors"
               >
                 {item.label}

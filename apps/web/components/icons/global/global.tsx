@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } from '../../../lib/language';
@@ -880,6 +881,8 @@ interface FeaturedProductCardProps {
   isAddingToCart: boolean;
   onAddToCart: (product: FeaturedProduct) => void | Promise<void>;
   onProductClick: (product: FeaturedProduct) => void;
+  /** When set, card navigates via Next.js Link (prefetch) instead of onProductClick. */
+  productHref?: string | null;
   formatPrice: (price: number, currency?: CurrencyCode) => string;
   currency?: CurrencyCode;
   isMobile?: boolean;
@@ -900,6 +903,7 @@ export function FeaturedProductCard({
   isAddingToCart,
   onAddToCart,
   onProductClick,
+  productHref,
   formatPrice,
   currency,
   isMobile = false,
@@ -917,19 +921,17 @@ export function FeaturedProductCard({
     };
 
     const volume = extractVolume(product);
+    const mobileClass = 'h-[293px] relative w-full max-w-[187px] mx-auto cursor-pointer overflow-visible';
 
-    return (
-      <div
-        className="h-[293px] relative w-full max-w-[187px] mx-auto cursor-pointer overflow-visible"
-        onClick={() => onProductClick(product)}
-      >
-        {/* Product Image */}
+    return productHref ? (
+      <Link href={productHref} prefetch className={mobileClass}>
         <div className="absolute aspect-[305/854] left-[29%] right-[32%] top-0 overflow-visible">
           <div className="absolute inset-0 overflow-visible pointer-events-none">
             <img
               alt={product.title}
               className="absolute h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%] object-contain"
               src={product.image || ''}
+              loading="lazy"
             />
           </div>
         </div>
@@ -969,6 +971,30 @@ export function FeaturedProductCard({
             </div>
           </button>
         </div>
+      </Link>
+    ) : (
+        <div className={mobileClass} onClick={() => onProductClick(product)}>
+        <div className="absolute aspect-[305/854] left-[29%] right-[32%] top-0 overflow-visible">
+          <div className="absolute inset-0 overflow-visible pointer-events-none">
+            <img alt={product.title} className="absolute h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%] object-contain" src={product.image || ''} loading="lazy" />
+          </div>
+        </div>
+        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[59.39%_0_21.5%_0] rounded-[20px] h-[38%] w-[98%] left-[1%]">
+          <div className="absolute flex flex-col font-['Inter:Bold',sans-serif] font-bold left-[12px] top-[8px] right-[35px] justify-start leading-[0] text-left text-black overflow-hidden">
+            <p className="leading-[20px] break-words w-full line-clamp-3 " style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{product.title}</p>
+          </div>
+          {(volume || product.category) && (
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#737373] text-[12px] top-[63px] tracking-[1.2px] uppercase whitespace-nowrap">
+              <p className="leading-[16px]">{volume || product.category}</p>
+            </div>
+          )}
+          <div className="absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] left-[12px] not-italic text-[16px] text-white bottom-[8px] whitespace-nowrap">
+            <p className="leading-[28px]">{formatPrice(product.price, currency)}</p>
+          </div>
+          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(product); }} disabled={isAddingToCart || !product.inStock} className="absolute z-20 block cursor-pointer right-[8px] size-[38px] bottom-[8px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50" aria-label={t('home.featuredProducts.addToCart')}>
+            <div className="flex flex-col font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] justify-center leading-[0] not-italic text-[20px] text-center text-white -mt-[3px]"><p className="leading-[20px] whitespace-pre-wrap">+</p></div>
+          </button>
+        </div>
       </div>
     );
   }
@@ -976,12 +1002,9 @@ export function FeaturedProductCard({
   // Desktop version
   if (compact) {
     // Compact version for shop page - smaller cards
-    return (
-      <div
-        key={product.id}
-        onClick={() => onProductClick(product)}
-        className="flex flex-col items-center gap-0 w-full cursor-pointer product-card-hover product-card-compact  z-[11] isolate rounded-[45px] p-2"
-      >
+    const compactClass = 'flex flex-col items-center gap-0 w-full cursor-pointer product-card-hover product-card-compact z-[11] isolate rounded-[45px] p-2';
+    const compactContent = (
+      <>
         {/* Image Container - fixed height, does not grow with img/title */}
         <div className={`${isRelated ? (isMobile ? 'h-[160px]' : 'md:h-[260px]') : (isMobile ? 'h-[180px]' : 'md:h-[340px]')} w-full relative product-image-container flex items-end justify-center bg-transparent rounded-lg overflow-hidden min-h-0 mb-3 shrink-0 flex-shrink-0`}>
           {product.image ? (
@@ -1034,16 +1057,60 @@ export function FeaturedProductCard({
             </div>
           </button>
         </div>
+      </>
+    );
+    return productHref ? (
+      <Link key={product.id} href={productHref} prefetch className={compactClass}>
+        {compactContent}
+      </Link>
+    ) : (
+      <div key={product.id} onClick={() => onProductClick(product)} className={compactClass}>
+        {compactContent}
       </div>
     );
   }
 
   // Full size version for home page — bottle extends beyond card, standing effect
-  return (
+  const fullSizeClass = 'flex flex-col items-center gap-0 w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2 overflow-visible';
+  return productHref ? (
+    <Link key={product.id} href={productHref} prefetch className={fullSizeClass}>
+      <div className="h-[240px] lg:h-[240px] md:h-[240px] sm:h-[216px] w-full relative product-image-container product-image-container-home flex items-end justify-center bg-transparent overflow-visible min-h-0 mb-3 shrink-0 flex-shrink-0">
+        {product.image ? (
+          <img alt={product.title} className="product-image-bottle-standing w-full max-w-[68%] h-auto object-contain object-bottom" src={product.image} style={{ backgroundColor: 'transparent' }} />
+        ) : (
+          <div className="w-full h-full bg-gray-300 rounded-lg" />
+        )}
+      </div>
+      <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0">
+        <div className="flex flex-col items-start w-full gap-0 min-h-0">
+          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full min-h-0">
+            <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full line-clamp-1">{product.title}</p>
+          </div>
+          <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
+            {product.category ? (
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-gray-500 min-w-0">
+                <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] break-words">{product.category}</p>
+              </div>
+            ) : (
+              <div className="shrink-0" />
+            )}
+            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] whitespace-nowrap">
+              <p className="leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px]">{formatPrice(product.price, currency)}</p>
+            </div>
+          </div>
+        </div>
+        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(product); }} disabled={!product.inStock || isAddingToCart} className="bg-[#00d1ff] content-stretch flex h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center justify-center py-[10px] lg:py-[10px] md:py-[12px] sm:py-[12px] relative z-10 rounded-[30px] lg:rounded-[30px] md:rounded-[34px] sm:rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer">
+          <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
+            <p className="leading-[22px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{isAddingToCart ? t('home.featuredProducts.adding') : t('home.featuredProducts.addToCart')}</p>
+          </div>
+        </button>
+      </div>
+    </Link>
+  ) : (
     <div
       key={product.id}
       onClick={() => onProductClick(product)}
-      className="flex flex-col items-center gap-0 w-[280px] lg:w-[280px] md:w-[280px] sm:w-[240px] cursor-pointer product-card-hover z-[11] isolate product-card-glass rounded-lg p-2 overflow-visible"
+      className={fullSizeClass}
     >
       {/* Image area: fixed height, does not grow with img/title */}
       <div className="h-[240px] lg:h-[240px] md:h-[240px] sm:h-[216px] w-full relative product-image-container product-image-container-home flex items-end justify-center bg-transparent overflow-visible min-h-0 mb-3 shrink-0 flex-shrink-0">

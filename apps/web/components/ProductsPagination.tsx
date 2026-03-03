@@ -113,6 +113,7 @@ export function ProductsPagination({
       ) : (
         <Link
           href={buildPaginationUrl(1)}
+          prefetch
           className="bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)]"
           aria-label="First page"
         >
@@ -165,6 +166,7 @@ export function ProductsPagination({
           <Link
             key={page}
             href={buildPaginationUrl(page)}
+            prefetch
             className={`flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all ${
               isActive
                 ? 'bg-[#00d1ff]'
@@ -199,6 +201,7 @@ export function ProductsPagination({
       ) : (
         <Link
           href={buildPaginationUrl(currentPage + 1)}
+          prefetch
           className="bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)]"
           aria-label="Next page"
         >
@@ -221,6 +224,7 @@ export function ProductsPagination({
       ) : (
         <Link
           href={buildPaginationUrl(totalPages)}
+          prefetch
           className="bg-[rgba(255,255,255,0.1)] flex items-center justify-center p-[8px] rounded-[24px] shrink-0 size-[44px] transition-all hover:bg-[rgba(255,255,255,0.2)]"
           aria-label="Last page"
         >

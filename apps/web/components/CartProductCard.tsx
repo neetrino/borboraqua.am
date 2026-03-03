@@ -73,7 +73,7 @@ export function CartProductCard({
 
   return (
     <article className={styles.card}>
-      <Link href={`/products/${item.variant.product.slug}`} className={styles.imageWrap}>
+      <Link href={`/products/${item.variant.product.slug}`} prefetch className={styles.imageWrap}>
         {item.variant.product.image ? (
           <Image
             src={item.variant.product.image}
@@ -126,7 +126,7 @@ export function CartProductCard({
         </button>
 
         <h2 className={styles.title}>
-          <Link href={`/products/${item.variant.product.slug}`} className="text-inherit hover:text-[#1ac0fd] transition-colors">
+          <Link href={`/products/${item.variant.product.slug}`} prefetch className="text-inherit hover:text-[#1ac0fd] transition-colors">
             {item.variant.product.title}
           </Link>
         </h2>

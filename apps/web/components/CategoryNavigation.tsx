@@ -393,6 +393,7 @@ function CategoryNavigationContent() {
               <Link
                 key={category.id}
                 href={category.slug === 'all' ? '/products' : `/products?category=${category.slug}`}
+                prefetch
                 onClick={(e) => {
                   e.preventDefault();
                   handleCategoryClick(category.slug === 'all' ? null : category.slug);

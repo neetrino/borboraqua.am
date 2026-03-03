@@ -376,6 +376,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                 const visibleProducts = products.slice(carouselIndex, carouselIndex + visibleCount);
                 return visibleProducts.map((product) => {
                   const featuredProduct = convertToFeaturedProduct(product);
+                  const productHref = product.slug ? `/products/${encodeURIComponent(product.slug.trim())}` : null;
                   return (
                     <div key={product.id} className={isMobile ? "w-full min-w-0 max-w-[50%]" : "w-[280px] min-w-[280px] max-w-[280px] flex-shrink-0"}>
                       <FeaturedProductCard
@@ -386,6 +387,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                         isAddingToCart={addingToCart.has(product.id)}
                         onAddToCart={handleAddToCart}
                         onProductClick={handleOpenProduct}
+                        productHref={productHref}
                         formatPrice={(price: number, curr?: any) => formatPrice(price, curr || currency)}
                         currency={currency}
                         isMobile={isMobile}

@@ -183,7 +183,6 @@ export function HomePageClient({
     const fetchFeaturedProducts = async () => {
       try {
         setProductsLoading(true);
-        console.log('📦 [HOMEPAGE] Fetching featured products...');
 
         const language = getStoredLanguage();
         const params: Record<string, string> = {
@@ -197,11 +196,8 @@ export function HomePageClient({
           params,
         });
 
-        console.log(`✅ [HOMEPAGE] Loaded ${response.data.length} featured products`);
-
         // If we got less than 9 products, try without filter to get any products
         if (response.data.length < 9) {
-          console.log('⚠️ [HOMEPAGE] Less than 9 featured products, fetching any products...');
           const fallbackParams: Record<string, string> = {
             page: '1',
             limit: '9',
@@ -215,7 +211,7 @@ export function HomePageClient({
           setFeaturedProducts(response.data.slice(0, 9));
         }
       } catch (err: any) {
-        console.error('❌ [HOMEPAGE] Error fetching featured products:', err);
+        
         setFeaturedProducts([]);
       } finally {
         setProductsLoading(false);
@@ -297,7 +293,6 @@ export function HomePageClient({
       setCurrency(getStoredCurrency());
     };
     const handleCurrencyRatesUpdate = () => {
-      console.log('💱 [HOMEPAGE] Currency rates updated, reloading rates...');
       initializeCurrencyRates(true).catch(console.error);
     };
 
@@ -492,7 +487,6 @@ export function HomePageClient({
       router,
       t,
       onSuccess: () => {
-        console.log('✅ [HOMEPAGE] Product added to cart:', product.title);
       },
       onError: (error: any) => {
         console.error('❌ [HOMEPAGE] Error adding to cart:', error);
@@ -805,7 +799,7 @@ export function HomePageClient({
         {/* Mobile Hero Section Decorative Group — 110% size */}
         <div className="absolute inset-[15%_10%_70%_10%] sm:inset-[12%_10%_70%_10%] md:inset-[10%_10%_70%_10%] z-0 overflow-visible flex items-center justify-center">
           <div className="absolute left-1/2 top-1/2 w-[110%] h-[110%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
-            <img alt="Decorative Group" className="block size-full object-contain object-center figma-fade-in" src={imgGroup2105} />
+            <img alt="Decorative Group" className="block size-full object-contain object-center figma-fade-in" src={imgGroup2105} loading="eager" />
           </div>
         </div>
 
@@ -814,13 +808,13 @@ export function HomePageClient({
         {/* Mobile Decorative Ellipses and Shapes */}
         <div className="-translate-x-1/2 absolute h-[311px] left-[calc(50%+303.5px)] top-[2200px] w-[329px]">
           <div className="absolute inset-[-91.64%_-86.63%]">
-            <img alt="" className="block max-w-none size-full" src={imgEllipse41} />
+            <img alt="" className="block max-w-none size-full" src={imgEllipse41} loading="lazy" />
           </div>
         </div>
         <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(20%+296.32px)] mix-blend-luminosity size-[537.421px] top-[2350px]">
           <div className="flex-none rotate-[55.86deg]">
             <div className="relative size-[386.94px]">
-              <img alt="" className="block max-w-none size-full" src={imgShape} />
+              <img alt="" className="block max-w-none size-full" src={imgShape} loading="lazy" />
             </div>
           </div>
         </div>
@@ -828,7 +822,7 @@ export function HomePageClient({
         
           <div className="-translate-x-1/2 absolute h-[777px] left-[calc(50%+397.5px)] top-[1200px] w-[823px]">
             <div className="absolute inset-[-59.85%_-56.5%]">
-              <img alt="" className="block max-w-none size-full" src={imgEllipse41} />
+              <img alt="" className="block max-w-none size-full" src={imgEllipse41} loading="lazy" />
             </div>
           </div>
       
@@ -838,7 +832,7 @@ export function HomePageClient({
         
         <div className="-translate-x-1/2 absolute h-[438px] left-[calc(50%-302px)] top-[650px] w-[464px]">
           <div className="absolute inset-[-83.33%_-78.66%]">
-            <img alt="" className="block max-w-none size-full" src={imgEllipse41} />
+            <img alt="" className="block max-w-none size-full" src={imgEllipse41} loading="lazy" />
           </div>
         </div>
 
@@ -847,10 +841,10 @@ export function HomePageClient({
       
        
           <div className="absolute flex items-center justify-center left-[57.67%] right-[4.12%] top-[calc(13.72%+958px)] bottom-[calc(100%-81.17%)]">
-            <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 flex-none rotate-[100.79deg] size-[90px]" maxDrag={50} />
+            <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 flex-none rotate-[100.79deg] size-[90px]" maxDrag={50} loading="lazy" />
           </div>
           <div className="absolute flex items-end justify-center top-[190px] sm:top-[220px] md:top-[240px] w-full max-w-[440px] z-[2] translate-x-8 sm:translate-x-44 md:translate-x-52">
-          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-1 size-[320px] sm:size-[360px] md:size-[400px] flex items-center justify-center" maxDrag={110} />
+          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-1 size-[320px] sm:size-[360px] md:size-[400px] flex items-center justify-center" maxDrag={110} loading="eager" />
         </div>       
 
        
@@ -930,7 +924,7 @@ export function HomePageClient({
 
         {/* Left bulb — after Featured title, float + drag */}
         <div className="absolute flex items-end justify-center left-2 right-auto top-[calc(0%+865px)] bottom-auto z-10 max-w-[130px] overflow-visible">
-          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-7 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} />
+          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-7 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} loading="lazy" />
         </div>
 
         {/* Mobile Featured Products - 4 products in 2x2 grid, 9 products in 3x3 grid from 728px */}
@@ -951,6 +945,7 @@ export function HomePageClient({
                     isAddingToCart={addingToCart.has(product.id)}
                     onAddToCart={handleAddToCart}
                     onProductClick={handleOpenProduct}
+                    productHref={product.slug ? `/products/${encodeURIComponent(product.slug)}` : null}
                     formatPrice={formatPrice}
                     currency={currency}
                     isMobile={true}
@@ -969,6 +964,7 @@ export function HomePageClient({
                     isAddingToCart={addingToCart.has(product.id)}
                     onAddToCart={handleAddToCart}
                     onProductClick={handleOpenProduct}
+                    productHref={product.slug ? `/products/${encodeURIComponent(product.slug)}` : null}
                     formatPrice={formatPrice}
                     currency={currency}
                     isMobile={true}
@@ -1040,7 +1036,7 @@ export function HomePageClient({
         {/* Mobile Trusted By Background Ellipse */}
         <div className="-translate-x-1/2 absolute flex items-center justify-center left-1/2 top-[2450px] w-full h-[500px] z-0 overflow-hidden" style={{ overflow: 'hidden', overflowY: 'hidden', overflowX: 'hidden' }}>
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden" style={{ overflow: 'hidden' }}>
-            <img alt="Trusted By Background" className="block max-w-none w-[150%] h-[150%] object-cover opacity-30" src={imgEllipse41} style={{ maxWidth: '100%', maxHeight: '100%' }} />
+            <img alt="Trusted By Background" className="block max-w-none w-[150%] h-[150%] object-cover opacity-30" src={imgEllipse41} loading="lazy" style={{ maxWidth: '100%', maxHeight: '100%' }} />
           </div>
         </div>
 
@@ -1073,6 +1069,7 @@ export function HomePageClient({
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
               className="absolute inset-0 max-w-none object-contain pointer-events-none size-full"
               src={TRUSTED_BY_LOGOS[trustedByIndex].src}
+              loading="lazy"
             />
           </div>
         </div>
@@ -1083,6 +1080,7 @@ export function HomePageClient({
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
               className="max-w-none object-contain pointer-events-none h-full w-auto"
               src={TRUSTED_BY_LOGOS[trustedByIndex].src}
+              loading="lazy"
             />
           </div>
           <div className="h-[72px] relative shrink-0 w-auto flex items-center justify-center">
@@ -1090,6 +1088,7 @@ export function HomePageClient({
               alt={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % 3].alt}
               className="max-w-none object-contain pointer-events-none h-full w-auto"
               src={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % 3].src}
+              loading="lazy"
             />
           </div>
         </div>
@@ -1237,7 +1236,7 @@ export function HomePageClient({
 
       {/* Hero decorative ball (bulb.svg) — drag to move a little */}
       <div className="absolute left-1/2 top-[315px] flex size-[606px] -translate-x-1/2 items-center justify-center pointer-events-auto md:top-[315px] sm:top-[252px]">
-        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active size-full flex items-center justify-center" maxDrag={140} />
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active size-full flex items-center justify-center" maxDrag={140} loading="eager" />
       </div>
 
        
@@ -1282,32 +1281,32 @@ export function HomePageClient({
       {/* Water Wave Graphic */}
       <div className="absolute left-0 right-0 h-[527px] top-[1050px] w-full z-0">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <img alt="Water Wave" className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash1} />
+          <img alt="Water Wave" className="absolute h-[158.63%] left-0 max-w-none top-[-58.62%] w-full" src={imgDanielSinocaAancLsb0SU0Unsplash1} loading="lazy" />
         </div>
       </div>
 
       {/* Decorative Elements - Ellipses */}
       <div className="absolute h-[1124px] left-[calc(50%+953.5px)] top-[2396px] translate-x-[-50%] w-[1191px] overflow-hidden">
         <div className="absolute inset-0 figma-float">
-          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse41} />
+          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse41} loading="lazy" />
         </div>
       </div>
 
       <div className="absolute h-[1051px] left-1/2 top-[4100px] translate-x-[-50%] w-[2808px] overflow-hidden "  >
         <div className="absolute inset-0 figma-float">
-          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse41} />
+          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse41} loading="lazy" />
         </div>
       </div>
 
       <div className="absolute h-[1124px] left-[calc(50%-1113.5px)] top-[3102px] translate-x-[-50%] w-[1191px] overflow-hidden">
         <div className="absolute inset-0 figma-float">
-          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse41} />
+          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse41} loading="lazy" />
         </div>
       </div>
 
       <div className="absolute h-[1124px] left-[calc(50%+986px)] top-[3116px] translate-x-[-50%] w-[1422px] overflow-hidden">
         <div className="absolute inset-0 figma-float">
-          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse41} />
+          <img alt="Ellipse" className="block max-w-none size-full" src={imgEllipse41} loading="lazy" />
         </div>
       </div>
 
@@ -1315,7 +1314,7 @@ export function HomePageClient({
       <div className="absolute flex items-center justify-center left-[calc(50%+846.59px)] size-[1045.176px] top-[2628px] translate-x-[-50%]">
         <div className="flex-none rotate-[-56.31deg]">
           <div className="relative size-[753.698px]">
-            <img alt="Shape" className="block max-w-none size-full" src={imgShape} />
+            <img alt="Shape" className="block max-w-none size-full" src={imgShape} loading="lazy" />
           </div>
         </div>
       </div>
@@ -1323,7 +1322,7 @@ export function HomePageClient({
       <div className="absolute flex items-center justify-center left-[calc(50%-587.04px)] size-[541.928px] top-[3100px] translate-x-[-50%]">
         <div className="flex-none rotate-[-165deg]">
           <div className="relative size-[524.132px]">
-            <img alt="Shape" className="block max-w-none size-full" src={imgShape} />
+            <img alt="Shape" className="block max-w-none size-full" src={imgShape} loading="lazy" />
           </div>
         </div>
       </div>
@@ -1399,6 +1398,7 @@ export function HomePageClient({
                       isAddingToCart={addingToCart.has(product.id)}
                       onAddToCart={handleAddToCart}
                       onProductClick={handleOpenProduct}
+                      productHref={product.slug ? `/products/${encodeURIComponent(product.slug)}` : null}
                       formatPrice={formatPrice}
                       currency={currency}
                     />
@@ -1481,7 +1481,6 @@ export function HomePageClient({
                 e.preventDefault();
                 e.stopPropagation();
               }
-              console.log('🖱️ [CAROUSEL] Next button clicked');
               handleNextProducts(e);
             }}
             className="left-[calc(50%-580px)] lg:left-[calc(50%-580px)] md:left-[calc(50%-500px)] sm:left-[calc(50%-400px)] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1090px]"
@@ -1496,7 +1495,6 @@ export function HomePageClient({
                 e.preventDefault();
                 e.stopPropagation();
               }
-              console.log('🖱️ [CAROUSEL] Previous button clicked');
               handlePreviousProducts(e);
             }}
             className="right-[calc(50%-580px)] lg:right-[calc(50%-580px)] md:right-[calc(50%-500px)] sm:right-[calc(50%-400px)] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1110px]"
@@ -1545,7 +1543,7 @@ export function HomePageClient({
         <div className="absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[calc(50%-27.08%-224px)] lg:left-[350px] md:left-[20.5%] sm:left-[5%] top-0 w-[173px] lg:w-[270px] md:w-[25%] sm:w-[40%]">
           <div className="absolute inset-0 rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
-              <img alt="Screenshot" className="absolute h-[149.05%] left-[-32.81%] max-w-none top-[-32.36%] w-[132.81%]" src={img5} />
+              <img alt="Screenshot" className="absolute h-[149.05%] left-[-32.81%] max-w-none top-[-32.36%] w-[132.81%]" src={img5} loading="lazy" />
             </div>
           </div>
         </div>
@@ -1572,7 +1570,7 @@ export function HomePageClient({
         <div className="absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[calc(50%+27.08%+224px)] lg:left-[1080px] md:left-[63.3%] sm:left-[55%] top-0 w-[173px] lg:w-[270px] md:w-[25%] sm:w-[40%]">
           <div className="absolute inset-0 rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
-              <img alt="Screenshot" className="absolute h-[101.64%] left-[-6.77%] max-w-none top-[-1.52%] w-[113.53%]" src={img6} />
+              <img alt="Screenshot" className="absolute h-[101.64%] left-[-6.77%] max-w-none top-[-1.52%] w-[113.53%]" src={img6} loading="lazy" />
             </div>
           </div>
         </div>
@@ -1599,12 +1597,12 @@ export function HomePageClient({
         <div className="absolute aspect-[100/100] left-[34.13%] right-[34.93%] lg:left-[38%] lg:right-[38%] top-0">
           <div className="absolute inset-[11.48%_0_20.97%_32.91%] overflow-hidden">
             <div className="absolute inset-0">
-              <img alt="PC Icon" className="block max-w-none size-full" src={img13} />
+              <img alt="PC Icon" className="block max-w-none size-full" src={img13} loading="lazy" />
             </div>
           </div>
           <div className="absolute inset-[29.31%_16.81%_0_9.91%] overflow-hidden">
             <div className="absolute inset-0">
-              <img alt="Glass" className="block max-w-none size-full" src={img14} />
+              <img alt="Glass" className="block max-w-none size-full" src={img14} loading="lazy" />
             </div>
           </div>
         </div>
@@ -1624,16 +1622,16 @@ export function HomePageClient({
         <div className="absolute aspect-[100/100] left-[37.07%] overflow-clip right-[32%] lg:left-[36%] lg:right-[36%] top-0">
           <div className="absolute inset-[10.22%_10.23%_61.04%_62.5%]">
             <div className="absolute inset-0">
-              <img alt="Leaf" className="block max-w-none size-full" src={img7} />
+              <img alt="Leaf" className="block max-w-none size-full" src={img7} loading="lazy" />
             </div>
           </div>
           <div className="absolute inset-[16.22%_15.91%_6.5%_4.41%] overflow-hidden">
             <div className="absolute inset-0">
-              <img alt="Glass" className="block max-w-none size-full" src={img8} />
+              <img alt="Glass" className="block max-w-none size-full" src={img8} loading="lazy" />
             </div>
           </div>
           <div className="absolute inset-[32.96%_31.82%_25.5%_35.23%]">
-            <img alt="Top" className="block max-w-none size-full" src={img9} />
+            <img alt="Top" className="block max-w-none size-full" src={img9} loading="lazy" />
           </div>
         </div>
         <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[63.5%_13.33%_22%_13.6%] lg:inset-[63.5%_13.33%_22%_13.6%] md:inset-[63.5%_13.33%_22%_13.6%] sm:inset-[57%_13.33%_7%_13.6%] justify-center leading-[14px] lg:leading-[18px] md:leading-[18px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[11px] text-center z-[10]">
@@ -1651,15 +1649,15 @@ export function HomePageClient({
         <div className="absolute bg-white inset-[15.83%_0_0_0] rounded-[30px] lg:rounded-[37px]" />
         <div className="absolute aspect-[100/100] left-[34.53%] right-[34.53%] lg:left-[38%] lg:right-[38%] top-0">
           <div className="absolute inset-[5.88%_0_26.15%_50.33%] overflow-hidden">
-            <img alt="Group" className="block max-w-none size-full" src={img10} />
+            <img alt="Group" className="block max-w-none size-full" src={img10} loading="lazy" />
           </div>
           <div className="absolute inset-[13.93%_8.94%_9.09%_8.94%] overflow-hidden">
             <div className="absolute inset-0">
-              <img alt="Glass" className="block max-w-none size-full" src={img11} />
+              <img alt="Glass" className="block max-w-none size-full" src={img11} loading="lazy" />
             </div>
           </div>
           <div className="absolute inset-[39.77%_45.45%_20.45%_45.45%]">
-            <img alt="Top" className="block max-w-none size-full" src={img12} />
+            <img alt="Top" className="block max-w-none size-full" src={img12} loading="lazy" />
           </div>
         </div>
         <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[63%_10.4%_20%_10.67%] lg:inset-[63%_10.4%_20%_10.67%] md:inset-[63%_10.4%_20%_10.67%] sm:inset-[57%_10.4%_8%_10.67%] justify-center leading-[18px] lg:leading-[22px] md:leading-[20px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[11px] text-center z-[10]">
@@ -1704,7 +1702,8 @@ export function HomePageClient({
               <img 
                 alt="Partner Logo" 
                 className="absolute inset-0 max-w-none object-contain pointer-events-none size-full" 
-                src={imgSas20Logo1} 
+                src={imgSas20Logo1}
+                loading="lazy"
               />
             </div>
             {/* Logo 1 - image6e */}
@@ -1719,7 +1718,8 @@ export function HomePageClient({
               <img 
                 alt="Partner Logo" 
                 className="absolute inset-0 max-w-none object-contain pointer-events-none size-full" 
-                src={kaiserLogo} 
+                src={kaiserLogo}
+                loading="lazy"
               />
             </div>
             {/* Logo 2 - logo 1 */}
@@ -1734,7 +1734,8 @@ export function HomePageClient({
               <img 
                 alt="Partner Logo" 
                 className="absolute inset-0 max-w-none object-contain pointer-events-none size-full" 
-                src={imgLogo1} 
+                src={imgLogo1}
+                loading="lazy"
               />
             </div>
           </div>
@@ -1784,7 +1785,6 @@ export function HomePageClient({
                   e.preventDefault();
                   e.stopPropagation();
                 }
-                console.log('🖱️ [TRUSTED BY] Next button clicked');
                 handleNextTrustedBy(e);
               }}
               className="size-[45px] lg:size-[56px] relative z-[101] left-0 right-auto border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
@@ -1799,7 +1799,6 @@ export function HomePageClient({
                   e.preventDefault();
                   e.stopPropagation();
                 }
-                console.log('🖱️ [TRUSTED BY] Previous button clicked');
                 handlePreviousTrustedBy(e);
               }}
               className="size-[45px] lg:size-[56px] relative z-[101] right-0 left-auto border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
@@ -1814,36 +1813,36 @@ export function HomePageClient({
       {/* Additional Decorative Elements - Hero Section Bubbles */}
       {/* Background ellipse at original left position */}
       <div className="absolute top-[38.44%] left-[-10%] h-[800px] w-[600px]  overflow-hidden pointer-events-none">
-        <img alt="Background Ellipse" className="block max-w-none size-full" src={imgEllipse41} />
+        <img alt="Background Ellipse" className="block max-w-none size-full" src={imgEllipse41} loading="lazy" />
       </div>
 
       {/* Decorative bubbles — bulb.svg, float + drag */}
       <div className="absolute z-[30] flex top-[43.44%] right-[71%] bottom-[43.57%] left-0 items-center justify-center overflow-visible pointer-events-none">
-        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-2 size-[385px] flex items-center justify-center" maxDrag={110} />
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-2 size-[385px] flex items-center justify-center" maxDrag={110} loading="lazy" />
       </div>
 
       <div className="absolute flex items-center justify-center left-[1394px] top-[1190px] size-[300px] pointer-events-none">
-        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-5 size-full flex items-center justify-center" maxDrag={95} />
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-5 size-full flex items-center justify-center" maxDrag={95} loading="lazy" />
       </div>
 
       <div className="absolute flex items-center justify-center left-[203px] top-[1433px] size-[100px] pointer-events-none">
-        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-9 size-full flex items-center justify-center" maxDrag={65} />
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-9 size-full flex items-center justify-center" maxDrag={65} loading="lazy" />
       </div>
 
       <div className="absolute flex inset-[22%_0.5%_77.5%_76.61%] items-center justify-center pointer-events-none">
-        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-6 size-[102px] flex items-center justify-center" maxDrag={65} />
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-6 size-[102px] flex items-center justify-center" maxDrag={65} loading="lazy" />
       </div>
 
       <div className="absolute flex top-[44%] right-[1%] bottom-[50.88%] left-auto items-center justify-center overflow-visible pointer-events-none">
-        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-8 size-[339px] flex items-center justify-center" maxDrag={110} />
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-8 size-[339px] flex items-center justify-center" maxDrag={110} loading="lazy" />
       </div>
 
       <div className="absolute flex top-[52%] right-[1%] bottom-[35.23%] left-auto items-center justify-center overflow-hidden pointer-events-none">
-        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 size-[228px] flex items-center justify-center" maxDrag={95} />
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 size-[228px] flex items-center justify-center" maxDrag={95} loading="lazy" />
       </div>
 
       <div className="absolute flex top-[1%] right-[75.18%] bottom-[55.65%] left-[-9.5%] items-center justify-center overflow-hidden pointer-events-none">
-        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-0 size-[156px] flex items-center justify-center" maxDrag={80} />
+        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-0 size-[156px] flex items-center justify-center" maxDrag={80} loading="lazy" />
       </div>
 
       {/* Water Energy Section Main Graphic */}
@@ -1853,12 +1852,12 @@ export function HomePageClient({
             <div className="absolute contents inset-[0_29.32%_0_22.98%]">
               <div className="absolute inset-[9.43%_29.32%_67.89%_59.08%]">
                 <div className="absolute inset-[0_2.54%_3.14%_0.54%]">
-                  <img alt="Vector" className="block max-w-none size-full" src={img15} />
+                  <img alt="Vector" className="block max-w-none size-full" src={img15} loading="lazy" />
                 </div>
               </div>
               <div className="absolute inset-[48.32%_66.63%_31.94%_22.98%]">
                 <div className="absolute inset-0">
-                  <img alt="Vector" className="block max-w-none size-full" src={img16} />
+                  <img alt="Vector" className="block max-w-none size-full" src={img16} loading="lazy" />
                 </div>
               </div>
               <div className="group/bottle absolute aspect-[244.35066986310085/678.8584334167344] flex items-center justify-center left-[33.81%] mix-blend-multiply right-[39.46%] top-0 overflow-visible">
@@ -1869,6 +1868,7 @@ export function HomePageClient({
                         alt="Water Bottle"
                         className="h-full w-auto max-h-full object-contain object-center scale-[2] transition-transform duration-500 ease-out group-hover/bottle:scale-[4] group-hover/bottle:rotate-90"
                         src={img17}
+                        loading="lazy"
                       />
                     </div>
                   </div>
@@ -1876,12 +1876,12 @@ export function HomePageClient({
               </div>
               <div className="absolute inset-[15.61%_32.71%_66.56%_53.61%] overflow-hidden">
                 <div className="absolute inset-0">
-                  <img alt="Glass" className="block max-w-none size-full" src={img18} />
+                  <img alt="Glass" className="block max-w-none size-full" src={img18} loading="lazy" />
                 </div>
               </div>
               <div className="absolute inset-[54.8%_59.41%_27.38%_26.91%] overflow-hidden">
                 <div className="absolute inset-0">
-                  <img alt="Glass" className="block max-w-none size-full" src={img18} />
+                  <img alt="Glass" className="block max-w-none size-full" src={img18} loading="lazy" />
                 </div>
               </div>
             </div>
