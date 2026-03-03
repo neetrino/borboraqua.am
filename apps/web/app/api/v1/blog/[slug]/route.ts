@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
 import { blogService } from "@/lib/services/blog.service";
 
-export const dynamic = "force-dynamic";
+const BLOG_POST_REVALIDATE = 900; // 15 minutes
 
 /**
  * GET /api/v1/blog/[slug]
- * Public blog post by slug
+ * Public blog post by slug (cached like products).
  *
  * Query params:
  * - lang: string (optional, default: "en")
@@ -19,7 +20,11 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const lang = searchParams.get("lang") || "en";
 
-    const post = await blogService.getBySlug(slug, lang);
+    const post = await unstable_cache(
+      () => blogService.getBySlug(slug, lang),
+      ["blog-slug", slug, lang],
+      { revalidate: BLOG_POST_REVALIDATE }
+    )();
 
     if (!post) {
       return NextResponse.json(

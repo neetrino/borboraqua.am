@@ -132,7 +132,6 @@ class ProductsService {
 
     // Add category filter
     if (category) {
-      console.log('🔍 [PRODUCTS SERVICE] Looking for category:', { category, lang });
       let categoryDoc = await db.category.findFirst({
         where: {
           translations: {
@@ -148,8 +147,6 @@ class ProductsService {
 
       // If category not found in current language, try to find it in other languages (fallback)
       if (!categoryDoc) {
-        console.warn('⚠️ [PRODUCTS SERVICE] Category not found in language:', { category, lang });
-        console.log('🔄 [PRODUCTS SERVICE] Trying to find category in other languages...');
         categoryDoc = await db.category.findFirst({
           where: {
             translations: {
@@ -162,27 +159,12 @@ class ProductsService {
           },
         });
         
-        if (categoryDoc) {
-          console.log('✅ [PRODUCTS SERVICE] Category found in different language:', { 
-            id: categoryDoc.id, 
-            slug: category,
-            foundIn: categoryDoc.translations?.find((t: { slug: string; locale: string }) => t.slug === category)?.locale || 'unknown'
-          });
-        }
       }
 
       if (categoryDoc) {
-        console.log('✅ [PRODUCTS SERVICE] Category found:', { id: categoryDoc.id, slug: category });
-        
         // Get all child categories (subcategories) recursively
         const childCategoryIds = await this.getAllChildCategoryIds(categoryDoc.id);
         const allCategoryIds = [categoryDoc.id, ...childCategoryIds];
-        
-        console.log('📂 [PRODUCTS SERVICE] Category IDs to include:', {
-          parent: categoryDoc.id,
-          children: childCategoryIds,
-          total: allCategoryIds.length
-        });
         
         // Build OR conditions for all categories (parent + children)
         const categoryConditions = allCategoryIds.flatMap((catId: string) => [
@@ -202,7 +184,6 @@ class ProductsService {
           where.OR = categoryConditions;
         }
       } else {
-        console.warn('⚠️ [PRODUCTS SERVICE] Category not found in any language:', { category, lang });
         // Return empty result if category not found
         return {
           data: [],
@@ -1110,7 +1091,6 @@ class ProductsService {
       media: (() => {
         // Use unified image utilities for consistent processing
         if (!Array.isArray(product.media)) {
-          console.log('📸 [PRODUCTS SERVICE] Product media is not an array, returning empty array');
           return [];
         }
         
@@ -1131,12 +1111,6 @@ class ProductsService {
         
         // Clean and validate final main images
         const cleanedMain = cleanImageUrls(main);
-        
-        console.log('📸 [PRODUCTS SERVICE] Main media images count (after cleanup):', cleanedMain.length);
-        console.log('📸 [PRODUCTS SERVICE] Variant images excluded:', variantImages.length);
-        if (cleanedMain.length > 0) {
-          console.log('📸 [PRODUCTS SERVICE] Main media (first 3):', cleanedMain.slice(0, 3).map((img: string) => img.substring(0, 50)));
-        }
         
         return cleanedMain;
       })(),
@@ -1204,11 +1178,6 @@ class ProductsService {
             const processedUrls = urls.map(url => processImageUrl(url)).filter((url): url is string => url !== null);
             // Use first valid URL, or join if multiple (comma-separated)
             variantImageUrl = processedUrls.length > 0 ? processedUrls.join(',') : null;
-          }
-          
-          // Log variant image for verification
-          if (variantImageUrl) {
-            console.log(`📸 [PRODUCTS SERVICE] Variant ${variant.id} (SKU: ${variant.sku}) has imageUrl:`, variantImageUrl.substring(0, 50) + (variantImageUrl.length > 50 ? '...' : ''));
           }
           
           return {

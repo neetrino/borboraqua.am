@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, type MouseEvent, type TouchEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '../lib/api-client';
+import { getRelatedProductsFromCache, setRelatedProductsCache } from '../lib/related-products-cache';
 import { formatPrice, getStoredCurrency } from '../lib/currency';
 import { getStoredLanguage, type LanguageCode } from '../lib/language';
 import { t } from '../lib/i18n';
@@ -123,74 +124,56 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
   }, []);
 
   useEffect(() => {
-    const fetchRelatedProducts = async () => {
+    const fetchRelatedProducts = async (backgroundRevalidate = false) => {
       try {
-        setLoading(true);
-        
-        // Get current language (may have changed)
+        if (!backgroundRevalidate) setLoading(true);
+
         const currentLang = getStoredLanguage();
-        
-        // Build params - if no categorySlug, fetch all products
-        const params: Record<string, string> = {
-          limit: '30', // Fetch more to ensure we have 10 after filtering
-          lang: currentLang,
-          listOnly: 'true', // Use listOnly mode to get category field (string) instead of categories array
-        };
-        
-        if (categorySlug) {
-          params.category = categorySlug;
-          console.log('[RelatedProducts] Fetching related products for category:', categorySlug, 'lang:', currentLang);
-        } else {
-          console.log('[RelatedProducts] No categorySlug, fetching all products, lang:', currentLang);
+
+        // Use cached related products (like blog/cart) for instant carousel
+        if (!backgroundRevalidate) {
+          const cached = getRelatedProductsFromCache(categorySlug, currentLang);
+          if (cached && Array.isArray(cached)) {
+            const filtered = (cached as RelatedProduct[]).filter((p) => p.id !== currentProductId);
+            setProducts(filtered.slice(0, 10));
+            setLoading(false);
+            fetchRelatedProducts(true);
+            return;
+          }
         }
-        
+
+        const params: Record<string, string> = {
+          limit: '30',
+          lang: currentLang,
+          listOnly: 'true',
+        };
+        if (categorySlug) params.category = categorySlug;
+
         const response = await apiClient.get<{
           data: RelatedProduct[];
-          meta?: {
-            total: number;
-          };
-        } | RelatedProduct[]>('/api/v1/products', {
-          params,
-        });
+          meta?: { total: number };
+        } | RelatedProduct[]>('/api/v1/products', { params });
 
-        // Handle both response structures: { data: [...], meta: {...} } or direct array
-        const productsArray = Array.isArray(response) 
-          ? response 
+        const productsArray = Array.isArray(response)
+          ? response
           : (response?.data || []);
-        
-        console.log('[RelatedProducts] API Response structure:', {
-          isArray: Array.isArray(response),
-          hasData: !Array.isArray(response) && !!response?.data,
-          productsCount: productsArray.length,
-        });
-        console.log('[RelatedProducts] First product sample:', productsArray[0] ? {
-          id: productsArray[0].id,
-          title: productsArray[0].title,
-          category: productsArray[0].category,
-          categories: productsArray[0].categories,
-          hasCategory: !!productsArray[0].category,
-          hasCategories: !!productsArray[0].categories && productsArray[0].categories.length > 0,
-        } : 'No products');
-        
-        // Filter out current product and take exactly 10
-        const filtered = productsArray.filter(p => p.id !== currentProductId);
-        console.log('[RelatedProducts] After filtering current product:', filtered.length);
-        const finalProducts = filtered.slice(0, 10);
-        console.log('[RelatedProducts] Final products to display:', finalProducts.length);
-        setProducts(finalProducts);
+
+        setRelatedProductsCache(categorySlug, currentLang, productsArray);
+
+        const filtered = (productsArray as RelatedProduct[]).filter((p) => p.id !== currentProductId);
+        setProducts(filtered.slice(0, 10));
       } catch (error) {
-        console.error('[RelatedProducts] Error fetching related products:', error);
-        setProducts([]);
+        if (!backgroundRevalidate) {
+          setProducts([]);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchRelatedProducts();
-    
-    return () => {
-      // Cleanup will be handled by the language-updated listener below
-    };
+
+    return () => {};
   }, [categorySlug, currentProductId, language]);
 
   // Separate effect for language updates to refetch products
@@ -346,8 +329,8 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
 
   // Always show the section, even if no products (will show loading or empty state)
   return (
-    <section className="py-12 mt-20 border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 mt-20 border-t border-gray-200 overflow-visible">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-visible">
         <h2 className="text-3xl font-bold text-gray-900 mb-10">{t(language, 'product.related_products_title')}</h2>
         
         {loading ? (
@@ -367,17 +350,40 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
             <p className="text-gray-500 text-lg">{t(language, 'product.noRelatedProducts')}</p>
           </div>
         ) : (
-          // Products Carousel - Similar to home page
-          <div className="relative">
-            {/* Products Grid - Show products based on carouselIndex */}
-            <div className={isMobile ? "grid grid-cols-2 gap-4 justify-center items-start" : "flex gap-12 lg:gap-12 md:gap-10 sm:gap-8 justify-center items-start"}>
-              {(() => {
-                const visibleCount = isMobile ? 2 : 3;
-                const visibleProducts = products.slice(carouselIndex, carouselIndex + visibleCount);
-                return visibleProducts.map((product) => {
+          // Products Carousel - Mobile: same UI as ProductsGrid (grid, no wrapper, same props)
+          <div className="relative overflow-visible">
+            {isMobile ? (
+              /* Mobile: identical to ProductsGrid - grid, direct card children, isMobile so bottle card shows */
+              <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                {products.slice(carouselIndex, carouselIndex + 2).map((product) => {
                   const featuredProduct = convertToFeaturedProduct(product);
+                  const productHref = product.slug ? `/products/${encodeURIComponent(product.slug.trim())}` : null;
                   return (
-                    <div key={product.id} className={isMobile ? "w-full min-w-0 max-w-[50%]" : "w-[280px] min-w-[280px] max-w-[280px] flex-shrink-0"}>
+                    <FeaturedProductCard
+                      key={product.id}
+                      product={featuredProduct}
+                      router={router}
+                      t={tClient}
+                      isLoggedIn={isLoggedIn}
+                      isAddingToCart={addingToCart.has(product.id)}
+                      onAddToCart={handleAddToCart}
+                      onProductClick={handleOpenProduct}
+                      productHref={productHref}
+                      formatPrice={(price: number, curr?: any) => formatPrice(price, curr || currency)}
+                      currency={currency}
+                      isMobile={true}
+                      compact={true}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex gap-12 lg:gap-12 md:gap-10 sm:gap-8 justify-center items-start">
+                {products.slice(carouselIndex, carouselIndex + 3).map((product) => {
+                  const featuredProduct = convertToFeaturedProduct(product);
+                  const productHref = product.slug ? `/products/${encodeURIComponent(product.slug.trim())}` : null;
+                  return (
+                    <div key={product.id} className="w-[280px] min-w-[280px] max-w-[280px] flex-shrink-0">
                       <FeaturedProductCard
                         product={featuredProduct}
                         router={router}
@@ -386,17 +392,18 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                         isAddingToCart={addingToCart.has(product.id)}
                         onAddToCart={handleAddToCart}
                         onProductClick={handleOpenProduct}
+                        productHref={productHref}
                         formatPrice={(price: number, curr?: any) => formatPrice(price, curr || currency)}
                         currency={currency}
-                        isMobile={isMobile}
+                        isMobile={false}
                         compact={true}
                         isRelated={true}
                       />
                     </div>
                   );
-                });
-              })()}
-            </div>
+                })}
+              </div>
+            )}
 
             {/* Navigation Arrows and Pagination - Mobile: arrows next to pagination, Desktop: arrows on sides */}
             {products.length > (isMobile ? 2 : 3) && (

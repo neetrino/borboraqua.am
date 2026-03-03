@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { unstable_cache } from "next/cache";
 import { productsService } from "@/lib/services/products.service";
 
-const PRODUCTS_LIST_CACHE_REVALIDATE = 60;
+const PRODUCTS_LIST_CACHE_REVALIDATE = 120;
 
 const isDbUnavailableError = (error: unknown): boolean => {
   if (!error || typeof error !== "object") return false;

@@ -906,7 +906,7 @@ function ProfilePageContent() {
                 {dashboardData.recentOrders.length === 0 ? (
                   <div className="text-center py-12">
                     <p className="text-gray-600 mb-4">{t('profile.dashboard.noOrders')}</p>
-                    <Link href="/products">
+                    <Link href="/products" prefetch>
                       <ProductPageButton className="mt-2 px-6 py-2">
                         {t('profile.dashboard.startShopping')}
                       </ProductPageButton>
@@ -918,6 +918,7 @@ function ProfilePageContent() {
                       <Link
                         key={order.id}
                         href={`/orders/${order.number}`}
+                        prefetch
                         onClick={(e) => handleOrderClick(order.number, e)}
                         className="block border border-gray-200 rounded-lg p-4 hover:border-gray-300 hover:shadow-md transition-all cursor-pointer"
                       >
@@ -1179,6 +1180,7 @@ function ProfilePageContent() {
                 <Link
                   key={order.id}
                   href={`/orders/${order.number}`}
+                  prefetch
                   onClick={(e) => handleOrderClick(order.number, e)}
                   className="block border border-gray-200 rounded-lg p-4 hover:border-gray-300 hover:shadow-md transition-all cursor-pointer"
                 >

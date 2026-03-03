@@ -9,7 +9,7 @@ import { ProductsPagination } from '../../components/ProductsPagination';
 import { productsService } from '../../lib/services/products.service';
 
 /** Cache revalidate (seconds). */
-const PRODUCTS_PAGE_REVALIDATE = 60;
+const PRODUCTS_PAGE_REVALIDATE = 120;
 
 const MAX_COLORS_PER_PRODUCT = 20;
 

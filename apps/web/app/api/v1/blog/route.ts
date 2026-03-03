@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { unstable_cache } from "next/cache";
 import { blogService } from "@/lib/services/blog.service";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0; // Always fetch fresh data
+const BLOG_LIST_REVALIDATE = 900; // 15 minutes
 
 /**
  * GET /api/v1/blog
- * Public blog posts list
+ * Public blog posts list (cached like products).
  *
  * Query params:
  * - lang: string (optional, default: "en")
@@ -21,8 +21,11 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "6", 10);
 
-    // Reduced logging for better performance
-    const result = await blogService.listPublished(lang, page, limit);
+    const result = await unstable_cache(
+      () => blogService.listPublished(lang, page, limit),
+      ["blog-list", lang, String(page), String(limit)],
+      { revalidate: BLOG_LIST_REVALIDATE }
+    )();
     
     const duration = Date.now() - startTime;
     // Only log if response is slow

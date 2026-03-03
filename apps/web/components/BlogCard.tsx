@@ -36,7 +36,7 @@ export function BlogCard({
     <article
       className={`group border border-gray-200 rounded-lg overflow-hidden bg-white hover:shadow-lg transition-all duration-300 ${className}`}
     >
-      <Link href={`/blog/${slug}`} className="block">
+      <Link href={`/blog/${slug}`} prefetch className="block">
         {imageUrl && (
           <div className="relative w-full h-48 sm:h-56 md:h-64 overflow-hidden bg-gray-100">
             <Image

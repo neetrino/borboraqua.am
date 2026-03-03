@@ -4,10 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { apiClient } from '../../lib/api-client';
+import { getCartFromCache, setCartCache } from '../../lib/cart-cache';
 import { formatPrice, getStoredCurrency } from '../../lib/currency';
 import { getStoredLanguage } from '../../lib/language';
 import { useTranslation } from '../../lib/i18n-client';
 import { useAuth } from '../../lib/auth/AuthContext';
+import { CART_KEY } from '../../lib/storageCounts';
 import { ProductPageButton } from '../../components/icons/global/globalMobile';
 
 interface CartItem {
@@ -44,8 +46,6 @@ interface Cart {
   };
   itemsCount: number;
 }
-
-const CART_KEY = 'shop_cart_guest';
 
 export default function CartPage() {
   useAuth();
@@ -97,9 +97,9 @@ export default function CartPage() {
     };
   }, []);
 
-  async function fetchCart() {
+  async function fetchCart(backgroundRevalidate = false) {
     try {
-      setLoading(true);
+      if (!backgroundRevalidate) setLoading(true);
       if (typeof window === 'undefined') {
         setCart(null);
         setLoading(false);
@@ -114,92 +114,137 @@ export default function CartPage() {
             return;
           }
 
-          // Ստանում ենք ապրանքների տվյալները API-ից
-          const itemsWithDetails: Array<{ item: CartItem | null; shouldRemove: boolean }> = await Promise.all(
-            guestCart.map(async (item, index) => {
-              try {
-                // Եթե productSlug-ը չկա, ապրանքը չի կարող ստացվել (API-ն ակնկալում է slug)
-                if (!item.productSlug) {
-                  console.warn(`Product ${item.productId} does not have slug, removing from cart`);
-                  return { item: null, shouldRemove: true };
-                }
+          const currentLang = getStoredLanguage();
+          const guestCartJson = JSON.stringify(guestCart);
 
-                // Ստանում ենք ապրանքի տվյալները slug-ով
-                const currentLang = getStoredLanguage();
-                const productData = await apiClient.get<{
-                  id: string;
-                  slug: string;
-                  title?: string;
-                  minimumOrderQuantity?: number;
-                  orderQuantityIncrement?: number;
-                  translations?: Array<{ title?: string; slug?: string; locale: string }>;
-                  media?: Array<{ url?: string; src?: string } | string>;
-                  variants?: Array<{
-                    _id?: unknown;
-                    id: string;
-                    sku: string;
-                    price: number;
-                    originalPrice?: number | null;
-                    stock?: number;
-                  }>;
-                }>(`/api/v1/products/${item.productSlug}`, {
-                  params: { lang: currentLang }
-                });
+          // Use cached cart view (like products cache) for instant display, then revalidate in background
+          if (!backgroundRevalidate) {
+            const cached = getCartFromCache(guestCartJson, currentLang);
+            if (cached) {
+              setCart(cached as Cart);
+              setLoading(false);
+              fetchCart(true);
+              return;
+            }
+          }
+          type ProductPayload = {
+            id: string;
+            slug: string;
+            title?: string;
+            minimumOrderQuantity?: number;
+            orderQuantityIncrement?: number;
+            translations?: Array<{ title?: string; slug?: string; locale: string }>;
+            media?: Array<{ url?: string; src?: string } | string>;
+            variants?: Array<{
+              _id?: unknown;
+              id: string;
+              sku: string;
+              price: number;
+              originalPrice?: number | null;
+              stock?: number;
+            }>;
+          };
 
-                const variant = productData.variants?.find(v => 
-                  (v._id != null ? String(v._id) : v.id) === item.variantId
-                ) || productData.variants?.[0];
+          // 1. Unique Slugs Extraction — Set unique product slugs (N+1 խնդրից խուսափելու համար)
+          const validGuestItems: Array<{ item: typeof guestCart[0]; index: number }> = [];
+          const uniqueSlugsSet = new Set<string>();
+          guestCart.forEach((item, index) => {
+            if (!item.productSlug) return;
+            validGuestItems.push({ item, index });
+            uniqueSlugsSet.add(item.productSlug);
+          });
+          const uniqueSlugs = Array.from(uniqueSlugsSet);
 
-                if (!variant) {
-                  console.warn(`Variant ${item.variantId} not found for product ${item.productId}`);
-                  return { item: null, shouldRemove: true };
-                }
-
-                const translation = productData.translations?.find((t: { locale: string }) => t.locale === currentLang) 
-                  || productData.translations?.[0];
-                const imageUrl = productData.media?.[0] 
-                  ? (typeof productData.media[0] === 'string' 
-                      ? productData.media[0] 
-                      : productData.media[0].url || productData.media[0].src)
-                  : null;
-
-                const productTitle = translation?.title || productData.translations?.[0]?.title || productData.title || '';
-                const productSlug = translation?.slug || productData.translations?.[0]?.slug || productData.slug || item.productSlug || '';
-
-                return {
-                  item: {
-                    id: `${item.productId}-${item.variantId}-${index}`,
-                    variant: {
-                      id: variant._id != null ? String(variant._id) : variant.id,
-                      sku: variant.sku || '',
-                      stock: variant.stock !== undefined ? variant.stock : undefined,
-                      product: {
-                        id: productData.id,
-                        title: productTitle,
-                        slug: productSlug,
-                        image: imageUrl,
-                      },
-                    },
-                    quantity: item.quantity,
-                    price: variant.price,
-                    originalPrice: variant.originalPrice || null,
-                    total: variant.price * item.quantity,
-                    minimumOrderQuantity: productData.minimumOrderQuantity || 1,
-                    orderQuantityIncrement: productData.orderQuantityIncrement || 1,
-                  },
-                  shouldRemove: false,
-                };
-              } catch (error: any) {
-                // Եթե ապրանքը չի գտնվում (404), հեռացնում ենք այն localStorage-ից
-                if (error?.status === 404 || error?.statusCode === 404) {
-                  console.warn(`Product ${item.productId} not found (404), removing from cart`);
-                  return { item: null, shouldRemove: true };
-                }
-                console.error(`Error fetching product ${item.productId}:`, error);
-                return { item: null, shouldRemove: false };
-              }
-            })
+          // 2. Parallel Fetching — Promise.allSettled (մեկ ձախողում ամբողջ batch-ը չի կոտրում)
+          const settled = await Promise.allSettled(
+            uniqueSlugs.map((slug) =>
+              apiClient.get<ProductPayload>(`/api/v1/products/${slug}`, {
+                params: { lang: currentLang },
+              })
+            )
           );
+
+          // 3. Data Mapping — Lookup Dictionary: slug → product data (կամ '404' / բացակա)
+          /** 404 = remove from cart; undefined = fetch error, keep in cart; otherwise product data */
+          const productBySlug = new Map<string, ProductPayload | '404'>();
+          // Robustness: մեկ ապրանքի fetch ձախողում էջը չի կոտրում, մնացածը ցուցադրվում են
+          uniqueSlugs.forEach((slug, i) => {
+            const result = settled[i];
+            if (result.status === 'fulfilled') {
+              productBySlug.set(slug, result.value);
+            } else {
+              const err = result.reason as { status?: number; statusCode?: number };
+              if (err?.status === 404 || err?.statusCode === 404) {
+                productBySlug.set(slug, '404');
+              }
+            }
+          });
+
+          // 4. Cart Population — line items-ը լցնում ենք Lookup Dictionary-ից (նույն slug = նույն տվյալը)
+          const itemsWithDetails: Array<{ item: CartItem | null; shouldRemove: boolean }> = guestCart.map(() => ({ item: null, shouldRemove: false }));
+
+          for (const { item, index } of validGuestItems) {
+            const slug = item.productSlug!;
+            const raw = productBySlug.get(slug);
+
+            if (raw === '404' || raw === undefined) {
+              itemsWithDetails[index] = { item: null, shouldRemove: raw === '404' };
+              continue;
+            }
+
+            const productData = raw;
+
+            const variant = productData.variants?.find(v =>
+              (v._id != null ? String(v._id) : v.id) === item.variantId
+            ) || productData.variants?.[0];
+
+            if (!variant) {
+              itemsWithDetails[index] = { item: null, shouldRemove: true };
+              continue;
+            }
+
+            const translation = productData.translations?.find((t: { locale: string }) => t.locale === currentLang)
+              || productData.translations?.[0];
+            const imageUrl = productData.media?.[0]
+              ? (typeof productData.media[0] === 'string'
+                ? productData.media[0]
+                : (productData.media[0] as { url?: string; src?: string }).url || (productData.media[0] as { url?: string; src?: string }).src)
+              : null;
+
+            const productTitle = translation?.title || productData.translations?.[0]?.title || productData.title || '';
+            const productSlugRes = translation?.slug || productData.translations?.[0]?.slug || productData.slug || slug || '';
+
+            itemsWithDetails[index] = {
+              item: {
+                id: `${item.productId}-${item.variantId}-${index}`,
+                variant: {
+                  id: variant._id != null ? String(variant._id) : variant.id,
+                  sku: variant.sku || '',
+                  stock: variant.stock !== undefined ? variant.stock : undefined,
+                  product: {
+                    id: productData.id,
+                    title: productTitle,
+                    slug: productSlugRes,
+                    image: imageUrl,
+                  },
+                },
+                quantity: item.quantity,
+                price: variant.price,
+                originalPrice: variant.originalPrice || null,
+                total: variant.price * item.quantity,
+                minimumOrderQuantity: productData.minimumOrderQuantity || 1,
+                orderQuantityIncrement: productData.orderQuantityIncrement || 1,
+              },
+              shouldRemove: false,
+            };
+          }
+
+          // Mark missing slugs (no productSlug) as shouldRemove so they get removed from localStorage
+          guestCart.forEach((item, index) => {
+            if (!item.productSlug) {
+              itemsWithDetails[index] = { item: null, shouldRemove: true };
+            }
+          });
 
           // Հեռացնում ենք ապրանքները, որոնք չեն գտնվել
           const itemsToRemove = itemsWithDetails
@@ -224,7 +269,7 @@ export default function CartPage() {
           const subtotal = validItems.reduce((sum, item) => sum + item.total, 0);
           const itemsCount = validItems.reduce((sum, item) => sum + item.quantity, 0);
 
-      setCart({
+      const cartData = {
         id: 'guest-cart',
         items: validItems,
         totals: {
@@ -236,7 +281,9 @@ export default function CartPage() {
           currency: 'AMD',
         },
         itemsCount,
-      });
+      };
+      setCartCache(guestCartJson, currentLang, cartData);
+      setCart(cartData);
     } catch (error) {
       console.error('Error fetching cart:', error);
       setCart(null);
@@ -484,6 +531,7 @@ export default function CartPage() {
               <div className="md:col-span-6 flex items-start gap-4">
                 <Link
                   href={`/products/${item.variant.product.slug}`}
+                  prefetch
                   className="w-24 h-24 sm:w-28 sm:h-28 bg-transparent rounded-lg flex-shrink-0 relative overflow-hidden"
                 >
                   {item.variant.product.image ? (
@@ -494,6 +542,7 @@ export default function CartPage() {
                       className="object-contain"
                       sizes="80px"
                       unoptimized
+                      priority
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -506,6 +555,7 @@ export default function CartPage() {
                 <div className="flex-1 min-w-0">
                   <Link
                     href={`/products/${item.variant.product.slug}`}
+                    prefetch
                     className="text-base font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-2"
                   >
                     {item.variant.product.title}

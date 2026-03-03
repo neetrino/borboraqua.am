@@ -8,9 +8,10 @@ interface DraggableBulbProps {
   src: string;
   wrapperClassName: string;
   maxDrag?: number;
+  loading?: 'lazy' | 'eager';
 }
 
-export function DraggableBulb({ src, wrapperClassName, maxDrag = DEFAULT_MAX_DRAG }: DraggableBulbProps) {
+export function DraggableBulb({ src, wrapperClassName, maxDrag = DEFAULT_MAX_DRAG, loading = 'lazy' }: DraggableBulbProps) {
   const [drag, setDrag] = useState({ x: 0, y: 0 });
   const startRef = useRef<{ clientX: number; clientY: number; offsetX: number; offsetY: number } | null>(null);
 
@@ -57,6 +58,7 @@ export function DraggableBulb({ src, wrapperClassName, maxDrag = DEFAULT_MAX_DRA
           alt=""
           className="block size-full object-contain select-none pointer-events-none"
           src={src}
+          loading={loading}
           draggable={false}
         />
       </div>

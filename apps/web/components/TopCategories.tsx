@@ -224,6 +224,7 @@ export function TopCategories() {
               <Link
                 key={category.id}
                 href={`/products?category=${category.slug}`}
+                prefetch
                 onClick={(e) => {
                   e.preventDefault();
                   handleCategoryClick(category.slug);

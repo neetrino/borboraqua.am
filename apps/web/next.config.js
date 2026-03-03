@@ -24,7 +24,7 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   transpilePackages: ['@shop/ui', '@shop/design-tokens'],
   // Standalone output - prevents prerendering of 404 page
   output: 'standalone',
