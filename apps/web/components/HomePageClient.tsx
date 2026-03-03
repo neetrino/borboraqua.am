@@ -808,7 +808,14 @@ export function HomePageClient({
         {/* Mobile Decorative Ellipses and Shapes */}
         <div className="-translate-x-1/2 absolute h-[311px] left-[calc(50%+303.5px)] top-[2200px] w-[329px]">
           <div className="absolute inset-[-91.64%_-86.63%]">
-            <img alt="" className="block max-w-none size-full" src={imgEllipse41} loading="lazy" />
+          <div
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full blur-[180px]"
+              style={{
+                background:
+                  'radial-gradient(circle at 30% 30%, #6fe1ff 0%, #1AC0FD99 45%, rgba(26, 192, 253, 0.35) 75%, rgba(26, 192, 253, 0) 100%)',
+              }}
+            />
           </div>
         </div>
         <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(20%+296.32px)] mix-blend-luminosity size-[537.421px] top-[2350px]">
@@ -820,11 +827,18 @@ export function HomePageClient({
         </div>
       
         
-          <div className="-translate-x-1/2 absolute h-[777px] left-[calc(50%+397.5px)] top-[1200px] w-[823px]">
-            <div className="absolute inset-[-59.85%_-56.5%]">
-              <img alt="" className="block max-w-none size-full" src={imgEllipse41} loading="lazy" />
-            </div>
+        <div className="-translate-x-1/2 absolute h-[777px] left-[calc(50%+397.5px)] top-[1200px] w-[823px]">
+          <div className="absolute inset-[-59.85%_-56.5%]">
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full blur-[180px]"
+              style={{
+                background:
+                  'radial-gradient(circle at 30% 30%, #9ff4ff 0%, #9fe7ff 45%, rgba(212, 236, 255, 0.5) 75%, rgba(248, 252, 255, 0) 100%)',
+              }}
+            />
           </div>
+        </div>
       
         
         {/* Third Mobile Shape */}
@@ -832,7 +846,14 @@ export function HomePageClient({
         
         <div className="-translate-x-1/2 absolute h-[438px] left-[calc(50%-302px)] top-[650px] w-[464px]">
           <div className="absolute inset-[-83.33%_-78.66%]">
-            <img alt="" className="block max-w-none size-full" src={imgEllipse41} loading="lazy" />
+          <div
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full blur-[180px]"
+              style={{
+                background:
+                  'radial-gradient(circle at 30% 30%, #6fe1ff 0%, #1AC0FD99 45%, rgba(26, 192, 253, 0.35) 75%, rgba(26, 192, 253, 0) 100%)',
+              }}
+            />
           </div>
         </div>
 
@@ -924,7 +945,7 @@ export function HomePageClient({
 
         {/* Left bulb — after Featured title, float + drag */}
         <div className="absolute flex items-end justify-center left-2 right-auto top-[calc(0%+865px)] bottom-auto z-10 max-w-[130px] overflow-visible">
-          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-7 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} loading="lazy" />
+          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-7 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} loading="eager" />
         </div>
 
         {/* Mobile Featured Products - 4 products in 2x2 grid, 9 products in 3x3 grid from 728px */}
@@ -1035,8 +1056,14 @@ export function HomePageClient({
 
         {/* Mobile Trusted By Background Ellipse */}
         <div className="-translate-x-1/2 absolute flex items-center justify-center left-1/2 top-[2450px] w-full h-[500px] z-0 overflow-hidden" style={{ overflow: 'hidden', overflowY: 'hidden', overflowX: 'hidden' }}>
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden" style={{ overflow: 'hidden' }}>
-            <img alt="Trusted By Background" className="block max-w-none w-[150%] h-[150%] object-cover opacity-30" src={imgEllipse41} loading="lazy" style={{ maxWidth: '100%', maxHeight: '100%' }} />
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden" style={{ overflow: 'hidden' }}>            <div
+              aria-hidden="true"
+              className="absolute inset-0 rounded-full blur-[180px]"
+              style={{
+                background:
+                  'radial-gradient(circle at 10% 10%, #9ff4ff 0%, #9fe7ff 45%, rgba(212, 236, 255, 0.5) 75%, rgba(248, 252, 255, 0) 100%)',
+              }}
+            />
           </div>
         </div>
 
@@ -1069,7 +1096,7 @@ export function HomePageClient({
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
               className="absolute inset-0 max-w-none object-contain pointer-events-none size-full"
               src={TRUSTED_BY_LOGOS[trustedByIndex].src}
-              loading="lazy"
+              loading="eager"
             />
           </div>
         </div>
@@ -1080,7 +1107,7 @@ export function HomePageClient({
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
               className="max-w-none object-contain pointer-events-none h-full w-auto"
               src={TRUSTED_BY_LOGOS[trustedByIndex].src}
-              loading="lazy"
+              loading="eager"
             />
           </div>
           <div className="h-[72px] relative shrink-0 w-auto flex items-center justify-center">
@@ -1088,7 +1115,7 @@ export function HomePageClient({
               alt={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % 3].alt}
               className="max-w-none object-contain pointer-events-none h-full w-auto"
               src={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % 3].src}
-              loading="lazy"
+              loading="eager"
             />
           </div>
         </div>

@@ -923,6 +923,7 @@ export function FeaturedProductCard({
     const volume = extractVolume(product);
     const mobileClass = 'h-[293px] relative w-full max-w-[187px] mx-auto cursor-pointer overflow-visible';
 
+    const mobileImageLoading: 'eager' | 'lazy' = 'eager';
     return productHref ? (
       <Link href={productHref} prefetch className={mobileClass}>
         <div className="absolute aspect-[305/854] left-[29%] right-[32%] top-0 overflow-visible">
@@ -931,7 +932,8 @@ export function FeaturedProductCard({
               alt={product.title}
               className="absolute h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%] object-contain"
               src={product.image || ''}
-              loading="lazy"
+              loading={mobileImageLoading}
+              decoding="async"
             />
           </div>
         </div>
@@ -976,7 +978,13 @@ export function FeaturedProductCard({
         <div className={mobileClass} onClick={() => onProductClick(product)}>
         <div className="absolute aspect-[305/854] left-[29%] right-[32%] top-0 overflow-visible">
           <div className="absolute inset-0 overflow-visible pointer-events-none">
-            <img alt={product.title} className="absolute h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%] object-contain" src={product.image || ''} loading="lazy" />
+            <img
+              alt={product.title}
+              className="absolute h-[110.66%] left-[-104.92%] max-w-none top-[-5.74%] w-[309.84%] object-contain"
+              src={product.image || ''}
+              loading={mobileImageLoading}
+              decoding="async"
+            />
           </div>
         </div>
         <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[59.39%_0_21.5%_0] rounded-[20px] h-[38%] w-[98%] left-[1%]">

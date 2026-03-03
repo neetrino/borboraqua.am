@@ -329,8 +329,8 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
 
   // Always show the section, even if no products (will show loading or empty state)
   return (
-    <section className="py-12 mt-20 border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-12 mt-20 border-t border-gray-200 overflow-visible">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-visible">
         <h2 className="text-3xl font-bold text-gray-900 mb-10">{t(language, 'product.related_products_title')}</h2>
         
         {loading ? (
@@ -350,18 +350,40 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
             <p className="text-gray-500 text-lg">{t(language, 'product.noRelatedProducts')}</p>
           </div>
         ) : (
-          // Products Carousel - Similar to home page
-          <div className="relative">
-            {/* Products Grid - Show products based on carouselIndex */}
-            <div className={isMobile ? "grid grid-cols-2 gap-4 justify-center items-start" : "flex gap-12 lg:gap-12 md:gap-10 sm:gap-8 justify-center items-start"}>
-              {(() => {
-                const visibleCount = isMobile ? 2 : 3;
-                const visibleProducts = products.slice(carouselIndex, carouselIndex + visibleCount);
-                return visibleProducts.map((product) => {
+          // Products Carousel - Mobile: same UI as ProductsGrid (grid, no wrapper, same props)
+          <div className="relative overflow-visible">
+            {isMobile ? (
+              /* Mobile: identical to ProductsGrid - grid, direct card children, isMobile so bottle card shows */
+              <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                {products.slice(carouselIndex, carouselIndex + 2).map((product) => {
                   const featuredProduct = convertToFeaturedProduct(product);
                   const productHref = product.slug ? `/products/${encodeURIComponent(product.slug.trim())}` : null;
                   return (
-                    <div key={product.id} className={isMobile ? "w-full min-w-0 max-w-[50%]" : "w-[280px] min-w-[280px] max-w-[280px] flex-shrink-0"}>
+                    <FeaturedProductCard
+                      key={product.id}
+                      product={featuredProduct}
+                      router={router}
+                      t={tClient}
+                      isLoggedIn={isLoggedIn}
+                      isAddingToCart={addingToCart.has(product.id)}
+                      onAddToCart={handleAddToCart}
+                      onProductClick={handleOpenProduct}
+                      productHref={productHref}
+                      formatPrice={(price: number, curr?: any) => formatPrice(price, curr || currency)}
+                      currency={currency}
+                      isMobile={true}
+                      compact={true}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex gap-12 lg:gap-12 md:gap-10 sm:gap-8 justify-center items-start">
+                {products.slice(carouselIndex, carouselIndex + 3).map((product) => {
+                  const featuredProduct = convertToFeaturedProduct(product);
+                  const productHref = product.slug ? `/products/${encodeURIComponent(product.slug.trim())}` : null;
+                  return (
+                    <div key={product.id} className="w-[280px] min-w-[280px] max-w-[280px] flex-shrink-0">
                       <FeaturedProductCard
                         product={featuredProduct}
                         router={router}
@@ -373,15 +395,15 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                         productHref={productHref}
                         formatPrice={(price: number, curr?: any) => formatPrice(price, curr || currency)}
                         currency={currency}
-                        isMobile={isMobile}
+                        isMobile={false}
                         compact={true}
                         isRelated={true}
                       />
                     </div>
                   );
-                });
-              })()}
-            </div>
+                })}
+              </div>
+            )}
 
             {/* Navigation Arrows and Pagination - Mobile: arrows next to pagination, Desktop: arrows on sides */}
             {products.length > (isMobile ? 2 : 3) && (
