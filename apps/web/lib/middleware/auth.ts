@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import * as jwt from "jsonwebtoken";
 import { db } from "@white-shop/db";
+import { isBlacklisted } from "@/lib/token-blacklist";
+import { logApi } from "@/lib/safe-log";
+import { getRequestId } from "@/lib/request-id";
 
 export interface AuthUser {
   id: string;
@@ -20,13 +24,20 @@ export async function authenticateToken(
     const authHeader = request.headers.get("authorization");
     const token = authHeader?.split(" ")[1]; // Bearer TOKEN
 
+    const requestId = getRequestId(request);
+
     if (!token) {
-      console.log("🔍 [AUTH] No token provided in Authorization header");
+      logApi("AUTH: No token provided", null, requestId);
       return null;
     }
 
     if (!process.env.JWT_SECRET) {
-      console.error("❌ [AUTH] JWT_SECRET is not set!");
+      logApi("AUTH: JWT_SECRET not set", null, requestId);
+      return null;
+    }
+
+    if (isBlacklisted(token)) {
+      logApi("AUTH: Token revoked (logout)", null, requestId);
       return null;
     }
 
@@ -35,14 +46,14 @@ export async function authenticateToken(
       decoded = jwt.verify(token, process.env.JWT_SECRET) as {
         userId: string;
       };
-      console.log("✅ [AUTH] Token verified successfully, userId:", decoded.userId);
+      logApi("AUTH: Token verified", { userId: decoded.userId }, requestId);
     } catch (jwtError) {
       if (jwtError instanceof jwt.JsonWebTokenError) {
-        console.log("❌ [AUTH] Invalid JWT token:", jwtError.message);
+        logApi("AUTH: Invalid JWT", { reason: (jwtError as Error).message }, requestId);
       } else if (jwtError instanceof jwt.TokenExpiredError) {
-        console.log("❌ [AUTH] Token expired:", jwtError.expiredAt);
+        logApi("AUTH: Token expired", null, requestId);
       } else {
-        console.log("❌ [AUTH] JWT verification error:", jwtError);
+        logApi("AUTH: JWT error", null, requestId);
       }
       return null;
     }
@@ -61,26 +72,21 @@ export async function authenticateToken(
     });
 
     if (!user) {
-      console.log("❌ [AUTH] User not found for userId:", decoded.userId);
+      logApi("AUTH: User not found", { userId: decoded.userId }, requestId);
       return null;
     }
 
     if (user.blocked) {
-      console.log("❌ [AUTH] User is blocked:", decoded.userId);
+      logApi("AUTH: User blocked", { userId: decoded.userId }, requestId);
       return null;
     }
 
     if (user.deletedAt) {
-      console.log("❌ [AUTH] User is deleted:", decoded.userId);
+      logApi("AUTH: User deleted", { userId: decoded.userId }, requestId);
       return null;
     }
 
-    console.log("✅ [AUTH] User authenticated successfully:", {
-      id: user.id,
-      email: user.email,
-      phone: user.phone,
-      roles: user.roles,
-    });
+    logApi("AUTH: Authenticated", { userId: user.id, roles: user.roles }, requestId);
 
     return {
       id: user.id,
@@ -90,7 +96,7 @@ export async function authenticateToken(
       roles: user.roles,
     };
   } catch (error) {
-    console.error("❌ [AUTH] Unexpected error during authentication:", error);
+    logApi("AUTH: Unexpected error", { message: error instanceof Error ? error.message : String(error) }, getRequestId(request));
     throw error;
   }
 }
@@ -99,18 +105,36 @@ export async function authenticateToken(
  * Check if user is admin
  */
 export function requireAdmin(user: AuthUser | null): boolean {
+  if (!user) return false;
+  return user.roles.includes("admin");
+}
+
+/**
+ * RBAC: require authenticated admin (P0 Security 2.4). Use in admin route handlers.
+ * Returns { user } or NextResponse 401/403.
+ */
+export async function requireAuthAdmin(
+  request: NextRequest
+): Promise<{ user: AuthUser; response: null } | { user: null; response: NextResponse }> {
+  const user = await authenticateToken(request);
   if (!user) {
-    console.log("❌ [AUTH] requireAdmin: User is null");
-    return false;
+    return {
+      user: null,
+      response: NextResponse.json(
+        { error: "Unauthorized", detail: "Invalid or missing token" },
+        { status: 401 }
+      ),
+    };
   }
-  
-  const isAdmin = user.roles.includes("admin");
-  console.log("🔍 [AUTH] requireAdmin check:", {
-    userId: user.id,
-    roles: user.roles,
-    isAdmin,
-  });
-  
-  return isAdmin;
+  if (!requireAdmin(user)) {
+    return {
+      user: null,
+      response: NextResponse.json(
+        { error: "Forbidden", detail: "Admin role required" },
+        { status: 403 }
+      ),
+    };
+  }
+  return { user, response: null };
 }
 

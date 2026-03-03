@@ -1,0 +1,37 @@
+# P0 Security 8.1: Dependency scanning + build + secret check
+name: CI
+
+on:
+  push:
+    branches: [main, dev, dev-a]
+  pull_request:
+    branches: [main, dev, dev-a]
+
+jobs:
+  build-and-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for committed secrets
+        run: npm run check:secrets
+
+      - name: Audit dependencies (production)
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Build
+        run: npm run build
+        env:
+          # No real DB in CI — migrations are skipped when URL is missing or invalid
+          DATABASE_URL: ""
+          JWT_SECRET: "ci-test-secret-do-not-use-in-prod"

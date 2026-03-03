@@ -2,6 +2,9 @@ import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import { db } from "@white-shop/db";
 
+/** Session TTL: JWT expiry (P0 Security 2.2). Prefer 24h; set JWT_EXPIRES_IN in env to override. */
+const DEFAULT_JWT_EXPIRES_IN = "24h";
+
 export interface RegisterData {
   email?: string;
   phone?: string;
@@ -141,7 +144,7 @@ class AuthService {
     const token = jwt.sign(
       { userId: user.id },
       process.env.JWT_SECRET as string,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" } as jwt.SignOptions
+      { expiresIn: process.env.JWT_EXPIRES_IN || DEFAULT_JWT_EXPIRES_IN } as jwt.SignOptions
     );
     console.log("✅ [AUTH] JWT token generated");
 
@@ -259,7 +262,7 @@ class AuthService {
     const token = jwt.sign(
       { userId: user.id },
       process.env.JWT_SECRET as string,
-      { expiresIn: process.env.JWT_EXPIRES_IN || "7d" } as jwt.SignOptions
+      { expiresIn: process.env.JWT_EXPIRES_IN || DEFAULT_JWT_EXPIRES_IN } as jwt.SignOptions
     );
 
     console.log("✅ [AUTH] Login successful, token generated");

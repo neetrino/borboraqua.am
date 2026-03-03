@@ -21,6 +21,7 @@ import {
   cleanImageUrls,
   separateMainAndVariantImages,
 } from '../../../lib/utils/image-utils';
+import { sanitizeHtml } from '../../../lib/sanitize';
 
 interface ProductPageProps {
   params: Promise<{ slug?: string }>;
@@ -1896,7 +1897,7 @@ export default function ProductPage({ params }: ProductPageProps) {
               </div>
             </div>
             {/* Description - Hidden on mobile */}
-            <div className="hidden lg:block text-gray-600 mb-8 prose prose-sm" dangerouslySetInnerHTML={{ __html: getProductText(language, product.id, 'longDescription') || product.description || '' }} />
+            <div className="hidden lg:block text-gray-600 mb-8 prose prose-sm" dangerouslySetInnerHTML={{ __html: sanitizeHtml(getProductText(language, product.id, 'longDescription') || product.description || '') }} />
 
             {/* Rating Section */}
             <div className="mt-8 flex items-center gap-2 pb-3">

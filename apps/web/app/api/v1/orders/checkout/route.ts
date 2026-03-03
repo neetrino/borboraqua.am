@@ -1,55 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateToken } from "@/lib/middleware/auth";
 import { ordersService } from "@/lib/services/orders.service";
+import { getIdempotentResponse, setIdempotentResponse } from "@/lib/idempotency";
+import { safeErrorResponse } from "@/lib/api-error";
 
 export async function POST(req: NextRequest) {
+  const idemKey = req.headers.get("Idempotency-Key");
+  if (idemKey && idemKey.length <= 128) {
+    const cached = getIdempotentResponse(idemKey);
+    if (cached) return NextResponse.json(cached.body, { status: cached.status });
+  }
+
   try {
-    console.log("📦 [ORDERS API] Checkout request received");
     const user = await authenticateToken(req);
     const data = await req.json();
-    
-    console.log("📦 [ORDERS API] Checkout data:", {
-      userId: user?.id,
-      cartId: data.cartId,
-      itemsCount: data.items?.length || 0,
-      email: data.email,
-      phone: data.phone,
-      paymentMethod: data.paymentMethod,
-      shippingMethod: data.shippingMethod,
-    });
-    
+
     const result = await ordersService.checkout(data, user?.id);
-    
-    console.log("✅ [ORDERS API] Checkout successful:", {
-      orderNumber: result.order?.number,
-      orderId: result.order?.id,
-      total: result.order?.total,
-    });
-    
+
+    if (idemKey && idemKey.length <= 128) {
+      setIdempotentResponse(idemKey, result, 201);
+    }
     return NextResponse.json(result, { status: 201 });
-  } catch (error: any) {
-    console.error("❌ [ORDERS API] Checkout error:", {
-      message: error?.message,
-      stack: error?.stack,
-      name: error?.name,
-      type: error?.type,
-      title: error?.title,
-      status: error?.status,
-      detail: error?.detail,
-      code: error?.code,
-      meta: error?.meta,
-      fullError: error,
+  } catch (error: unknown) {
+    const status = error && typeof error === "object" && "status" in error ? (error as { status: number }).status : 500;
+    if (status >= 500) {
+      console.error("❌ [ORDERS API] Checkout error:", error);
+    }
+    return safeErrorResponse(req, error, {
+      status,
+      allowDetailInProd: status < 500 && error && typeof error === "object" && "detail" in error ? (error as { detail: string }).detail : undefined,
     });
-    return NextResponse.json(
-      {
-        type: error.type || "https://api.shop.am/problems/internal-error",
-        title: error.title || "Internal Server Error",
-        status: error.status || 500,
-        detail: error.detail || error.message || "An error occurred",
-        instance: req.url,
-      },
-      { status: error.status || 500 }
-    );
   }
 }
 

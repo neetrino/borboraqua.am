@@ -13,7 +13,8 @@
     "start": "turbo run start",
     "create-admin": "tsx scripts/create-admin.ts",
     "deploy:neon-migrations": "tsx scripts/deploy-neon-migrations.ts",
-    "setup:neon-db": "tsx scripts/setup-neon-db.ts"
+    "setup:neon-db": "tsx scripts/setup-neon-db.ts",
+    "check:secrets": "node scripts/check-no-secrets.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3"

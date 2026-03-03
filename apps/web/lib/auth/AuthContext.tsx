@@ -281,22 +281,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   /**
-   * Logout user
+   * Logout user — invalidate token on server (2.7), then clear local state
    */
   const logout = () => {
     console.log('🔐 [AUTH] Logging out...');
-    
-    // Clear auth data
+    const currentToken = token;
+    // Invalidate token on server first (while we still have it)
+    if (currentToken && typeof window !== 'undefined') {
+      const base = process.env.NEXT_PUBLIC_API_URL || '';
+      const url = base ? `${base}/api/v1/auth/logout` : '/api/v1/auth/logout';
+      fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${currentToken}` } }).catch(() => {});
+    }
     localStorage.removeItem(AUTH_TOKEN_KEY);
     localStorage.removeItem(AUTH_USER_KEY);
-
     setToken(null);
     setUser(null);
-
-    // Trigger auth update event
     window.dispatchEvent(new Event('auth-updated'));
-
-    // Redirect to home page
     router.push('/');
   };
 
