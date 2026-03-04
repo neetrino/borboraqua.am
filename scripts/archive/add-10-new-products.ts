@@ -32,7 +32,7 @@ if (!dbUrl || !dbUrl.startsWith("postgresql://") && !dbUrl.startsWith("postgres:
   console.error(`   Checked path: ${envPath}`);
   console.error(`   Current value: ${dbUrl ? `"${dbUrl.substring(0, 50)}..."` : "(empty)"}`);
   console.error("   Please make sure .env file exists in the root directory with DATABASE_URL");
-  console.error("   Format: DATABASE_URL=\"postgresql://user:password@host:5432/dbname?schema=public\"");
+  console.error("   Format: DATABASE_URL=\"postgresql://user:@host:5432/dbname?schema=public\"");
   process.exit(1);
 }
 

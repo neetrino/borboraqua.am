@@ -134,7 +134,7 @@ Vercel Integration-ի դեպքում.
 ### Ձևաչափ.
 
 ```
-postgresql://[user]:[password]@[host]/[database]?sslmode=require
+postgresql://[user]:@[host]/[database]?sslmode=require
 ```
 
 ### Connection string-երի տիպեր.
@@ -155,10 +155,10 @@ postgresql://[user]:[password]@[host]/[database]?sslmode=require
 
 ```bash
 # Pooled (ծրագրի համար)
-DATABASE_URL="postgresql://user:pass@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL="postgresql://user:@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require"
 
 # Direct (միգրացիաների համար)
-DIRECT_URL="postgresql://user:pass@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require"
+DIRECT_URL="postgresql://user:@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require"
 ```
 
 ---
@@ -183,10 +183,10 @@ datasource db {
 
 ```bash
 # Pooled connection (ծրագրի համար)
-DATABASE_URL="postgresql://user:pass@ep-xxx-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL="postgresql://user:@ep-xxx-pooler.us-east-2.aws.neon.tech/neondb?sslmode=require"
 
 # Direct connection (միգրացիաների համար)
-DIRECT_URL="postgresql://user:pass@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require"
+DIRECT_URL="postgresql://user:@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require"
 ```
 
 ### Միգրացիաներ.
@@ -312,7 +312,7 @@ neonctl branches rename restored main
 
 ```bash
 # pg_dump Neon connection-ով
-pg_dump "postgresql://user:pass@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require" > backup.sql
+pg_dump "postgresql://user:@ep-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require" > backup.sql
 
 # Վերականգնում
 psql "postgresql://..." < backup.sql

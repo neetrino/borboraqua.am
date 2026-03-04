@@ -769,7 +769,7 @@ neonctl branches create --name feature-auth
 
 ```typescript
 // .env.local (development)
-DATABASE_URL="postgresql://user:pass@ep-xxx-123.us-east-2.aws.neon.tech/neondb?sslmode=require"
+DATABASE_URL="postgresql://user:@ep-xxx-123.us-east-2.aws.neon.tech/neondb?sslmode=require"
 
 // Prisma — ավելացնել serverless-ի համար
 // schema.prisma
@@ -996,20 +996,20 @@ ALTER ROLE analytics_user SET lock_timeout = '30s';
 
 ```bash
 # Runtime — app_user pooler-ով
-DATABASE_URL="postgresql://app_user:pass@ep-xxx-pooler.neon.tech/neondb?sslmode=require&connection_limit=5&pool_timeout=10"
+DATABASE_URL="postgresql://app_user:@ep-xxx-pooler.neon.tech/neondb?sslmode=require&connection_limit=5&pool_timeout=10"
 
 # Միգրացիաներ — owner ուղղակի (միայն CI/CD և ձեռքով գործողություններ)
-DIRECT_URL="postgresql://neon_owner:pass@ep-xxx.neon.tech/neondb?sslmode=require"
+DIRECT_URL="postgresql://neon_owner:@ep-xxx.neon.tech/neondb?sslmode=require"
 ```
 
 #### Vercel Frontend + NestJS Backend (Size B/C)
 
 ```bash
 # NestJS (.env Render/Railway-ում) — app_user pooler-ով
-DATABASE_URL="postgresql://app_user:pass@ep-xxx-pooler.neon.tech/neondb?sslmode=require&connection_limit=10&pool_timeout=15"
+DATABASE_URL="postgresql://app_user:@ep-xxx-pooler.neon.tech/neondb?sslmode=require&connection_limit=10&pool_timeout=15"
 
 # Միգրացիաներ CI/CD-ում — owner
-DIRECT_URL="postgresql://neon_owner:pass@ep-xxx.neon.tech/neondb?sslmode=require"
+DIRECT_URL="postgresql://neon_owner:@ep-xxx.neon.tech/neondb?sslmode=require"
 ```
 
 ---

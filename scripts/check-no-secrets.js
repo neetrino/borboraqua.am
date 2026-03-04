@@ -36,6 +36,7 @@ let failed = false;
 walk(ROOT, (file) => {
   const rel = path.relative(ROOT, file);
   if (rel.startsWith("scripts/check-no-secrets")) return;
+  if (rel === ".env" || rel.endsWith("/.env")) return; // local secrets, never commit
   let content;
   try {
     content = fs.readFileSync(file, "utf8");

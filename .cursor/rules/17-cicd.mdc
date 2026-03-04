@@ -149,17 +149,17 @@ jobs:
       - name: Run migrations
         run: pnpm prisma migrate deploy
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          DATABASE_URL: postgresql://test:@localhost:5432/test
 
       - name: Run unit tests
         run: pnpm test:unit
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          DATABASE_URL: postgresql://test:@localhost:5432/test
 
       - name: Run integration tests
         run: pnpm test:integration
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
+          DATABASE_URL: postgresql://test:@localhost:5432/test
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
@@ -488,7 +488,8 @@ services:
     container_name: app
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://${DB_USER:-app}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-app}
+      # Override with DATABASE_URL or DB_USER/DB_PASSWORD/DB_NAME in production
+      DATABASE_URL: postgresql://app:@postgres:5432/app
       REDIS_URL: redis://redis:6379
       NODE_ENV: production
     ports:

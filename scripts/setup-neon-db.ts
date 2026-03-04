@@ -22,7 +22,7 @@ if (!NEON_DATABASE_URL) {
   console.error("❌ [SETUP] DATABASE_URL environment variable is not set!");
   console.error("   Please set DATABASE_URL in your .env file or as an environment variable.");
   console.error("\n   Example:");
-  console.error('   DATABASE_URL="postgresql://neondb_owner:npg_4NFk3DcLajCP@ep-bold-bonus-ahakkqdf-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require&client_encoding=UTF8"');
+  console.error('   DATABASE_URL="postgresql://user:@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require&client_encoding=UTF8"');
   process.exit(1);
 }
 
