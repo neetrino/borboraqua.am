@@ -947,7 +947,7 @@ export function FeaturedProductCard({
           
           {/* Category/Volume - below title, left side */}
           {(volume || product.category) && (
-            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#737373] text-[12px] top-[63px] tracking-[1.2px] uppercase whitespace-nowrap">
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#737373] text-[14px] top-[63px] tracking-[1.2px] uppercase whitespace-nowrap">
               <p className="leading-[16px]">{volume || product.category}</p>
             </div>
           )}
@@ -992,7 +992,7 @@ export function FeaturedProductCard({
             <p className="leading-[20px] break-words w-full line-clamp-3 " style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{product.title}</p>
           </div>
           {(volume || product.category) && (
-            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#737373] text-[12px] top-[63px] tracking-[1.2px] uppercase whitespace-nowrap">
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#737373] text-[14px] top-[63px] tracking-[1.2px] uppercase whitespace-nowrap">
               <p className="leading-[16px]">{volume || product.category}</p>
             </div>
           )}
@@ -1038,7 +1038,7 @@ export function FeaturedProductCard({
             {/* Category and price - same row, price on the right */}
             <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
               {product.category ? (
-                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[12px] text-[#737373] tracking-[1.2px] uppercase min-w-0">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[14px] text-[#737373] tracking-[1.2px] uppercase min-w-0">
                   <p className="leading-[16px] break-words line-clamp-1">{product.category}</p>
                 </div>
               ) : (
@@ -1096,7 +1096,7 @@ export function FeaturedProductCard({
           </div>
           <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
             {product.category ? (
-              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-gray-500 min-w-0">
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-gray-500 min-w-0">
                 <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] break-words">{product.category}</p>
               </div>
             ) : (
@@ -1142,7 +1142,7 @@ export function FeaturedProductCard({
           {/* Category and price - same row, price on the right */}
           <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
             {product.category ? (
-              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-gray-500 min-w-0">
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-gray-500 min-w-0">
                 <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] break-words">{product.category}</p>
               </div>
             ) : (

@@ -64,10 +64,10 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
   return (
     <div className="relative w-full" data-node-id="4:1680">
       {/* Hero Section Container - Compact Layout */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-3 mb-0 gap-3 sm:gap-0" data-name="Hero" data-node-id="4:1681">
-        {/* Left: Show Results Text */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-2 xl:py-3 mb-0 gap-3 sm:gap-0" data-name="Hero" data-node-id="4:1681">
+        {/* Left: Show Results Text - hidden on mobile */}
         {total > 0 && (
-          <p className="font-['Montserrat',sans-serif] font-bold text-sm text-[rgba(0,0,0,0.87)] whitespace-nowrap" data-node-id="4:1712">
+          <p className="hidden xl:block font-['Montserrat',sans-serif] font-bold text-sm text-[rgba(0,0,0,0.87)] whitespace-nowrap" data-node-id="4:1712">
             {t('products.hero.showResults').replace('{total}', total.toString())}
           </p>
         )}
