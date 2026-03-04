@@ -191,7 +191,8 @@ export default function OrderPage() {
     );
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | undefined) => {
+    if (status == null || status === '') return 'bg-gray-100 text-gray-800';
     switch (status.toLowerCase()) {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
@@ -245,9 +246,7 @@ export default function OrderPage() {
                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.paymentStatus)}`}>
                   {t('orders.orderStatus.payment').replace('{status}', order.paymentStatus)}
                 </span>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.fulfillmentStatus)}`}>
-                  {t('orders.orderStatus.fulfillment').replace('{status}', order.fulfillmentStatus)}
-                </span>
+           
               </div>
             </div>
           </div>

@@ -893,11 +893,11 @@ function ProfilePageContent() {
 
               {/* Recent Orders */}
               <Card className="p-6">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between gap-3 mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">{t('profile.dashboard.recentOrders')}</h2>
                   <ProductPageButton
                     variant="outline"
-                    className="h-9 px-4 text-sm font-semibold"
+                    className="min-h-10 py-2.5 px-4 text-sm font-semibold leading-normal shrink-0"
                     onClick={() => handleTabChange('orders')}
                   >
                     {t('profile.dashboard.viewAll')}
