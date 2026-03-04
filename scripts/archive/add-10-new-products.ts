@@ -39,7 +39,7 @@ if (!dbUrl || !dbUrl.startsWith("postgresql://") && !dbUrl.startsWith("postgres:
 console.log(`✅ DATABASE_URL loaded (starts with: ${dbUrl.substring(0, 30)}...)`);
 
 // Now import db after environment is loaded
-import { db } from "../packages/db";
+import { db } from "../../packages/db";
 
 // 10 New products data
 const newProducts = [
@@ -213,6 +213,7 @@ async function main() {
             },
           },
         },
+        include: { translations: true },
       });
       brands.push(defaultBrand);
       console.log(`✅ Created default brand: White Shop\n`);
@@ -233,6 +234,7 @@ async function main() {
             },
           },
         },
+        include: { translations: true },
       });
       categories.push(defaultCategory);
       console.log(`✅ Created default category: General\n`);
