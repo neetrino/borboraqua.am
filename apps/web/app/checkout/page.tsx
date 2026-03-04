@@ -435,14 +435,18 @@ export default function CheckoutPage() {
   }, [shippingRegionId]);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (regionDropdownRef.current && !regionDropdownRef.current.contains(e.target as Node)) {
         setRegionDropdownOpen(false);
       }
     };
     if (regionDropdownOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+      };
     }
   }, [regionDropdownOpen]);
 
