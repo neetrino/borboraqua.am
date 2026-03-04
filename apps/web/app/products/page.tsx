@@ -176,7 +176,7 @@ export default async function ProductsPage({ searchParams }: any) {
   }
 
   return (
-    <div className="w-full overflow-x-hidden max-w-full">
+    <div className="w-full overflow-x-hidden max-w-full pb-[100px] xl:pb-0">
       {/* Products Hero Section - Figma Design */}
       <div className="max-w-7xl mx-auto pl-4 sm:pl-6 lg:pl-8 pr-0 sm:pr-2 lg:pr-4">
         <ProductsHero total={productsData.meta.total} />
