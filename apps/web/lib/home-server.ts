@@ -34,34 +34,44 @@ export type HomePageData = {
  * Fetch home page featured + kids products on the server (for Home page RSC).
  * Result is cached with unstable_cache (revalidate: 60s).
  */
+const EMPTY_HOME_DATA: HomePageData = { featured: [], kids: [] };
+
 export async function getHomePageData(lang: string): Promise<HomePageData> {
-  const result = await unstable_cache(
-    async () => {
-      const [featuredRes, kidsRes] = await Promise.all([
-        productsService.findAll({
-          filter: 'featured',
-          limit: 9,
-          page: 1,
-          lang,
-          listOnly: true,
-        }),
-        productsService.findAll({
-          search: 'kids',
-          limit: 10,
-          page: 1,
-          lang,
-          listOnly: true,
-        }),
-      ]);
-      const featured = featuredRes.data ?? [];
-      let kids = kidsRes.data ?? [];
-      if (kids.length === 0 && featured.length > 0) {
-        kids = featured.slice(0, 10);
-      }
-      return { featured, kids };
-    },
-    ['home', lang],
-    { revalidate: HOME_REVALIDATE }
-  )();
-  return result as HomePageData;
+  if (!process.env.DATABASE_URL) {
+    return EMPTY_HOME_DATA;
+  }
+
+  try {
+    const result = await unstable_cache(
+      async () => {
+        const [featuredRes, kidsRes] = await Promise.all([
+          productsService.findAll({
+            filter: 'featured',
+            limit: 9,
+            page: 1,
+            lang,
+            listOnly: true,
+          }),
+          productsService.findAll({
+            search: 'kids',
+            limit: 10,
+            page: 1,
+            lang,
+            listOnly: true,
+          }),
+        ]);
+        const featured = featuredRes.data ?? [];
+        let kids = kidsRes.data ?? [];
+        if (kids.length === 0 && featured.length > 0) {
+          kids = featured.slice(0, 10);
+        }
+        return { featured, kids };
+      },
+      ['home', lang],
+      { revalidate: HOME_REVALIDATE }
+    )();
+    return result as HomePageData;
+  } catch {
+    return EMPTY_HOME_DATA;
+  }
 }

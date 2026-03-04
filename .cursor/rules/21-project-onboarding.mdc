@@ -532,8 +532,8 @@ src/
 
 ```bash
 # Database (app_user runtime-ի, owner միգրացիաների — տե՛ս 06-database)
-DATABASE_URL="postgresql://app_user:password@ep-xxx-pooler.neon.tech/neondb?sslmode=require"
-DIRECT_URL="postgresql://neon_owner:password@ep-xxx.neon.tech/neondb?sslmode=require"
+DATABASE_URL="postgresql://app_user:@ep-xxx-pooler.neon.tech/neondb?sslmode=require"
+DIRECT_URL="postgresql://neon_owner:@ep-xxx.neon.tech/neondb?sslmode=require"
 
 # Auth
 AUTH_SECRET="your-secret-here"            # Auth.js (NextAuth v5)

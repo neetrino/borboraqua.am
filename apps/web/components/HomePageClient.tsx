@@ -1265,7 +1265,10 @@ export function HomePageClient({
 
       {/* Hero decorative ball (bulb.svg) — drag to move a little */}
       <div className="absolute left-1/2 top-[315px] flex size-[606px] -translate-x-1/2 items-center justify-center pointer-events-auto md:top-[315px] sm:top-[252px]">
-        <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active size-full flex items-center justify-center" maxDrag={140} loading="eager" />
+        <div className="relative size-full flex items-center justify-center">
+          <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active size-full flex items-center justify-center" maxDrag={140} loading="eager" />
+          <div className="absolute left-1/2 top-[45%] -translate-x-1/2 -translate-y-1/2 w-[120%] h-[70%] rounded-full blur-3xl pointer-events-none" style={{background: 'radial-gradient(circle, #1AC0FDdd 0%, #1AC0FDbb 35%, #1AC0FD55 65%, #1AC0FD00 100%)'}} />
+        </div>
       </div>
 
        

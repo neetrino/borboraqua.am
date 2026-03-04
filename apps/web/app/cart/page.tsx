@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { apiClient } from '../../lib/api-client';
-import { getCartFromCache, setCartCache } from '../../lib/cart-cache';
 import { formatPrice, getStoredCurrency } from '../../lib/currency';
 import { getStoredLanguage } from '../../lib/language';
 import { useTranslation } from '../../lib/i18n-client';
@@ -117,16 +116,6 @@ export default function CartPage() {
           const currentLang = getStoredLanguage();
           const guestCartJson = JSON.stringify(guestCart);
 
-          // Use cached cart view (like products cache) for instant display, then revalidate in background
-          if (!backgroundRevalidate) {
-            const cached = getCartFromCache(guestCartJson, currentLang);
-            if (cached) {
-              setCart(cached as Cart);
-              setLoading(false);
-              fetchCart(true);
-              return;
-            }
-          }
           type ProductPayload = {
             id: string;
             slug: string;
@@ -282,7 +271,6 @@ export default function CartPage() {
         },
         itemsCount,
       };
-      setCartCache(guestCartJson, currentLang, cartData);
       setCart(cartData);
     } catch (error) {
       console.error('Error fetching cart:', error);

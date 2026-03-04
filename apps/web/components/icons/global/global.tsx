@@ -1091,8 +1091,8 @@ export function FeaturedProductCard({
       </div>
       <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0">
         <div className="flex flex-col items-start w-full gap-0 min-h-0">
-          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full min-h-0">
-            <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full line-clamp-1">{product.title}</p>
+          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-start relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full min-h-[48px]">
+            <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full line-clamp-2">{product.title}</p>
           </div>
           <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
             {product.category ? (
@@ -1136,8 +1136,8 @@ export function FeaturedProductCard({
       {/* Content Section - fixed layout, does not grow card */}
       <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0">
         <div className="flex flex-col items-start w-full gap-0 min-h-0">
-          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full min-h-0">
-            <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full line-clamp-1">{product.title}</p>
+          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-start relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full min-h-[48px]">
+            <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full line-clamp-2">{product.title}</p>
           </div>
           {/* Category and price - same row, price on the right */}
           <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">

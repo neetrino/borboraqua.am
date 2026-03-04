@@ -17,7 +17,7 @@ The table `public.categories` does not exist in the current database.
 Root directory-ում ստեղծեք `.env` ֆայլ և ավելացրեք ձեր Neon database connection string-ը:
 
 ```env
-DATABASE_URL="postgresql://neondb_owner:npg_4NFk3DcLajCP@ep-bold-bonus-ahakkqdf-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require&client_encoding=UTF8"
+DATABASE_URL="postgresql://neondb_owner:@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require&client_encoding=UTF8"
 ```
 
 **Կարևոր:** Ավելացրեք `&client_encoding=UTF8` պարամետրը հայերենի և այլ UTF-8 նիշերի համար:

@@ -180,8 +180,8 @@ CORS_ORIGIN=https://your-frontend.vercel.app
 ### Connection String:
 
 ```
-Internal: postgres://user:pass@dpg-xxx.oregon-postgres.render.com/mydb
-External: postgres://user:pass@dpg-xxx.oregon-postgres.render.com/mydb
+Internal: postgres://user:@dpg-xxx.oregon-postgres.render.com/mydb
+External: postgres://user:@dpg-xxx.oregon-postgres.render.com/mydb
 ```
 
 ### В Web Service:

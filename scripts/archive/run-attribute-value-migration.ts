@@ -35,7 +35,7 @@ async function runMigration() {
     console.error('❌ Migration failed:', error);
     if (error.message?.includes('DATABASE_URL')) {
       console.error('\n💡 Please make sure DATABASE_URL is set in .env file');
-      console.error('   Format: DATABASE_URL="postgresql://user:password@host:5432/dbname?schema=public"');
+      console.error('   Format: DATABASE_URL="postgresql://user:@host:5432/dbname?schema=public"');
     }
     process.exit(1);
   } finally {

@@ -13,7 +13,7 @@ The table `public.product_attributes` does not exist in the current database.
 
 1. **Ստեղծեք `.env` ֆայլը root directory-ում** (եթե չունեք):
    ```env
-   DATABASE_URL="postgresql://user:password@localhost:5432/whiteshop?schema=public"
+   DATABASE_URL="postgresql://user:@localhost:5432/whiteshop?schema=public"
    ```
 
 2. **Աշխատեցրեք:**
@@ -26,7 +26,7 @@ The table `public.product_attributes` does not exist in the current database.
 
 1. **Ստեղծեք `.env` ֆայլը root directory-ում:**
    ```env
-   DATABASE_URL="postgresql://user:password@localhost:5432/whiteshop?schema=public"
+   DATABASE_URL="postgresql://user:@localhost:5432/whiteshop?schema=public"
    ```
 
 2. **Աշխատեցրեք migration-ը:**

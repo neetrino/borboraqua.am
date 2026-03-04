@@ -32,14 +32,14 @@ if (!dbUrl || !dbUrl.startsWith("postgresql://") && !dbUrl.startsWith("postgres:
   console.error(`   Checked path: ${envPath}`);
   console.error(`   Current value: ${dbUrl ? `"${dbUrl.substring(0, 50)}..."` : "(empty)"}`);
   console.error("   Please make sure .env file exists in the root directory with DATABASE_URL");
-  console.error("   Format: DATABASE_URL=\"postgresql://user:password@host:5432/dbname?schema=public\"");
+  console.error("   Format: DATABASE_URL=\"postgresql://user:@host:5432/dbname?schema=public\"");
   process.exit(1);
 }
 
 console.log(`✅ DATABASE_URL loaded (starts with: ${dbUrl.substring(0, 30)}...)`);
 
 // Now import db after environment is loaded
-import { db } from "../packages/db";
+import { db } from "../../packages/db";
 
 // 10 New products data
 const newProducts = [
@@ -213,6 +213,7 @@ async function main() {
             },
           },
         },
+        include: { translations: true },
       });
       brands.push(defaultBrand);
       console.log(`✅ Created default brand: White Shop\n`);
@@ -233,6 +234,7 @@ async function main() {
             },
           },
         },
+        include: { translations: true },
       });
       categories.push(defaultCategory);
       console.log(`✅ Created default category: General\n`);

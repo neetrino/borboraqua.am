@@ -317,7 +317,7 @@ fly secrets unset JWT_SECRET
 
 ```bash
 fly secrets set \
-  DATABASE_URL="postgresql://user:pass@host/db" \
+  DATABASE_URL="postgresql://user:@host/db" \
   JWT_SECRET="your-secret-32-chars-min" \
   CORS_ORIGIN="https://your-frontend.vercel.app"
 ```
@@ -357,7 +357,7 @@ fly postgres create \
 fly proxy 5432 -a my-db
 
 # Подключиться psql
-psql postgres://postgres:password@localhost:5432
+psql postgres://postgres:@localhost:5432
 ```
 
 ### Fly Redis:
