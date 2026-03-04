@@ -6,7 +6,7 @@
 @layer base {
 
   html {
-    @apply overflow-y-auto;
+    @apply min-h-full overflow-y-auto;
   }
 
   html,
@@ -15,7 +15,7 @@
   }
 
   body {
-    @apply m-0 p-0;
+    @apply m-0 p-0 min-h-full;
   }
 
   /* Hide header when product image zoom is open (single product page) */
@@ -407,6 +407,18 @@
 
   .home-page-wrapper {
     @apply w-full relative overflow-x-hidden;
+  }
+
+  /* Trusted By shape — մեկ տեղից. էջի բարձրությունը հաշվարկվում է ըստ shape-ի */
+  .home-mobile-trusted-by-root {
+    --trusted-by-top: 2460px;
+    --trusted-by-shape-h: 420px;
+    min-height: calc(var(--trusted-by-top) + var(--trusted-by-shape-h));
+  }
+  @media (min-width: 728px) {
+    .home-mobile-trusted-by-root {
+      --trusted-by-shape-h: 740px;
+    }
   }
 
   /* Breadcrumb bar background – reuse same palette as app-page-background */

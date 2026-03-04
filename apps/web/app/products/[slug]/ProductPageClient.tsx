@@ -302,11 +302,11 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
     setLanguage(getStoredLanguage());
   }, []);
 
-  // Mount: fetch only when server did not provide initialProduct (e.g. 404). Refetch only on language change.
+  // Mount: always refetch with client's stored language so title/description match selected language (server may have used accept-language).
   useEffect(() => {
     if (!slug || RESERVED_ROUTES.includes(slug.toLowerCase())) return;
 
-    if (!initialProduct) fetchProduct();
+    fetchProduct();
 
     initializeCurrencyRates().catch(console.error);
 
@@ -1819,7 +1819,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             {product.brand && <p className="text-sm text-gray-500 mb-2 lg:mb-2">{product.brand.name}</p>}
             {/* Mobile: Smaller title */}
             <h1 className="text-xl lg:text-3xl font-bold text-gray-900 mb-4">
-              {getProductText(language, product.id, 'title') || product.title}
+              {product.title || getProductText(language, product.id, 'title')}
             </h1>
             <div className="mb-6">
               <div className="flex flex-col gap-1">
@@ -1849,7 +1849,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
               </div>
             </div>
             {/* Description - Hidden on mobile */}
-            <div className="hidden lg:block text-gray-600 mb-8 prose prose-sm" dangerouslySetInnerHTML={{ __html: sanitizeHtml(getProductText(language, product.id, 'longDescription') || product.description || '') }} />
+            <div className="hidden lg:block text-gray-600 mb-8 prose prose-sm" dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description || getProductText(language, product.id, 'longDescription') || '') }} />
 
             {/* Rating Section */}
             <div className="mt-8 flex items-center gap-2 pb-3">
@@ -2281,9 +2281,9 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
       {/* Related Products Carousel - Above Reviews */}
       {product && (
         <div className="mt-24">
-          <RelatedProducts 
-            categorySlug={product.categories && product.categories.length > 0 ? product.categories[0]?.slug : undefined} 
-            currentProductId={product.id} 
+<RelatedProducts
+            categorySlug={product.categories && product.categories.length > 0 ? product.categories[0]?.slug : undefined}
+            currentProductId={product.id}
           />
         </div>
       )}

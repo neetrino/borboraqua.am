@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, type MouseEvent, type TouchEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '../lib/api-client';
-import { getRelatedProductsFromCache, setRelatedProductsCache } from '../lib/related-products-cache';
+import { getRelatedProductsFromCache, setRelatedProductsCache, clearRelatedProductsCache } from '../lib/related-products-cache';
 import { formatPrice, getStoredCurrency } from '../lib/currency';
 import { getStoredLanguage, type LanguageCode } from '../lib/language';
 import { t } from '../lib/i18n';
@@ -176,21 +176,15 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     return () => {};
   }, [categorySlug, currentProductId, language]);
 
-  // Separate effect for language updates to refetch products
+  // On language change: clear cache so related products refetch in the new language
   useEffect(() => {
     const handleLanguageUpdate = () => {
-      const newLang = getStoredLanguage();
-      console.log('[RelatedProducts] Language updated, refetching products with lang:', newLang);
-      setLanguage(newLang);
-      // fetchRelatedProducts will be called automatically when language state changes
+      clearRelatedProductsCache();
+      setLanguage(getStoredLanguage());
     };
-    
     window.addEventListener('language-updated', handleLanguageUpdate);
-    
-    return () => {
-      window.removeEventListener('language-updated', handleLanguageUpdate);
-    };
-  }, [language]);
+    return () => window.removeEventListener('language-updated', handleLanguageUpdate);
+  }, []);
 
   /**
    * Handle carousel navigation - similar to home page
@@ -303,14 +297,6 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
         category = categoryWithTitle.title.trim();
       }
     }
-    
-    console.log('[RelatedProducts] Converting product:', {
-      id: product.id,
-      title: product.title,
-      category: product.category,
-      categories: product.categories,
-      finalCategory: category,
-    });
     
     return {
       id: product.id,
