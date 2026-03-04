@@ -874,9 +874,9 @@ export function HomePageClient({
       
        
           <div className="absolute flex items-center justify-center left-[57.67%] right-[4.12%] top-[calc(13.72%+958px)] bottom-[calc(100%-81.17%)]">
-            <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 flex-none rotate-[100.79deg] size-[90px]" maxDrag={50} loading="lazy" />
+            <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 flex-none rotate-[100.79deg] size-[90px]" maxDrag={50} loading="eager" />
           </div>
-          <div className="absolute flex items-end justify-center top-[190px] sm:top-[220px] md:top-[240px] w-full max-w-[440px] z-[2] translate-x-8 sm:translate-x-44 md:translate-x-52">
+          <div className="absolute flex items-end justify-center top-[190px] sm:top-[220px] md:top-[240px] left-1/2 -translate-x-1/2 w-full max-w-[440px] z-[2]">
           <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-1 size-[320px] sm:size-[360px] md:size-[400px] flex items-center justify-center" maxDrag={110} loading="eager" />
         </div>       
 
