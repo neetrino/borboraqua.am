@@ -767,11 +767,11 @@ export function TopHeaderBar({
           {/* Hamburger Menu Button */}
           <button
             onClick={() => setShowMobileMenu(true)}
-            className="bg-[rgba(170,214,245,0.38)] border border-[rgba(255,255,255,0.72)] border-solid shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_2px_6px_rgba(88,149,209,0.16)] cursor-pointer flex items-center justify-center rounded-full w-[49px] h-[49px] transition-all duration-300 hover:bg-[rgba(170,214,245,0.5)] hover:border-white/85 active:scale-95"
+            className="bg-[rgba(170,214,245,0.38)] border border-[rgba(255,255,255,0.72)] border-solid shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_2px_6px_rgba(88,149,209,0.16)] cursor-pointer flex items-center justify-center rounded-full w-[40px] h-[40px] md:w-[49px] md:h-[49px] transition-all duration-300 hover:bg-[rgba(170,214,245,0.5)] hover:border-white/85 active:scale-95"
           >
             <div className="flex items-center justify-center">
               <div className="-scale-y-100 flex-none rotate-180">
-                <div className="h-[12px] relative w-[18px]">
+                <div className="h-[10px] relative w-[14px] md:h-[12px] md:w-[18px]">
                   <img className="block max-w-none size-full" style={{ filter: 'brightness(0) invert(1) drop-shadow(0 1px 1px rgba(34, 85, 132, 0.45))' }} alt="" src={imgVector3} />
                 </div>
               </div>
@@ -780,11 +780,11 @@ export function TopHeaderBar({
           {/* Search Button */}
           <button
             onClick={() => setShowSearchModal(true)}
-            className="bg-[rgba(170,214,245,0.38)] border border-[rgba(255,255,255,0.72)] border-solid shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_2px_6px_rgba(88,149,209,0.16)] cursor-pointer flex items-center justify-center rounded-full w-[49px] h-[49px] transition-all duration-300 hover:bg-[rgba(170,214,245,0.5)] hover:border-white/85 active:scale-95"
+            className="bg-[rgba(170,214,245,0.38)] border border-[rgba(255,255,255,0.72)] border-solid shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_2px_6px_rgba(88,149,209,0.16)] cursor-pointer flex items-center justify-center rounded-full w-[40px] h-[40px] md:w-[49px] md:h-[49px] transition-all duration-300 hover:bg-[rgba(170,214,245,0.5)] hover:border-white/85 active:scale-95"
           >
             <div className="flex items-center justify-center">
               <div className="-scale-y-100 flex-none rotate-180">
-                <div className="relative size-[20px]">
+                <div className="relative size-[16px] md:size-[20px]">
                   <img className="block max-w-none size-full" style={{ filter: 'brightness(0) invert(1) drop-shadow(0 1px 1px rgba(34, 85, 132, 0.45))' }} alt="" src={imgVector2} />
                 </div>
               </div>
@@ -797,34 +797,34 @@ export function TopHeaderBar({
           <button
             ref={buttonRef}
             onClick={() => setShowLangCurrencyMenu(!showLangCurrencyMenu)}
-            className="h-[48px] min-w-[159px] bg-[#00d1ff] rounded-[70px] flex items-center justify-center gap-2 px-[18px] transition-all duration-200 hover:bg-[#00bde8] active:scale-95"
+            className="h-[34px] min-w-[100px] md:h-[44px] md:min-w-[140px] bg-[#00d1ff] rounded-[70px] flex items-center justify-center gap-1 md:gap-2 px-2.5 md:px-[18px] transition-all duration-200 hover:bg-[#00bde8] active:scale-95"
             aria-expanded={showLangCurrencyMenu}
           >
             {/* Globe Icon */}
             <img 
               src={imgLanguageIcon} 
               alt="Language" 
-              className="w-[19px] h-[19px] block"
+              className="w-[12px] h-[12px] md:w-[19px] md:h-[19px] block"
               style={{ filter: 'brightness(0) invert(1)' }}
             />
             {/* Language Text */}
-            <span className="text-white text-[16px] leading-[18px] font-bold whitespace-nowrap">
+            <span className="text-white text-[12px] leading-[14px] md:text-[16px] md:leading-[18px] font-bold whitespace-nowrap">
               {getLanguageDisplayCode(language)} /
             </span>
             {/* Currency Vector Icon */}
             <img 
               src="/assets/icons/vector12.svg" 
               alt="Currency" 
-              className="w-[19px] h-[19px] block"
+              className="w-[12px] h-[12px] md:w-[19px] md:h-[19px] block"
               style={{ filter: 'brightness(0) invert(1)' }}
             />
             {/* Currency Text */}
-            <span className="text-white text-[16px] leading-[18px] font-bold whitespace-nowrap">
+            <span className="text-white text-[12px] leading-[14px] md:text-[16px] md:leading-[18px] font-bold whitespace-nowrap">
               {currency}
             </span>
             {/* Dropdown Arrow */}
             <svg 
-              className={`w-[13px] h-[13px] text-white transition-transform duration-200 ${showLangCurrencyMenu ? 'rotate-180' : ''}`}
+              className={`w-[9px] h-[9px] md:w-[13px] md:h-[13px] text-white transition-transform duration-200 ${showLangCurrencyMenu ? 'rotate-180' : ''}`}
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
