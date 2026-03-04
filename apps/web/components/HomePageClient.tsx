@@ -793,8 +793,39 @@ export function HomePageClient({
           </div>
         )}
 
-        {/* Mobile Background Gradient */}
-       <div className="absolute bg-gradient-to-b blur-[50px] from-[#62b3e8] h-[850px] left-0 right-0 to-[rgba(221,216,216,0.75)] top-0 w-full" />
+        {/* Mobile: hero վերևը հին, ներքևը հարթ անցում, միացումը արտահայտիչ */}
+        {/* 1. Hero section — վերևը հին, ներքևը հարթ գրադիենտ դեպի արտահայտիչ կապույտ */}
+        <div
+          className="absolute left-0 right-0 top-0 w-full z-0"
+          style={{
+            height: '920px',
+            background: 'linear-gradient(to bottom, #62b3e8 0%, rgba(150,195,225,0.95) 45%, rgba(165,200,228,0.95) 58%, rgba(110,170,210,0.96) 72%, rgba(55,140,195,0.98) 85%, #1e7eb5 100%)',
+          }}
+          aria-hidden
+        />
+        <div className="absolute left-0 right-0 top-0 h-[920px] w-full bg-gradient-to-b from-[#62b3e8] to-transparent opacity-35 blur-[50px] pointer-events-none z-0" aria-hidden />
+
+        {/* 2. Featured Products — միացումից արտահայտիչ կապույտ, աստիճանաբար բաց */}
+        <div
+          className="absolute left-0 right-0 w-full z-0"
+          style={{
+            top: '860px',
+            height: '1620px',
+            background: 'linear-gradient(to bottom,rgb(43, 136, 189) 0%,rgb(178, 194, 206) 25%, #6bb3e0 52%, #9ccceb 78%, #c0e2f4 100%)',
+          }}
+          aria-hidden
+        />
+
+        {/* 3. Trusted By — մի քիչ ավելի մուգ (overlap 2460–2480) */}
+        <div
+          className="absolute left-0 right-0 w-full z-0"
+          style={{
+            top: '2460px',
+            height: '420px',
+            background: 'linear-gradient(to bottom, rgba(195, 224, 247, 0.98) 0%, #c8e4f5 60%, #d4ebf8 100%)',
+          }}
+          aria-hidden
+        />
 
         {/* Mobile Hero Section Decorative Group — 110% size */}
         <div className="absolute inset-[15%_10%_70%_10%] sm:inset-[12%_10%_70%_10%] md:inset-[10%_10%_70%_10%] z-0 overflow-visible flex items-center justify-center">
@@ -808,54 +839,24 @@ export function HomePageClient({
         {/* Mobile Decorative Ellipses and Shapes */}
         <div className="-translate-x-1/2 absolute h-[311px] left-[calc(50%+303.5px)] top-[2200px] w-[329px]">
           <div className="absolute inset-[-91.64%_-86.63%]">
-          <div
-              aria-hidden="true"
-              className="absolute inset-0 rounded-full blur-[180px]"
-              style={{
-                background:
-                  'radial-gradient(circle at 30% 30%, #6fe1ff 0%, #1AC0FD99 45%, rgba(26, 192, 253, 0.35) 75%, rgba(26, 192, 253, 0) 100%)',
-              }}
-            />
+          
           </div>
         </div>
-        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(20%+296.32px)] mix-blend-luminosity size-[537.421px] top-[2350px]">
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(15%+296.32px)] mix-blend-luminosity size-[537.421px] top-[2320px]">
           <div className="flex-none rotate-[55.86deg]">
-            <div className="relative size-[386.94px]">
+            <div className="relative size-[256.94px]">
               <img alt="" className="block max-w-none size-full" src={imgShape} loading="lazy" />
             </div>
           </div>
         </div>
       
-        
-        <div className="-translate-x-1/2 absolute h-[777px] left-[calc(50%+397.5px)] top-[1200px] w-[823px]">
-          <div className="absolute inset-[-59.85%_-56.5%]">
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 rounded-full blur-[180px]"
-              style={{
-                background:
-                  'radial-gradient(circle at 30% 30%, #9ff4ff 0%, #9fe7ff 45%, rgba(212, 236, 255, 0.5) 75%, rgba(248, 252, 255, 0) 100%)',
-              }}
-            />
-          </div>
-        </div>
+   
       
         
         {/* Third Mobile Shape */}
        
         
-        <div className="-translate-x-1/2 absolute h-[438px] left-[calc(50%-302px)] top-[650px] w-[464px]">
-          <div className="absolute inset-[-83.33%_-78.66%]">
-          <div
-              aria-hidden="true"
-              className="absolute inset-0 rounded-full blur-[180px]"
-              style={{
-                background:
-                  'radial-gradient(circle at 30% 30%, #6fe1ff 0%, #1AC0FD99 45%, rgba(26, 192, 253, 0.35) 75%, rgba(26, 192, 253, 0) 100%)',
-              }}
-            />
-          </div>
-        </div>
+     
 
 
         {/* Left decorative bubble near Featured Products - fixed 200px from left on all mobile widths (2 bubbles removed for mobile) */}
@@ -925,8 +926,8 @@ export function HomePageClient({
         </div>
 
 
-        {/* Mobile Featured Products Gradient Overlay */}
-        <div className="absolute bg-gradient-to-b blur-[30px] from-[#62b3e8] h-[300px] left-0 right-0 pointer-events-none to-[rgba(255, 255, 255, 0.07)] top-[738px] w-full z-[1]" data-node-id="3:2019" />
+        {/* Mobile Featured Products – նույն գույները ինչ մնացած section / app-page-background */}
+       
 
         {/* Mobile Featured Products Section */}
         <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[6px] items-center justify-center left-1/2 top-[923px] w-full max-w-[429px] px-4 z-10">
@@ -1055,17 +1056,7 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Trusted By Background Ellipse */}
-        <div className="-translate-x-1/2 absolute flex items-center justify-center left-1/2 top-[2450px] w-full h-[500px] z-0 overflow-hidden" style={{ overflow: 'hidden', overflowY: 'hidden', overflowX: 'hidden' }}>
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden" style={{ overflow: 'hidden' }}>            <div
-              aria-hidden="true"
-              className="absolute inset-0 rounded-full blur-[180px]"
-              style={{
-                background:
-                  'radial-gradient(circle at 10% 10%, #9ff4ff 0%, #9fe7ff 45%, rgba(212, 236, 255, 0.5) 75%, rgba(248, 252, 255, 0) 100%)',
-              }}
-            />
-          </div>
-        </div>
+      
 
         {/* Mobile Trusted By Section */}
         <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-center justify-center left-[calc(50%+0.5px)] top-[2463px] w-full max-w-[429px] z-10">
