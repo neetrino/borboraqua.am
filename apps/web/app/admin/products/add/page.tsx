@@ -3349,7 +3349,7 @@ function AddProductPageContent() {
         }
       }
       
-      // Error logged to console
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

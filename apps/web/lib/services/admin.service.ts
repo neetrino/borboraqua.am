@@ -1520,7 +1520,8 @@ class AdminService {
 
         // Track used SKUs within this transaction to ensure uniqueness
         const usedSkus = new Set<string>();
-        
+        const locale = data.translations?.[0]?.locale ?? 'hy';
+
         // Generate variants with options
         // Support both old format (color/size strings) and new format (AttributeValue IDs)
         // Also support generic options array for any attribute type
@@ -1551,7 +1552,7 @@ class AdminService {
                   options.push({ valueId: opt.valueId });
                 } else if (opt.attributeKey && opt.value) {
                   // Try to find or create AttributeValue
-                  const foundValueId = await findOrCreateAttributeValue(opt.attributeKey, opt.value, data.locale);
+                  const foundValueId = await findOrCreateAttributeValue(opt.attributeKey, opt.value, locale);
                   if (foundValueId) {
                     valueId = foundValueId;
                     attributeKey = opt.attributeKey;
@@ -1583,7 +1584,7 @@ class AdminService {
             } else {
               // Old format: Try to find or create AttributeValues for color and size
               if (variant.color) {
-                const colorValueId = await findOrCreateAttributeValue("color", variant.color, data.locale);
+                const colorValueId = await findOrCreateAttributeValue("color", variant.color, locale);
                 if (colorValueId) {
                   options.push({ valueId: colorValueId });
                   if (!attributesMap["color"]) {
@@ -1601,7 +1602,7 @@ class AdminService {
               }
               
               if (variant.size) {
-                const sizeValueId = await findOrCreateAttributeValue("size", variant.size, data.locale);
+                const sizeValueId = await findOrCreateAttributeValue("size", variant.size, locale);
                 if (sizeValueId) {
                   options.push({ valueId: sizeValueId });
                   if (!attributesMap["size"]) {
@@ -1995,6 +1996,8 @@ class AdminService {
           console.warn('⚠️ [ADMIN SERVICE] Could not set client encoding in transaction:', encodingError?.message);
         }
 
+        const locale = data.translations?.[0]?.locale ?? 'hy';
+
         // Collect all variant images to exclude from main media (if media is being updated)
         let allVariantImages: any[] = [];
         if (data.variants !== undefined) {
@@ -2261,20 +2264,35 @@ class AdminService {
                   variantIdToUse = matchedVariantId;
                   console.log(`🔍 [ADMIN SERVICE] Variant lookup by SKU "${skuValue}": found variant ID ${matchedVariantId}`);
                 } else {
-                  // Check if SKU exists globally (might be from another product)
-                  const existingSkuVariant = await tx.productVariant.findFirst({
+                  // Prefer current product: find variant with this SKU in the product we're updating
+                  const sameProductVariant = await tx.productVariant.findFirst({
                     where: {
                       sku: skuValue,
+                      productId,
                     },
                   });
-                  
-                  if (existingSkuVariant) {
-                    console.warn(`⚠️ [ADMIN SERVICE] SKU "${skuValue}" already exists in product ${existingSkuVariant.productId}, but not in current product ${productId}`);
-                    // Don't use this variant, as it belongs to another product
-                    throw new Error(`SKU "${skuValue}" already exists in another product. Please use a unique SKU.`);
+                  if (sameProductVariant) {
+                    variantToUpdate = sameProductVariant;
+                    variantIdToUse = sameProductVariant.id;
+                    console.log(`🔍 [ADMIN SERVICE] Variant lookup by SKU "${skuValue}": same product, using variant ID ${sameProductVariant.id}`);
+                  } else {
+                    // SKU exists in another product -> conflict
+                    const existingSkuVariant = await tx.productVariant.findFirst({
+                      where: { sku: skuValue },
+                    });
+                    if (existingSkuVariant) {
+                      const otherProductId = existingSkuVariant.productId;
+                      console.warn(`⚠️ [ADMIN SERVICE] SKU "${skuValue}" already exists in product ${otherProductId}, not in current ${productId}`);
+                      throw {
+                        status: 409,
+                        type: "https://api.shop.am/problems/conflict",
+                        title: "Conflict",
+                        detail: `SKU "${skuValue}" already exists in another product. Use a different SKU for this product.`,
+                        conflictProductId: otherProductId,
+                      };
+                    }
+                    console.log(`🔍 [ADMIN SERVICE] Variant lookup by SKU "${skuValue}": not found, will create new variant`);
                   }
-                  
-                  console.log(`🔍 [ADMIN SERVICE] Variant lookup by SKU "${skuValue}": not found in current product`);
                 }
               }
               
@@ -2327,7 +2345,12 @@ class AdminService {
                   
                   if (existingSkuCheck) {
                     console.error(`❌ [ADMIN SERVICE] SKU "${skuValue}" already exists! Variant ID: ${existingSkuCheck.id}, Product ID: ${existingSkuCheck.productId}`);
-                    throw new Error(`SKU "${skuValue}" already exists. Cannot create duplicate variant.`);
+                    throw {
+                      status: 409,
+                      type: "https://api.shop.am/problems/conflict",
+                      title: "Conflict",
+                      detail: `SKU "${skuValue}" already exists. Cannot create duplicate variant.`,
+                    };
                   }
                 }
                 
@@ -2520,11 +2543,12 @@ class AdminService {
   }
 
   /**
-   * Delete product (soft delete)
+   * Delete product (hard delete — բազայից ամբողջությամբ ջնջում)
    */
   async deleteProduct(productId: string) {
     const product = await db.product.findUnique({
       where: { id: productId },
+      select: { id: true, variants: { select: { id: true } } },
     });
 
     if (!product) {
@@ -2536,12 +2560,19 @@ class AdminService {
       };
     }
 
-    await db.product.update({
+    const variantIds = product.variants.map((v) => v.id);
+    if (variantIds.length > 0) {
+      await db.cartItem.deleteMany({
+        where: { variantId: { in: variantIds } },
+      });
+      await db.orderItem.updateMany({
+        where: { variantId: { in: variantIds } },
+        data: { variantId: null },
+      });
+    }
+
+    await db.product.delete({
       where: { id: productId },
-      data: {
-        deletedAt: new Date(),
-        published: false,
-      },
     });
 
     return { success: true };
@@ -2601,11 +2632,11 @@ class AdminService {
       },
     });
     
-    const globalDiscountSetting = settings.find((s: { key: string; value: string }) => s.key === 'globalDiscount');
-    const categoryDiscountsSetting = settings.find((s: { key: string; value: string }) => s.key === 'categoryDiscounts');
-    const brandDiscountsSetting = settings.find((s: { key: string; value: string }) => s.key === 'brandDiscounts');
-    const defaultCurrencySetting = settings.find((s: { key: string; value: string }) => s.key === 'defaultCurrency');
-    const currencyRatesSetting = settings.find((s: { key: string; value: string }) => s.key === 'currencyRates');
+    const globalDiscountSetting = settings.find((s) => s.key === 'globalDiscount');
+    const categoryDiscountsSetting = settings.find((s) => s.key === 'categoryDiscounts');
+    const brandDiscountsSetting = settings.find((s) => s.key === 'brandDiscounts');
+    const defaultCurrencySetting = settings.find((s) => s.key === 'defaultCurrency');
+    const currencyRatesSetting = settings.find((s) => s.key === 'currencyRates');
     
     // Default currency rates (fallback)
     const defaultCurrencyRates = {
@@ -2617,7 +2648,7 @@ class AdminService {
     };
     
     return {
-      globalDiscount: globalDiscountSetting ? Number(globalDiscountSetting.value) : 0,
+      globalDiscount: globalDiscountSetting ? Number(globalDiscountSetting.value as string) : 0,
       categoryDiscounts: categoryDiscountsSetting ? (categoryDiscountsSetting.value as Record<string, number>) : {},
       brandDiscounts: brandDiscountsSetting ? (brandDiscountsSetting.value as Record<string, number>) : {},
       defaultCurrency: defaultCurrencySetting ? (defaultCurrencySetting.value as string) : 'AMD',
@@ -2984,7 +3015,7 @@ class AdminService {
       }
     >();
 
-    orderItems.forEach((item: { variantId: string | null; quantity: number; total: number; variant?: { id: string; productId: string; sku: string | null; product?: { translations?: Array<{ title: string }>; media?: Array<{ url?: string }> } }; sku?: string }) => {
+    orderItems.forEach((item) => {
       if (!item.variant) return;
 
       const variantId = item.variantId || item.variant.id;
@@ -3633,8 +3664,8 @@ class AdminService {
       },
     });
 
-    const brandTranslations = Array.isArray(updatedBrand?.translations) 
-      ? updatedBrand.translations 
+    const brandTranslations = Array.isArray(updatedBrand?.translations)
+      ? updatedBrand?.translations ?? []
       : [];
     const translation = brandTranslations[0] || null;
 
@@ -4887,8 +4918,8 @@ class AdminService {
       image?: string | null;
     }>();
 
-    orders.forEach((order: { items: Array<{ variantId: string | null; variant?: { product?: { id: string; translations?: Array<{ title: string }>; media?: Array<{ url?: string }> } }; productTitle?: string; sku?: string; quantity: number; total: number }> }) => {
-      order.items.forEach((item: { variantId: string | null; variant?: { product?: { id: string; translations?: Array<{ title: string }>; media?: Array<{ url?: string }> } }; productTitle?: string; sku?: string; quantity: number; total: number }) => {
+    orders.forEach((order) => {
+      order.items.forEach((item) => {
         if (item.variantId) {
           const key = item.variantId;
           const existing = productMap.get(key) || {
@@ -4922,8 +4953,8 @@ class AdminService {
       orderCount: number;
     }>();
 
-    orders.forEach((order: { items: Array<{ variant?: { product?: { categories: Array<{ id: string; translations?: Array<{ title: string }> }> } }; quantity: number; total: number }> }) => {
-      order.items.forEach((item: { variant?: { product?: { categories: Array<{ id: string; translations?: Array<{ title: string }> }> } }; quantity: number; total: number }) => {
+    orders.forEach((order) => {
+      order.items.forEach((item) => {
         if (item.variant?.product) {
           item.variant.product.categories.forEach((category: { id: string; translations?: Array<{ title: string }> }) => {
             const categoryId = category.id;
@@ -5021,8 +5052,8 @@ class AdminService {
     };
 
     const enabledWeekdays =
-      Array.isArray(value.schedule?.enabledWeekdays) && value.schedule.enabledWeekdays.length > 0
-        ? value.schedule.enabledWeekdays
+      Array.isArray(value.schedule?.enabledWeekdays) && (value.schedule?.enabledWeekdays?.length ?? 0) > 0
+        ? value.schedule?.enabledWeekdays
         : [2, 4];
 
     const timeSlots = Array.isArray(value.timeSlots) && value.timeSlots.length > 0
@@ -5144,7 +5175,7 @@ class AdminService {
     const enabledWeekdays = Array.isArray(data.schedule?.enabledWeekdays)
       ? Array.from(
           new Set(
-            data.schedule.enabledWeekdays
+            (data.schedule?.enabledWeekdays ?? [])
               .map((d) => Number(d))
               .filter((d) => Number.isInteger(d) && d >= 0 && d <= 6),
           ),
