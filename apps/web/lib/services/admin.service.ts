@@ -1004,14 +1004,45 @@ class AdminService {
         orderBy,
         include: {
           translations: true, // Get all translations, we'll filter by lang later
-          variants: {
-            where: { published: true },
-            take: 1,
-            orderBy: { price: "asc" },
-          },
+          variants: true, // All variants for total stock and price (filter/sort in map)
           labels: true,
+          categories: { include: { translations: true } },
         },
       });
+
+      // Fix missing categories relations for products that have categoryIds but no categories relation
+      // This is a one-time fix for existing products
+      for (const product of products) {
+        const categoryIds = (product as any).categoryIds || [];
+        const categories = Array.isArray((product as any).categories) ? (product as any).categories : [];
+        
+        if (categoryIds.length > 0 && categories.length === 0) {
+          console.warn(`⚠️ [ADMIN SERVICE] Product ${product.id} has categoryIds but no categories relation. Fixing...`);
+          try {
+            await db.product.update({
+              where: { id: product.id },
+              data: {
+                categories: {
+                  connect: categoryIds.map((id: string) => ({ id })),
+                },
+              },
+            });
+            // Reload categories for this product
+            const updatedProduct = await db.product.findUnique({
+              where: { id: product.id },
+              include: {
+                categories: { include: { translations: true } },
+              },
+            });
+            if (updatedProduct) {
+              (product as any).categories = updatedProduct.categories;
+              console.log(`✅ [ADMIN SERVICE] Fixed categories relation for product ${product.id}`);
+            }
+          } catch (error: any) {
+            console.error(`❌ [ADMIN SERVICE] Failed to fix categories relation for product ${product.id}:`, error.message);
+          }
+        }
+      }
       
       const productsTime = Date.now() - queryStartTime;
       console.log(`✅ [ADMIN SERVICE] Products fetched in ${productsTime}ms. Found ${products.length} products`);
@@ -1047,12 +1078,9 @@ class AdminService {
             orderBy,
             include: {
               translations: true, // Get all translations, we'll filter by lang later
-              variants: {
-                where: { published: true },
-                take: 1,
-                orderBy: { price: "asc" },
-              },
+              variants: true, // All variants for total stock and price (filter/sort in map)
               labels: true,
+              categories: { include: { translations: true } },
             },
           });
           
@@ -1109,9 +1137,16 @@ class AdminService {
       const translations = Array.isArray(product.translations) ? product.translations : [];
       const translation = translations.find((t: { locale: string }) => t.locale === lang) || translations[0] || null;
       
-      // Безопасное получение variant с проверкой на существование массива
-      const variant = Array.isArray(product.variants) && product.variants.length > 0
-        ? product.variants[0]
+      // All variants: for total stock and for price (first by price, prefer published)
+      const allVariants = Array.isArray(product.variants) ? product.variants : [];
+      const totalStock = allVariants.reduce((sum: number, v: { stock?: number }) => sum + (Number(v?.stock) || 0), 0);
+      const variantForPrice = allVariants.length > 0
+        ? [...allVariants].sort((a: any, b: any) => {
+            const pa = a.published ? 0 : 1;
+            const pb = b.published ? 0 : 1;
+            if (pa !== pb) return pa - pb;
+            return (a.price ?? 0) - (b.price ?? 0);
+          })[0]
         : null;
       
       const image =
@@ -1121,18 +1156,63 @@ class AdminService {
             : (product.media[0] as any)?.url
           : null;
 
+      // Primary category title for list view
+      const categories = Array.isArray((product as any).categories) ? (product as any).categories : [];
+      const primaryCategoryId = (product as any).primaryCategoryId;
+      
+      // Debug logging for category resolution
+      if (categories.length === 0) {
+        console.warn(`⚠️ [ADMIN SERVICE] Product ${product.id} has no categories relation. primaryCategoryId: ${primaryCategoryId}`);
+      }
+      
+      let selectedCategory = primaryCategoryId && categories.length > 0
+        ? categories.find((c: { id: string }) => c.id === primaryCategoryId)
+        : null;
+      if (!selectedCategory && categories.length > 0) selectedCategory = categories[0];
+      
+      let category: string | null = null;
+      
+      if (selectedCategory) {
+        const categoryTranslations = Array.isArray(selectedCategory.translations)
+          ? selectedCategory.translations
+          : [];
+        const categoryTranslation = categoryTranslations.find((t: { locale: string }) => t.locale === lang) || categoryTranslations[0] || null;
+        category = categoryTranslation?.title ?? null;
+        
+        if (!category) {
+          console.warn(`⚠️ [ADMIN SERVICE] Product ${product.id} category ${selectedCategory.id} has no translation for locale ${lang}. Available locales: ${categoryTranslations.map((t: { locale: string }) => t.locale).join(', ')}`);
+        }
+      }
+      
       return {
         id: product.id,
         slug: translation?.slug || "",
         title: translation?.title || "",
         published: product.published,
         featured: product.featured || false,
-        price: variant?.price || 0,
-        stock: variant?.stock || 0,
+        price: variantForPrice?.price ?? 0,
+        stock: totalStock,
         discountPercent: product.discountPercent || 0, // Include discountPercent
-        compareAtPrice: variant?.compareAtPrice || null, // Include compareAtPrice for showing original price
+        compareAtPrice: variantForPrice?.compareAtPrice ?? null, // Include compareAtPrice for showing original price
         colorStocks: [], // Can be enhanced later
         image,
+        category,
+        createdAt: product.createdAt.toISOString(),
+      };
+
+      return {
+        id: product.id,
+        slug: translation?.slug || "",
+        title: translation?.title || "",
+        published: product.published,
+        featured: product.featured || false,
+        price: variantForPrice?.price ?? 0,
+        stock: totalStock,
+        discountPercent: product.discountPercent || 0, // Include discountPercent
+        compareAtPrice: variantForPrice?.compareAtPrice ?? null, // Include compareAtPrice for showing original price
+        colorStocks: [], // Can be enhanced later
+        image,
+        category,
         createdAt: product.createdAt.toISOString(),
       };
     });
@@ -1757,6 +1837,12 @@ class AdminService {
                   })),
                 }
               : undefined,
+            // Connect categories for many-to-many relation
+            categories: data.categoryIds && data.categoryIds.length > 0
+              ? {
+                  connect: data.categoryIds.map((id) => ({ id })),
+                }
+              : undefined,
           },
         });
 
@@ -2113,6 +2199,39 @@ class AdminService {
               skipDuplicates: true,
             });
             console.log('✅ [ADMIN SERVICE] Updated ProductAttribute relations:', data.attributeIds);
+          }
+        }
+
+          // 3.6. Update categories relation (many-to-many)
+        if (data.categoryIds !== undefined) {
+          // Get current categories
+          const currentProduct = await tx.product.findUnique({
+            where: { id: productId },
+            select: { categories: { select: { id: true } } },
+          });
+          
+          const currentCategoryIds = currentProduct?.categories?.map((c: { id: string }) => c.id) || [];
+          const newCategoryIds = data.categoryIds || [];
+          
+          // Find categories to disconnect (in current but not in new)
+          const toDisconnect = currentCategoryIds.filter((id: string) => !newCategoryIds.includes(id));
+          // Find categories to connect (in new but not in current)
+          const toConnect = newCategoryIds.filter((id: string) => !currentCategoryIds.includes(id));
+          
+          if (toDisconnect.length > 0 || toConnect.length > 0) {
+            await tx.product.update({
+              where: { id: productId },
+              data: {
+                categories: {
+                  disconnect: toDisconnect.map((id: string) => ({ id })),
+                  connect: toConnect.map((id: string) => ({ id })),
+                },
+              },
+            });
+            console.log('✅ [ADMIN SERVICE] Updated categories relation:', {
+              disconnected: toDisconnect,
+              connected: toConnect,
+            });
           }
         }
 
@@ -3095,6 +3214,7 @@ class AdminService {
    */
   async createCategory(data: {
     title: string;
+    slug?: string;
     locale?: string;
     parentId?: string;
     requiresSizes?: boolean;
@@ -3117,11 +3237,37 @@ class AdminService {
       }
     }
     
-    // Generate slug from title
-    const slug = data.title
+    // Generate unique slug from title or use provided slug
+    const baseSlug = data.slug?.trim() || data.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
+    
+    // Ensure slug is unique for this locale
+    let slug = baseSlug;
+    let counter = 1;
+    while (true) {
+      const existing = await db.categoryTranslation.findFirst({
+        where: {
+          slug,
+          locale,
+        },
+      });
+      
+      if (!existing) {
+        break; // Slug is unique
+      }
+      
+      // Slug exists, try with counter
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+      
+      // Safety limit to prevent infinite loop
+      if (counter > 1000) {
+        slug = `${baseSlug}-${Date.now()}`;
+        break;
+      }
+    }
 
     const category = await db.category.create({
       data: {
@@ -3211,6 +3357,7 @@ class AdminService {
    */
   async updateCategory(categoryId: string, data: {
     title?: string;
+    slug?: string;
     locale?: string;
     parentId?: string | null;
     requiresSizes?: boolean;
@@ -3327,13 +3474,41 @@ class AdminService {
 
     // Update translation if title is provided
     if (data.title) {
-      const slug = data.title
+      // Generate unique slug from title or use provided slug
+      const baseSlug = data.slug?.trim() || data.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
-
+      
       const categoryTranslations = Array.isArray(category.translations) ? category.translations : [];
       const existingTranslation = categoryTranslations.find((t: { locale: string }) => t.locale === locale);
+
+      // Ensure slug is unique for this locale (excluding current translation)
+      let slug = baseSlug;
+      let counter = 1;
+      while (true) {
+        const existing = await db.categoryTranslation.findFirst({
+          where: {
+            slug,
+            locale,
+            NOT: existingTranslation ? { id: existingTranslation.id } : undefined,
+          },
+        });
+        
+        if (!existing) {
+          break; // Slug is unique
+        }
+        
+        // Slug exists, try with counter
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+        
+        // Safety limit to prevent infinite loop
+        if (counter > 1000) {
+          slug = `${baseSlug}-${Date.now()}`;
+          break;
+        }
+      }
 
       if (existingTranslation) {
         // Update existing translation

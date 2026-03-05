@@ -304,6 +304,7 @@
     "product": "PRODUCT",
     "stock": "STOCK",
     "price": "PRICE",
+    "category": "CATEGORY",
     "status": "STATUS",
     "featured": "FEATURED",
     "created": "CREATED",

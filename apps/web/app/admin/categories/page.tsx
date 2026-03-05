@@ -28,10 +28,12 @@ function CategoriesSection() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [formData, setFormData] = useState({
     title: '',
+    slug: '',
     parentId: '',
     requiresSizes: false,
     subcategoryIds: [] as string[],
   });
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [saving, setSaving] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
@@ -131,6 +133,23 @@ function CategoriesSection() {
 
   const categoryTree = buildCategoryTree(categories);
 
+  // Generate slug from title
+  const generateSlug = (title: string): string => {
+    return title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  // Auto-generate slug from title when title changes (if not manually edited)
+  useEffect(() => {
+    if (!slugManuallyEdited && formData.title) {
+      const autoSlug = generateSlug(formData.title);
+      setFormData(prev => ({ ...prev, slug: autoSlug }));
+    }
+  }, [formData.title, slugManuallyEdited]);
+
   // Pagination calculations
   const totalPages = Math.ceil(categoryTree.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -152,12 +171,14 @@ function CategoriesSection() {
     try {
       await apiClient.post('/api/v1/admin/categories', {
         title: formData.title.trim(),
+        slug: formData.slug.trim() || generateSlug(formData.title.trim()),
         parentId: formData.parentId || undefined,
         requiresSizes: formData.requiresSizes,
         locale: 'en',
       });
       setShowAddModal(false);
-      setFormData({ title: '', parentId: '', requiresSizes: false, subcategoryIds: [] });
+      setFormData({ title: '', slug: '', parentId: '', requiresSizes: false, subcategoryIds: [] });
+      setSlugManuallyEdited(false);
       fetchCategories();
       showToast(t('admin.categories.createdSuccess'), 'success');
     } catch (err: any) {
@@ -178,18 +199,22 @@ function CategoriesSection() {
       
       setFormData({
         title: category.title,
+        slug: category.slug || '',
         parentId: category.parentId || '',
         requiresSizes: category.requiresSizes || false,
         subcategoryIds: categoryWithChildren.children?.map(child => child.id) || [],
       });
+      setSlugManuallyEdited(true); // Don't auto-update slug when editing
     } catch (err) {
       console.error('Error fetching category children:', err);
       setFormData({
         title: category.title,
+        slug: category.slug || '',
         parentId: category.parentId || '',
         requiresSizes: category.requiresSizes || false,
         subcategoryIds: [],
       });
+      setSlugManuallyEdited(true);
     }
     
     setShowEditModal(true);
@@ -205,6 +230,7 @@ function CategoriesSection() {
     try {
       await apiClient.put(`/api/v1/admin/categories/${editingCategory.id}`, {
         title: formData.title.trim(),
+        slug: formData.slug.trim() || generateSlug(formData.title.trim()),
         parentId: formData.parentId || null,
         requiresSizes: formData.requiresSizes,
         subcategoryIds: formData.subcategoryIds,
@@ -212,7 +238,8 @@ function CategoriesSection() {
       });
       setShowEditModal(false);
       setEditingCategory(null);
-      setFormData({ title: '', parentId: '', requiresSizes: false, subcategoryIds: [] });
+      setFormData({ title: '', slug: '', parentId: '', requiresSizes: false, subcategoryIds: [] });
+      setSlugManuallyEdited(false);
       fetchCategories();
       showToast(t('admin.categories.updatedSuccess'), 'success');
     } catch (err: any) {
@@ -263,11 +290,12 @@ function CategoriesSection() {
     <div className="space-y-4">
       {/* Add Category Button */}
       <div className="flex justify-end">
-        <ProductPageButton
-          onClick={() => {
-            setFormData({ title: '', parentId: '', requiresSizes: false, subcategoryIds: [] });
-            setShowAddModal(true);
-          }}
+          <ProductPageButton
+            onClick={() => {
+              setFormData({ title: '', slug: '', parentId: '', requiresSizes: false, subcategoryIds: [] });
+              setSlugManuallyEdited(false);
+              setShowAddModal(true);
+            }}
           className="flex items-center gap-2 text-sm h-11 px-5"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -391,6 +419,24 @@ function CategoriesSection() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Slug *
+                </label>
+                <Input
+                  type="text"
+                  value={formData.slug}
+                  onChange={(e) => {
+                    setFormData({ ...formData, slug: e.target.value });
+                    setSlugManuallyEdited(true);
+                  }}
+                  placeholder="category-slug"
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Auto-generated from title. You can edit it manually.
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('admin.categories.parentCategory')}
                 </label>
                 <select
@@ -434,7 +480,8 @@ function CategoriesSection() {
                 variant="outline"
                 onClick={() => {
                   setShowAddModal(false);
-                  setFormData({ title: '', parentId: '', requiresSizes: false, subcategoryIds: [] });
+                  setFormData({ title: '', slug: '', parentId: '', requiresSizes: false, subcategoryIds: [] });
+                  setSlugManuallyEdited(false);
                 }}
                 disabled={saving}
               >
@@ -462,6 +509,24 @@ function CategoriesSection() {
                   placeholder={t('admin.categories.categoryTitlePlaceholder')}
                   className="w-full"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Slug *
+                </label>
+                <Input
+                  type="text"
+                  value={formData.slug}
+                  onChange={(e) => {
+                    setFormData({ ...formData, slug: e.target.value });
+                    setSlugManuallyEdited(true);
+                  }}
+                  placeholder="category-slug"
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Auto-generated from title. You can edit it manually.
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -555,7 +620,8 @@ function CategoriesSection() {
                 onClick={() => {
                   setShowEditModal(false);
                   setEditingCategory(null);
-                  setFormData({ title: '', parentId: '', requiresSizes: false, subcategoryIds: [] });
+                  setFormData({ title: '', slug: '', parentId: '', requiresSizes: false, subcategoryIds: [] });
+                  setSlugManuallyEdited(false);
                 }}
                 disabled={saving}
               >
