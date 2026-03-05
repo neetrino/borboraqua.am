@@ -3214,6 +3214,7 @@ class AdminService {
    */
   async createCategory(data: {
     title: string;
+    slug?: string;
     locale?: string;
     parentId?: string;
     requiresSizes?: boolean;
@@ -3236,11 +3237,37 @@ class AdminService {
       }
     }
     
-    // Generate slug from title
-    const slug = data.title
+    // Generate unique slug from title or use provided slug
+    const baseSlug = data.slug?.trim() || data.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "");
+    
+    // Ensure slug is unique for this locale
+    let slug = baseSlug;
+    let counter = 1;
+    while (true) {
+      const existing = await db.categoryTranslation.findFirst({
+        where: {
+          slug,
+          locale,
+        },
+      });
+      
+      if (!existing) {
+        break; // Slug is unique
+      }
+      
+      // Slug exists, try with counter
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+      
+      // Safety limit to prevent infinite loop
+      if (counter > 1000) {
+        slug = `${baseSlug}-${Date.now()}`;
+        break;
+      }
+    }
 
     const category = await db.category.create({
       data: {
@@ -3330,6 +3357,7 @@ class AdminService {
    */
   async updateCategory(categoryId: string, data: {
     title?: string;
+    slug?: string;
     locale?: string;
     parentId?: string | null;
     requiresSizes?: boolean;
@@ -3446,13 +3474,41 @@ class AdminService {
 
     // Update translation if title is provided
     if (data.title) {
-      const slug = data.title
+      // Generate unique slug from title or use provided slug
+      const baseSlug = data.slug?.trim() || data.title
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
-
+      
       const categoryTranslations = Array.isArray(category.translations) ? category.translations : [];
       const existingTranslation = categoryTranslations.find((t: { locale: string }) => t.locale === locale);
+
+      // Ensure slug is unique for this locale (excluding current translation)
+      let slug = baseSlug;
+      let counter = 1;
+      while (true) {
+        const existing = await db.categoryTranslation.findFirst({
+          where: {
+            slug,
+            locale,
+            NOT: existingTranslation ? { id: existingTranslation.id } : undefined,
+          },
+        });
+        
+        if (!existing) {
+          break; // Slug is unique
+        }
+        
+        // Slug exists, try with counter
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+        
+        // Safety limit to prevent infinite loop
+        if (counter > 1000) {
+          slug = `${baseSlug}-${Date.now()}`;
+          break;
+        }
+      }
 
       if (existingTranslation) {
         // Update existing translation
