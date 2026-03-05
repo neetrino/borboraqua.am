@@ -402,7 +402,7 @@ export function Header({
                 <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                   {/* Language Section */}
                   <div className="px-3 py-2 border-b border-gray-200">
-                    <div className="text-xs font-semibold text-gray-500 uppercase mb-2">Language</div>
+                    <div className="text-xs font-semibold text-blue-600 uppercase mb-2">Language</div>
                     {Object.entries(LANGUAGES).map(([code, lang]) => (
                       <button
                         key={code}
@@ -419,7 +419,7 @@ export function Header({
                   </div>
                   {/* Currency Section */}
                   <div className="px-3 py-2">
-                    <div className="text-xs font-semibold text-gray-500 uppercase mb-2">Currency</div>
+                    <div className="text-xs font-semibold text-blue-600 uppercase mb-2">Currency</div>
                     {(['USD', 'AMD', 'EUR', 'RUB', 'GEL'] as CurrencyCode[]).map((code) => (
                       <button
                         key={code}
@@ -532,8 +532,8 @@ interface FooterProps {
 export function Footer({ router, t, isHomePage = false }: FooterProps) {
   return (
     <>
-      {/* Footer */}
-      <div className={` z-[9999] relative h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 w-full ${isHomePage ? 'overflow-hidden mt-[5380px] lg:mt-[5380px] md:mt-[4820px] sm:mt-[3830px]' : 'overflow-visible'}`}>
+      {/* Footer - hidden when product image zoom is open (single product page) */}
+      <div data-hide-on-product-zoom className={` z-[9999] relative h-[620px] lg:h-[620px] md:h-[600px] sm:h-[500px] left-0 w-full ${isHomePage ? 'overflow-hidden mt-[5380px] lg:mt-[5380px] md:mt-[4820px] sm:mt-[3830px]' : 'overflow-visible'}`}>
         {/* Footer transition gradient - seamless blend with page background (only for non-home pages) */}
         {!isHomePage && (
           <div className="absolute top-0 left-0 right-0 h-[250px] z-[1]"/>
@@ -947,7 +947,7 @@ export function FeaturedProductCard({
           
           {/* Category/Volume - below title, left side */}
           {(volume || product.category) && (
-            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#737373] text-[14px] top-[63px] tracking-[1.2px] uppercase whitespace-nowrap">
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#00D1FF] text-[14px] top-[63px] tracking-[1.2px] uppercase whitespace-nowrap">
               <p className="leading-[16px]">{volume || product.category}</p>
             </div>
           )}
@@ -992,7 +992,7 @@ export function FeaturedProductCard({
             <p className="leading-[20px] break-words w-full line-clamp-3 " style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>{product.title}</p>
           </div>
           {(volume || product.category) && (
-            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#737373] text-[14px] top-[63px] tracking-[1.2px] uppercase whitespace-nowrap">
+            <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#00D1FF] text-[14px] top-[63px] tracking-[1.2px] uppercase whitespace-nowrap">
               <p className="leading-[16px]">{volume || product.category}</p>
             </div>
           )}
@@ -1038,7 +1038,7 @@ export function FeaturedProductCard({
             {/* Category and price - same row, price on the right */}
             <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
               {product.category ? (
-                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[14px] text-[#737373] tracking-[1.2px] uppercase min-w-0">
+                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[14px] text-[#00D1FF] tracking-[1.2px] uppercase min-w-0">
                   <p className="leading-[16px] break-words line-clamp-1">{product.category}</p>
                 </div>
               ) : (
@@ -1096,7 +1096,7 @@ export function FeaturedProductCard({
           </div>
           <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
             {product.category ? (
-              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-gray-500 min-w-0">
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-[#00D1FF] min-w-0">
                 <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] break-words">{product.category}</p>
               </div>
             ) : (
@@ -1142,7 +1142,7 @@ export function FeaturedProductCard({
           {/* Category and price - same row, price on the right */}
           <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
             {product.category ? (
-              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-gray-500 min-w-0">
+              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-[#00D1FF] min-w-0">
                 <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] break-words">{product.category}</p>
               </div>
             ) : (
@@ -1377,7 +1377,7 @@ export function AdminMenuDrawer({ tabs, currentPath }: AdminMenuDrawerProps) {
                     }`}
                   >
                     <span className="flex items-center gap-3 min-w-0">
-                      <span className={`flex-shrink-0 ${isActive ? 'text-white' : 'text-gray-500'}`}>{tab.icon}</span>
+                      <span className={`flex-shrink-0 ${isActive ? 'text-white' : 'text-blue-600'}`}>{tab.icon}</span>
                       <span className="truncate">{tab.label}</span>
                     </span>
                     <svg className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-400'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">

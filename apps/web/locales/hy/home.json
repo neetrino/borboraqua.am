@@ -14,12 +14,12 @@
     "dailyDose": "լուծումներ՝",
     "of": "մաքուր և",
     "freshness": "որակյալ ջրի համար",
-    "subtitle": "BORBOR — ընտրություն առողջ կյանքի համար",
+    "subtitle": "BORBOR AQUA — ընտրություն առողջ կյանքի համար",
     "shopNow": "Գնել հիմա",
     "learnMore": "Իմանալ ավելին"
   },
   "featuredProducts": {
-    "title": "ԱՌԱՋԱՐԿՎԱԾ ԱՊՐԱՆՔՆԵՐ",
+    "title": "ԱՌԱՋԱՐԿՎՈՂ  ԱՊՐԱՆՔՆԵՐ",
     "subtitle": "Մաքուր ջուր Ճիշտ ընտրություն",
     "viewAllProducts": "Դիտել բոլոր ապրանքները",
     "adding": "Ավելացվում է...",
@@ -33,7 +33,7 @@
   "waterEnergySection": {
     "pure": "Մաքուր",
     "energy": "էներգիա",
-    "subtitle": "Մաքուր էներգիա, բնությունից վերցված, ամեն կաթիլում բռնված",
+    "subtitle": "Բնությունից վերցված մաքուր էներգիա ամեն կաթիլում:",
     "drawnFrom": "բնությունից վերցված",
     "nature": "բնությունից,",
     "capturedIn": "ամեն կաթիլում բռնված",
@@ -44,8 +44,8 @@
     "refreshesThe": "թարմացնում է",
     "bodyAnd": "մարմինը և",
     "restores": "վերականգնում",
-    "descriptionLine1": "Բյուրեղային պարզություն, որը թարմացնում է",
-    "descriptionLine2": "մարմինը և վերականգնում"
+    "descriptionLine1": "Բյուրեղային մաքրություն, որը թարմացնում և",
+    "descriptionLine2": "վերականգնում է մարմինը:"
   },
   "cards": {
     "pureSpringWater": {
@@ -79,7 +79,7 @@
       "descriptionLine2": "առողջության համար"
     },
     "nonCarbonated": {
-      "title": "ԶԳԱՑՎԱԾ",
+      "title": "Չգազավորված",
       "description": "BORBOR AQUA-ի",
       "descriptionLine1": "շշալցված ջուրը չի պարունակում",
       "descriptionLine2": " ածխաթթու գազ"
