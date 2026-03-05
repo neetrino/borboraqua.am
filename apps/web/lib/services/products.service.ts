@@ -477,6 +477,15 @@ class ProductsService {
           price: finalPrice,
           image,
           inStock: (variant?.stock || 0) > 0,
+          labels: Array.isArray(product.labels)
+            ? product.labels.map((label: { id: string; type: string; value: string; position: string; color: string | null }) => ({
+                id: label.id,
+                type: label.type,
+                value: label.value,
+                position: label.position,
+                color: label.color,
+              }))
+            : [],
           minimumOrderQuantity: (product as any).minimumOrderQuantity || 1,
           orderQuantityIncrement: (product as any).orderQuantityIncrement || 1,
           defaultVariantId: (variant as any)?.id || null,

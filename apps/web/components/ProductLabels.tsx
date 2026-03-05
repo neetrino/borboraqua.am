@@ -33,27 +33,8 @@ export const ProductLabels: React.FC<ProductLabelsProps> = ({ labels }) => {
 
   const positions: ProductLabelPosition[] = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
 
-  const getColorClasses = (label: ProductLabel) => {
-    if (label.color) {
-      return '';
-    }
-
-    if (label.type === 'percentage') {
-      return 'bg-red-600 text-white';
-    }
-
-    const value = label.value.toLowerCase();
-    if (value.includes('new') || value.includes('նոր')) {
-      return 'bg-green-600 text-white';
-    }
-    if (value.includes('hot') || value.includes('տաք')) {
-      return 'bg-orange-600 text-white';
-    }
-    if (value.includes('sale') || value.includes('զեղչ')) {
-      return 'bg-red-600 text-white';
-    }
-
-    return 'bg-blue-600 text-white';
+  const getColorClasses = () => {
+    return 'text-[#00D1FF]';
   };
 
   const getCornerPositionClasses = (position: ProductLabelPosition) => {
@@ -61,11 +42,11 @@ export const ProductLabels: React.FC<ProductLabelsProps> = ({ labels }) => {
       case 'top-left':
         return 'top-2 left-2 items-start';
       case 'top-right':
-        return 'top-2 right-2 items-end';
+        return 'top-2 left-2 items-start';
       case 'bottom-left':
         return 'bottom-2 left-2 items-start';
       case 'bottom-right':
-        return 'bottom-2 right-2 items-end';
+        return 'bottom-2 left-2 items-start';
       default:
         return '';
     }
@@ -85,10 +66,7 @@ export const ProductLabels: React.FC<ProductLabelsProps> = ({ labels }) => {
             {labelsForPosition.map((label) => (
               <div
                 key={label.id}
-                className={`px-2 py-0.5 text-[10px] font-semibold rounded-md shadow-sm pointer-events-auto ${getColorClasses(
-                  label,
-                )}`}
-                style={label.color ? { backgroundColor: label.color, color: 'white' } : undefined}
+                className={`text-[14px] font-semibold pointer-events-auto ${getColorClasses()}`}
               >
                 {label.type === 'percentage' ? `${label.value}%` : label.value}
               </div>

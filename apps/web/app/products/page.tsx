@@ -144,7 +144,7 @@ async function getProducts(
           meta: raw.meta,
         };
       },
-      ['products-page', language, String(page), String(limit), search?.trim() ?? '', 'listOnly'],
+      ['products-page', language, String(page), String(limit), search?.trim() ?? '', 'listOnly', 'labels-v1'],
       { revalidate: PRODUCTS_PAGE_REVALIDATE }
     )();
 

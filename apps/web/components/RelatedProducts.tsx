@@ -42,6 +42,13 @@ interface RelatedProduct {
       value: string;
     }>;
   }>;
+  labels?: Array<{
+    id: string;
+    type: 'text' | 'percentage';
+    value: string;
+    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    color: string | null;
+  }>;
 }
 
 interface RelatedProductsProps {
@@ -315,6 +322,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
       orderQuantityIncrement: product.orderQuantityIncrement,
       defaultVariantId: product.defaultVariantId || null,
       brand: product.brand || null,
+      labels: product.labels,
     };
   };
 
