@@ -16,7 +16,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'Borbor-Aqua',
+  title: 'BORBOR AQUA',
   description: 'Modern e-commerce platform',
   icons: {
     icon: '/icon.svg',

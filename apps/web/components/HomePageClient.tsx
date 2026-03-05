@@ -69,6 +69,7 @@ interface Product {
   subtitle?: string;
   description?: string;
   category?: string; // Primary category title
+  categories?: string[]; // All category titles (when listOnly)
   price: number;
   image: string | null;
   inStock: boolean;
@@ -190,6 +191,7 @@ export function HomePageClient({
           limit: '9', // Get 9 products for carousel
           lang: language,
           filter: 'featured', // Try to get featured products
+          listOnly: 'true', // Get category + categories for cards
         };
 
         const response = await apiClient.get<ProductsResponse>('/api/v1/products', {
@@ -202,6 +204,7 @@ export function HomePageClient({
             page: '1',
             limit: '9',
             lang: language,
+            listOnly: 'true',
           };
           const fallbackResponse = await apiClient.get<ProductsResponse>('/api/v1/products', {
             params: fallbackParams,
@@ -1477,8 +1480,8 @@ export function HomePageClient({
               />
             </div>
           )}
-          {/* View All Products Button */}
-          <div className="absolute content-stretch flex flex-col items-center left-[20px] lg:left-[20px] md:left-[16px] sm:left-[12px] right-[20px] lg:right-[20px] md:right-[16px] sm:right-[12px] top-[560px] lg:top-[560px] md:top-[380px] sm:top-[330px]">
+          {/* View All Products Button — ցածր միայն desktop (lg) */}
+          <div className="absolute content-stretch flex flex-col items-center left-[20px] lg:left-[20px] md:left-[16px] sm:left-[12px] right-[20px] lg:right-[20px] md:right-[16px] sm:right-[12px] top-[560px] lg:top-[600px] md:top-[380px] sm:top-[330px]">
             <div
               onClick={() => router.push('/products')}
               className="bg-[#FFFFFF] border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[7px] lg:gap-[7px] md:gap-[6px] sm:gap-[4px] items-center px-[30px] lg:px-[30px] md:px-[28px] sm:px-[20px] py-[10px] lg:py-[10px] md:py-[10px] sm:py-[8px] relative rounded-[9999px] shrink-0 cursor-pointer hover:border-[#00d1ff] hover:bg-[#00d1ff]/5 transition-all"
