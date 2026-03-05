@@ -11,6 +11,7 @@ import { SearchIcon } from '../SearchIcon';
 import { HeaderCartIcon } from '../HeaderCartIcon';
 import { LanguageIcon } from '../LanguageIcon';
 import { ExitIcon } from '../ExitIcon';
+import { ProductLabels, type ProductLabel } from '../../ProductLabels';
 
 // Export HeaderCartIcon for use in other components
 export { HeaderCartIcon };
@@ -873,6 +874,7 @@ export interface FeaturedProduct {
     id: string;
     name: string;
   } | null;
+  labels?: ProductLabel[];
 }
 
 interface FeaturedProductCardProps {
@@ -914,6 +916,7 @@ export function FeaturedProductCard({
 }: FeaturedProductCardProps) {
   const hasMultipleCategories = product.categories && product.categories.length > 0;
   const singleCategoryDisplay = product.category ?? null;
+  const hasLabels = Array.isArray(product.labels) && product.labels.length > 0;
 
   /** Յուրաքանչյուր բառի առաջի տառը մեծատառ */
   const formatCategoryLabel = (s: string) =>
@@ -946,6 +949,7 @@ export function FeaturedProductCard({
             />
           </div>
         </div>
+        {hasLabels && <ProductLabels labels={product.labels!} />}
 
         {/* Rounded Card with Price, Volume, and Add Button */}
         <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[55%_0_1%_0] rounded-[20px] h-[44%] w-[98%] left-[1%] overflow-hidden">
@@ -1004,6 +1008,7 @@ export function FeaturedProductCard({
             />
           </div>
         </div>
+        {hasLabels && <ProductLabels labels={product.labels!} />}
         <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[55%_0_1%_0] rounded-[20px] h-[44%] w-[98%] left-[1%] overflow-hidden">
           <div className="absolute flex flex-col font-['Inter:Bold',sans-serif] font-bold left-[12px] top-[8px] right-[35px] justify-start leading-[0] text-left text-black overflow-hidden">
             <p className="leading-[20px] break-words w-full line-clamp-2" style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{product.title}</p>
@@ -1052,6 +1057,7 @@ export function FeaturedProductCard({
           ) : (
             <div className="w-full h-full bg-gray-300 rounded-lg" />
           )}
+          {hasLabels && <ProductLabels labels={product.labels!} />}
         </div>
         {/* Content Section - fixed layout, does not grow card */}
         <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative min-h-0 min-w-0">
@@ -1119,6 +1125,7 @@ export function FeaturedProductCard({
         ) : (
           <div className="w-full h-full bg-gray-300 rounded-lg" />
         )}
+        {hasLabels && <ProductLabels labels={product.labels!} />}
       </div>
       <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0">
         <div className="flex flex-col items-start w-full gap-0 min-h-0">
@@ -1169,6 +1176,7 @@ export function FeaturedProductCard({
         ) : (
           <div className="w-full h-full bg-gray-300 rounded-lg" />
         )}
+        {hasLabels && <ProductLabels labels={product.labels!} />}
       </div>
       {/* Content Section - fixed layout, does not grow card */}
       <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0">

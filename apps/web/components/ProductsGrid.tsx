@@ -25,6 +25,13 @@ interface Product {
     id: string;
     name: string;
   } | null;
+  labels?: Array<{
+    id: string;
+    type: 'text' | 'percentage';
+    value: string;
+    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+    color: string | null;
+  }>;
 }
 
 type ViewMode = 'list' | 'grid-2' | 'grid-3';
@@ -247,6 +254,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     image: product.image,
     inStock: product.inStock,
     brand: product.brand,
+    labels: product.labels,
   });
 
   // Limit products: 12 on desktop, 8 on mobile
