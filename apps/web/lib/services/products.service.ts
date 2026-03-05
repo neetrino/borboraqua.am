@@ -441,7 +441,7 @@ class ProductsService {
           selectedCategory = categoriesMap.get(primaryCategoryId) || null;
         }
         
-        // Get category title from translations
+        // Get category title from translations (primary for backward compatibility)
         let categoryTitle: string | null = null;
         if (selectedCategory) {
           const categoryTranslations = Array.isArray(selectedCategory.translations)
@@ -452,6 +452,16 @@ class ProductsService {
             || null;
           categoryTitle = categoryTranslation?.title || null;
         }
+
+        // All category titles for this product (current lang)
+        const categoryTitles: string[] = categories
+          .map((cat: { translations?: Array<{ locale: string; title: string }> }) => {
+            const tr = Array.isArray(cat.translations) ? cat.translations : [];
+            const t = tr.find((x: { locale: string }) => x.locale === lang) || tr[0];
+            return t?.title || null;
+          })
+          .filter((title: string | null): title is string => !!title);
+        const uniqueCategoryTitles = [...new Set(categoryTitles)];
         
         return {
           id: product.id,
@@ -460,6 +470,7 @@ class ProductsService {
           subtitle: translation?.subtitle || null,
           description: translation?.descriptionHtml || null,
           category: categoryTitle,
+          categories: uniqueCategoryTitles.length > 0 ? uniqueCategoryTitles : undefined,
           brand: product.brand
             ? { id: product.brand.id, name: brandTranslation?.name || "" }
             : null,

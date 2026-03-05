@@ -99,7 +99,7 @@ export function ProductsPagination({
   const isLastPage = currentPage === totalPages;
 
   return (
-    <div className="flex gap-[4px] items-center justify-center mt-4 mb-6 xl:mt-6 xl:mb-0">
+    <div className="flex gap-[4px] items-center justify-center mt-14 mb-6 xl:mt-16 xl:mb-0">
       {/* First Page Button - Always visible, disabled on first page */}
       {isFirstPage ? (
         <div

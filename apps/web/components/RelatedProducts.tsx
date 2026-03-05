@@ -17,6 +17,12 @@ interface RelatedProduct {
   title: string;
   description?: string | null;
   category?: string | null; // Primary category title (when listOnly=true)
+  /** listOnly API returns string[]; full product returns Array<{id,slug,title}> */
+  categories?: string[] | Array<{
+    id: string;
+    slug: string;
+    title: string;
+  }>;
   price: number;
   originalPrice?: number | null;
   compareAtPrice: number | null;
@@ -30,11 +36,6 @@ interface RelatedProduct {
     id: string;
     name: string;
   } | null;
-  categories?: Array<{
-    id: string;
-    slug: string;
-    title: string;
-  }>;
   variants?: Array<{
     options?: Array<{
       key: string;
@@ -280,29 +281,33 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
 
   // Convert RelatedProduct to FeaturedProduct format
   const convertToFeaturedProduct = (product: RelatedProduct): FeaturedProduct => {
-    // Get category - prefer direct category field (from listOnly mode), fallback to categories array
+    const raw = product.categories;
+    let categories: string[] | undefined;
+    if (Array.isArray(raw) && raw.length > 0) {
+      const first = raw[0];
+      if (typeof first === 'string') {
+        categories = raw.filter((t): t is string => typeof t === 'string' && t.trim() !== '');
+      } else {
+        categories = (raw as Array<{ title?: string }>)
+          .map((cat) => cat?.title?.trim())
+          .filter((t): t is string => !!t);
+      }
+      if (categories.length === 0) categories = undefined;
+    }
+
     let category: string | undefined = undefined;
-    
-    // First try direct category field (when listOnly=true)
     if (product.category && product.category.trim() !== '') {
       category = product.category.trim();
-    } 
-    // Fallback to categories array if category field is not available
-    else if (product.categories && product.categories.length > 0) {
-      // Find first category with a valid non-empty title
-      const categoryWithTitle = product.categories.find(
-        (cat) => cat?.title && cat.title.trim() !== ''
-      );
-      if (categoryWithTitle) {
-        category = categoryWithTitle.title.trim();
-      }
+    } else if (categories && categories.length > 0) {
+      category = categories[0];
     }
-    
+
     return {
       id: product.id,
       slug: product.slug,
       title: product.title,
       category,
+      categories,
       price: product.price,
       image: product.image,
       inStock: product.inStock,

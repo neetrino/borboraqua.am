@@ -13,6 +13,7 @@ interface Product {
   title: string;
   description?: string | null;
   category?: string | null; // Primary category title
+  categories?: string[] | null; // All category titles
   price: number;
   compareAtPrice: number | null;
   image: string | null;
@@ -216,11 +217,10 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
       case 'grid-2':
         return 'grid grid-cols-2 gap-12 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2';
       case 'grid-3':
-        // Mobile: 2 columns, Tablet (md) and Desktop (lg): 3 columns
-        return 'grid grid-cols-2 gap-4 sm:gap-6 md:gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3';
+        // Mobile: 2 columns, ավելի մեծ բաց շարքերի միջև (gap-y-8)
+        return 'grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-6 md:gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3';
       default:
-        // Mobile: 2 columns, Tablet (md) and Desktop (lg): 3 columns
-        return 'grid grid-cols-2 gap-4 sm:gap-6 md:gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3';
+        return 'grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-6 md:gap-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3';
     }
   };
 
@@ -239,6 +239,7 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     title: product.title,
     description: product.description ?? undefined,
     category: product.category ?? undefined,
+    categories: product.categories ?? undefined,
     minimumOrderQuantity: product.minimumOrderQuantity,
     orderQuantityIncrement: product.orderQuantityIncrement,
     defaultVariantId: product.defaultVariantId ?? null,
