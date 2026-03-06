@@ -1033,10 +1033,10 @@ export function FeaturedProductCard({
           )}
           {hasLabels && <ProductLabels labels={product.labels!} />}
         </div>
-        {/* Content Section - title and price on one row; when title wraps to 2 lines, price stays top-right and is not overlapped */}
-        <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative min-h-0 min-w-0">
-          <div className="flex flex-row items-start justify-between gap-2 w-full min-w-0">
-            <p className="flex-1 min-w-0 font-['Inter:Black',sans-serif] font-black text-[16px] text-black leading-[24px] break-words line-clamp-2">{product.title}</p>
+        {/* Content Section - fixed height so card does not grow with title length */}
+        <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative min-h-0 min-w-0 shrink-0">
+          <div className="flex flex-row items-end justify-between gap-2 w-full min-w-0 h-[48px] overflow-hidden">
+            <p className="flex-1 min-w-0 font-['Inter:Black',sans-serif] font-black text-[16px] text-black leading-[24px] break-words line-clamp-2 overflow-hidden">{product.title}</p>
             <span className="shrink-0 font-['Inter:Black',sans-serif] font-black text-[16px] text-[#00d1ff] leading-[22px] whitespace-nowrap">{formatPrice(product.price, currency)}</span>
           </div>
           <button
@@ -1080,9 +1080,9 @@ export function FeaturedProductCard({
         )}
         {hasLabels && <ProductLabels labels={product.labels!} />}
       </div>
-      <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0">
-        <div className="flex flex-row items-start justify-between gap-2 w-full min-w-0">
-          <p className="flex-1 min-w-0 font-['Montserrat:Bold',sans-serif] font-bold text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words line-clamp-2">{product.title}</p>
+      <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0 shrink-0">
+        <div className="flex flex-row items-end justify-between gap-2 w-full min-w-0 h-[48px] overflow-hidden">
+          <p className="flex-1 min-w-0 font-['Montserrat:Bold',sans-serif] font-bold text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words line-clamp-2 overflow-hidden">{product.title}</p>
           <span className="shrink-0 font-['Inter:Black',sans-serif] font-black text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] text-[#00d1ff] leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px] whitespace-nowrap">{formatPrice(product.price, currency)}</span>
         </div>
         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(product); }} disabled={!product.inStock || isAddingToCart} className="bg-[#00d1ff] content-stretch flex h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center justify-center py-[10px] lg:py-[10px] md:py-[12px] sm:py-[12px] relative z-10 rounded-[30px] lg:rounded-[30px] md:rounded-[34px] sm:rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer">
@@ -1112,10 +1112,10 @@ export function FeaturedProductCard({
         )}
         {hasLabels && <ProductLabels labels={product.labels!} />}
       </div>
-      {/* Content Section - title and price on one row; when title wraps to 2 lines, price stays top-right */}
-      <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0">
-        <div className="flex flex-row items-start justify-between gap-2 w-full min-w-0">
-          <p className="flex-1 min-w-0 font-['Montserrat:Bold',sans-serif] font-bold text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words line-clamp-2">{product.title}</p>
+      {/* Content Section - fixed height so card does not grow with title length */}
+      <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0 shrink-0">
+        <div className="flex flex-row items-end justify-between gap-2 w-full min-w-0 h-[48px] overflow-hidden">
+          <p className="flex-1 min-w-0 font-['Montserrat:Bold',sans-serif] font-bold text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words line-clamp-2 overflow-hidden">{product.title}</p>
           <span className="shrink-0 font-['Inter:Black',sans-serif] font-black text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] text-[#00d1ff] leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px] whitespace-nowrap">{formatPrice(product.price, currency)}</span>
         </div>
         <button
