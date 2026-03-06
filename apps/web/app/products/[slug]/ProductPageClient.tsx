@@ -159,7 +159,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         const bPos = (b as any).position ?? 0;
         return aPos - bPos;
       });
-      
+
       sortedVariants.forEach((v) => {
         if (v.imageUrl) {
           const urls = smartSplitUrls(v.imageUrl);
@@ -167,14 +167,14 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         }
       });
     }
-    
+
     const cleanedVariantImages = cleanImageUrls(variantImages);
 
     // Combine all images: main first, then variant images
     // Use array to preserve order, Set to track duplicates
     const allImages: string[] = [];
     const seenNormalized = new Set<string>();
-    
+
     // Add main images first (preserve order)
     cleanedMain.forEach((img) => {
       const processed = processImageUrl(img) || img;
@@ -184,7 +184,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         seenNormalized.add(normalized);
       }
     });
-    
+
     // Add variant images that are not already in main images
     cleanedVariantImages.forEach((img) => {
       const processed = processImageUrl(img) || img;
@@ -211,7 +211,11 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
     const normalizedName = colorName.toLowerCase().trim();
     return colorMap[normalizedName] || '#CCCCCC';
   };
-  
+
+  /** Category label: first letter of each word uppercase (same as Product Card) */
+  const formatCategoryLabel = (s: string) =>
+    s ? s.toLowerCase().replace(/(?:^|\s)\S/g, (ch) => ch.toUpperCase()) : s;
+
   // Init variant/color/size from server-fetched product (no client fetch on first paint)
   useEffect(() => {
     if (!initialProduct || product !== initialProduct || !product?.variants?.length) return;
@@ -238,11 +242,11 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
   // Fetch product function - defined outside useEffect to be accessible
   const fetchProduct = useCallback(async () => {
     if (!slug || RESERVED_ROUTES.includes(slug.toLowerCase())) return;
-    
+
     try {
       setLoading(true);
       const currentLang = getStoredLanguage();
-      
+
       // Try to fetch with current language first
       let data: Product;
       try {
@@ -265,11 +269,11 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
           throw error;
         }
       }
-      
+
       setProduct(data);
       setCurrentImageIndex(0);
       setThumbnailStartIndex(0);
-      
+
       if (data.variants && data.variants.length > 0) {
         let initialVariant = data.variants[0];
         if (variantIdFromUrl) {
@@ -362,7 +366,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
@@ -382,7 +386,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
 
   useEffect(() => {
     if (!product || !slug) return;
-    
+
     const loadReviews = async () => {
       try {
         const data = await apiClient.get<Array<{ rating: number }>>(`/api/v1/products/${slug}/reviews`);
@@ -392,14 +396,14 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         setReviews([]);
       }
     };
-    
+
     loadReviews();
-    
+
     // Listen for review updates
     const handleReviewUpdate = () => {
       loadReviews();
     };
-    
+
     if (typeof window !== 'undefined') {
       window.addEventListener('review-updated', handleReviewUpdate);
       return () => window.removeEventListener('review-updated', handleReviewUpdate);
@@ -430,12 +434,12 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
   const variantHasColor = useCallback((variant: ProductVariant, color: string): boolean => {
     if (!variant.options || !color) return false;
     const normalizedColor = color.toLowerCase().trim();
-    
+
     // Check ALL options for color attribute
-    const colorOptions = variant.options.filter(opt => 
+    const colorOptions = variant.options.filter(opt =>
       (opt.key === 'color' || opt.attribute === 'color')
     );
-    
+
     // Check if any color option matches
     return colorOptions.some(opt => {
       const optValue = opt.value?.toLowerCase().trim();
@@ -445,7 +449,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
 
   const findVariantByColorAndSize = useCallback((color: string | null, size: string | null): ProductVariant | null => {
     if (!product?.variants || product.variants.length === 0) return null;
-    
+
     const normalizedColor = color?.toLowerCase().trim();
     const normalizedSize = size?.toLowerCase().trim();
 
@@ -465,7 +469,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
       // Prefer in-stock variant of this color
       // IMPORTANT: Use variantHasColor to check ALL color options
       const colorVariants = product.variants.filter(v => variantHasColor(v, normalizedColor));
-      
+
       if (colorVariants.length > 0) {
         return colorVariants.find(v => v.stock > 0) || colorVariants[0];
       }
@@ -477,7 +481,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         const vSize = getOptionValue(v.options, 'size');
         return vSize === normalizedSize;
       });
-      
+
       if (sizeVariants.length > 0) {
         return sizeVariants.find(v => v.stock > 0) || sizeVariants[0];
       }
@@ -497,7 +501,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
     otherAttributes: Map<string, string>
   ): ProductVariant | null => {
     if (!product?.variants || product.variants.length === 0) return null;
-    
+
     const normalizedColor = color?.toLowerCase().trim();
     const normalizedSize = size?.toLowerCase().trim();
 
@@ -527,15 +531,15 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
       // Check other attributes
       for (const [attrKey, attrValue] of otherAttributes.entries()) {
         if (attrKey === 'color' || attrKey === 'size') continue;
-        
+
         const variantValue = getOptionValue(variant.options, attrKey);
         const normalizedAttrValue = attrValue.toLowerCase().trim();
-        
+
         // Try matching by valueId first (if available)
-        const option = variant.options?.find(opt => 
+        const option = variant.options?.find(opt =>
           opt.key === attrKey || opt.attribute === attrKey
         );
-        
+
         if (option) {
           // Check by valueId if both have it
           if (option.valueId && attrValue) {
@@ -544,7 +548,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
               continue;
             }
           }
-          
+
           // Fallback to value matching
           if (variantValue !== normalizedAttrValue) {
             return false;
@@ -606,7 +610,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
     // Check if variant image is an attribute value image (these are excluded from gallery)
     const isAttributeValueImage = (url: string): boolean => {
       if (!product.productAttributes) return false;
-      
+
       for (const productAttr of product.productAttributes) {
         if (productAttr.attribute?.values) {
           for (const val of productAttr.attribute.values) {
@@ -629,7 +633,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
     // Try to find the first variant image in the images array
     for (const url of splitUrls) {
       if (!url || url.trim() === '') continue;
-      
+
       const processedUrl = processImageUrl(url);
       if (!processedUrl) continue;
 
@@ -638,14 +642,14 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
       // Try multiple matching strategies with better normalization
       const imageIndex = images.findIndex(img => {
         if (!img) return false;
-        
+
         // Process both URLs for consistent comparison
         const processedImg = processImageUrl(img);
         if (!processedImg) return false;
-        
+
         const normalizedImg = normalizeUrl(processedImg);
         const normalizedProcessed = normalizeUrl(processedUrl);
-        
+
         if (normalizedImg === normalizedProcessed) return true;
 
         // Match with/without leading slash (handle both processed URLs)
@@ -653,11 +657,11 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         const imgWithoutSlash = processedImg.startsWith('/') ? processedImg.substring(1) : processedImg;
         const processedWithSlash = processedUrl.startsWith('/') ? processedUrl : `/${processedUrl}`;
         const processedWithoutSlash = processedUrl.startsWith('/') ? processedUrl.substring(1) : processedUrl;
-        
-        if (imgWithSlash === processedWithSlash || 
-            imgWithoutSlash === processedWithoutSlash ||
-            imgWithSlash === processedWithoutSlash ||
-            imgWithoutSlash === processedWithSlash) {
+
+        if (imgWithSlash === processedWithSlash ||
+          imgWithoutSlash === processedWithoutSlash ||
+          imgWithSlash === processedWithoutSlash ||
+          imgWithoutSlash === processedWithSlash) {
           return true;
         }
 
@@ -670,7 +674,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         }
 
         if (processedImg.startsWith('data:') && processedUrl.startsWith('data:') && processedImg === processedUrl) return true;
-        
+
         return false;
       });
 
@@ -679,7 +683,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         return;
       }
     }
-    
+
     // Fallback: If variant image not found, try to find any variant with the same color
     // and use its image if available in the gallery
     // IMPORTANT: Use variantHasColor to check ALL color options
@@ -690,45 +694,45 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         const colorVariants = product.variants.filter(v => {
           return variantHasColor(v, variantColor) && v.imageUrl;
         });
-        
+
         // Try to find image from any variant with the same color
         for (const colorVariant of colorVariants) {
           if (!colorVariant.imageUrl) continue;
-          
+
           const colorSplitUrls = smartSplitUrls(colorVariant.imageUrl);
           for (const colorUrl of colorSplitUrls) {
             if (!colorUrl || colorUrl.trim() === '') continue;
-            
+
             const processedColorUrl = processImageUrl(colorUrl);
             if (!processedColorUrl) continue;
-            
+
             // Skip attribute value images
             if (isAttributeValueImage(processedColorUrl)) continue;
-            
+
             const colorImageIndex = images.findIndex(img => {
               if (!img) return false;
               const processedImg = processImageUrl(img);
               if (!processedImg) return false;
-              
+
               const normalizedImg = normalizeUrl(processedImg);
               const normalizedColor = normalizeUrl(processedColorUrl);
-              
+
               if (normalizedImg === normalizedColor) {
                 return true;
               }
-              
+
               // Try with/without slash
               const imgWithSlash = processedImg.startsWith('/') ? processedImg : `/${processedImg}`;
               const imgWithoutSlash = processedImg.startsWith('/') ? processedImg.substring(1) : processedImg;
               const colorWithSlash = processedColorUrl.startsWith('/') ? processedColorUrl : `/${processedColorUrl}`;
               const colorWithoutSlash = processedColorUrl.startsWith('/') ? processedColorUrl.substring(1) : processedColorUrl;
-              
-              return imgWithSlash === colorWithSlash || 
-                     imgWithoutSlash === colorWithoutSlash ||
-                     imgWithSlash === colorWithoutSlash ||
-                     imgWithoutSlash === colorWithSlash;
+
+              return imgWithSlash === colorWithSlash ||
+                imgWithoutSlash === colorWithoutSlash ||
+                imgWithSlash === colorWithoutSlash ||
+                imgWithoutSlash === colorWithSlash;
             });
-            
+
             if (colorImageIndex !== -1) {
               setCurrentImageIndex(colorImageIndex);
               return;
@@ -743,17 +747,17 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
     if (product && product.variants && product.variants.length > 0) {
       // Find variant considering all selected attributes (color, size, and others)
       const newVariant = findVariantByAllAttributes(selectedColor, selectedSize, selectedAttributeValues);
-      
+
       if (newVariant && newVariant.id !== selectedVariant?.id) {
         setSelectedVariant(newVariant);
-        
+
         // Switch to variant's image if it exists
         switchToVariantImage(newVariant);
-        
+
         // Synchronize selection states with the found variant (supports both formats)
         const colorValue = getOptionValue(newVariant.options, 'color');
         const sizeValue = getOptionValue(newVariant.options, 'size');
-        
+
         if (colorValue && colorValue !== selectedColor?.toLowerCase().trim()) {
           setSelectedColor(colorValue);
         }
@@ -790,48 +794,48 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
     const isVariantCompatible = (variant: ProductVariant, currentSelections: Map<string, string>, excludeAttrKey?: string): boolean => {
       // If no selections, all variants are compatible
       if (currentSelections.size === 0) return true;
-      
+
       // Check each selected attribute (excluding the one we're building)
       for (const [attrKey, selectedValue] of currentSelections.entries()) {
         // Skip the attribute we're currently building
         if (excludeAttrKey && attrKey === excludeAttrKey) {
           continue;
         }
-        
+
         // IMPORTANT: Check ALL options for this attribute, not just the first one
         // A variant can have multiple values for the same attribute
         const normalizedSelectedValue = selectedValue.toLowerCase().trim();
         let hasMatchingValue = false;
-        
+
         // Check all options for this attribute
         const matchingOptions = variant.options?.filter(opt => {
           const optKey = opt.key || opt.attribute;
           return optKey === attrKey;
         }) || [];
-        
+
         if (matchingOptions.length === 0) {
           // Variant doesn't have this attribute, so it's not compatible
           return false;
         }
-        
+
         // Check if any of the options match the selected value
         for (const option of matchingOptions) {
           const optValue = option.value?.toLowerCase().trim();
           const optValueId = option.valueId;
-          
+
           // Match by value (case-insensitive)
           if (optValue === normalizedSelectedValue) {
             hasMatchingValue = true;
             break;
           }
-          
+
           // Match by valueId
           if (optValueId && optValueId === selectedValue) {
             hasMatchingValue = true;
             break;
           }
         }
-        
+
         // If no matching value found, variant is not compatible
         if (!hasMatchingValue) {
           return false;
@@ -862,7 +866,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
       product.productAttributes.forEach((productAttr) => {
         const attrKey = productAttr.attribute.key;
         const valueMap = new Map<string, { valueId?: string; value: string; label: string; variants: ProductVariant[] }>();
-        
+
         // IMPORTANT: Show ALL attribute values, regardless of other selections
         // We don't filter variants here - we show all values that exist in any variant
         // Stock will be calculated separately based on current selections
@@ -911,7 +915,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
 
         // Get current selections for stock calculation (excluding this attribute)
         const currentSelections = getCurrentSelections(attrKey);
-        
+
         const groupsArray = Array.from(valueMap.values()).map((item) => {
           // Find the attribute value to get imageUrl and colors
           // Try multiple matching strategies to ensure we find the correct attribute value
@@ -922,19 +926,19 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
           }
           if (!attrValue && productAttr.attribute.values) {
             // Fallback: try by value (case-insensitive)
-            attrValue = productAttr.attribute.values.find((v: any) => 
+            attrValue = productAttr.attribute.values.find((v: any) =>
               v.value?.toLowerCase() === item.value?.toLowerCase() ||
               v.value === item.value
             );
           }
           if (!attrValue && productAttr.attribute.values) {
             // Last resort: try by label (case-insensitive)
-            attrValue = productAttr.attribute.values.find((v: any) => 
+            attrValue = productAttr.attribute.values.find((v: any) =>
               v.label?.toLowerCase() === item.label?.toLowerCase() ||
               v.label === item.label
             );
           }
-          
+
           // Calculate stock: if other attributes are selected, show stock only for compatible variants
           // Otherwise, show total stock for all variants with this value
           let stock = 0;
@@ -948,7 +952,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             // No selections, show total stock
             stock = item.variants.reduce((sum, v) => sum + v.stock, 0);
           }
-          
+
           return {
             valueId: item.valueId,
             value: item.value,
@@ -967,7 +971,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
       // This handles cases where attributes were added to variants but not yet synced to productAttributes
       if (product?.variants) {
         const allAttributeKeys = new Set<string>();
-        
+
         // Collect all attribute keys from variant options
         product.variants.forEach((variant) => {
           variant.options?.forEach((opt) => {
@@ -977,32 +981,32 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             }
           });
         });
-        
+
         // For each attribute key not already in groups, create attribute group from variants
         allAttributeKeys.forEach((attrKey) => {
           if (!groups.has(attrKey)) {
             const valueMap = new Map<string, { valueId?: string; value: string; label: string; variants: ProductVariant[] }>();
-            
+
             // IMPORTANT: Show ALL attribute values, regardless of other selections
             // We don't filter variants here - we show all values that exist in any variant
             // Stock will be calculated separately based on current selections
-            
+
             product.variants?.forEach((variant) => {
               // Include ALL variants - don't filter by compatibility
               // This ensures all attribute values are shown
               // IMPORTANT: Use filter() instead of find() to get ALL options for this attribute
               // A variant can have multiple values for the same attribute (e.g., color: [red, blue])
 
-              const options = variant.options?.filter((opt) => 
+              const options = variant.options?.filter((opt) =>
                 (opt.key === attrKey || opt.attribute === attrKey)
               ) || [];
-              
+
               // Process ALL options for this attribute (not just the first one)
               options.forEach((option) => {
                 const valueId = option.valueId || '';
                 const value = option.value || '';
                 const label = option.value || '';
-                
+
                 const mapKey = valueId || value;
                 if (!valueMap.has(mapKey)) {
                   valueMap.set(mapKey, {
@@ -1018,62 +1022,62 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                 }
               });
             });
-            
+
             if (valueMap.size > 0) {
               // Try to find attribute values from productAttributes to get imageUrl
-              const productAttr = product.productAttributes?.find((pa: any) => 
+              const productAttr = product.productAttributes?.find((pa: any) =>
                 pa.attribute?.key === attrKey
               );
-              
-            // Get current selections for stock calculation (excluding this attribute)
-            const currentSelections = getCurrentSelections(attrKey);
-            
-            const groupsArray = Array.from(valueMap.values()).map((item) => {
-              // Try to find attribute value to get imageUrl and colors
-              let attrValue = null;
-              if (productAttr?.attribute?.values) {
-                if (item.valueId) {
-                  attrValue = productAttr.attribute.values.find((v: any) => v.id === item.valueId);
+
+              // Get current selections for stock calculation (excluding this attribute)
+              const currentSelections = getCurrentSelections(attrKey);
+
+              const groupsArray = Array.from(valueMap.values()).map((item) => {
+                // Try to find attribute value to get imageUrl and colors
+                let attrValue = null;
+                if (productAttr?.attribute?.values) {
+                  if (item.valueId) {
+                    attrValue = productAttr.attribute.values.find((v: any) => v.id === item.valueId);
+                  }
+                  if (!attrValue) {
+                    attrValue = productAttr.attribute.values.find((v: any) =>
+                      v.value?.toLowerCase() === item.value?.toLowerCase() ||
+                      v.value === item.value
+                    );
+                  }
+                  if (!attrValue) {
+                    attrValue = productAttr.attribute.values.find((v: any) =>
+                      v.label?.toLowerCase() === item.label?.toLowerCase() ||
+                      v.label === item.label
+                    );
+                  }
                 }
-                if (!attrValue) {
-                  attrValue = productAttr.attribute.values.find((v: any) => 
-                    v.value?.toLowerCase() === item.value?.toLowerCase() ||
-                    v.value === item.value
+
+                // Calculate stock: if other attributes are selected, show stock only for compatible variants
+                // Otherwise, show total stock for all variants with this value
+                let stock = 0;
+                if (currentSelections.size > 0) {
+                  // Filter variants by compatibility and sum their stock
+                  const compatibleVariants = item.variants.filter(v =>
+                    isVariantCompatible(v, currentSelections, attrKey)
                   );
+                  stock = compatibleVariants.reduce((sum, v) => sum + v.stock, 0);
+                } else {
+                  // No selections, show total stock
+                  stock = item.variants.reduce((sum, v) => sum + v.stock, 0);
                 }
-                if (!attrValue) {
-                  attrValue = productAttr.attribute.values.find((v: any) => 
-                    v.label?.toLowerCase() === item.label?.toLowerCase() ||
-                    v.label === item.label
-                  );
-                }
-              }
-              
-              // Calculate stock: if other attributes are selected, show stock only for compatible variants
-              // Otherwise, show total stock for all variants with this value
-              let stock = 0;
-              if (currentSelections.size > 0) {
-                // Filter variants by compatibility and sum their stock
-                const compatibleVariants = item.variants.filter(v => 
-                  isVariantCompatible(v, currentSelections, attrKey)
-                );
-                stock = compatibleVariants.reduce((sum, v) => sum + v.stock, 0);
-              } else {
-                // No selections, show total stock
-                stock = item.variants.reduce((sum, v) => sum + v.stock, 0);
-              }
-              
-              return {
-                valueId: item.valueId,
-                value: item.value,
-                label: item.label,
-                stock: stock,
-                variants: item.variants,
-                imageUrl: attrValue?.imageUrl || null,
-                colors: attrValue?.colors || null,
-              };
-            });
-              
+
+                return {
+                  valueId: item.valueId,
+                  value: item.value,
+                  label: item.label,
+                  stock: stock,
+                  variants: item.variants,
+                  imageUrl: attrValue?.imageUrl || null,
+                  colors: attrValue?.colors || null,
+                };
+              });
+
               groups.set(attrKey, groupsArray);
             }
           }
@@ -1100,9 +1104,9 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
           variant.options?.forEach((opt) => {
             const attrKey = opt.key || opt.attribute || '';
             const value = opt.value || '';
-            
+
             if (!value) return;
-            
+
             if (attrKey === 'color') {
               const normalizedColor = value.toLowerCase().trim();
               if (!colorMap.has(normalizedColor)) {
@@ -1142,20 +1146,20 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         // Get current selections for stock calculation
         const colorSelections = getCurrentSelections('color');
         const sizeSelections = getCurrentSelections('size');
-        
+
         if (colorMap.size > 0) {
           groups.set('color', Array.from(colorMap.entries()).map(([value, variants]) => {
             // Calculate stock: if other attributes are selected, show stock only for compatible variants
             let stock = 0;
             if (colorSelections.size > 0) {
-              const compatibleVariants = variants.filter(v => 
+              const compatibleVariants = variants.filter(v =>
                 isVariantCompatible(v, colorSelections, 'color')
               );
               stock = compatibleVariants.reduce((sum, v) => sum + v.stock, 0);
             } else {
               stock = variants.reduce((sum, v) => sum + v.stock, 0);
             }
-            
+
             return {
               value,
               label: value,
@@ -1170,14 +1174,14 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             // Calculate stock: if other attributes are selected, show stock only for compatible variants
             let stock = 0;
             if (sizeSelections.size > 0) {
-              const compatibleVariants = variants.filter(v => 
+              const compatibleVariants = variants.filter(v =>
                 isVariantCompatible(v, sizeSelections, 'size')
               );
               stock = compatibleVariants.reduce((sum, v) => sum + v.stock, 0);
             } else {
               stock = variants.reduce((sum, v) => sum + v.stock, 0);
             }
-            
+
             return {
               value,
               label: value,
@@ -1186,23 +1190,23 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             };
           }));
         }
-        
+
         // Add other attributes
         otherAttributesMap.forEach((valueMap, attrKey) => {
           const attrSelections = getCurrentSelections(attrKey);
-          
+
           groups.set(attrKey, Array.from(valueMap.entries()).map(([value, variants]) => {
             // Calculate stock: if other attributes are selected, show stock only for compatible variants
             let stock = 0;
             if (attrSelections.size > 0) {
-              const compatibleVariants = variants.filter(v => 
+              const compatibleVariants = variants.filter(v =>
                 isVariantCompatible(v, attrSelections, attrKey)
               );
               stock = compatibleVariants.reduce((sum, v) => sum + v.stock, 0);
             } else {
               stock = variants.reduce((sum, v) => sum + v.stock, 0);
             }
-            
+
             return {
               value,
               label: value,
@@ -1241,7 +1245,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
   }
 
   const currentVariant = selectedVariant || findVariantByColorAndSize(selectedColor, selectedSize) || product?.variants?.[0] || null;
-  
+
   // Ստուգում ենք, արդյոք variant-ը արդեն cart-ում է
   useEffect(() => {
     if (!currentVariant) {
@@ -1280,17 +1284,17 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
       return () => window.removeEventListener('cart-updated', handleCartUpdate);
     }
   }, [currentVariant?.id]);
-  
+
   const price = currentVariant?.price || 0;
   const originalPrice = currentVariant?.originalPrice;
   const compareAtPrice = currentVariant?.compareAtPrice;
   const discountPercent = currentVariant?.productDiscount || product?.productDiscount || null;
   const maxQuantity = currentVariant?.stock && currentVariant.stock > 0 ? currentVariant.stock : 0;
   const isOutOfStock = !currentVariant || currentVariant.stock <= 0;
-  
+
   // Check which attributes are available and required
   // Use attributeGroups for new format, colorGroups/sizeGroups for old format
-  const hasColorAttribute = attributeGroups.has('color') 
+  const hasColorAttribute = attributeGroups.has('color')
     ? (attributeGroups.get('color')?.some(g => g.stock > 0) || false)
     : (colorGroups.length > 0 && colorGroups.some(g => g.stock > 0));
   const hasSizeAttribute = attributeGroups.has('size')
@@ -1299,7 +1303,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
   const needsColor = hasColorAttribute && !selectedColor;
   const needsSize = hasSizeAttribute && !selectedSize;
   const isVariationRequired = needsColor || needsSize;
-  
+
   // Generate user-friendly message for required attributes
   const getRequiredAttributesMessage = (): string => {
     if (needsColor && needsSize) {
@@ -1311,7 +1315,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
     }
     return t(language, 'product.selectOptions');
   };
-  
+
   // Check if selected variant's attribute values have stock
   // Returns a map of attribute keys to whether they're unavailable (stock = 0)
   // IMPORTANT: Only mark as unavailable if the variant itself has no stock
@@ -1319,24 +1323,24 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
   // but the variant itself might still have stock
   const unavailableAttributes = useMemo(() => {
     const unavailable = new Map<string, boolean>();
-    
+
     if (!currentVariant || !product) return unavailable;
-    
+
     // If the variant itself has stock, all its attributes are available
     if (currentVariant.stock > 0) {
       return unavailable; // No unavailable attributes
     }
-    
+
     // Only if variant has no stock, check which attributes are unavailable
     // This helps identify which attribute combination caused the out-of-stock
     currentVariant.options?.forEach((option) => {
       const attrKey = option.key || option.attribute;
       if (!attrKey) return;
-      
+
       // Get the attribute group for this attribute
       const attrGroup = attributeGroups.get(attrKey);
       if (!attrGroup) return;
-      
+
       // Find the attribute value in the group that matches the variant's option
       const attrValue = attrGroup.find((g) => {
         if (option.valueId && g.valueId) {
@@ -1344,20 +1348,20 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         }
         return g.value?.toLowerCase().trim() === option.value?.toLowerCase().trim();
       });
-      
+
       // Only mark as unavailable if attribute value has no stock AND variant has no stock
       // This helps identify which attribute combination is out of stock
       if (attrValue && attrValue.stock <= 0 && currentVariant.stock <= 0) {
         unavailable.set(attrKey, true);
       }
     });
-    
+
     return unavailable;
   }, [currentVariant, attributeGroups, product]);
-  
+
   // Check if any attribute is unavailable
   const hasUnavailableAttributes = unavailableAttributes.size > 0;
-  
+
   const canAddToCart = !isOutOfStock && !isVariationRequired && !hasUnavailableAttributes;
 
   // Եթե variant-ը արդեն cart-ում է, minimumOrderQuantity-ը դառնում է orderQuantityIncrement-ի չափով
@@ -1380,19 +1384,19 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
   }, [product?.id, minimumOrderQuantity, orderQuantityIncrement, currentVariant]);
 
   useEffect(() => {
-    if (!currentVariant || currentVariant.stock <= 0) { 
-      setQuantity(0); 
-      return; 
+    if (!currentVariant || currentVariant.stock <= 0) {
+      setQuantity(0);
+      return;
     }
     setQuantity(prev => {
       const currentStock = currentVariant.stock;
-      
+
       // Եթե քանակը արդեն մեծ է կամ հավասար է minimumOrderQuantity-ին և բազմապատիկ է increment-ին,
       // չփոխենք այն (հատկապես cart-ում ավելացումից հետո)
       if (prev >= minimumOrderQuantity && prev % orderQuantityIncrement === 0 && prev <= currentStock) {
         return prev;
       }
-      
+
       if (prev > currentStock) {
         // Round down to nearest valid quantity
         const rounded = Math.floor(currentStock / orderQuantityIncrement) * orderQuantityIncrement;
@@ -1417,19 +1421,19 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
       // Calculate next quantity based on increment
       const increment = delta > 0 ? orderQuantityIncrement : -orderQuantityIncrement;
       const next = prev + increment;
-      
+
       // Ensure minimum order quantity
       if (next < minimumOrderQuantity) {
         return currentVariant && currentVariant.stock > 0 ? minimumOrderQuantity : 0;
       }
-      
+
       // Ensure doesn't exceed max quantity
       if (next > maxQuantity) {
         // Round down to nearest valid quantity
         const rounded = Math.floor(maxQuantity / orderQuantityIncrement) * orderQuantityIncrement;
         return Math.max(rounded, minimumOrderQuantity);
       }
-      
+
       return next;
     });
   };
@@ -1454,30 +1458,30 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
       setSelectedColor(null);
     } else {
       setSelectedColor(normalizedColor);
-      
+
       // Immediately try to find and switch to a variant image with this color
       // IMPORTANT: Use variantHasColor to check ALL color options, not just the first one
       const colorVariants = product.variants?.filter(v => {
         return variantHasColor(v, normalizedColor) && v.imageUrl;
       }) || [];
-      
+
       // Try to find image from variants with this color
       for (const variant of colorVariants) {
         if (!variant.imageUrl) continue;
-        
+
         const splitUrls = smartSplitUrls(variant.imageUrl);
         for (const url of splitUrls) {
           if (!url || url.trim() === '') continue;
-          
+
           const processedUrl = processImageUrl(url);
           if (!processedUrl) continue;
-          
+
           // Try to find this image in the images array
           const imageIndex = images.findIndex(img => {
             if (!img) return false;
             const processedImg = processImageUrl(img);
             if (!processedImg) return false;
-            
+
             // Normalize both URLs for comparison
             const normalizeUrl = (u: string): string => {
               let n = u.trim().toLowerCase();
@@ -1485,24 +1489,24 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
               if (n.endsWith('/')) n = n.substring(0, n.length - 1);
               return n;
             };
-            
+
             const normalizedImg = normalizeUrl(processedImg);
             const normalizedUrl = normalizeUrl(processedUrl);
-            
+
             if (normalizedImg === normalizedUrl) return true;
-            
+
             // Try with/without leading slash
             const imgWithSlash = processedImg.startsWith('/') ? processedImg : `/${processedImg}`;
             const imgWithoutSlash = processedImg.startsWith('/') ? processedImg.substring(1) : processedImg;
             const urlWithSlash = processedUrl.startsWith('/') ? processedUrl : `/${processedUrl}`;
             const urlWithoutSlash = processedUrl.startsWith('/') ? processedUrl.substring(1) : processedUrl;
-            
-            return imgWithSlash === urlWithSlash || 
-                   imgWithoutSlash === urlWithoutSlash ||
-                   imgWithSlash === urlWithoutSlash ||
-                   imgWithoutSlash === urlWithSlash;
+
+            return imgWithSlash === urlWithSlash ||
+              imgWithoutSlash === urlWithoutSlash ||
+              imgWithSlash === urlWithoutSlash ||
+              imgWithoutSlash === urlWithSlash;
           });
-          
+
           if (imageIndex !== -1) {
             setCurrentImageIndex(imageIndex);
             return;
@@ -1530,7 +1534,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
       <div className="flex flex-col lg:grid lg:grid-cols-[55%_45%] gap-12 items-start">
         {/* Mobile: Image section - shown first */}
         <div className="w-full lg:hidden mb-6">
-          <div 
+          <div
             className="relative aspect-square product-card-glass overflow-hidden group flex items-center justify-center min-h-0"
             onTouchStart={onTouchStart}
             onTouchMove={onTouchMove}
@@ -1541,7 +1545,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                 {/* Image Carousel Container */}
                 <div className="relative w-full h-full">
                   {/* Images Container - Horizontal Scroll */}
-                  <div 
+                  <div
                     className="flex h-full transition-transform duration-300 ease-out"
                     style={{
                       transform: `translateX(-${currentImageIndex * (100 / images.length)}%)`,
@@ -1549,14 +1553,14 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                     }}
                   >
                     {images.map((image, index) => (
-                      <div 
+                      <div
                         key={index}
                         className="h-full flex-shrink-0 flex items-center justify-center"
                         style={{ width: `${100 / images.length}%` }}
                       >
                         <div className="w-full h-[115%] flex items-center justify-center">
-                          <img 
-                            src={image} 
+                          <img
+                            src={image}
                             alt={`${product.title} - ${index + 1}`}
                             className="w-full h-full object-contain object-center"
                           />
@@ -1569,7 +1573,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">{t(language, 'common.messages.noImage')}</div>
             )}
-            
+
             {/* Discount Badge on Image - Blue circle in top-right */}
             {discountPercent && (
               <div className="absolute top-4 right-4 w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold z-10 shadow-[0_2px_8px_rgba(37,99,235,0.3)]">
@@ -1578,12 +1582,12 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             )}
 
             {product.labels && <ProductLabels labels={product.labels} />}
-            
+
             {/* Control Buttons - Bottom left */}
             <div className="absolute bottom-4 left-4 flex flex-col gap-3 z-10">
               {/* Fullscreen Button */}
-              <button 
-                onClick={() => setShowZoom(true)} 
+              <button
+                onClick={() => setShowZoom(true)}
                 className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:bg-white/90 transition-all duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
                 aria-label={t(language, 'common.ariaLabels.fullscreenImage')}
               >
@@ -1602,11 +1606,10 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                       setCurrentImageIndex(index);
                       setTimeout(() => setIsTransitioning(false), 300);
                     }}
-                    className={`transition-all duration-300 rounded-full ${
-                      index === currentImageIndex
+                    className={`transition-all duration-300 rounded-full ${index === currentImageIndex
                         ? 'bg-[#00d1ff] w-8 h-2'
                         : 'bg-white/60 w-2 h-2 hover:bg-white/80'
-                    }`}
+                      }`}
                     aria-label={`Go to image ${index + 1}`}
                   />
                 ))}
@@ -1626,17 +1629,17 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                   className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:bg-white/90 transition-all duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)] z-10"
                   aria-label={t(language, 'common.ariaLabels.previousImage')}
                 >
-                  <svg 
-                    className="w-5 h-5 text-gray-800" 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    className="w-5 h-5 text-gray-800"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M15 19l-7-7 7-7" 
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 19l-7-7 7-7"
                     />
                   </svg>
                 </button>
@@ -1651,17 +1654,17 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                   className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:bg-white/90 transition-all duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)] z-10"
                   aria-label={t(language, 'common.ariaLabels.nextImage')}
                 >
-                  <svg 
-                    className="w-5 h-5 text-gray-800" 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    className="w-5 h-5 text-gray-800"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2} 
-                      d="M9 5l7 7-7 7" 
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
                     />
                   </svg>
                 </button>
@@ -1679,29 +1682,28 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                 const actualIndex = thumbnailStartIndex + index;
                 const isActive = actualIndex === currentImageIndex;
                 return (
-                  <button 
+                  <button
                     key={actualIndex}
                     onClick={() => setCurrentImageIndex(actualIndex)}
-                    className={`relative w-full aspect-[3/4] rounded-[1rem] overflow-hidden border bg-white transition-all duration-300 flex-shrink-0 ${
-                      isActive 
-                        ? 'border-gray-400 shadow-[0_2px_8px_rgba(0,0,0,0.12)] ring-2 ring-gray-300' 
+                    className={`relative w-full aspect-[3/4] rounded-[1rem] overflow-hidden border bg-white transition-all duration-300 flex-shrink-0 ${isActive
+                        ? 'border-gray-400 shadow-[0_2px_8px_rgba(0,0,0,0.12)] ring-2 ring-gray-300'
                         : 'border-gray-200 hover:border-gray-300 hover:shadow-[0_2px_6px_rgba(0,0,0,0.08)]'
-                    }`}
+                      }`}
                   >
-                    <img 
-                      src={image} 
-                      alt="" 
-                      className="w-full h-full object-cover transition-transform duration-300" 
+                    <img
+                      src={image}
+                      alt=""
+                      className="w-full h-full object-cover transition-transform duration-300"
                     />
                   </button>
                 );
               })}
             </div>
-            
+
             {/* Navigation Arrows - Scroll thumbnails */}
             {images.length > thumbnailsPerView && (
               <div className="flex flex-row gap-1.5 justify-center">
-                <button 
+                <button
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();
@@ -1720,21 +1722,21 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                   className="w-9 h-9 rounded border transition-all duration-200 flex items-center justify-center border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-200 hover:shadow-[0_1px_3px_rgba(0,0,0,0.1)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:hover:border-gray-300 disabled:hover:shadow-none bg-gray-100"
                   aria-label={t(language, 'common.ariaLabels.previousThumbnail')}
                 >
-                  <svg 
-                    className="w-4 h-4" 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2.5} 
-                      d="M5 15l7-7 7 7" 
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M5 15l7-7 7 7"
                     />
                   </svg>
                 </button>
-                <button 
+                <button
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();
@@ -1753,61 +1755,61 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                   className="w-9 h-9 rounded border transition-all duration-200 flex items-center justify-center border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-200 hover:shadow-[0_1px_3px_rgba(0,0,0,0.1)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-100 disabled:hover:border-gray-300 disabled:hover:shadow-none bg-gray-100"
                   aria-label={t(language, 'common.ariaLabels.nextThumbnail')}
                 >
-                  <svg 
-                    className="w-4 h-4" 
-                    fill="none" 
-                    stroke="currentColor" 
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth={2.5} 
-                      d="M19 9l-7 7-7-7" 
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M19 9l-7 7-7-7"
                     />
                   </svg>
                 </button>
               </div>
             )}
           </div>
-          
+
           {/* Right Column - Main Image */}
           <div className="flex-1">
             <div className="relative aspect-square product-card-glass overflow-visible group flex items-center justify-center min-h-0">
-            {images.length > 0 ? (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-full h-[115%] flex items-center justify-center">
-                  <img 
-                    src={images[currentImageIndex]} 
-                    alt={product.title} 
-                    className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105" 
-                  />
+              {images.length > 0 ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-full h-[115%] flex items-center justify-center">
+                    <img
+                      src={images[currentImageIndex]}
+                      alt={product.title}
+                      className="w-full h-full object-contain object-center transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">{t(language, 'common.messages.noImage')}</div>
-            )}
-            
-            {/* Discount Badge on Image - Blue circle in top-right */}
-            {discountPercent && (
-              <div className="absolute top-4 right-4 w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold z-10 shadow-[0_2px_8px_rgba(37,99,235,0.3)]">
-                -{discountPercent}%
-              </div>
-            )}
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">{t(language, 'common.messages.noImage')}</div>
+              )}
 
-            {product.labels && <ProductLabels labels={product.labels} />}
-            
-            {/* Control Buttons - Bottom left */}
-            <div className="absolute bottom-4 left-4 flex flex-col gap-3 z-10">
-              {/* Fullscreen Button */}
-              <button 
-                onClick={() => setShowZoom(true)} 
-                className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:bg-white/90 transition-all duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
-                aria-label={t(language, 'common.ariaLabels.fullscreenImage')}
-              >
-                <Maximize2 className="w-5 h-5 text-gray-800" />
-              </button>
-            </div>
+              {/* Discount Badge on Image - Blue circle in top-right */}
+              {discountPercent && (
+                <div className="absolute top-4 right-4 w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold z-10 shadow-[0_2px_8px_rgba(37,99,235,0.3)]">
+                  -{discountPercent}%
+                </div>
+              )}
+
+              {product.labels && <ProductLabels labels={product.labels} />}
+
+              {/* Control Buttons - Bottom left */}
+              <div className="absolute bottom-4 left-4 flex flex-col gap-3 z-10">
+                {/* Fullscreen Button */}
+                <button
+                  onClick={() => setShowZoom(true)}
+                  className="w-12 h-12 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/50 shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:bg-white/90 transition-all duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
+                  aria-label={t(language, 'common.ariaLabels.fullscreenImage')}
+                >
+                  <Maximize2 className="w-5 h-5 text-gray-800" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1821,6 +1823,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             <h1 className="text-xl lg:text-3xl font-bold text-gray-900 mb-4">
               {product.title || getProductText(language, product.id, 'title')}
             </h1>
+
             <div className="mb-6">
               <div className="flex flex-col gap-1">
                 {/* Mobile: Price layout - old price on right, new price on left */}
@@ -1838,6 +1841,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                     </p>
                   )}
                 </div>
+
                 {/* Desktop: Original price below discounted price - full width, not inline */}
                 <div className="hidden lg:block">
                   {(originalPrice || (compareAtPrice && compareAtPrice > price)) && (
@@ -1850,7 +1854,18 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             </div>
             {/* Description - Hidden on mobile */}
             <div className="hidden lg:block text-gray-600 mb-8 prose prose-sm" dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description || getProductText(language, product.id, 'longDescription') || '') }} />
-
+           
+            {/* Categories - same style as Product Card (#00D1FF) */}
+            {product.categories && product.categories.length > 0 && (
+              <div className="flex flex-col gap-1 mb-4 text-base lg:text-lg text-[#00D1FF] tracking-[1.4px]">
+                {product.categories.map((c) => (
+                  <p key={c.id} className="leading-[26px] lg:leading-[28px]">
+                    {formatCategoryLabel(c.title)}
+                  </p>
+                ))}
+              </div>
+            )}
+          
             {/* Rating Section */}
             <div className="mt-8 flex items-center gap-2 pb-3">
               <div className="flex items-center gap-2">
@@ -1858,11 +1873,10 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                   {[1, 2, 3, 4, 5].map((star) => (
                     <svg
                       key={star}
-                      className={`w-4 h-4 lg:w-5 lg:h-5 ${
-                        star <= Math.round(averageRating)
+                      className={`w-4 h-4 lg:w-5 lg:h-5 ${star <= Math.round(averageRating)
                           ? 'text-[#00D1FF]'
                           : 'text-[#00D1FF] opacity-30'
-                      }`}
+                        }`}
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="1.5"
@@ -1876,7 +1890,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                   {averageRating > 0 ? averageRating.toFixed(1) : '0.0'}
                 </span>
               </div>
-              <span 
+              <span
                 onClick={scrollToReviews}
                 className="text-sm text-gray-600 cursor-pointer hover:text-gray-900 hover:underline transition-colors"
               >
@@ -1899,13 +1913,13 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
 
                 // Check if this attribute is unavailable for the selected variant
                 const isUnavailable = unavailableAttributes.get(attrKey) || false;
-                
+
                 return (
                   <div key={attrKey} className="space-y-1.5">
                     <label className={`text-xs font-bold uppercase ${isUnavailable ? 'text-red-600' : ''}`}>
-                      {attrKey === 'color' ? t(language, 'product.color') : 
-                       attrKey === 'size' ? t(language, 'product.size') : 
-                       attributeName}:
+                      {attrKey === 'color' ? t(language, 'product.color') :
+                        attrKey === 'size' ? t(language, 'product.size') :
+                          attributeName}:
                     </label>
                     {isColor ? (
                       <div className="flex flex-wrap gap-1.5 items-center">
@@ -1916,36 +1930,35 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                           // Process imageUrl to ensure it's in the correct format
                           const processedImageUrl = g.imageUrl ? processImageUrl(g.imageUrl) : null;
                           const hasImage = processedImageUrl && processedImageUrl.trim() !== '';
-                          const colorHex = g.colors && Array.isArray(g.colors) && g.colors.length > 0 
-                            ? g.colors[0] 
+                          const colorHex = g.colors && Array.isArray(g.colors) && g.colors.length > 0
+                            ? g.colors[0]
                             : getColorValue(g.value);
-                          
+
                           // Dynamic sizing based on number of values
                           // Keep size consistent for 2 values, reduce for more
                           const totalValues = attrGroups.length;
-                          const sizeClass = totalValues > 6 
-                            ? 'w-8 h-8' 
-                            : totalValues > 3 
-                            ? 'w-9 h-9' 
-                            : 'w-10 h-10';
-                          
+                          const sizeClass = totalValues > 6
+                            ? 'w-8 h-8'
+                            : totalValues > 3
+                              ? 'w-9 h-9'
+                              : 'w-10 h-10';
+
                           return (
                             <div key={g.valueId || g.value} className="flex flex-col items-center gap-0.5">
-                              <button 
+                              <button
                                 onClick={() => handleColorSelect(g.value)}
-                                className={`${sizeClass} rounded-full transition-all overflow-hidden ${
-                                  isSelected 
-                                    ? 'border-[3px] border-green-500 scale-110' 
+                                className={`${sizeClass} rounded-full transition-all overflow-hidden ${isSelected
+                                    ? 'border-[3px] border-green-500 scale-110'
                                     : g.stock <= 0
-                                      ? 'border-2 border-gray-200 opacity-60 hover:opacity-80' 
+                                      ? 'border-2 border-gray-200 opacity-60 hover:opacity-80'
                                       : 'border-2 border-gray-300 hover:scale-105'
-                                }`}
+                                  }`}
                                 style={hasImage ? {} : { backgroundColor: colorHex }}
-                                title={`${g.value}${g.stock > 0 ? ` (${g.stock} ${t(language, 'product.pcs')})` : ` (${t(language, 'product.outOfStock')})`}`} 
+                                title={`${g.value}${g.stock > 0 ? ` (${g.stock} ${t(language, 'product.pcs')})` : ` (${t(language, 'product.outOfStock')})`}`}
                               >
                                 {hasImage && processedImageUrl ? (
-                                  <img 
-                                    src={processedImageUrl} 
+                                  <img
+                                    src={processedImageUrl}
                                     alt={g.label}
                                     className="w-full h-full object-cover"
                                     onError={(e) => {
@@ -1972,44 +1985,43 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                           const isSelected = selectedSize === g.value.toLowerCase().trim();
                           // IMPORTANT: Don't disable based on stock - show all sizes, even if stock is 0
                           // Stock is just informational, not a reason to hide the option
-                          
+
                           // Process imageUrl to ensure it's in the correct format
                           const processedImageUrl = g.imageUrl ? processImageUrl(g.imageUrl) : null;
                           const hasImage = processedImageUrl && processedImageUrl.trim() !== '';
-                          
+
                           // Dynamic sizing based on number of values
                           // Keep size consistent for 2 values, reduce for more
                           const totalValues = attrGroups.length;
-                          const paddingClass = totalValues > 6 
-                            ? 'px-2 py-1' 
-                            : totalValues > 3 
-                            ? 'px-2.5 py-1.5' 
-                            : 'px-3 py-2';
-                          const textSizeClass = totalValues > 6 
-                            ? 'text-xs' 
+                          const paddingClass = totalValues > 6
+                            ? 'px-2 py-1'
+                            : totalValues > 3
+                              ? 'px-2.5 py-1.5'
+                              : 'px-3 py-2';
+                          const textSizeClass = totalValues > 6
+                            ? 'text-xs'
                             : 'text-sm';
-                          const imageSizeClass = totalValues > 6 
-                            ? 'w-4 h-4' 
+                          const imageSizeClass = totalValues > 6
+                            ? 'w-4 h-4'
                             : 'w-5 h-5';
-                          const minWidthClass = totalValues > 6 
-                            ? 'min-w-[40px]' 
+                          const minWidthClass = totalValues > 6
+                            ? 'min-w-[40px]'
                             : 'min-w-[50px]';
 
                           return (
-                            <button 
+                            <button
                               key={g.valueId || g.value}
                               onClick={() => handleSizeSelect(g.value)}
-                              className={`${minWidthClass} ${paddingClass} rounded-lg border-2 transition-all flex items-center gap-1.5 ${
-                                isSelected 
-                                  ? 'border-green-500 bg-gray-50' 
+                              className={`${minWidthClass} ${paddingClass} rounded-lg border-2 transition-all flex items-center gap-1.5 ${isSelected
+                                  ? 'border-green-500 bg-gray-50'
                                   : displayStock <= 0
-                                    ? 'border-gray-200 opacity-60 hover:opacity-80' 
+                                    ? 'border-gray-200 opacity-60 hover:opacity-80'
                                     : 'border-gray-200 hover:border-gray-400'
-                              }`}
+                                }`}
                             >
                               {hasImage && processedImageUrl && (
-                                <img 
-                                  src={processedImageUrl} 
+                                <img
+                                  src={processedImageUrl}
                                   alt={g.label}
                                   className={`${imageSizeClass} object-cover rounded border border-gray-300 flex-shrink-0`}
                                   onError={(e) => {
@@ -2033,38 +2045,38 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                           const isSelected = selectedValueId === g.valueId || (!g.valueId && selectedColor === g.value);
                           // IMPORTANT: Don't disable based on stock - show all attribute values, even if stock is 0
                           // Stock is just informational, not a reason to hide the option
-                          
+
                           // Process imageUrl to ensure it's in the correct format
                           const processedImageUrl = g.imageUrl ? processImageUrl(g.imageUrl) : null;
                           const hasImage = processedImageUrl && processedImageUrl.trim() !== '';
                           const hasColors = g.colors && Array.isArray(g.colors) && g.colors.length > 0;
-                          const colorHex = hasColors && g.colors 
-                            ? g.colors[0] 
+                          const colorHex = hasColors && g.colors
+                            ? g.colors[0]
                             : null;
-                          
+
                           // Debug logging for image issues
                           if (g.imageUrl && !hasImage) {
                             console.warn(`⚠️ [ATTRIBUTE IMAGE] Failed to process imageUrl for attribute "${attrKey}" value "${g.value}":`, g.imageUrl);
                           }
-                          
+
                           // Dynamic sizing based on number of values
                           // Keep size consistent for 2 values, reduce for more
                           const totalValues = attrGroups.length;
-                          const paddingClass = totalValues > 6 
-                            ? 'px-2 py-1' 
-                            : totalValues > 3 
-                            ? 'px-3 py-1.5' 
-                            : 'px-4 py-2';
-                          const textSizeClass = totalValues > 6 
-                            ? 'text-xs' 
+                          const paddingClass = totalValues > 6
+                            ? 'px-2 py-1'
+                            : totalValues > 3
+                              ? 'px-3 py-1.5'
+                              : 'px-4 py-2';
+                          const textSizeClass = totalValues > 6
+                            ? 'text-xs'
                             : 'text-sm';
-                          const imageSizeClass = totalValues > 6 
-                            ? 'w-4 h-4' 
-                            : totalValues > 3 
-                            ? 'w-5 h-5' 
-                            : 'w-6 h-6';
-                          const gapClass = totalValues > 6 
-                            ? 'gap-1' 
+                          const imageSizeClass = totalValues > 6
+                            ? 'w-4 h-4'
+                            : totalValues > 3
+                              ? 'w-5 h-5'
+                              : 'w-6 h-6';
+                          const gapClass = totalValues > 6
+                            ? 'gap-1'
                             : 'gap-2';
 
                           return (
@@ -2079,18 +2091,17 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                                 }
                                 setSelectedAttributeValues(newMap);
                               }}
-                              className={`${paddingClass} rounded-lg border-2 transition-all flex items-center ${gapClass} ${
-                                isSelected
+                              className={`${paddingClass} rounded-lg border-2 transition-all flex items-center ${gapClass} ${isSelected
                                   ? 'border-green-500 bg-gray-50'
                                   : g.stock <= 0
                                     ? 'border-gray-200 opacity-60 hover:opacity-80'
                                     : 'border-gray-200 hover:border-gray-400'
-                              }`}
+                                }`}
                               style={!hasImage && colorHex ? { backgroundColor: colorHex } : {}}
                             >
                               {hasImage && processedImageUrl ? (
-                                <img 
-                                  src={processedImageUrl} 
+                                <img
+                                  src={processedImageUrl}
                                   alt={g.label}
                                   className={`${imageSizeClass} object-cover rounded border border-gray-300 flex-shrink-0`}
                                   onError={(e) => {
@@ -2098,7 +2109,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                                   }}
                                 />
                               ) : hasColors && colorHex ? (
-                                <div 
+                                <div
                                   className={`${imageSizeClass} rounded border border-gray-300 flex-shrink-0`}
                                   style={{ backgroundColor: colorHex }}
                                 />
@@ -2122,21 +2133,20 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                       {colorGroups.map((g) => {
                         const isSelected = selectedColor === g.color?.toLowerCase().trim();
                         const isDisabled = g.stock <= 0;
-                        
+
                         return (
                           <div key={g.color} className="flex flex-col items-center gap-1">
-                            <button 
+                            <button
                               onClick={() => !isDisabled && handleColorSelect(g.color)}
                               disabled={isDisabled}
-                              className={`w-10 h-10 rounded-full transition-all ${
-                                isSelected 
-                                  ? 'border-[3px] border-green-500 scale-110' 
-                                  : isDisabled 
-                                    ? 'border-2 border-gray-100 opacity-30 grayscale cursor-not-allowed' 
+                              className={`w-10 h-10 rounded-full transition-all ${isSelected
+                                  ? 'border-[3px] border-green-500 scale-110'
+                                  : isDisabled
+                                    ? 'border-2 border-gray-100 opacity-30 grayscale cursor-not-allowed'
                                     : 'border-2 border-gray-300 hover:scale-105'
-                              }`}
-                              style={{ backgroundColor: getColorValue(g.color) }} 
-                              title={isDisabled ? `${g.color} (${t(language, 'product.outOfStock')})` : `${g.color}${g.stock > 0 ? ` (${g.stock} ${t(language, 'product.pcs')})` : ''}`} 
+                                }`}
+                              style={{ backgroundColor: getColorValue(g.color) }}
+                              title={isDisabled ? `${g.color} (${t(language, 'product.outOfStock')})` : `${g.color}${g.stock > 0 ? ` (${g.stock} ${t(language, 'product.pcs')})` : ''}`}
                             />
                             {g.stock > 0 && (
                               <span className="text-xs text-gray-500">{g.stock}</span>
@@ -2168,17 +2178,16 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                     const isDisabled = displayStock <= 0;
 
                     return (
-                      <button 
-                        key={g.size} 
+                      <button
+                        key={g.size}
                         onClick={() => !isDisabled && handleSizeSelect(g.size)}
                         disabled={isDisabled}
-                        className={`min-w-[50px] px-3 py-2 rounded-lg border-2 transition-all ${
-                          isSelected 
-                            ? 'border-green-500 bg-gray-50' 
-                            : isDisabled 
-                              ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed' 
+                        className={`min-w-[50px] px-3 py-2 rounded-lg border-2 transition-all ${isSelected
+                            ? 'border-green-500 bg-gray-50'
+                            : isDisabled
+                              ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
                               : 'border-gray-200 hover:border-gray-400'
-                        }`}
+                          }`}
                       >
                         <div className="flex flex-col text-center">
                           <span className={`text-sm font-medium ${isDisabled ? 'text-gray-400' : 'text-gray-900'}`}>{g.size}</span>
@@ -2193,7 +2202,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
               </div>
             )}
           </div>
-          
+
           {/* Action Buttons - Aligned with bottom of image */}
           <div className="mt-auto pt-6">
             {/* Show required attributes message if needed */}
@@ -2211,9 +2220,9 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                   {Array.from(unavailableAttributes.entries()).map(([attrKey]) => {
                     const productAttr = product?.productAttributes?.find((pa: any) => pa.attribute?.key === attrKey);
                     const attributeName = productAttr?.attribute?.name || attrKey.charAt(0).toUpperCase() + attrKey.slice(1);
-                    return attrKey === 'color' ? t(language, 'product.color') : 
-                           attrKey === 'size' ? t(language, 'product.size') : 
-                           attributeName;
+                    return attrKey === 'color' ? t(language, 'product.color') :
+                      attrKey === 'size' ? t(language, 'product.size') :
+                        attributeName;
                   }).join(', ')} {t(language, 'product.outOfStock')}
                 </p>
               </div>
@@ -2229,7 +2238,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                 onClick={async () => {
                   if (!canAddToCart || !product || !currentVariant) return;
                   setIsAddingToCart(true);
-                  
+
                   const success = await addToCart({
                     product: {
                       id: product.id,
@@ -2261,11 +2270,11 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
           {showMessage && <div className="mt-4 p-4 bg-gray-900 text-white rounded-md shadow-lg">{showMessage}</div>}
         </div>
       </div>
-      
+
       {showZoom && images.length > 0 && (
         <div className="fixed inset-0 bg-black bg-opacity-90 z-[9999] flex items-center justify-center p-4" onClick={() => setShowZoom(false)}>
           <img src={images[currentImageIndex]} alt="" className="max-w-full max-h-full object-contain" />
-          <button 
+          <button
             className="absolute top-4 right-4 text-white text-2xl"
             aria-label={t(language, 'common.buttons.close')}
             onClick={(e) => {
@@ -2281,7 +2290,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
       {/* Related Products Carousel - Above Reviews */}
       {product && (
         <div className="mt-24">
-<RelatedProducts
+          <RelatedProducts
             categorySlug={product.categories && product.categories.length > 0 ? product.categories[0]?.slug : undefined}
             currentProductId={product.id}
           />

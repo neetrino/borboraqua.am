@@ -1171,34 +1171,26 @@ class AdminService {
       if (!selectedCategory && categories.length > 0) selectedCategory = categories[0];
       
       let category: string | null = null;
-      
       if (selectedCategory) {
         const categoryTranslations = Array.isArray(selectedCategory.translations)
           ? selectedCategory.translations
           : [];
         const categoryTranslation = categoryTranslations.find((t: { locale: string }) => t.locale === lang) || categoryTranslations[0] || null;
         category = categoryTranslation?.title ?? null;
-        
         if (!category) {
           console.warn(`⚠️ [ADMIN SERVICE] Product ${product.id} category ${selectedCategory.id} has no translation for locale ${lang}. Available locales: ${categoryTranslations.map((t: { locale: string }) => t.locale).join(', ')}`);
         }
       }
-      
-      return {
-        id: product.id,
-        slug: translation?.slug || "",
-        title: translation?.title || "",
-        published: product.published,
-        featured: product.featured || false,
-        price: variantForPrice?.price ?? 0,
-        stock: totalStock,
-        discountPercent: product.discountPercent || 0, // Include discountPercent
-        compareAtPrice: variantForPrice?.compareAtPrice ?? null, // Include compareAtPrice for showing original price
-        colorStocks: [], // Can be enhanced later
-        image,
-        category,
-        createdAt: product.createdAt.toISOString(),
-      };
+
+      // All category titles (current lang) for list view
+      const categoryTitles: string[] = categories
+        .map((c: { translations?: Array<{ locale: string; title: string }> }) => {
+          const tr = Array.isArray(c.translations) ? c.translations : [];
+          const t = tr.find((x: { locale: string }) => x.locale === lang) || tr[0];
+          return t?.title?.trim() || "";
+        })
+        .filter(Boolean);
+      const categoriesList = [...new Set(categoryTitles)];
 
       return {
         id: product.id,
@@ -1208,11 +1200,12 @@ class AdminService {
         featured: product.featured || false,
         price: variantForPrice?.price ?? 0,
         stock: totalStock,
-        discountPercent: product.discountPercent || 0, // Include discountPercent
-        compareAtPrice: variantForPrice?.compareAtPrice ?? null, // Include compareAtPrice for showing original price
-        colorStocks: [], // Can be enhanced later
+        discountPercent: product.discountPercent || 0,
+        compareAtPrice: variantForPrice?.compareAtPrice ?? null,
+        colorStocks: [],
         image,
         category,
+        categories: categoriesList.length > 0 ? categoriesList : undefined,
         createdAt: product.createdAt.toISOString(),
       };
     });
