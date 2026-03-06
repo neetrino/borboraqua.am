@@ -1581,7 +1581,11 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
               </div>
             )}
 
-            {product.labels && <ProductLabels labels={product.labels} />}
+            {product.labels && (
+              <div className="absolute inset-0 z-20 pointer-events-none translate-x-3 translate-y-2">
+                <ProductLabels labels={product.labels} />
+              </div>
+            )}
 
             {/* Control Buttons - Bottom left */}
             <div className="absolute bottom-4 left-4 flex flex-col gap-3 z-10">
@@ -1797,7 +1801,11 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                 </div>
               )}
 
-              {product.labels && <ProductLabels labels={product.labels} />}
+              {product.labels && (
+                <div className="absolute inset-0 z-20 pointer-events-none translate-x-3 translate-y-2">
+                  <ProductLabels labels={product.labels} />
+                </div>
+              )}
 
               {/* Control Buttons - Bottom left */}
               <div className="absolute bottom-4 left-4 flex flex-col gap-3 z-10">

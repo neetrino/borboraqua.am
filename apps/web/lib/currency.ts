@@ -165,21 +165,28 @@ export function formatPrice(price: number, currency: CurrencyCode = 'AMD'): stri
 /**
  * Format price that is already in the target currency (no conversion)
  * Useful for prices that are stored in specific currency (e.g., shipping prices in AMD)
+ * When currency is AMD, shows number followed by " AMD" (e.g. "1,500 AMD").
  */
 export function formatPriceInCurrency(price: number, currency: CurrencyCode): string {
   const currencyInfo = CURRENCIES[currency];
-  
-  // Show all currencies without decimals (remove .00)
   const minimumFractionDigits = 0;
   const maximumFractionDigits = 0;
-  
+
+  if (currency === 'AMD') {
+    const numberPart = new Intl.NumberFormat('en-US', {
+      minimumFractionDigits,
+      maximumFractionDigits,
+    }).format(price);
+    return `${numberPart} AMD`;
+  }
+
   const formatted = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currencyInfo.code,
     minimumFractionDigits,
     maximumFractionDigits,
   }).format(price);
-  
+
   return formatted;
 }
 
