@@ -53,7 +53,7 @@ export const ProductLabels: React.FC<ProductLabelsProps> = ({ labels }) => {
   };
 
   return (
-    <div className="absolute inset-0 pointer-events-none z-20">
+    <div className="absolute inset-0 pointer-events-none z-20 md:translate-x-5">
       {positions.map((position) => {
         const labelsForPosition = labels.filter((label) => label.position === position);
         if (labelsForPosition.length === 0) return null;

@@ -914,13 +914,7 @@ export function FeaturedProductCard({
   compact = false,
   isRelated = false,
 }: FeaturedProductCardProps) {
-  const hasMultipleCategories = product.categories && product.categories.length > 0;
-  const singleCategoryDisplay = product.category ?? null;
   const hasLabels = Array.isArray(product.labels) && product.labels.length > 0;
-
-  /** Յուրաքանչյուր բառի առաջի տառը մեծատառ */
-  const formatCategoryLabel = (s: string) =>
-    s ? s.toLowerCase().replace(/(?:^|\s)\S/g, (ch) => ch.toUpperCase()) : s;
 
   if (isMobile) {
     // Extract volume from title or subtitle (e.g., "0.5L", "0.33L", "0.25L")
@@ -952,47 +946,35 @@ export function FeaturedProductCard({
         {hasLabels && <ProductLabels labels={product.labels!} />}
 
         {/* Rounded Card with Price, Volume, and Add Button */}
-        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[55%_0_1%_0] rounded-[20px] h-[44%] w-[98%] left-[1%] overflow-hidden">
-          {/* Title - left top corner, 2 lines so category is not cut off */}
-          <div className="absolute flex flex-col font-['Inter:Bold',sans-serif] font-bold left-[12px] top-[8px] right-[35px] justify-start leading-[0] text-left text-black overflow-hidden">
+        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[55%_0_1%_0] rounded-[20px] h-[40%] w-[98%] left-[1%] overflow-hidden">
+          {/* Title - left top corner, 2 lines */}
+          <div className="absolute flex flex-col font-['Inter:Bold',sans-serif] font-bold left-[12px] top-[14px] right-[35px] justify-start leading-[0] text-left text-black overflow-hidden">
             <p className="leading-[20px] break-words w-full line-clamp-2" style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{product.title}</p>
           </div>
           
-          {/* Category/Volume - below title, 10px up from original */}
-          {(volume || singleCategoryDisplay || hasMultipleCategories) && (
+          {/* Volume - below title */}
+          {volume && (
             <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#00D1FF] text-[14px] top-[50px] tracking-[1.2px] gap-0.5 min-h-[54px] overflow-visible">
-              {volume ? (
-                <p className="leading-[16px]">{volume}</p>
-              ) : hasMultipleCategories ? (
-                product.categories!.map((c) => (
-                  <p key={c} className="leading-[16px]">{formatCategoryLabel(c)}</p>
-                ))
-              ) : (
-                <p className="leading-[16px]">{formatCategoryLabel(singleCategoryDisplay ?? '')}</p>
-              )}
+              <p className="leading-[16px]">{volume}</p>
             </div>
           )}
 
-          {/* Price - block-ի ներսում, ներքևից */}
-          <div className="absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] left-[12px] not-italic text-[16px] text-white bottom-0 whitespace-nowrap">
-            <p className="leading-[28px]">{formatPrice(product.price, currency)}</p>
+          {/* Price and + button on one line at bottom */}
+          <div className="absolute left-[12px] right-[12px] bottom-[8px] flex flex-row items-center justify-between gap-2">
+            <p className="font-['Inter:Black',sans-serif] font-black text-[16px] text-white leading-[28px] whitespace-nowrap">{formatPrice(product.price, currency)}</p>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onAddToCart(product);
+              }}
+              disabled={isAddingToCart || !product.inStock}
+              className="z-20 shrink-0 size-[38px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
+              aria-label={t('home.featuredProducts.addToCart')}
+            >
+              <span className="font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] text-[20px] text-white -mt-[3px]">+</span>
+            </button>
           </div>
-          
-          {/* Add to Cart Button - bottom right */}
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onAddToCart(product);
-            }}
-            disabled={isAddingToCart || !product.inStock}
-            className="absolute z-20 block cursor-pointer right-[8px] size-[38px] bottom-[8px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50"
-            aria-label={t('home.featuredProducts.addToCart')}
-          >
-            <div className="flex flex-col font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] justify-center leading-[0] not-italic text-[20px] text-center text-white -mt-[3px]">
-              <p className="leading-[20px] whitespace-pre-wrap">+</p>
-            </div>
-          </button>
         </div>
       </Link>
     ) : (
@@ -1009,29 +991,21 @@ export function FeaturedProductCard({
           </div>
         </div>
         {hasLabels && <ProductLabels labels={product.labels!} />}
-        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[55%_0_1%_0] rounded-[20px] h-[44%] w-[98%] left-[1%] overflow-hidden">
-          <div className="absolute flex flex-col font-['Inter:Bold',sans-serif] font-bold left-[12px] top-[8px] right-[35px] justify-start leading-[0] text-left text-black overflow-hidden">
+        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[55%_0_1%_0] rounded-[20px] h-[40%] w-[98%] left-[1%] overflow-hidden">
+          <div className="absolute flex flex-col font-['Inter:Bold',sans-serif] font-bold left-[12px] top-[14px] right-[35px] justify-start leading-[0] text-left text-black overflow-hidden">
             <p className="leading-[20px] break-words w-full line-clamp-2" style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{product.title}</p>
           </div>
-          {(volume || singleCategoryDisplay || hasMultipleCategories) && (
+          {volume && (
             <div className="absolute flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] left-[12px] not-italic text-[#00D1FF] text-[14px] top-[55px] tracking-[1.2px] gap-0.5 min-h-[54px] overflow-visible">
-              {volume ? (
-                <p className="leading-[16px]">{volume}</p>
-              ) : hasMultipleCategories ? (
-                product.categories!.map((c) => (
-                  <p key={c} className="leading-[16px]">{formatCategoryLabel(c)}</p>
-                ))
-              ) : (
-                <p className="leading-[16px]">{formatCategoryLabel(singleCategoryDisplay ?? '')}</p>
-              )}
+              <p className="leading-[16px]">{volume}</p>
             </div>
           )}
-          <div className="absolute flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] left-[12px] not-italic text-[16px] text-white bottom-0 whitespace-nowrap">
-            <p className="leading-[28px]">{formatPrice(product.price, currency)}</p>
+          <div className="absolute left-[12px] right-[12px] bottom-[8px] flex flex-row items-center justify-between gap-2">
+            <p className="font-['Inter:Black',sans-serif] font-black text-[16px] text-white leading-[28px] whitespace-nowrap">{formatPrice(product.price, currency)}</p>
+            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(product); }} disabled={isAddingToCart || !product.inStock} className="z-20 shrink-0 size-[38px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50" aria-label={t('home.featuredProducts.addToCart')}>
+              <span className="font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] text-[20px] text-white -mt-[3px]">+</span>
+            </button>
           </div>
-          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(product); }} disabled={isAddingToCart || !product.inStock} className="absolute z-20 block cursor-pointer right-[8px] size-[38px] bottom-[8px] bg-[#1ac0fd] hover:bg-[#6bb8dc] rounded-full flex items-center justify-center transition-all disabled:opacity-50" aria-label={t('home.featuredProducts.addToCart')}>
-            <div className="flex flex-col font-['Hiragino_Maru_Gothic_ProN:W4',sans-serif] justify-center leading-[0] not-italic text-[20px] text-center text-white -mt-[3px]"><p className="leading-[20px] whitespace-pre-wrap">+</p></div>
-          </button>
         </div>
       </div>
     );
@@ -1059,32 +1033,11 @@ export function FeaturedProductCard({
           )}
           {hasLabels && <ProductLabels labels={product.labels!} />}
         </div>
-        {/* Content Section - fixed layout, does not grow card */}
+        {/* Content Section - title and price on one row; when title wraps to 2 lines, price stays top-right and is not overlapped */}
         <div className="w-full flex flex-col gap-[30px] px-[8px] pb-[8px] relative min-h-0 min-w-0">
-          <div className="flex flex-col items-start w-full gap-0 min-h-0">
-            {/* Title - 2 lines max on desktop, fixed height so card does not grow */}
-            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[16px] text-black w-full h-[48px] min-h-[48px] overflow-hidden">
-              <p className="leading-[24px] break-words w-full line-clamp-2">{product.title}</p>
-            </div>
-            {/* Category and price - same row, price on the right (categories stacked, fixed height) */}
-            <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
-              {(singleCategoryDisplay || hasMultipleCategories) ? (
-                <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] relative shrink-0 text-[14px] text-[#00D1FF] tracking-[1.2px] min-w-0 gap-0.5 h-[54px] overflow-hidden">
-                  {hasMultipleCategories
-                    ? product.categories!.map((c) => (
-                        <p key={c} className="leading-[16px] break-words">{formatCategoryLabel(c)}</p>
-                      ))
-                    : (
-                        <p className="leading-[16px] break-words">{formatCategoryLabel(singleCategoryDisplay ?? '')}</p>
-                      )}
-                </div>
-              ) : (
-                <div className="shrink-0 h-[54px]" />
-              )}
-              <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[16px] whitespace-nowrap">
-                <p className="leading-[22px]">{formatPrice(product.price, currency)}</p>
-              </div>
-            </div>
+          <div className="flex flex-row items-start justify-between gap-2 w-full min-w-0">
+            <p className="flex-1 min-w-0 font-['Inter:Black',sans-serif] font-black text-[16px] text-black leading-[24px] break-words line-clamp-2">{product.title}</p>
+            <span className="shrink-0 font-['Inter:Black',sans-serif] font-black text-[16px] text-[#00d1ff] leading-[22px] whitespace-nowrap">{formatPrice(product.price, currency)}</span>
           </div>
           <button
             onClick={(e) => {
@@ -1128,28 +1081,9 @@ export function FeaturedProductCard({
         {hasLabels && <ProductLabels labels={product.labels!} />}
       </div>
       <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0">
-        <div className="flex flex-col items-start w-full gap-0 min-h-0">
-          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-start relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full min-h-[48px]">
-            <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full line-clamp-2">{product.title}</p>
-          </div>
-          <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
-            {(singleCategoryDisplay || hasMultipleCategories) ? (
-              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-[#00D1FF] min-w-0 gap-0.5 h-[66px] overflow-hidden">
-                {hasMultipleCategories
-                  ? product.categories!.map((c) => (
-                      <p key={c} className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] break-words">{formatCategoryLabel(c)}</p>
-                    ))
-                  : (
-                      <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] break-words">{formatCategoryLabel(singleCategoryDisplay ?? '')}</p>
-                    )}
-              </div>
-            ) : (
-              <div className="shrink-0 h-[66px]" />
-            )}
-            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] whitespace-nowrap">
-              <p className="leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px]">{formatPrice(product.price, currency)}</p>
-            </div>
-          </div>
+        <div className="flex flex-row items-start justify-between gap-2 w-full min-w-0">
+          <p className="flex-1 min-w-0 font-['Montserrat:Bold',sans-serif] font-bold text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words line-clamp-2">{product.title}</p>
+          <span className="shrink-0 font-['Inter:Black',sans-serif] font-black text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] text-[#00d1ff] leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px] whitespace-nowrap">{formatPrice(product.price, currency)}</span>
         </div>
         <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onAddToCart(product); }} disabled={!product.inStock || isAddingToCart} className="bg-[#00d1ff] content-stretch flex h-[44px] lg:h-[44px] md:h-[48px] sm:h-[48px] items-center justify-center py-[10px] lg:py-[10px] md:py-[12px] sm:py-[12px] relative z-10 rounded-[30px] lg:rounded-[30px] md:rounded-[34px] sm:rounded-[34px] shrink-0 w-full hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#00d1ff]/50 hover:scale-105 active:scale-95 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none transition-all duration-300 cursor-pointer">
           <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
@@ -1178,31 +1112,11 @@ export function FeaturedProductCard({
         )}
         {hasLabels && <ProductLabels labels={product.labels!} />}
       </div>
-      {/* Content Section - fixed layout, does not grow card */}
+      {/* Content Section - title and price on one row; when title wraps to 2 lines, price stays top-right */}
       <div className="w-full flex flex-col gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] px-[14px] lg:px-[14px] md:px-[16px] sm:px-[16px] pb-[14px] lg:pb-[14px] md:pb-[16px] sm:pb-[16px] min-h-0 min-w-0">
-        <div className="flex flex-col items-start w-full gap-0 min-h-0">
-          <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-start relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black w-full min-h-[48px]">
-            <p className="leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words w-full line-clamp-2">{product.title}</p>
-          </div>
-          {/* Category and price - same row, price on the right (categories stacked, fixed height) */}
-          <div className="flex flex-row items-center justify-between gap-2 mt-1 w-full">
-            {(singleCategoryDisplay || hasMultipleCategories) ? (
-              <div className="flex flex-col font-['Montserrat:Bold',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-[#00D1FF] min-w-0 gap-0.5 h-[66px] overflow-hidden">
-                {hasMultipleCategories
-                  ? product.categories!.map((c) => (
-                      <p key={c} className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] break-words">{formatCategoryLabel(c)}</p>
-                    ))
-                  : (
-                      <p className="leading-[20px] lg:leading-[20px] md:leading-[18px] sm:leading-[16px] break-words">{formatCategoryLabel(singleCategoryDisplay ?? '')}</p>
-                    )}
-              </div>
-            ) : (
-              <div className="shrink-0 h-[66px]" />
-            )}
-            <div className="flex flex-col font-['Inter:Black',sans-serif] font-black justify-center leading-[0] not-italic relative shrink-0 text-[#00d1ff] text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] whitespace-nowrap">
-              <p className="leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px]">{formatPrice(product.price, currency)}</p>
-            </div>
-          </div>
+        <div className="flex flex-row items-start justify-between gap-2 w-full min-w-0">
+          <p className="flex-1 min-w-0 font-['Montserrat:Bold',sans-serif] font-bold text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-black leading-[24px] lg:leading-[24px] md:leading-[24px] sm:leading-[20px] break-words line-clamp-2">{product.title}</p>
+          <span className="shrink-0 font-['Inter:Black',sans-serif] font-black text-[18px] lg:text-[18px] md:text-[18px] sm:text-[16px] text-[#00d1ff] leading-[26px] lg:leading-[26px] md:leading-[24px] sm:leading-[20px] whitespace-nowrap">{formatPrice(product.price, currency)}</span>
         </div>
         <button
           onClick={(e) => {
