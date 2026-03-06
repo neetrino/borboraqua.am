@@ -27,6 +27,8 @@ interface Product {
   }>;
   image: string | null;
   category?: string | null;
+  /** All category titles for this product (admin list) */
+  categories?: string[];
   createdAt: string;
 }
 
@@ -1212,7 +1214,9 @@ export default function ProductsPage() {
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-700">
-                          {product.category ?? '—'}
+                          {product.categories && product.categories.length > 0
+                            ? product.categories.join(', ')
+                            : (product.category ?? '—')}
                         </td>
                         <td className="px-3 py-4 text-center">
                           <button
