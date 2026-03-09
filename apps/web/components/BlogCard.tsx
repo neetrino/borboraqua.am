@@ -47,12 +47,13 @@ export function BlogCard({
   const { t } = useTranslation();
   const imageUrl = featuredImage ? processImageUrl(featuredImage) : null;
   const formattedDate = publishedAt ? formatPublishedDate(publishedAt) : null;
+  const encodedSlug = encodeURIComponent(slug);
 
   return (
     <article
       className={`group border border-gray-200 rounded-lg overflow-hidden bg-white hover:shadow-lg transition-all duration-300 ${className}`}
     >
-      <Link href={`/blog/${slug}`} prefetch className="block">
+      <Link href={`/blog/${encodedSlug}`} prefetch className="block">
         {imageUrl && (
           <div className="w-full overflow-hidden bg-gray-100">
             {/* eslint-disable-next-line @next/next/no-img-element */}
