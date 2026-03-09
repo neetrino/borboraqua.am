@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { processImageUrl } from '../lib/utils/image-utils';
 import { useTranslation } from '../lib/i18n-client';
 
@@ -14,6 +13,29 @@ interface BlogCardProps {
   className?: string;
 }
 
+const HY_MONTHS = [
+  'հունվարի',
+  'փետրվարի',
+  'մարտի',
+  'ապրիլի',
+  'մայիսի',
+  'հունիսի',
+  'հուլիսի',
+  'օգոստոսի',
+  'սեպտեմբերի',
+  'հոկտեմբերի',
+  'նոյեմբերի',
+  'դեկտեմբերի',
+] as const;
+
+function formatPublishedDate(dateValue: string): string {
+  const date = new Date(dateValue);
+  const day = date.getUTCDate();
+  const month = HY_MONTHS[date.getUTCMonth()] ?? '';
+  const year = date.getUTCFullYear();
+  return `${day} ${month}, ${year} թ.`;
+}
+
 export function BlogCard({
   slug,
   title,
@@ -24,13 +46,7 @@ export function BlogCard({
 }: BlogCardProps) {
   const { t } = useTranslation();
   const imageUrl = featuredImage ? processImageUrl(featuredImage) : null;
-  const formattedDate = publishedAt
-    ? new Date(publishedAt).toLocaleDateString('hy-AM', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null;
+  const formattedDate = publishedAt ? formatPublishedDate(publishedAt) : null;
 
   return (
     <article
@@ -38,14 +54,14 @@ export function BlogCard({
     >
       <Link href={`/blog/${slug}`} prefetch className="block">
         {imageUrl && (
-          <div className="relative w-full h-48 sm:h-56 md:h-64 overflow-hidden bg-gray-100">
-            <Image
+          <div className="w-full overflow-hidden bg-gray-100">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={imageUrl}
               alt={title}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+              className="w-full h-auto block group-hover:scale-105 transition-transform duration-300"
               loading="lazy"
+              decoding="async"
             />
           </div>
         )}

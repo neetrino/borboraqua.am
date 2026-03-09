@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { processImageUrl } from '../lib/utils/image-utils';
@@ -21,6 +20,29 @@ interface BlogPost {
 
 interface BlogArticleContentProps {
   post: BlogPost;
+}
+
+const HY_MONTHS = [
+  'հունվարի',
+  'փետրվարի',
+  'մարտի',
+  'ապրիլի',
+  'մայիսի',
+  'հունիսի',
+  'հուլիսի',
+  'օգոստոսի',
+  'սեպտեմբերի',
+  'հոկտեմբերի',
+  'նոյեմբերի',
+  'դեկտեմբերի',
+] as const;
+
+function formatPublishedDate(dateValue: string): string {
+  const date = new Date(dateValue);
+  const day = date.getUTCDate();
+  const month = HY_MONTHS[date.getUTCMonth()] ?? '';
+  const year = date.getUTCFullYear();
+  return `${day} ${month}, ${year} թ.`;
 }
 
 // Component to process internal links in content
@@ -70,11 +92,7 @@ export function BlogArticleContent({ post }: BlogArticleContentProps) {
   const { t } = useTranslation();
   const imageUrl = post.featuredImage ? processImageUrl(post.featuredImage) : null;
   const formattedDate = post.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString('hy-AM', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
+    ? formatPublishedDate(post.publishedAt)
     : null;
 
   // Process content: internal links, heading structure, then sanitize for XSS (3.1a)
@@ -106,16 +124,16 @@ export function BlogArticleContent({ post }: BlogArticleContentProps) {
           {t('blog.backToBlog')}
         </button>
 
-        {/* Featured Image */}
+        {/* Featured Image — contain mode on /blog/slug */}
         {imageUrl && (
-          <div className="relative w-full h-64 sm:h-80 md:h-96 mb-8 rounded-lg overflow-hidden bg-gray-100">
-            <Image
+          <div className="w-full mb-8 rounded-lg overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={imageUrl}
               alt={post.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 896px"
-              priority
+              className="w-full max-w-full max-h-[360px] sm:max-h-[420px] md:max-h-[520px] h-auto object-contain block rounded-lg"
+              loading="eager"
+              decoding="async"
             />
           </div>
         )}
@@ -142,10 +160,10 @@ export function BlogArticleContent({ post }: BlogArticleContentProps) {
           </div>
         )}
 
-        {/* Article Content */}
+        {/* Article Content — images full width of blog */}
         {processedContent && (
           <div
-            className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-[#00d1ff] prose-a:no-underline hover:prose-a:underline prose-img:rounded-lg prose-img:shadow-md prose-strong:text-gray-900 prose-ul:text-gray-700 prose-ol:text-gray-700 prose-li:my-2"
+            className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-[#00d1ff] prose-a:no-underline hover:prose-a:underline prose-img:w-full prose-img:max-w-full prose-img:h-auto prose-img:rounded-lg prose-img:shadow-md prose-strong:text-gray-900 prose-ul:text-gray-700 prose-ol:text-gray-700 prose-li:my-2"
             dangerouslySetInnerHTML={{ __html: processedContent }}
           />
         )}
