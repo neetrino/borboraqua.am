@@ -26,6 +26,15 @@ export async function GET(req: NextRequest) {
       ["blog-list", lang, String(page), String(limit)],
       { revalidate: BLOG_LIST_REVALIDATE }
     )();
+
+    // Guard against stale cached empty responses for a specific locale.
+    // If cache says empty, verify once with a direct read before returning.
+    if (result.data.length === 0) {
+      const freshResult = await blogService.listPublished(lang, page, limit);
+      if (freshResult.data.length > 0) {
+        return NextResponse.json(freshResult);
+      }
+    }
     
     const duration = Date.now() - startTime;
     // Only log if response is slow

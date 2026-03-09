@@ -30,7 +30,7 @@ const SETTINGS_KEY = "blog-posts";
 // Simple in-memory cache for blog posts (cleared on updates)
 let postsCache: BlogPost[] | null = null;
 let cacheTimestamp: number = 0;
-const CACHE_TTL = 60000; // 15 minutes cache
+const CACHE_TTL = 600000; // 10 minutes cache
 
 async function loadAllPosts(): Promise<BlogPost[]> {
   const now = Date.now();
@@ -127,6 +127,29 @@ function pickTranslation(
   return en || translations[0] || null;
 }
 
+function normalizeSlugValue(slug: string): string {
+  const trimmedSlug = slug.trim();
+  try {
+    return decodeURIComponent(trimmedSlug);
+  } catch {
+    return trimmedSlug;
+  }
+}
+
+function normalizeSlugForStorage(slug: string): string {
+  const decodedSlug = normalizeSlugValue(slug);
+  return decodedSlug
+    .toLowerCase()
+    .trim()
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function areSlugsEqual(firstSlug: string, secondSlug: string): boolean {
+  return normalizeSlugForStorage(firstSlug) === normalizeSlugForStorage(secondSlug);
+}
+
 class BlogService {
   /**
    * Admin list of posts for specific locale
@@ -152,12 +175,7 @@ class BlogService {
           updatedAt: post.updatedAt,
           locale: translation?.locale || locale,
           title: translation?.title || post.slug,
-          contentHtml: translation?.contentHtml || null,
           excerpt: translation?.excerpt || null,
-          seoTitle: translation?.seoTitle || null,
-          seoDescription: translation?.seoDescription || null,
-          featuredImage: translation?.featuredImage || null,
-          ogImage: translation?.ogImage || null,
         };
       });
   }
@@ -218,20 +236,34 @@ class BlogService {
   }) {
     const now = new Date().toISOString();
     const posts = await loadAllPosts();
+    const normalizedSlug = normalizeSlugForStorage(input.slug);
 
-    // Ensure unique slug
-    if (posts.some((p) => p.slug === input.slug && !p.deletedAt)) {
+    if (!normalizedSlug) {
       throw {
         status: 400,
         type: "https://api.shop.am/problems/validation-error",
         title: "Validation Error",
-        detail: `Blog post with slug '${input.slug}' already exists`,
+        detail: "Blog post slug cannot be empty after normalization",
+      };
+    }
+
+    // Ensure unique slug
+    if (
+      posts.some(
+        (p) => !p.deletedAt && areSlugsEqual(p.slug, normalizedSlug)
+      )
+    ) {
+      throw {
+        status: 400,
+        type: "https://api.shop.am/problems/validation-error",
+        title: "Validation Error",
+        detail: `Blog post with slug '${normalizedSlug}' already exists`,
       };
     }
 
     const newPost: BlogPost = {
       id: randomUUID(),
-      slug: input.slug,
+      slug: normalizedSlug,
       published: input.published,
       createdAt: now,
       updatedAt: now,
@@ -299,20 +331,34 @@ class BlogService {
 
     // Update base fields
     if (typeof input.slug === "string" && input.slug.trim()) {
+      const normalizedSlug = normalizeSlugForStorage(input.slug);
+
+      if (!normalizedSlug) {
+        throw {
+          status: 400,
+          type: "https://api.shop.am/problems/validation-error",
+          title: "Validation Error",
+          detail: "Blog post slug cannot be empty after normalization",
+        };
+      }
+
       // Check slug uniqueness
       if (
         posts.some(
-          (p) => p.id !== post.id && p.slug === input.slug && !p.deletedAt
+          (p) =>
+            p.id !== post.id &&
+            !p.deletedAt &&
+            areSlugsEqual(p.slug, normalizedSlug)
         )
       ) {
         throw {
           status: 400,
           type: "https://api.shop.am/problems/validation-error",
           title: "Validation Error",
-          detail: `Blog post with slug '${input.slug}' already exists`,
+          detail: `Blog post with slug '${normalizedSlug}' already exists`,
         };
       }
-      post.slug = input.slug.trim();
+      post.slug = normalizedSlug;
     }
 
     if (typeof input.published === "boolean") {
@@ -495,9 +541,19 @@ class BlogService {
    */
   async getBySlug(slug: string, locale: Locale) {
     const posts = await loadAllPosts();
-    const post = posts.find(
-      (p) => p.slug === slug && p.published && !p.deletedAt
-    );
+    const requestedRawSlug = slug.trim();
+    const requestedNormalizedSlug = normalizeSlugForStorage(slug);
+
+    const post = posts.find((p) => {
+      if (!p.published || p.deletedAt || !p.slug) {
+        return false;
+      }
+
+      return (
+        areSlugsEqual(p.slug, requestedRawSlug) ||
+        areSlugsEqual(p.slug, requestedNormalizedSlug)
+      );
+    });
 
     if (!post) {
       return null;
