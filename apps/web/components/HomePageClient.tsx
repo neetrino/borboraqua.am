@@ -512,70 +512,66 @@ export function HomePageClient({
     <div className="w-full bg-white overflow-x-hidden">
       {/* Mobile / Tablet Version - Visible up to xl, but hidden on desktop screens (zoom-independent) */}
       <div className={`${isDesktopScreen ? 'hidden' : 'xl:hidden'} home-mobile-trusted-by-root bg-white relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden max-w-full`}>
-        {/* Mobile Header (hidden when menu/search popups are open) - sticky when scrolling */}
+        {/* Mobile Header (hidden when menu/search popups are open) - same background as TopHeaderBar */}
         {!showMobileMenu && !showSearchModal && (
-        <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-4 pt-[35px] pb-3 max-w-full">
-          <div className="content-stretch flex gap-[6px] items-center relative shrink-0">
-            {/* Mobile Menu Button (Hamburger) */}
+        <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-3 pt-3 pb-1 max-w-full border-b border-black/5 mobile-header-bg">
+          <div className="content-stretch flex gap-2 items-center relative shrink-0">
+            {/* Mobile Menu Button (Hamburger) - same size as TopHeaderBar */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch cursor-pointer flex flex-col items-start px-[15.5px] py-[18.5px] relative rounded-[9999px] w-[49px] transition-all duration-300 hover:bg-white/10 hover:border-white/80 hover:scale-110 active:scale-95"
+              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid cursor-pointer flex items-center justify-center rounded-full w-[40px] h-[40px] md:w-[49px] md:h-[49px] transition-all duration-300 hover:bg-white/10 hover:border-white/80 hover:scale-110 active:scale-95"
             >
-              <div className="flex items-center justify-center relative shrink-0">
-                <div className="-scale-y-100 flex-none rotate-180">
-                  <div className="h-[12px] relative w-[18px]">
-                    <img className="block max-w-none size-full" alt="" src={imgVector3} />
-                  </div>
+              <div className="-scale-y-100 flex-none rotate-180">
+                <div className="h-[10px] relative w-[14px] md:h-[12px] md:w-[18px]">
+                  <img className="block max-w-none size-full" alt="" src={imgVector3} />
                 </div>
               </div>
             </button>
-            {/* Mobile Search Button */}
+            {/* Mobile Search Button - same size as TopHeaderBar */}
             <button
               onClick={() => setShowSearchModal(true)}
-              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid content-stretch cursor-pointer flex items-center p-[14.5px] relative rounded-[9999px] transition-all duration-300 hover:bg-white/10 hover:border-white/80 hover:scale-110 active:scale-95"
+              className="bg-[rgba(0,0,0,0)] border-[0.5px] border-[rgba(255,255,255,0.49)] border-solid cursor-pointer flex items-center justify-center rounded-full w-[40px] h-[40px] md:w-[49px] md:h-[49px] transition-all duration-300 hover:bg-white/10 hover:border-white/80 hover:scale-110 active:scale-95"
             >
-              <div className="flex items-center justify-center relative shrink-0">
-                <div className="-scale-y-100 flex-none rotate-180">
-                  <div className="relative size-[20px]">
-                    <img className="block max-w-none size-full" alt="" src={imgVector2} />
-                  </div>
+              <div className="-scale-y-100 flex-none rotate-180">
+                <div className="relative size-[16px] md:size-[20px]">
+                  <img className="block max-w-none size-full" alt="" src={imgVector2} />
                 </div>
               </div>
             </button>
           </div>
           
-          {/* Language & Currency Selector */}
+          {/* Language & Currency Selector - same sizes as TopHeaderBar */}
           <div className="relative" ref={langCurrencyMenuRef}>
             <button
               onClick={() => setShowLangCurrencyMenu(!showLangCurrencyMenu)}
-              className="bg-[#1ac0fd] rounded-[70px] flex items-center gap-2 px-3 py-2 transition-all duration-200 hover:bg-[#6bb8dc] active:scale-95"
+              className="h-[34px] min-w-[100px] md:h-[44px] md:min-w-[140px] bg-[#00d1ff] rounded-[70px] flex items-center justify-center gap-1 md:gap-2 px-2.5 md:px-[18px] transition-all duration-200 hover:bg-[#00bde8] active:scale-95"
               aria-expanded={showLangCurrencyMenu}
             >
               {/* Globe Icon */}
               <img 
                 src="/assets/home/Vector.svg" 
                 alt="Language" 
-                className="w-4 h-4 block"
+                className="w-[12px] h-[12px] md:w-[19px] md:h-[19px] block"
                 style={{ filter: 'brightness(0) invert(1)' }}
               />
               {/* Language Text */}
-              <span className="text-white text-sm font-medium whitespace-nowrap">
+              <span className="text-white text-[12px] leading-[14px] md:text-[16px] md:leading-[18px] font-bold whitespace-nowrap">
                 {getLanguageDisplayCode(language)} /
               </span>
               {/* Currency Vector Icon */}
               <img 
                 src="/assets/icons/vector12.svg" 
                 alt="Currency" 
-                className="w-4 h-4 block"
+                className="w-[12px] h-[12px] md:w-[19px] md:h-[19px] block"
                 style={{ filter: 'brightness(0) invert(1)' }}
               />
               {/* Currency Text */}
-              <span className="text-white text-sm font-medium whitespace-nowrap">
+              <span className="text-white text-[12px] leading-[14px] md:text-[16px] md:leading-[18px] font-bold whitespace-nowrap">
                 {currency}
               </span>
               {/* Dropdown Arrow */}
               <svg 
-                className={`w-3 h-3 text-white transition-transform duration-200 ${showLangCurrencyMenu ? 'rotate-180' : ''}`}
+                className={`w-[9px] h-[9px] md:w-[13px] md:h-[13px] text-white transition-transform duration-200 ${showLangCurrencyMenu ? 'rotate-180' : ''}`}
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -802,7 +798,7 @@ export function HomePageClient({
           className="absolute left-0 right-0 top-0 w-full z-0"
           style={{
             height: '920px',
-            background: 'linear-gradient(to bottom, #62b3e8 0%, rgba(150,195,225,0.95) 45%, rgba(165,200,228,0.95) 58%, rgba(110,170,210,0.96) 72%, rgba(55,140,195,0.98) 85%, #1e7eb5 100%)',
+            background: 'linear-gradient(to bottom, #62b3e8 0%, rgba(150,195,225,0.95) 45%, rgba(165,200,228,0.95) 58%, rgba(110,170,210,0.96) 72%, #5aa3cc 85%, #6badd2 100%)',
           }}
           aria-hidden
         />
@@ -814,7 +810,7 @@ export function HomePageClient({
           style={{
             top: '860px',
             height: '1620px',
-            background: 'linear-gradient(to bottom,rgb(43, 136, 189) 0%,rgb(178, 194, 206) 25%, #6bb3e0 52%, #9ccceb 78%, #c0e2f4 100%)',
+            background: 'linear-gradient(to bottom,rgb(99, 169, 209) 0%, #6badd2 6%,rgb(167, 209, 231) 14%,rgb(186, 217, 234) 28%, #c8e4f5 45%, #dceef9 62%,rgb(166, 209, 233) 100%)',
           }}
           aria-hidden
         />
@@ -825,7 +821,7 @@ export function HomePageClient({
           style={{
             top: 'var(--trusted-by-top)',
             height: '420px',
-            background: 'linear-gradient(to bottom, rgba(195, 224, 247, 0.98) 0%, #c8e4f5 60%, #d4ebf8 100%)',
+            background: 'linear-gradient(to bottom, #a8d2ed 0%, #b0d8f0 60%, #b8dcf2 100%)',
           }}
           aria-hidden
         />
@@ -835,7 +831,7 @@ export function HomePageClient({
           style={{
             top: 'calc(var(--trusted-by-top) + 420px)',
             height: '320px',
-            background: 'linear-gradient(to bottom, #d4ebf8 0%, #d4ebf8 100%)',
+            background: 'linear-gradient(to bottom, #b8dcf2 0%, #b8dcf2 100%)',
           }}
           aria-hidden
         />
@@ -886,32 +882,32 @@ export function HomePageClient({
        
 
 
-        {/* Mobile Hero Text */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-start justify-center left-1/2 top-[281px] w-full max-w-[380px] px-6 z-10">
-          <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center text-left leading-[40px] relative shrink-0 text-[34px] text-white w-full whitespace-pre-wrap break-words">
-            <p className="mb-0">{t('home.hero.your')}</p>
-            <p className="mb-0 font-['Montserrat:Light',sans-serif] font-light">{t('home.hero.dailyDose')}</p>
-            <p className="mb-0 font-['Montserrat:Light',sans-serif] font-light">{t('home.hero.of')}</p>
-            <p className="mb-0">{t('home.hero.freshness')}</p>
+        {/* Mobile Hero Text — կենտրոն, բոլոր տեքստերը սպիտակ */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-1/2 top-[241px] w-full max-w-[380px] px-6 z-10">
+          <div className="flex flex-col font-['Montserrat',sans-serif] justify-center text-center leading-[40px] relative shrink-0 text-[34px] text-white w-full">
+            <p className="mb-0 font-black hero-headline-underline">{t('home.hero.your')}</p>
+            <p className="mb-0 font-light hero-headline-underline">{t('home.hero.dailyDose')}</p>
+            <p className="mb-0 font-light hero-headline-underline">{t('home.hero.of')}</p>
+            <p className="mb-0 font-black hero-headline-underline whitespace-nowrap">{t('home.hero.freshness')}</p>
           </div>
         </div>
 
         {/* Mobile Hero Text Bottom Gradient Overlay */}
 
 
-        {/* Mobile Experience Purity Label */}
-        <div className="absolute content-stretch flex gap-[12px] items-center left-[32px] right-4 top-[261px] max-w-[calc(100%-32px)] z-[10]">
+        {/* Mobile Experience Purity Label — մեջտեղ, սպիտակ */}
+        <div className="-translate-x-1/2 absolute content-stretch flex gap-[12px] items-center justify-center left-1/2 top-[221px] w-full max-w-[380px] px-6 z-[10]">
           <div className="bg-white h-[2px] shrink-0 w-[48px]" />
           <div className="content-stretch flex flex-col items-start relative shrink-0">
-            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase whitespace-nowrap">
+            <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase whitespace-nowrap">
               <p className="leading-[20px]">{t('home.hero.experiencePurity')}</p>
             </div>
           </div>
         </div>
 
-        {/* Mobile Subtitle */}
-        <div className="absolute content-stretch flex flex-col items-center justify-center left-[32px] right-[32px] top-[494px]">
-          <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white text-center break-words z-[10] ">
+        {/* Mobile Subtitle — սպիտակ */}
+        <div className="absolute content-stretch flex flex-col items-center justify-center left-[32px] right-[32px] top-[414px]">
+          <div className="flex flex-col font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white text-center break-words z-[10]">
             <p className="leading-[26px]">{t('home.hero.subtitle')}</p>
           </div>
         </div>
@@ -1896,12 +1892,12 @@ export function HomePageClient({
                 </div>
               </div>
               <div className="group/bottle absolute aspect-[244.35066986310085/678.8584334167344] flex items-center justify-center left-[33.81%] mix-blend-multiply right-[39.46%] top-0 overflow-visible">
-                <div className="flex-none h-[541px] rotate-[-0.5deg] w-[191px] overflow-visible">
+                <div className="flex-none h-[620px] rotate-[-0.5deg] w-[191px] overflow-visible">
                   <div className="relative size-full flex items-center justify-center overflow-visible">
                     <div className="absolute inset-0 overflow-visible pointer-events-none flex items-center justify-center">
                       <img
                         alt="Water Bottle"
-                        className="h-full w-auto max-h-full object-contain object-center scale-[2] transition-transform duration-500 ease-out group-hover/bottle:scale-[4] group-hover/bottle:rotate-90"
+                        className="h-full w-auto max-h-full object-contain object-center scale-[2.35] transition-transform duration-500 ease-out group-hover/bottle:scale-[4] group-hover/bottle:rotate-90"
                         src={img17}
                         loading="lazy"
                       />

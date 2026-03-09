@@ -834,6 +834,7 @@ export default function AdminBlogPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {t('admin.blog.featuredImageLabel')}
                 </label>
+                <p className="text-xs text-gray-500 mb-2">{t('admin.blog.featuredImageHint')}</p>
                 {formFeaturedImage ? (
                   <div className="relative">
                     <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-300">

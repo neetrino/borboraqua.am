@@ -15,9 +15,9 @@ export const CART_KEY = STORAGE_KEYS.cart;
 export const BLOG_VIEW_CACHE_KEY = STORAGE_KEYS.blogViewCache;
 export const RELATED_PRODUCTS_VIEW_CACHE_KEY = STORAGE_KEYS.relatedProductsViewCache;
 
-/** TTL for blog list view cache (seconds). 15 minutes. */
-export const BLOG_VIEW_CACHE_TTL_SEC = 900;
+/** TTL for blog list view cache (seconds). 60 seconds. */
+export const BLOG_VIEW_CACHE_TTL_SEC = 10;
 
 /** TTL for related products carousel cache (seconds). */
-export const RELATED_PRODUCTS_VIEW_CACHE_TTL_SEC = 60;
+export const RELATED_PRODUCTS_VIEW_CACHE_TTL_SEC = 10;
 

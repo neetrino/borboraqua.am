@@ -71,6 +71,14 @@
     display: none;
   }
 
+  /* Mobile header background (home + TopHeaderBar) – glass gradient */
+  .mobile-header-bg {
+    background: linear-gradient(135deg, rgba(55, 105, 205, 0.22), rgba(75, 135, 225, 0.22));
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  }
+
   @keyframes figma-float {
 
     0%,

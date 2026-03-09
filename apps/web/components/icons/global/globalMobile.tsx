@@ -752,14 +752,8 @@ export function TopHeaderBar({
   return (
     <div 
       data-hide-on-product-zoom
-      className="xl:hidden fixed top-0 left-0 right-0 w-full z-[100] border-b shadow-sm overflow-x-hidden overflow-y-visible" 
-      style={{ 
-        paddingTop: 'env(safe-area-inset-top, 0px)',
-        background: 'linear-gradient(135deg, rgba(55, 105, 205, 0.08), rgba(75, 135, 225, 0.08))',
-        backdropFilter: 'blur(40px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-        boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05), 0px 0px 0px rgba(0, 0, 0, 0), 0px 0px 0px rgba(0, 0, 0, 0)',
-      }}
+      className="xl:hidden fixed top-0 left-0 right-0 w-full z-[100] border-b overflow-x-hidden overflow-y-visible mobile-header-bg"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
     >
       <div className="mx-auto flex h-[64px] w-full max-w-[430px] md:max-w-[768px] items-center justify-between px-5 pt-0">
         {/* Left side - Menu & Search Icons */}
