@@ -1,5 +1,6 @@
 import { db } from "@white-shop/db";
 import { randomUUID } from "crypto";
+import { Prisma } from "@prisma/client";
 
 type Locale = "en" | "hy" | "ru" | string;
 
@@ -29,7 +30,7 @@ const SETTINGS_KEY = "blog-posts";
 // Simple in-memory cache for blog posts (cleared on updates)
 let postsCache: BlogPost[] | null = null;
 let cacheTimestamp: number = 0;
-const CACHE_TTL = 60000; // 60 seconds cache (increased for better performance)
+const CACHE_TTL = 60000; // 15 minutes cache
 
 async function loadAllPosts(): Promise<BlogPost[]> {
   const now = Date.now();
@@ -89,14 +90,16 @@ async function loadAllPosts(): Promise<BlogPost[]> {
 }
 
 async function saveAllPosts(posts: BlogPost[]) {
+  const postsJson = posts as unknown as Prisma.InputJsonValue;
+
   await db.settings.upsert({
     where: { key: SETTINGS_KEY },
     update: {
-      value: posts,
+      value: postsJson,
     },
     create: {
       key: SETTINGS_KEY,
-      value: posts,
+      value: postsJson,
       description: "Blog posts storage (JSON, per-locale translations)",
     },
   });
