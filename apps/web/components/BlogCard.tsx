@@ -36,6 +36,16 @@ function formatPublishedDate(dateValue: string): string {
   return `${day} ${month}, ${year} թ.`;
 }
 
+function normalizeSlugForHref(slug: string): string {
+  const trimmedSlug = slug.trim();
+  try {
+    // Prevent double-encoding when slug is already percent-encoded
+    return encodeURIComponent(decodeURIComponent(trimmedSlug));
+  } catch {
+    return encodeURIComponent(trimmedSlug);
+  }
+}
+
 export function BlogCard({
   slug,
   title,
@@ -47,7 +57,7 @@ export function BlogCard({
   const { t } = useTranslation();
   const imageUrl = featuredImage ? processImageUrl(featuredImage) : null;
   const formattedDate = publishedAt ? formatPublishedDate(publishedAt) : null;
-  const encodedSlug = encodeURIComponent(slug);
+  const encodedSlug = normalizeSlugForHref(slug);
 
   return (
     <article

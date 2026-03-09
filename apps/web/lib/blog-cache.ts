@@ -44,6 +44,7 @@ export function setBlogCache(
   meta: BlogListCacheEntry['meta']
 ): void {
   if (typeof sessionStorage === 'undefined') return;
+  if (data.length === 0) return;
   try {
     const entry: BlogListCacheEntry = {
       data,
