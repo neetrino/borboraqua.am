@@ -530,6 +530,58 @@ interface FooterProps {
   isHomePage?: boolean;
 }
 
+const ANDROID_APP_URL = 'https://play.google.com/store/apps/details?id=borboraqua.neetrino.app&hl=ru';
+const IOS_APP_URL = 'https://apps.apple.com/us/app/borboraqua/id6759641035';
+const APPLE_BADGE_ICON_SRC = '/assets/stores/app-store-apple.svg';
+const GOOGLE_PLAY_BADGE_ICON_SRC = '/assets/stores/google-play-icon.svg';
+const GOOGLE_PLAY_BADGE_WORDMARK_SRC = '/assets/stores/google-play-wordmark.svg';
+
+function StoreDownloadBadge({
+  store,
+  href,
+}: {
+  store: 'google-play' | 'app-store';
+  href: string;
+}) {
+  const isGooglePlay = store === 'google-play';
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={isGooglePlay ? 'Download on Google Play' : 'Download on App Store'}
+      className="group relative h-[32px] w-[96px] overflow-hidden rounded-[5px] border border-[#a6a6a6] bg-black transition-opacity hover:opacity-90"
+    >
+      {isGooglePlay ? (
+        <>
+          <div className="absolute left-[5px] top-[5px] h-[18px] w-[16px]">
+            <img alt="Google Play" className="block size-full object-contain" src={GOOGLE_PLAY_BADGE_ICON_SRC} />
+          </div>
+          <div className="absolute left-[28px] top-[3px] flex flex-col items-start gap-[1px]">
+            <p className="min-w-full text-[8px] uppercase leading-normal text-white">GET IT ON</p>
+            <div className="flex items-center justify-center">
+              <div className="h-[12px] w-[59px] -scale-y-100">
+                <img alt="Google Play" className="block size-full object-contain" src={GOOGLE_PLAY_BADGE_WORDMARK_SRC} />
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="absolute left-[5px] top-[5px] h-[18px] w-[16px]">
+            <img alt="App Store" className="block size-full object-contain" src={APPLE_BADGE_ICON_SRC} />
+          </div>
+          <div className="absolute left-[26px] top-1/2 flex w-[64px] -translate-y-1/2 flex-col items-start justify-center gap-0 text-white">
+            <span className="block w-full shrink-0 text-[8px] leading-[10px] font-medium antialiased">Download on the</span>
+            <span className="block w-full shrink-0 text-[13px] leading-[14px] font-semibold tracking-[-0.2px]">App Store</span>
+          </div>
+        </>
+      )}
+    </a>
+  );
+}
+
 export function Footer({ router, t, isHomePage = false }: FooterProps) {
   return (
     <>
@@ -696,6 +748,12 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
             <div className="relative shrink-0 size-[28px] lg:size-[28px] md:size-[32px] sm:size-[32px] cursor-pointer hover:opacity-80 transition-opacity">
               <img alt="Telegram" className="block max-w-none size-full" src={socialTelegram} />
             </div>
+          </div>
+
+          {/* Store download badges (Figma footer) */}
+          <div className="absolute right-[-30px] lg:right-[-30px] md:right-[12px] top-[310px] lg:top-[310px] md:top-[352px] hidden md:flex items-center gap-1.5">
+            <StoreDownloadBadge store="google-play" href={ANDROID_APP_URL} />
+            <StoreDownloadBadge store="app-store" href={IOS_APP_URL} />
           </div>
         </div>
 
