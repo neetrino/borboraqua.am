@@ -990,7 +990,7 @@ export function FeaturedProductCard({
     const mobileImageLoading: 'eager' | 'lazy' = 'eager';
     return productHref ? (
       <Link href={productHref} prefetch className={mobileClass}>
-        <div className="absolute aspect-[305/854] left-[29%] right-[32%] top-0 overflow-visible">
+        <div className="absolute aspect-[305/854] left-[29%] right-[32%] top-0 overflow-visible z-20 pointer-events-none">
           <div className="absolute inset-0 overflow-visible pointer-events-none">
             <img
               alt={product.title}
@@ -1004,7 +1004,7 @@ export function FeaturedProductCard({
         {hasLabels && <ProductLabels labels={product.labels!} />}
 
         {/* Rounded Card with Price, Volume, and Add Button */}
-        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[55%_0_1%_0] rounded-[20px] h-[40%] w-[98%] left-[1%] overflow-hidden">
+        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[59%_0_1%_0] rounded-[20px] h-[40%] w-[98%] left-[1%] overflow-hidden z-10">
           {/* Title - left top corner, 2 lines */}
           <div className="absolute flex flex-col font-['Inter:Bold',sans-serif] font-bold left-[12px] top-[14px] right-[35px] justify-start leading-[0] text-left text-black overflow-hidden">
             <p className="leading-[20px] break-words w-full line-clamp-2" style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{product.title}</p>
@@ -1037,7 +1037,7 @@ export function FeaturedProductCard({
       </Link>
     ) : (
         <div className={mobileClass} onClick={() => onProductClick(product)}>
-        <div className="absolute aspect-[305/854] left-[29%] right-[32%] top-0 overflow-visible">
+        <div className="absolute aspect-[305/854] left-[29%] right-[32%] top-0 overflow-visible z-20 pointer-events-none">
           <div className="absolute inset-0 overflow-visible pointer-events-none">
             <img
               alt={product.title}
@@ -1049,7 +1049,7 @@ export function FeaturedProductCard({
           </div>
         </div>
         {hasLabels && <ProductLabels labels={product.labels!} />}
-        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[55%_0_1%_0] rounded-[20px] h-[40%] w-[98%] left-[1%] overflow-hidden">
+        <div className="absolute bg-[rgba(123,201,236,0.2)] inset-[58%_0_1%_0] rounded-[20px] h-[40%] w-[98%] left-[1%] overflow-hidden z-10">
           <div className="absolute flex flex-col font-['Inter:Bold',sans-serif] font-bold left-[12px] top-[14px] right-[35px] justify-start leading-[0] text-left text-black overflow-hidden">
             <p className="leading-[20px] break-words w-full line-clamp-2" style={{ fontSize: 'clamp(14px, 3.5vw, 18px)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{product.title}</p>
           </div>
