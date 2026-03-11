@@ -317,7 +317,7 @@ export function Header({
           </div>
 
           {/* Navigation Menu - active item highlighted */}
-          <div className={`content-stretch flex font-['Inter:Bold',sans-serif] font-bold gap-[60px] lg:gap-[60px] md:gap-[24px] sm:gap-[12px] items-end justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-[#151e21] uppercase whitespace-nowrap sm:hidden md:flex`}>
+          <div className={`content-stretch flex font-['Inter:Bold',sans-serif] font-bold gap-[50px] lg:gap-[50px] md:gap-[24px] sm:gap-[12px] items-end justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-[#151e21] uppercase whitespace-nowrap sm:hidden md:flex`}>
             <div
               onClick={() => router.push('/')}
               className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname === '/' ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
