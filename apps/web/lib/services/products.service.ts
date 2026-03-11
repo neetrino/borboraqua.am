@@ -314,7 +314,10 @@ class ProductsService {
       const orderBy =
         sort === "price"
           ? ({ variants: { _min: { price: "desc" as const } } } as const)
-          : ({ createdAt: "desc" as const } as const);
+          : ([
+              { position: { sort: "asc" as const, nulls: "last" as const } },
+              { createdAt: "desc" as const },
+            ] as const);
       products = await db.product.findMany({
         where,
         orderBy,
@@ -477,6 +480,7 @@ class ProductsService {
           price: finalPrice,
           image,
           inStock: (variant?.stock || 0) > 0,
+          position: (product as any).position ?? null,
           labels: Array.isArray(product.labels)
             ? product.labels.map((label: { id: string; type: string; value: string; position: string; color: string | null }) => ({
                 id: label.id,

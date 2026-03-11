@@ -443,6 +443,9 @@
       "categoryCreatedSuccessSizes": "Կատեգորիա \"{name}\" հաջողությամբ ստեղծվեց (չափեր պահանջվում են)",
       "failedToProcessImages": "Չհաջողվեց մշակել ընտրված պատկերները",
       "failedToProcessImage": "Չհաջողվեց մշակել ընտրված պատկերը",
+      "addImageToDescription": "Ավելացնել նկար description-ում",
+      "failedToUploadDescriptionImage": "Չհաջողվեց վերբեռնել նկարը description-ում",
+      "invalidImageFile": "Խնդրում ենք ընտրել վավեր նկար ֆայլ",
       "r2Required": "Ապրանքի պատկերները պետք է վերբեռնվեն R2: Ստուգեք R2 կարգավորումները և կրկին փորձեք:",
       "imageFormatHint": "Պատկերները վերածվում են WebP, առավելագույնը 200 KB յուրաքանչյուրը:",
       "enterDefaultPrice": "Մուտքագրել լռելյայն գին բոլոր տարբերակների համար:",
@@ -450,6 +453,7 @@
       "enterSkuPrefix": "Մուտքագրել SKU նախածանց (կավտոմատ կավելացվի -color-size, եթե կիրառելի է):",
       "minimumOrderQuantity": "Նվազագույն պատվերի քանակ",
       "minimumOrderQuantityHint": "Հաճախորդը պետք է պատվիրի առնվազն այս քանակով",
+      "positionHint": "Կառավարում է shop page-ում ապրանքի հերթականությունը (աճման կարգով)։ Դատարկ արժեքները հայտնվում են վերջում։",
       "orderQuantityIncrement": "Պատվերի քանակի ավելացում (բլոկ)",
       "orderQuantityIncrementHint": "Պատվերի քանակը կավելանա այս քանակով (օրինակ՝ 12 հատ)"
     }

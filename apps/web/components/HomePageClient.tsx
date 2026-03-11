@@ -837,7 +837,7 @@ export function HomePageClient({
         />
 
         {/* Mobile Hero Section Decorative Group — 110% size */}
-        <div className="absolute inset-[15%_10%_70%_10%] sm:inset-[12%_10%_70%_10%] md:inset-[10%_10%_70%_10%] z-0 overflow-visible flex items-center justify-center">
+        <div className="absolute inset-[9%_10%_70%_10%] sm:inset-[11%_10%_70%_10%] md:inset-[9%_10%_70%_10%] z-0 overflow-visible flex items-center justify-center">
           <div className="absolute left-1/2 top-1/2 w-[110%] h-[110%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
             <img alt="Decorative Group" className="block size-full object-contain object-center figma-fade-in" src={imgGroup2105} loading="eager" />
           </div>

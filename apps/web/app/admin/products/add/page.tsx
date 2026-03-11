@@ -94,7 +94,8 @@ interface ProductData {
   categoryIds?: string[];
   attributeIds?: string[]; // All attribute IDs that this product has
   published: boolean;
-    featured?: boolean;
+  featured?: boolean;
+  position?: number | null;
   media?: string[];
   labels?: ProductLabel[];
   variants?: Array<{
@@ -113,6 +114,283 @@ interface ProductData {
 /** Response from POST /api/v1/admin/products/upload-images — product images stored only on R2. */
 interface UploadImagesResponse {
   urls: string[];
+}
+
+type AdminLocale = 'hy' | 'en' | 'ru';
+
+const DESCRIPTION_IMAGE_TAG_REGEX = /<img\b[^>]*src=["']([^"']+)["'][^>]*>/gi;
+
+function extractDescriptionImageUrls(html: string): string[] {
+  if (!html) return [];
+  const urls: string[] = [];
+  DESCRIPTION_IMAGE_TAG_REGEX.lastIndex = 0;
+  let match: RegExpExecArray | null = DESCRIPTION_IMAGE_TAG_REGEX.exec(html);
+  while (match) {
+    if (match[1]) {
+      urls.push(match[1]);
+    }
+    match = DESCRIPTION_IMAGE_TAG_REGEX.exec(html);
+  }
+  return urls;
+}
+
+function stripDescriptionImageTags(html: string): string {
+  if (!html) return '';
+  return html
+    .replace(/<p>\s*<img\b[^>]*>\s*<\/p>/gi, '')
+    .replace(/<img\b[^>]*>/gi, '')
+    .trim();
+}
+
+function sanitizeDescriptionHtml(html: string): string {
+  if (!html) return '';
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+    .replace(/\son\w+=(["']).*?\1/gi, '')
+    .replace(/\son\w+=([^\s>]+)/gi, '');
+}
+
+interface RichTextEditorProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  onInsertImage?: () => void;
+  isImageLoading?: boolean;
+}
+
+function RichTextEditor({ value, onChange, placeholder, onInsertImage, isImageLoading = false }: RichTextEditorProps) {
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const [isHtmlMode, setIsHtmlMode] = useState(false);
+  const [htmlDraft, setHtmlDraft] = useState(value || '');
+
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    if (!isHtmlMode && editor.innerHTML !== value) {
+      editor.innerHTML = value || '';
+    }
+    if (isHtmlMode) {
+      setHtmlDraft(value || '');
+    }
+  }, [value, isHtmlMode]);
+
+  const emitChange = () => {
+    const html = editorRef.current?.innerHTML || '';
+    onChange(html);
+  };
+
+  const applyCommand = (command: string, commandValue?: string) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    document.execCommand('styleWithCSS', false, 'true');
+    document.execCommand(command, false, commandValue);
+    emitChange();
+  };
+
+  const applyFormatBlock = (tagName: string) => {
+    applyCommand('formatBlock', `<${tagName.toLowerCase()}>`);
+  };
+
+  const applyLink = () => {
+    const url = window.prompt('Enter link URL');
+    if (!url) return;
+    applyCommand('createLink', url);
+  };
+
+  const toggleHtmlMode = () => {
+    if (isHtmlMode) {
+      onChange(htmlDraft);
+      setIsHtmlMode(false);
+      return;
+    }
+    setHtmlDraft(value || '');
+    setIsHtmlMode(true);
+  };
+
+  const applyFontSize = (sizePx: string) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+      return;
+    }
+
+    editor.focus();
+    const range = selection.getRangeAt(0);
+    const span = document.createElement('span');
+    span.style.fontSize = sizePx;
+
+    const selectedContent = range.extractContents();
+    span.appendChild(selectedContent);
+    range.insertNode(span);
+
+    selection.removeAllRanges();
+    const updatedRange = document.createRange();
+    updatedRange.selectNodeContents(span);
+    selection.addRange(updatedRange);
+
+    emitChange();
+  };
+
+  return (
+    <div className="rounded-md border border-gray-300 bg-white">
+      <div className="flex flex-wrap items-center gap-1 border-b border-gray-200 p-2">
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={applyLink} title="Insert link">
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L10.5 5.43" />
+            <path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13.5 18.57" />
+          </svg>
+        </button>
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={() => applyCommand('unlink')} title="Remove link">
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M10 13a5 5 0 0 0 7.07 0l1.41-1.41" />
+            <path d="M14 11a5 5 0 0 0-7.07 0L5.52 12.4" />
+            <path d="M3 3l18 18" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          className="h-8 w-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={onInsertImage}
+          disabled={!onInsertImage || isImageLoading}
+          title="Insert image"
+        >
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <circle cx="9" cy="10" r="1.5" />
+            <path d="M21 16l-5-5-7 7" />
+          </svg>
+        </button>
+
+        <div className="mx-1 h-6 w-px bg-gray-300" />
+
+        <select
+          className="h-8 rounded border border-gray-300 px-2 text-sm"
+          defaultValue="p"
+          onChange={(e) => applyFormatBlock(e.target.value)}
+          title="Paragraph style"
+        >
+          <option value="p">Paragraph</option>
+          <option value="h1">Heading 1</option>
+          <option value="h2">Heading 2</option>
+          <option value="h3">Heading 3</option>
+        </select>
+        <select
+          className="h-8 rounded border border-gray-300 px-2 text-sm"
+          defaultValue="16px"
+          onChange={(e) => applyFontSize(e.target.value)}
+          title="Font size"
+        >
+          <option value="12px">12</option>
+          <option value="14px">14</option>
+          <option value="16px">16</option>
+          <option value="18px">18</option>
+          <option value="20px">20</option>
+          <option value="24px">24</option>
+          <option value="28px">28</option>
+          <option value="32px">32</option>
+          <option value="36px">36</option>
+        </select>
+
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-sm font-bold text-gray-700 hover:bg-gray-100" onClick={() => applyCommand('bold')} title="Bold">B</button>
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-sm italic text-gray-700 hover:bg-gray-100" onClick={() => applyCommand('italic')} title="Italic">I</button>
+
+        <div className="mx-1 h-6 w-px bg-gray-300" />
+
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={() => applyCommand('justifyLeft')} title="Align left">
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 6h16M4 10h10M4 14h16M4 18h10" />
+          </svg>
+        </button>
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={() => applyCommand('justifyCenter')} title="Align center">
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 6h16M7 10h10M4 14h16M7 18h10" />
+          </svg>
+        </button>
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={() => applyCommand('justifyRight')} title="Align right">
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 6h16M10 10h10M4 14h16M10 18h10" />
+          </svg>
+        </button>
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={() => applyCommand('justifyFull')} title="Justify">
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+          </svg>
+        </button>
+
+        <div className="mx-1 h-6 w-px bg-gray-300" />
+
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={() => applyCommand('insertUnorderedList')} title="Bullet list">
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 6h11M9 12h11M9 18h11" />
+            <circle cx="4" cy="6" r="1" />
+            <circle cx="4" cy="12" r="1" />
+            <circle cx="4" cy="18" r="1" />
+          </svg>
+        </button>
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={() => applyCommand('insertOrderedList')} title="Numbered list">
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M10 6h10M10 12h10M10 18h10" />
+            <path d="M4 7V5l-1 1M3 13h2v-2H3v2zm0 5h2v-2H3v2z" />
+          </svg>
+        </button>
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={() => applyCommand('outdent')} title="Outdent">
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M11 6h9M11 12h9M11 18h9M4 12h5M6 10l-2 2 2 2" />
+          </svg>
+        </button>
+        <button type="button" className="h-8 w-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-100" onClick={() => applyCommand('indent')} title="Indent">
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M4 6h9M4 12h9M4 18h9M20 12h-5M18 10l2 2-2 2" />
+          </svg>
+        </button>
+
+        <div className="mx-1 h-6 w-px bg-gray-300" />
+
+        <button
+          type="button"
+          className={`h-8 w-8 rounded border text-gray-700 hover:bg-gray-100 ${isHtmlMode ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+          onClick={toggleHtmlMode}
+          title="HTML source mode"
+        >
+          <svg viewBox="0 0 24 24" className="mx-auto h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="relative">
+        {isHtmlMode ? (
+          <textarea
+            className="min-h-[140px] w-full resize-y px-3 py-2 text-sm focus:outline-none"
+            value={htmlDraft}
+            onChange={(e) => {
+              const next = e.target.value;
+              setHtmlDraft(next);
+              onChange(next);
+            }}
+          />
+        ) : (
+          <div
+            ref={editorRef}
+            contentEditable
+            suppressContentEditableWarning
+            className="min-h-[140px] px-3 py-2 text-sm focus:outline-none"
+            onInput={emitChange}
+            onBlur={emitChange}
+            style={{ whiteSpace: 'pre-wrap' }}
+          />
+        )}
+        {!isHtmlMode && !value?.replace(/<[^>]*>/g, '').trim() && (
+          <span className="pointer-events-none absolute left-3 top-2 text-sm text-gray-400">
+            {placeholder}
+          </span>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function AddProductPageContent() {
@@ -139,6 +417,7 @@ function AddProductPageContent() {
     categoryIds: [] as string[],
     published: false,
     featured: false,
+    position: '',
     minimumOrderQuantity: 1,
     orderQuantityIncrement: 1,
     imageUrls: [] as string[],
@@ -147,9 +426,19 @@ function AddProductPageContent() {
     variants: [] as Variant[],
     labels: [] as ProductLabel[],
   });
+  const [descriptionImages, setDescriptionImages] = useState<Record<AdminLocale, string[]>>({
+    hy: [],
+    en: [],
+    ru: [],
+  });
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [brandsExpanded, setBrandsExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const descriptionImageInputRefs = useRef<Record<AdminLocale, HTMLInputElement | null>>({
+    hy: null,
+    en: null,
+    ru: null,
+  });
   const variantImageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const attributesDropdownRef = useRef<HTMLDivElement | null>(null);
   const [attributesDropdownOpen, setAttributesDropdownOpen] = useState(false);
@@ -814,24 +1103,32 @@ function AddProductPageContent() {
             en: { title: '', descriptionHtml: '' },
             ru: { title: '', descriptionHtml: '' },
           };
-          
+          const descriptionImagesMap: Record<AdminLocale, string[]> = {
+            hy: [],
+            en: [],
+            ru: [],
+          };
           // Fill translations from product.translations array
           productTranslations.forEach((trans: any) => {
             if (trans.locale && ['hy', 'en', 'ru'].includes(trans.locale)) {
               const locale = trans.locale as 'hy' | 'en' | 'ru';
+              const descriptionHtml = trans.descriptionHtml || '';
               translationsMap[locale] = {
                 title: trans.title || '',
-                descriptionHtml: trans.descriptionHtml || '',
+                descriptionHtml: stripDescriptionImageTags(descriptionHtml),
               };
+              descriptionImagesMap[locale] = extractDescriptionImageUrls(descriptionHtml);
             }
           });
           
           // Fallback: if no translations array, use single title/description (backward compatibility)
           if (productTranslations.length === 0 && product.title) {
+            const fallbackDescriptionHtml = product.descriptionHtml || '';
             translationsMap.en = {
               title: product.title || '',
-              descriptionHtml: product.descriptionHtml || '',
+              descriptionHtml: stripDescriptionImageTags(fallbackDescriptionHtml),
             };
+            descriptionImagesMap.en = extractDescriptionImageUrls(fallbackDescriptionHtml);
           }
 
           setFormData({
@@ -842,6 +1139,7 @@ function AddProductPageContent() {
             categoryIds: product.categoryIds || [],
             published: product.published || false,
             featured: product.featured || false,
+            position: (product as any).position != null ? String((product as any).position) : '',
             minimumOrderQuantity: (product as any).minimumOrderQuantity ?? 1,
             orderQuantityIncrement: (product as any).orderQuantityIncrement ?? 1,
             imageUrls: normalizedMedia,
@@ -862,7 +1160,7 @@ function AddProductPageContent() {
               color: label.color || null,
             })),
           });
-          
+          setDescriptionImages(descriptionImagesMap);
           // Reset new brand/category fields when loading existing product
           setUseNewBrand(false);
           setUseNewCategory(false);
@@ -1456,7 +1754,7 @@ function AddProductPageContent() {
     });
   };
 
-  const handleDescriptionChange = (locale: 'hy' | 'en' | 'ru', value: string) => {
+  const handleDescriptionChange = (locale: AdminLocale, value: string) => {
     setFormData((prev) => ({
       ...prev,
       translations: {
@@ -1467,6 +1765,94 @@ function AddProductPageContent() {
         },
       },
     }));
+  };
+
+  const uploadSingleDescriptionImageToR2 = async (file: File): Promise<string> => {
+    if (!file.type.startsWith('image/')) {
+      throw new Error(t('admin.products.add.invalidImageFile') || 'Please select a valid image file');
+    }
+
+    const base64 = await processProductImageFile(file);
+    if (!base64 || !base64.trim()) {
+      throw new Error('Failed to process description image');
+    }
+
+    const uploadedUrls = await uploadImagesToR2([base64]);
+    const imageUrl = uploadedUrls?.[0];
+    if (!imageUrl) {
+      throw new Error('Failed to upload description image to R2');
+    }
+    return imageUrl;
+  };
+
+  const handleUploadDescriptionImage = async (locale: AdminLocale, event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) {
+      return;
+    }
+
+    setImageUploadLoading(true);
+    try {
+      const imageUrl = await uploadSingleDescriptionImageToR2(files[0]);
+      setDescriptionImages((prev) => ({
+        ...prev,
+        [locale]: [...prev[locale], imageUrl],
+      }));
+    } catch (error: any) {
+      console.error('❌ [DESCRIPTION IMAGE] Upload failed:', error);
+      alert(error?.message || t('admin.products.add.failedToUploadDescriptionImage'));
+    } finally {
+      setImageUploadLoading(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleRemoveDescriptionImage = (locale: AdminLocale, imageIndex: number) => {
+    setDescriptionImages((prev) => ({
+      ...prev,
+      [locale]: prev[locale].filter((_, index) => index !== imageIndex),
+    }));
+  };
+
+  const handleReplaceDescriptionImage = async (
+    locale: AdminLocale,
+    imageIndex: number,
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) {
+      return;
+    }
+
+    setImageUploadLoading(true);
+    try {
+      const imageUrl = await uploadSingleDescriptionImageToR2(files[0]);
+      setDescriptionImages((prev) => ({
+        ...prev,
+        [locale]: prev[locale].map((existingUrl, index) => (index === imageIndex ? imageUrl : existingUrl)),
+      }));
+    } catch (error: any) {
+      console.error('❌ [DESCRIPTION IMAGE] Replace failed:', error);
+      alert(error?.message || t('admin.products.add.failedToUploadDescriptionImage'));
+    } finally {
+      setImageUploadLoading(false);
+      event.target.value = '';
+    }
+  };
+
+  const buildDescriptionHtml = (locale: AdminLocale): string | undefined => {
+    const descriptionHtml = sanitizeDescriptionHtml(stripDescriptionImageTags(formData.translations[locale].descriptionHtml || '')).trim();
+    const imageUrls = (descriptionImages[locale] || []).filter((url) => typeof url === 'string' && url.trim().length > 0);
+
+    const imagesHtml = imageUrls.map((url) => `<p><img src="${url}" alt="" /></p>`).join('');
+
+    if (!descriptionHtml && imageUrls.length === 0) {
+      return undefined;
+    }
+    if (!descriptionHtml) {
+      return imagesHtml || undefined;
+    }
+    return `${descriptionHtml}${imagesHtml}` || undefined;
   };
 
   // Check if selected category requires sizes
@@ -3078,11 +3464,12 @@ function AddProductPageContent() {
       ['hy', 'en', 'ru'].forEach((locale) => {
         const translation = formData.translations[locale as 'hy' | 'en' | 'ru'];
         if (translation.title.trim()) {
+          const localeKey = locale as AdminLocale;
           translations.push({
             locale,
             title: translation.title.trim(),
             slug: formData.slug, // Use same slug for all languages (or generate per language if needed)
-            descriptionHtml: translation.descriptionHtml.trim() || undefined,
+            descriptionHtml: buildDescriptionHtml(localeKey),
           });
         }
       });
@@ -3097,6 +3484,14 @@ function AddProductPageContent() {
       // Prepare payload
       // Note: Database supports single brandId, so we use the first selected brand
       // For multiple brands, we would need to update the schema to support brandIds array
+      const parsedPosition =
+        formData.position.trim() === '' ? null : parseInt(formData.position, 10);
+      if (parsedPosition !== null && (!Number.isInteger(parsedPosition) || parsedPosition < 1)) {
+        alert('Position must be a positive integer');
+        setLoading(false);
+        return;
+      }
+
       const payload: any = {
         slug: formData.slug,
         translations: translations,
@@ -3107,6 +3502,7 @@ function AddProductPageContent() {
         // При редактировании используем значение из формы
         published: isEditMode ? formData.published : true,
         featured: formData.featured,
+        position: parsedPosition,
         minimumOrderQuantity: formData.minimumOrderQuantity || 1,
         orderQuantityIncrement: formData.orderQuantityIncrement || 1,
         variants: variants,
@@ -3422,13 +3818,49 @@ function AddProductPageContent() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           {t('admin.products.add.description')}
                         </label>
-                        <textarea
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          rows={4}
-                          value={formData.translations.hy.descriptionHtml}
-                          onChange={(e) => handleDescriptionChange('hy', e.target.value)}
-                          placeholder={t('admin.products.add.productDescriptionPlaceholder')}
+                        <input
+                          ref={(el) => {
+                            descriptionImageInputRefs.current.hy = el;
+                          }}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleUploadDescriptionImage('hy', e)}
+                          className="hidden"
                         />
+                        <RichTextEditor
+                          value={formData.translations.hy.descriptionHtml}
+                          onChange={(value) => handleDescriptionChange('hy', value)}
+                          placeholder={t('admin.products.add.productDescriptionPlaceholder')}
+                          onInsertImage={() => descriptionImageInputRefs.current.hy?.click()}
+                          isImageLoading={imageUploadLoading}
+                        />
+                        {descriptionImages.hy.length > 0 && (
+                          <div className="mt-3 space-y-2">
+                            {descriptionImages.hy.map((imageUrl, index) => (
+                              <div key={`hy-${index}`} className="flex items-center gap-2 rounded-md border border-gray-200 bg-white p-2">
+                                <img src={imageUrl} alt="" className="h-16 w-16 rounded object-cover border border-gray-200" />
+                                <div className="flex items-center gap-2">
+                                  <label className="cursor-pointer px-2 py-1 text-xs font-medium text-gray-700 border border-gray-300 rounded hover:bg-gray-50">
+                                    Փոխել
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={(e) => handleReplaceDescriptionImage('hy', index, e)}
+                                    />
+                                  </label>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveDescriptionImage('hy', index)}
+                                    className="px-2 py-1 text-xs font-medium text-red-600 border border-red-200 rounded hover:bg-red-50"
+                                  >
+                                    Ջնջել
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -3456,13 +3888,49 @@ function AddProductPageContent() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           {t('admin.products.add.description')}
                         </label>
-                        <textarea
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          rows={4}
-                          value={formData.translations.en.descriptionHtml}
-                          onChange={(e) => handleDescriptionChange('en', e.target.value)}
-                          placeholder={t('admin.products.add.productDescriptionPlaceholder')}
+                        <input
+                          ref={(el) => {
+                            descriptionImageInputRefs.current.en = el;
+                          }}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleUploadDescriptionImage('en', e)}
+                          className="hidden"
                         />
+                        <RichTextEditor
+                          value={formData.translations.en.descriptionHtml}
+                          onChange={(value) => handleDescriptionChange('en', value)}
+                          placeholder={t('admin.products.add.productDescriptionPlaceholder')}
+                          onInsertImage={() => descriptionImageInputRefs.current.en?.click()}
+                          isImageLoading={imageUploadLoading}
+                        />
+                        {descriptionImages.en.length > 0 && (
+                          <div className="mt-3 space-y-2">
+                            {descriptionImages.en.map((imageUrl, index) => (
+                              <div key={`en-${index}`} className="flex items-center gap-2 rounded-md border border-gray-200 bg-white p-2">
+                                <img src={imageUrl} alt="" className="h-16 w-16 rounded object-cover border border-gray-200" />
+                                <div className="flex items-center gap-2">
+                                  <label className="cursor-pointer px-2 py-1 text-xs font-medium text-gray-700 border border-gray-300 rounded hover:bg-gray-50">
+                                    Replace
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={(e) => handleReplaceDescriptionImage('en', index, e)}
+                                    />
+                                  </label>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveDescriptionImage('en', index)}
+                                    className="px-2 py-1 text-xs font-medium text-red-600 border border-red-200 rounded hover:bg-red-50"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -3489,13 +3957,49 @@ function AddProductPageContent() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           {t('admin.products.add.description')}
                         </label>
-                        <textarea
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          rows={4}
-                          value={formData.translations.ru.descriptionHtml}
-                          onChange={(e) => handleDescriptionChange('ru', e.target.value)}
-                          placeholder={t('admin.products.add.productDescriptionPlaceholder')}
+                        <input
+                          ref={(el) => {
+                            descriptionImageInputRefs.current.ru = el;
+                          }}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleUploadDescriptionImage('ru', e)}
+                          className="hidden"
                         />
+                        <RichTextEditor
+                          value={formData.translations.ru.descriptionHtml}
+                          onChange={(value) => handleDescriptionChange('ru', value)}
+                          placeholder={t('admin.products.add.productDescriptionPlaceholder')}
+                          onInsertImage={() => descriptionImageInputRefs.current.ru?.click()}
+                          isImageLoading={imageUploadLoading}
+                        />
+                        {descriptionImages.ru.length > 0 && (
+                          <div className="mt-3 space-y-2">
+                            {descriptionImages.ru.map((imageUrl, index) => (
+                              <div key={`ru-${index}`} className="flex items-center gap-2 rounded-md border border-gray-200 bg-white p-2">
+                                <img src={imageUrl} alt="" className="h-16 w-16 rounded object-cover border border-gray-200" />
+                                <div className="flex items-center gap-2">
+                                  <label className="cursor-pointer px-2 py-1 text-xs font-medium text-gray-700 border border-gray-300 rounded hover:bg-gray-50">
+                                    Заменить
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      onChange={(e) => handleReplaceDescriptionImage('ru', index, e)}
+                                    />
+                                  </label>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveDescriptionImage('ru', index)}
+                                    className="px-2 py-1 text-xs font-medium text-red-600 border border-red-200 rounded hover:bg-red-50"
+                                  >
+                                    Удалить
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -4607,7 +5111,24 @@ function AddProductPageContent() {
             </div>
 
             {/* Order Quantity Settings */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('admin.products.add.position')}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={formData.position}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, position: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="1"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {t('admin.products.add.positionHint')}
+                </p>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('admin.products.add.minimumOrderQuantity')}

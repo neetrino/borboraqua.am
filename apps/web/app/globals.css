@@ -441,6 +441,28 @@
   }
 }
 
+/* Product single page — description block: minimal spacing */
+.product-description p,
+.product-description ul,
+.product-description ol,
+.product-description li,
+.product-description h1,
+.product-description h2,
+.product-description h3,
+.product-description h4 {
+  margin: 0;
+  padding: 0;
+}
+.product-description ul,
+.product-description ol {
+  padding-left: 1.25rem;
+}
+.product-description li {
+  padding-top: 0;
+  padding-bottom: 0;
+  line-height: 1.35;
+}
+
 /* imgShape.svg — forced color #5bb7d9 */
 img[src*="imgShape"] {
   filter: brightness(0) saturate(100%) invert(65%) sepia(42%) saturate(1400%) hue-rotate(170deg) brightness(0.92) contrast(1.04);

@@ -11,6 +11,7 @@ interface Product {
   id: string;
   slug: string;
   title: string;
+  position?: number | null;
   description?: string | null;
   category?: string | null; // Primary category title
   categories?: string[] | null; // All category titles
@@ -189,25 +190,28 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
 
   // Sort products
   useEffect(() => {
-    let sorted = [...products];
+    const sorted = [...products].sort((a, b) => {
+      const aPosition = a.position ?? Number.POSITIVE_INFINITY;
+      const bPosition = b.position ?? Number.POSITIVE_INFINITY;
 
-    switch (sortBy) {
-      case 'price-asc':
-        sorted.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-desc':
-        sorted.sort((a, b) => b.price - a.price);
-        break;
-      case 'name-asc':
-        sorted.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case 'name-desc':
-        sorted.sort((a, b) => b.title.localeCompare(a.title));
-        break;
-      default:
-        // Keep original order
-        break;
-    }
+      // Position is always the primary ordering key.
+      if (aPosition !== bPosition) {
+        return aPosition - bPosition;
+      }
+
+      switch (sortBy) {
+        case 'price-asc':
+          return a.price - b.price;
+        case 'price-desc':
+          return b.price - a.price;
+        case 'name-asc':
+          return a.title.localeCompare(b.title);
+        case 'name-desc':
+          return b.title.localeCompare(a.title);
+        default:
+          return 0;
+      }
+    });
 
     setSortedProducts(sorted);
   }, [products, sortBy]);

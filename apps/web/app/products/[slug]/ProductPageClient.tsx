@@ -1832,7 +1832,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
               {product.title || getProductText(language, product.id, 'title')}
             </h1>
 
-            <div className="mb-6">
+            <div className="mb-2">
               <div className="flex flex-col gap-1">
                 {/* Mobile: Price layout - old price on right, new price on left */}
                 <div className="flex items-center gap-2 justify-between lg:justify-start">
@@ -1860,12 +1860,16 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                 </div>
               </div>
             </div>
-            {/* Description - Hidden on mobile */}
-            <div className="hidden lg:block text-gray-600 mb-8 prose prose-sm" dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description || getProductText(language, product.id, 'longDescription') || '') }} />
+            {/* Description - tight spacing, no prose (custom compact styles) */}
+            <div
+              className="product-description text-gray-600 mb-2 text-sm max-w-none [&_p]:m-0 [&_p]:leading-[1.35] [&_p+_p]:mt-0 [&_h1]:m-0 [&_h1]:mb-1 [&_h1]:text-lg [&_h2]:m-0 [&_h2]:mb-0.5 [&_h2]:text-base [&_h3]:m-0 [&_h3]:mb-0.5 [&_ul]:m-0 [&_ul]:mt-0 [&_ul]:mb-0 [&_ul]:pl-5 [&_ul]:list-disc [&_ol]:m-0 [&_ol]:mt-0 [&_ol]:mb-0 [&_ol]:pl-5 [&_li]:m-0 [&_li]:leading-tight [&_li]:py-0 [&_img]:max-w-[67%] [&_img]:h-auto [&_img]:rounded-xl [&_img]:my-3 [&_img]:mx-0 [&_img]:contrast-135 [&_img]:saturate-160"
+              style={{ lineHeight: 1.35 }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description || getProductText(language, product.id, 'longDescription') || '') }}
+            />
            
             {/* Categories - same style as Product Card (#00D1FF) */}
             {product.categories && product.categories.length > 0 && (
-              <div className="flex flex-col gap-1 mb-4 text-base lg:text-lg text-[#00D1FF] tracking-[1.4px]">
+              <div className="flex flex-col gap-1 mb-2 text-base lg:text-lg text-[#00D1FF] tracking-[1.4px]">
                 {product.categories.map((c) => (
                   <p key={c.id} className="leading-[26px] lg:leading-[28px]">
                     {formatCategoryLabel(c.title)}
@@ -1875,7 +1879,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             )}
           
             {/* Rating Section */}
-            <div className="mt-8 flex items-center gap-2 pb-3">
+            <div className="mt-2 flex items-center gap-2 pb-1">
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -2211,8 +2215,8 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             )}
           </div>
 
-          {/* Action Buttons - Aligned with bottom of image */}
-          <div className="mt-auto pt-6">
+          {/* Action Buttons - Quantity + Add to cart, close to stars/attributes */}
+          <div className="mt-auto pt-3">
             {/* Show required attributes message if needed */}
             {isVariationRequired && (
               <div className="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -2235,7 +2239,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                 </p>
               </div>
             )}
-            <div className="flex items-center gap-3 pt-4 border-t">
+            <div className="flex items-center gap-3 pt-2 border-t">
               {/* Mobile: Quantity selector with glassmorphism style */}
               <div className="flex items-center border border-white/30 rounded-[72px] overflow-clip bg-white/10 backdrop-blur-md lg:bg-white lg:backdrop-blur-none">
                 <button onClick={() => adjustQuantity(-1)} className="w-12 h-12 flex items-center justify-center text-gray-900 hover:bg-white/20 lg:hover:bg-gray-100">-</button>
