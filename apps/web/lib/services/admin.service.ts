@@ -1371,6 +1371,7 @@ class AdminService {
       attributeIds: allAttributeIds, // All attribute IDs that this product has
       published: product.published,
       featured: (product as any).featured || false,
+      position: (product as any).position ?? null,
       minimumOrderQuantity: (product as any).minimumOrderQuantity ?? 1,
       orderQuantityIncrement: (product as any).orderQuantityIncrement ?? 1,
       media: Array.isArray(product.media) ? product.media : [],
@@ -1548,6 +1549,7 @@ class AdminService {
     categoryIds?: string[];
     published: boolean;
     featured?: boolean;
+    position?: number | null;
     minimumOrderQuantity?: number;
     orderQuantityIncrement?: number;
     media?: any[];
@@ -1803,6 +1805,42 @@ class AdminService {
           descriptionHtml: translation.descriptionHtml || undefined,
         }));
 
+        let normalizedPosition: number | null = null;
+        if (data.position !== undefined && data.position !== null) {
+          if (!Number.isInteger(data.position) || data.position < 1) {
+            throw {
+              status: 400,
+              type: "https://api.shop.am/problems/validation-error",
+              title: "Validation Error",
+              detail: "Field 'position' must be a positive integer",
+            };
+          }
+
+          const maxPositionResult = await tx.product.aggregate({
+            _max: { position: true },
+            where: {
+              deletedAt: null,
+              position: { not: null },
+            },
+          });
+          const maxPosition = maxPositionResult?._max?.position ?? 0;
+          normalizedPosition = Math.min(data.position, maxPosition + 1);
+
+          await tx.product.updateMany({
+            where: {
+              deletedAt: null,
+              position: {
+                gte: normalizedPosition,
+              },
+            },
+            data: {
+              position: {
+                increment: 1,
+              },
+            },
+          });
+        }
+
         const product = await tx.product.create({
           data: {
             brandId: data.brandId || undefined,
@@ -1811,6 +1849,7 @@ class AdminService {
             media: finalMedia,
             published: data.published,
             featured: data.featured ?? false,
+            position: normalizedPosition,
             minimumOrderQuantity: data.minimumOrderQuantity ?? 1,
             orderQuantityIncrement: data.orderQuantityIncrement ?? 1,
             publishedAt: data.published ? new Date() : undefined,
@@ -2013,6 +2052,7 @@ class AdminService {
       categoryIds?: string[];
       published?: boolean;
       featured?: boolean;
+      position?: number | null;
       minimumOrderQuantity?: number;
       orderQuantityIncrement?: number;
       media?: any[];
@@ -2132,6 +2172,104 @@ class AdminService {
         if (data.featured !== undefined) updateData.featured = data.featured;
         if (data.minimumOrderQuantity !== undefined) updateData.minimumOrderQuantity = data.minimumOrderQuantity;
         if (data.orderQuantityIncrement !== undefined) updateData.orderQuantityIncrement = data.orderQuantityIncrement;
+
+        const existingPositionRaw = (existing as any).position;
+        const existingPosition = Number.isInteger(existingPositionRaw) && existingPositionRaw > 0
+          ? existingPositionRaw
+          : null;
+
+        if (data.position !== undefined) {
+          if (data.position === null) {
+            if (existingPosition !== null) {
+              await tx.product.updateMany({
+                where: {
+                  id: { not: productId },
+                  deletedAt: null,
+                  position: {
+                    gt: existingPosition,
+                  },
+                },
+                data: {
+                  position: {
+                    decrement: 1,
+                  },
+                },
+              });
+            }
+            updateData.position = null;
+          } else {
+            if (!Number.isInteger(data.position) || data.position < 1) {
+              throw {
+                status: 400,
+                type: "https://api.shop.am/problems/validation-error",
+                title: "Validation Error",
+                detail: "Field 'position' must be a positive integer",
+              };
+            }
+
+            const maxPositionResult = await tx.product.aggregate({
+              _max: { position: true },
+              where: {
+                id: { not: productId },
+                deletedAt: null,
+                position: { not: null },
+              },
+            });
+            const maxPosition = maxPositionResult?._max?.position ?? 0;
+            const targetPosition = Math.min(data.position, maxPosition + 1);
+
+            if (existingPosition === null) {
+              await tx.product.updateMany({
+                where: {
+                  id: { not: productId },
+                  deletedAt: null,
+                  position: {
+                    gte: targetPosition,
+                  },
+                },
+                data: {
+                  position: {
+                    increment: 1,
+                  },
+                },
+              });
+            } else if (targetPosition < existingPosition) {
+              await tx.product.updateMany({
+                where: {
+                  id: { not: productId },
+                  deletedAt: null,
+                  position: {
+                    gte: targetPosition,
+                    lt: existingPosition,
+                  },
+                },
+                data: {
+                  position: {
+                    increment: 1,
+                  },
+                },
+              });
+            } else if (targetPosition > existingPosition) {
+              await tx.product.updateMany({
+                where: {
+                  id: { not: productId },
+                  deletedAt: null,
+                  position: {
+                    gt: existingPosition,
+                    lte: targetPosition,
+                  },
+                },
+                data: {
+                  position: {
+                    decrement: 1,
+                  },
+                },
+              });
+            }
+
+            updateData.position = targetPosition;
+          }
+        }
 
         // 2. Update translations
         if (data.translations && data.translations.length > 0) {

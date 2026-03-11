@@ -26,6 +26,7 @@ interface Product {
   id: string;
   slug: string;
   title: string;
+  position?: number | null;
   description?: string | null;
   category?: string | null; // Primary category title
   categories?: string[] | null; // All category titles
@@ -67,6 +68,7 @@ function trimProductForGrid(p: {
   id: string;
   slug?: string | null;
   title?: string | null;
+  position?: number | null;
   description?: string | null;
   category?: string | null;
   categories?: string[] | null;
@@ -87,6 +89,7 @@ function trimProductForGrid(p: {
     id: p.id,
     slug: p.slug ?? '',
     title: p.title ?? '',
+    position: p.position ?? null,
     description: p.description ?? null,
     category: p.category ?? null,
     categories: p.categories ?? null,
@@ -172,7 +175,12 @@ export default async function ProductsPage({ searchParams }: any) {
   const perPage = isMobileUserAgent(userAgent) ? PER_PAGE_MOBILE : PER_PAGE_DESKTOP;
 
   const productsData = await getProducts(page, params?.search, perPage);
-  const normalizedProducts = productsData.data;
+  const normalizedProducts = [...productsData.data].sort((a, b) => {
+    const aPosition = a.position ?? Number.POSITIVE_INFINITY;
+    const bPosition = b.position ?? Number.POSITIVE_INFINITY;
+    if (aPosition === bPosition) return 0;
+    return aPosition - bPosition;
+  });
 
   // Get language for translations - try cookies first, then fallback
   let language: LanguageCode = 'hy';
