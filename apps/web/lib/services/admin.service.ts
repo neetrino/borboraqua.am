@@ -1534,6 +1534,44 @@ class AdminService {
   }
 
   /**
+   * Returns next unique slug for the given base: if 0 products use base → base;
+   * if 1 product → base-2; if 2 → base-3; etc.
+   * When excludeProductId is set (update), keeps current slug if product already uses one in the family.
+   */
+  private async getNextUniqueSlug(
+    tx: { productTranslation: { findMany: (args: { where: { locale: string }; select: { slug: true; productId: true } }) => Promise<Array<{ slug: string; productId: string }>> } },
+    baseSlug: string,
+    locale: string,
+    options?: { excludeProductId?: string; currentSlug?: string }
+  ): Promise<string> {
+    const base = baseSlug.replace(/-\d+$/, '');
+    const all = await tx.productTranslation.findMany({
+      where: { locale },
+      select: { slug: true, productId: true },
+    });
+    const inFamily = all.filter(
+      (row) => row.slug === base || (row.slug.startsWith(base + '-') && /^\d+$/.test(row.slug.slice(base.length + 1)))
+    );
+    const excludeProductId = options?.excludeProductId;
+    const currentSlug = options?.currentSlug;
+
+    if (excludeProductId) {
+      const myRow = inFamily.find((r) => r.productId === excludeProductId);
+      if (myRow) return myRow.slug;
+      const used = new Set(inFamily.map((r) => r.slug));
+      if (!used.has(base)) return base;
+      for (let n = 2; n <= inFamily.length + 1; n++) {
+        const candidate = `${base}-${n}`;
+        if (!used.has(candidate)) return candidate;
+      }
+      return `${base}-${inFamily.length + 1}`;
+    }
+
+    const count = inFamily.length;
+    return count === 0 ? base : `${base}-${count + 1}`;
+  }
+
+  /**
    * Create product
    */
   async createProduct(data: {
@@ -1596,6 +1634,10 @@ class AdminService {
         // Track used SKUs within this transaction to ensure uniqueness
         const usedSkus = new Set<string>();
         const locale = data.translations?.[0]?.locale ?? 'hy';
+        const finalSlug = await this.getNextUniqueSlug(tx, data.slug.trim(), locale);
+        if (finalSlug !== data.slug.trim()) {
+          console.log('🔗 [ADMIN SERVICE] Slug uniquified:', data.slug.trim(), '→', finalSlug);
+        }
 
         // Generate variants with options
         // Support both old format (color/size strings) and new format (AttributeValue IDs)
@@ -1705,7 +1747,7 @@ class AdminService {
             const uniqueSku = await this.generateUniqueSku(
               tx,
               variant.sku,
-              data.slug,
+              finalSlug,
               variantIndex,
               usedSkus
             );
@@ -1797,48 +1839,53 @@ class AdminService {
         console.log('📸 [ADMIN SERVICE] Final main media count:', finalMedia.length);
         console.log('📸 [ADMIN SERVICE] Variant images excluded:', allVariantImages.length);
 
-        // Create translations for all provided languages
+        // Create translations for all provided languages (use finalSlug for uniqueness)
         const translationsToCreate = data.translations.map((translation) => ({
           locale: translation.locale,
           title: translation.title,
-          slug: translation.slug,
+          slug: finalSlug,
           descriptionHtml: translation.descriptionHtml || undefined,
         }));
 
         let normalizedPosition: number | null = null;
         if (data.position !== undefined && data.position !== null) {
-          if (!Number.isInteger(data.position) || data.position < 1) {
-            throw {
-              status: 400,
-              type: "https://api.shop.am/problems/validation-error",
-              title: "Validation Error",
-              detail: "Field 'position' must be a positive integer",
-            };
+          try {
+            if (!Number.isInteger(data.position) || data.position < 1) {
+              throw {
+                status: 400,
+                type: "https://api.shop.am/problems/validation-error",
+                title: "Validation Error",
+                detail: "Field 'position' must be a positive integer",
+              };
+            }
+
+            const maxPositionResult = await tx.product.aggregate({
+              _max: { position: true },
+              where: {
+                deletedAt: null,
+                position: { not: null },
+              },
+            });
+            const maxPosition = maxPositionResult?._max?.position ?? 0;
+            normalizedPosition = Math.min(data.position, maxPosition + 1);
+
+            await tx.product.updateMany({
+              where: {
+                deletedAt: null,
+                position: {
+                  gte: normalizedPosition,
+                },
+              },
+              data: {
+                position: {
+                  increment: 1,
+                },
+              },
+            });
+          } catch (positionError: unknown) {
+            console.warn('⚠️ [ADMIN SERVICE] Product position not available (migration may be missing):', positionError);
+            normalizedPosition = null;
           }
-
-          const maxPositionResult = await tx.product.aggregate({
-            _max: { position: true },
-            where: {
-              deletedAt: null,
-              position: { not: null },
-            },
-          });
-          const maxPosition = maxPositionResult?._max?.position ?? 0;
-          normalizedPosition = Math.min(data.position, maxPosition + 1);
-
-          await tx.product.updateMany({
-            where: {
-              deletedAt: null,
-              position: {
-                gte: normalizedPosition,
-              },
-            },
-            data: {
-              position: {
-                increment: 1,
-              },
-            },
-          });
         }
 
         const product = await tx.product.create({
@@ -1849,7 +1896,7 @@ class AdminService {
             media: finalMedia,
             published: data.published,
             featured: data.featured ?? false,
-            position: normalizedPosition,
+            ...(normalizedPosition !== null && { position: normalizedPosition }),
             minimumOrderQuantity: data.minimumOrderQuantity ?? 1,
             orderQuantityIncrement: data.orderQuantityIncrement ?? 1,
             publishedAt: data.published ? new Date() : undefined,
@@ -2174,107 +2221,121 @@ class AdminService {
         if (data.minimumOrderQuantity !== undefined) updateData.minimumOrderQuantity = data.minimumOrderQuantity;
         if (data.orderQuantityIncrement !== undefined) updateData.orderQuantityIncrement = data.orderQuantityIncrement;
 
-        const existingPositionRaw = existing.position;
+        const existingPositionRaw = (existing as { position?: number | null }).position;
         const existingPosition = Number.isInteger(existingPositionRaw) && existingPositionRaw > 0
           ? existingPositionRaw
           : null;
 
         if (data.position !== undefined) {
-          if (data.position === null) {
-            if (existingPosition !== null) {
-              await tx.product.updateMany({
-                where: {
-                  id: { not: productId },
-                  deletedAt: null,
-                  position: {
-                    gt: existingPosition,
+          try {
+            if (data.position === null) {
+              if (existingPosition !== null) {
+                await tx.product.updateMany({
+                  where: {
+                    id: { not: productId },
+                    deletedAt: null,
+                    position: {
+                      gt: existingPosition,
+                    },
                   },
-                },
-                data: {
-                  position: {
-                    decrement: 1,
+                  data: {
+                    position: {
+                      decrement: 1,
+                    },
                   },
-                },
-              });
-            }
-            updateData.position = null;
-          } else {
-            if (!Number.isInteger(data.position) || data.position < 1) {
-              throw {
-                status: 400,
-                type: "https://api.shop.am/problems/validation-error",
-                title: "Validation Error",
-                detail: "Field 'position' must be a positive integer",
-              };
-            }
+                });
+              }
+              updateData.position = null;
+            } else {
+              if (!Number.isInteger(data.position) || data.position < 1) {
+                throw {
+                  status: 400,
+                  type: "https://api.shop.am/problems/validation-error",
+                  title: "Validation Error",
+                  detail: "Field 'position' must be a positive integer",
+                };
+              }
 
-            const maxPositionResult = await tx.product.aggregate({
-              _max: { position: true },
-              where: {
-                id: { not: productId },
-                deletedAt: null,
-                position: { not: null },
-              },
-            });
-            const maxPosition = maxPositionResult?._max?.position ?? 0;
-            const targetPosition = Math.min(data.position, maxPosition + 1);
+              const maxPositionResult = await tx.product.aggregate({
+                _max: { position: true },
+                where: {
+                  id: { not: productId },
+                  deletedAt: null,
+                  position: { not: null },
+                },
+              });
+              const maxPosition = maxPositionResult?._max?.position ?? 0;
+              const targetPosition = Math.min(data.position, maxPosition + 1);
 
-            if (existingPosition === null) {
-              await tx.product.updateMany({
-                where: {
-                  id: { not: productId },
-                  deletedAt: null,
-                  position: {
-                    gte: targetPosition,
+              if (existingPosition === null) {
+                await tx.product.updateMany({
+                  where: {
+                    id: { not: productId },
+                    deletedAt: null,
+                    position: {
+                      gte: targetPosition,
+                    },
                   },
-                },
-                data: {
-                  position: {
-                    increment: 1,
+                  data: {
+                    position: {
+                      increment: 1,
+                    },
                   },
-                },
-              });
-            } else if (targetPosition < existingPosition) {
-              await tx.product.updateMany({
-                where: {
-                  id: { not: productId },
-                  deletedAt: null,
-                  position: {
-                    gte: targetPosition,
-                    lt: existingPosition,
+                });
+              } else if (targetPosition < existingPosition) {
+                await tx.product.updateMany({
+                  where: {
+                    id: { not: productId },
+                    deletedAt: null,
+                    position: {
+                      gte: targetPosition,
+                      lt: existingPosition,
+                    },
                   },
-                },
-                data: {
-                  position: {
-                    increment: 1,
+                  data: {
+                    position: {
+                      increment: 1,
+                    },
                   },
-                },
-              });
-            } else if (targetPosition > existingPosition) {
-              await tx.product.updateMany({
-                where: {
-                  id: { not: productId },
-                  deletedAt: null,
-                  position: {
-                    gt: existingPosition,
-                    lte: targetPosition,
+                });
+              } else if (targetPosition > existingPosition) {
+                await tx.product.updateMany({
+                  where: {
+                    id: { not: productId },
+                    deletedAt: null,
+                    position: {
+                      gt: existingPosition,
+                      lte: targetPosition,
+                    },
                   },
-                },
-                data: {
-                  position: {
-                    decrement: 1,
+                  data: {
+                    position: {
+                      decrement: 1,
+                    },
                   },
-                },
-              });
+                });
+              }
+
+              updateData.position = targetPosition;
             }
-
-            updateData.position = targetPosition;
+          } catch (positionError: unknown) {
+            const err = positionError as { status?: number };
+            if (err?.status === 400) throw positionError;
+            console.warn('⚠️ [ADMIN SERVICE] Product position update skipped (migration may be missing):', positionError);
           }
         }
 
         // 2. Update translations
         if (data.translations && data.translations.length > 0) {
-          // Upsert each translation
+          const firstT = data.translations[0];
+          const currentSlug = existing.translations.find((t: { locale: string }) => t.locale === firstT.locale)?.slug;
+          const finalSlug = await this.getNextUniqueSlug(tx, firstT.slug.trim(), firstT.locale, {
+            excludeProductId: productId,
+            currentSlug: currentSlug ?? undefined,
+          });
+          if (finalSlug !== firstT.slug.trim()) {
+            console.log('🔗 [ADMIN SERVICE] Slug uniquified on update:', firstT.slug.trim(), '→', finalSlug);
+          }
           for (const translation of data.translations) {
             await tx.productTranslation.upsert({
               where: {
@@ -2285,14 +2346,14 @@ class AdminService {
               },
               update: {
                 title: translation.title,
-                slug: translation.slug,
+                slug: finalSlug,
                 descriptionHtml: translation.descriptionHtml || null,
               },
               create: {
                 productId,
                 locale: translation.locale,
                 title: translation.title,
-                slug: translation.slug,
+                slug: finalSlug,
                 descriptionHtml: translation.descriptionHtml || null,
               },
             });
