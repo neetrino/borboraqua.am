@@ -83,6 +83,135 @@ class AdminService {
     }
   }
 
+  private isUnknownProductPositionError(error: unknown): boolean {
+    const msg = (error as { message?: string })?.message ?? "";
+    return msg.includes("Unknown argument") && msg.includes("position");
+  }
+
+  private normalizeProductPositionValue(value: unknown): number | null {
+    return Number.isInteger(value) && Number(value) > 0 ? Number(value) : null;
+  }
+
+  private async getProductPositionRaw(executor: any, productId: string): Promise<number | null> {
+    const rows = await executor.$queryRaw<Array<{ position: number | null }>>`
+      SELECT "position"
+      FROM "products"
+      WHERE "id" = ${productId}
+      LIMIT 1
+    `;
+
+    return this.normalizeProductPositionValue(rows[0]?.position ?? null);
+  }
+
+  private async getMaxProductPositionRaw(executor: any, excludeProductId?: string): Promise<number> {
+    const rows = excludeProductId
+      ? await executor.$queryRaw<Array<{ max: number | null }>>`
+          SELECT MAX("position")::int AS "max"
+          FROM "products"
+          WHERE "deletedAt" IS NULL
+            AND "position" IS NOT NULL
+            AND "id" <> ${excludeProductId}
+        `
+      : await executor.$queryRaw<Array<{ max: number | null }>>`
+          SELECT MAX("position")::int AS "max"
+          FROM "products"
+          WHERE "deletedAt" IS NULL
+            AND "position" IS NOT NULL
+        `;
+
+    return this.normalizeProductPositionValue(rows[0]?.max ?? null) ?? 0;
+  }
+
+  private async prepareProductCreatePositionRaw(executor: any, requestedPosition: number): Promise<number> {
+    const maxPosition = await this.getMaxProductPositionRaw(executor);
+    const targetPosition = Math.min(requestedPosition, maxPosition + 1);
+
+    await executor.$executeRaw`
+      UPDATE "products"
+      SET "position" = "position" + 1
+      WHERE "deletedAt" IS NULL
+        AND "position" IS NOT NULL
+        AND "position" >= ${targetPosition}
+    `;
+
+    return targetPosition;
+  }
+
+  private async prepareProductUpdatePositionRaw(
+    executor: any,
+    productId: string,
+    requestedPosition: number | null,
+    existingPosition: number | null
+  ): Promise<number | null> {
+    if (requestedPosition === null) {
+      if (existingPosition !== null) {
+        await executor.$executeRaw`
+          UPDATE "products"
+          SET "position" = "position" - 1
+          WHERE "id" <> ${productId}
+            AND "deletedAt" IS NULL
+            AND "position" IS NOT NULL
+            AND "position" > ${existingPosition}
+        `;
+      }
+
+      return null;
+    }
+
+    const maxPosition = await this.getMaxProductPositionRaw(executor, productId);
+    const targetPosition = Math.min(requestedPosition, maxPosition + 1);
+
+    if (existingPosition === null) {
+      await executor.$executeRaw`
+        UPDATE "products"
+        SET "position" = "position" + 1
+        WHERE "id" <> ${productId}
+          AND "deletedAt" IS NULL
+          AND "position" IS NOT NULL
+          AND "position" >= ${targetPosition}
+      `;
+    } else if (targetPosition < existingPosition) {
+      await executor.$executeRaw`
+        UPDATE "products"
+        SET "position" = "position" + 1
+        WHERE "id" <> ${productId}
+          AND "deletedAt" IS NULL
+          AND "position" IS NOT NULL
+          AND "position" >= ${targetPosition}
+          AND "position" < ${existingPosition}
+      `;
+    } else if (targetPosition > existingPosition) {
+      await executor.$executeRaw`
+        UPDATE "products"
+        SET "position" = "position" - 1
+        WHERE "id" <> ${productId}
+          AND "deletedAt" IS NULL
+          AND "position" IS NOT NULL
+          AND "position" > ${existingPosition}
+          AND "position" <= ${targetPosition}
+      `;
+    }
+
+    return targetPosition;
+  }
+
+  private async persistProductPositionRaw(executor: any, productId: string, position: number | null): Promise<void> {
+    if (position === null) {
+      await executor.$executeRaw`
+        UPDATE "products"
+        SET "position" = NULL
+        WHERE "id" = ${productId}
+      `;
+      return;
+    }
+
+    await executor.$executeRaw`
+      UPDATE "products"
+      SET "position" = ${position}
+      WHERE "id" = ${productId}
+    `;
+  }
+
   /**
    * Get dashboard stats
    */
@@ -1261,6 +1390,7 @@ class AdminService {
   async getProductById(productId: string) {
     // Try to include productAttributes, but handle case where table might not exist
     let product;
+    let fallbackPosition: number | null | undefined;
     try {
       product = await db.product.findUnique({
         where: { id: productId },
@@ -1380,6 +1510,9 @@ class AdminService {
 
     // Get default translation for backward compatibility (prefer English, then first available)
     const defaultTranslation = translations.find((t: { locale: string }) => t.locale === "en") || translations[0] || null;
+    if ((product as { position?: number | null }).position === undefined) {
+      fallbackPosition = await this.getProductPositionRaw(db, productId);
+    }
 
     return {
       id: product.id,
@@ -1402,7 +1535,7 @@ class AdminService {
       attributeIds: allAttributeIds, // All attribute IDs that this product has
       published: product.published,
       featured: (product as any).featured || false,
-      position: product.position ?? null,
+      position: fallbackPosition ?? product.position ?? null,
       minimumOrderQuantity: (product as any).minimumOrderQuantity ?? 1,
       orderQuantityIncrement: (product as any).orderQuantityIncrement ?? 1,
       media: Array.isArray(product.media) ? product.media : [],
@@ -1918,13 +2051,14 @@ class AdminService {
               },
             });
           } catch (positionError: unknown) {
-            console.warn('⚠️ [ADMIN SERVICE] Product position not available (migration may be missing):', positionError);
-            normalizedPosition = null;
+            const err = positionError as { status?: number };
+            if (err?.status === 400) throw positionError;
+            console.warn('⚠️ [ADMIN SERVICE] Falling back to raw SQL for product position create:', positionError);
+            normalizedPosition = await this.prepareProductCreatePositionRaw(tx, data.position);
           }
         }
 
-        const product = await tx.product.create({
-          data: {
+        const createData = {
             brandId: data.brandId || undefined,
             primaryCategoryId: data.primaryCategoryId || undefined,
             categoryIds: data.categoryIds || [],
@@ -1957,8 +2091,27 @@ class AdminService {
                   connect: data.categoryIds.map((id) => ({ id })),
                 }
               : undefined,
-          },
-        });
+          };
+
+        const createProduct = (productData: typeof createData) =>
+          tx.product.create({
+            data: productData,
+          });
+
+        let product;
+        try {
+          product = await createProduct(createData);
+        } catch (err: unknown) {
+          if (this.isUnknownProductPositionError(err)) {
+            const { position: _p, ...dataWithoutPosition } = createData;
+            product = await createProduct(dataWithoutPosition);
+            if (normalizedPosition !== null) {
+              await this.persistProductPositionRaw(tx, product.id, normalizedPosition);
+            }
+          } else {
+            throw err;
+          }
+        }
 
         // Create ProductAttribute relations if attributeIds provided
         if (data.attributeIds && data.attributeIds.length > 0) {
@@ -2260,10 +2413,11 @@ class AdminService {
         if (data.minimumOrderQuantity !== undefined) updateData.minimumOrderQuantity = data.minimumOrderQuantity;
         if (data.orderQuantityIncrement !== undefined) updateData.orderQuantityIncrement = data.orderQuantityIncrement;
 
-        const existingPositionRaw = (existing as { position?: number | null }).position;
-        const existingPosition = Number.isInteger(existingPositionRaw) && existingPositionRaw > 0
-          ? existingPositionRaw
-          : null;
+        let existingPositionRaw = (existing as { position?: number | null }).position;
+        if (existingPositionRaw === undefined && data.position !== undefined) {
+          existingPositionRaw = await this.getProductPositionRaw(tx, productId);
+        }
+        const existingPosition = this.normalizeProductPositionValue(existingPositionRaw ?? null);
 
         if (data.position !== undefined) {
           try {
@@ -2360,7 +2514,13 @@ class AdminService {
           } catch (positionError: unknown) {
             const err = positionError as { status?: number };
             if (err?.status === 400) throw positionError;
-            console.warn('⚠️ [ADMIN SERVICE] Product position update skipped (migration may be missing):', positionError);
+            console.warn('⚠️ [ADMIN SERVICE] Falling back to raw SQL for product position update:', positionError);
+            updateData.position = await this.prepareProductUpdatePositionRaw(
+              tx,
+              productId,
+              data.position ?? null,
+              existingPosition
+            );
           }
         }
 
@@ -2870,10 +3030,17 @@ class AdminService {
         try {
           return await doUpdate(updateData);
         } catch (err: unknown) {
-          const msg = (err as { message?: string })?.message ?? '';
-          if (msg.includes('Unknown argument') && msg.includes('position')) {
+          if (this.isUnknownProductPositionError(err)) {
+            const positionToPersist =
+              Object.prototype.hasOwnProperty.call(updateData, 'position')
+                ? (updateData as { position?: number | null }).position ?? null
+                : undefined;
             const { position: _p, ...dataWithoutPosition } = updateData;
-            return await doUpdate(dataWithoutPosition);
+            const updatedProduct = await doUpdate(dataWithoutPosition);
+            if (positionToPersist !== undefined) {
+              await this.persistProductPositionRaw(tx, productId, positionToPersist);
+            }
+            return updatedProduct;
           }
           throw err;
         }
