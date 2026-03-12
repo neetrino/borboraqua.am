@@ -188,15 +188,14 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     });
   };
 
-  // Sort products
+  // Sort products — position only for default; name/price filters sort only by that criterion
   useEffect(() => {
     const sorted = [...products].sort((a, b) => {
-      const aPosition = a.position ?? Number.POSITIVE_INFINITY;
-      const bPosition = b.position ?? Number.POSITIVE_INFINITY;
-
-      // Position is always the primary ordering key.
-      if (aPosition !== bPosition) {
-        return aPosition - bPosition;
+      if (sortBy === 'default') {
+        const aPosition = a.position ?? Number.POSITIVE_INFINITY;
+        const bPosition = b.position ?? Number.POSITIVE_INFINITY;
+        if (aPosition !== bPosition) return aPosition - bPosition;
+        return 0;
       }
 
       switch (sortBy) {

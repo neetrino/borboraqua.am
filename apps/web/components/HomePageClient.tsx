@@ -1042,39 +1042,51 @@ export function HomePageClient({
             </div>
           </button>
         </div>
-        {/* Mobile / Tablet Stats Cards — պլանշետում ցածր, overlap չլինի */}
-        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[1900px] min-[728px]:top-[2210px] w-full max-w-[calc(100%-2rem)] min-[728px]:max-w-[min(92vw,960px)] xl:max-w-[700px] px-4">
-          <div className="h-[240px] min-[728px]:h-[227px] relative shrink-0 w-full xl:w-[calc(62%-4px)] min-w-0">
-            <div className="absolute bg-[#1ac0fd] inset-0 rounded-[30px]" />
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[70%_6%_18%_40%] min-[728px]:inset-[65%_6%_18%_40%] justify-center leading-[0] text-[40px] min-[728px]:text-[50px] text-center text-white tracking-[-0.9px] uppercase">
-              <p className="leading-[36px] min-[728px]:leading-[45px] whitespace-pre-wrap">98%</p>
+        {/* Mobile / Tablet Stats Cards — պլանշետում ցածր, overlap չլինի; img5/img6 ինչպես desktop */}
+        <div className="-translate-x-1/2 absolute left-1/2 top-[1900px] min-[728px]:top-[2210px] w-full max-w-[calc(100%-2rem)] min-[728px]:max-w-[min(92vw,960px)] max-lg:min-[729px]:max-w-[min(82vw,760px)] xl:max-w-[700px] px-4">
+          <div className="flex gap-[8px] min-[728px]:gap-[12px] items-start content-stretch">
+            {/* Side Image Left (img5) */}
+            <div className="h-[200px] min-[728px]:h-[210px] w-[96px] min-[728px]:w-[132px] min-[729px]:max-[1024px]:w-[156px] shrink-0 rounded-[24px] min-[728px]:rounded-[30px] overflow-hidden">
+              <img alt="" className="h-full w-full object-cover" src={img5} loading="lazy" />
             </div>
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[6%_10%_40%_10%] min-[728px]:inset-[6%_6%_30%_6%] justify-center leading-[22px] min-[728px]:leading-[28px] text-[18px] min-[728px]:text-[24px] text-white text-left tracking-[-0.9px] uppercase break-words">
+            <div className="h-[200px] min-[728px]:h-[210px] relative flex-1 min-w-0 min-[729px]:max-[1024px]:flex-none min-[729px]:max-[1024px]:w-[calc(100%-168px)]">
+            <div className="absolute bg-[#1ac0fd] inset-0 rounded-[30px]" />
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[70%_6%_18%_40%] min-[728px]:inset-[65%_6%_18%_40%] justify-center leading-[0] text-[34px] min-[728px]:text-[42px] text-center text-white tracking-[-0.9px] uppercase">
+              <p className="leading-[31px] min-[728px]:leading-[38px] whitespace-pre-wrap">{t('home.cards.pureSpringWater.percentage')}</p>
+            </div>
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[6%_10%_40%_10%] min-[728px]:inset-[6%_6%_30%_6%] justify-center leading-[20px] min-[728px]:leading-[24px] text-[16px] min-[728px]:text-[20px] text-white text-left tracking-[-0.9px] uppercase break-words">
               <p className="mb-0">{t('home.cards.pureSpringWater.pure')}</p>
               <p className="mb-0">{t('home.cards.pureSpringWater.spring')}</p>
               <p className="mb-0">{t('home.cards.pureSpringWater.water')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light mb-0">{t('home.cards.pureSpringWater.from')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light">{t('home.cards.pureSpringWater.armenia')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[82%_8%_6%_40%] min-[728px]:inset-[80%_8%_6%_40%] italic justify-center leading-[0] text-[12px] min-[728px]:text-[14px] text-right text-white">
-              <p className="leading-[18px] min-[728px]:leading-[21px] whitespace-pre-wrap">{t('home.cards.pureSpringWater.source')}</p>
+            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[82%_8%_6%_40%] min-[728px]:inset-[80%_8%_6%_40%] italic justify-center leading-[0] text-[10px] min-[728px]:text-[12px] text-right text-white">
+              <p className="leading-[15px] min-[728px]:leading-[18px] whitespace-pre-wrap">{t('home.cards.pureSpringWater.source')}</p>
             </div>
           </div>
+          </div>
         </div>
-        <div className="-translate-x-1/2 absolute content-stretch flex gap-[8px] items-start left-1/2 top-[2150px] min-[728px]:top-[2470px] w-full max-w-[calc(100%-2rem)] min-[728px]:max-w-[min(92vw,960px)] xl:max-w-[700px] px-4">
-          <div className="h-[240px] min-[728px]:h-[227px] relative shrink-0 w-full xl:w-[calc(62%-4px)] min-w-0">
+        <div className="-translate-x-1/2 absolute left-1/2 top-[2150px] min-[728px]:top-[2470px] w-full max-w-[calc(100%-2rem)] min-[728px]:max-w-[min(92vw,960px)] max-lg:min-[729px]:max-w-[min(82vw,760px)] xl:max-w-[700px] px-4">
+          <div className="flex gap-[8px] min-[728px]:gap-[12px] items-start content-stretch">
+          <div className="h-[200px] min-[728px]:h-[210px] relative flex-1 min-w-0 min-[729px]:max-[1024px]:flex-none min-[729px]:max-[1024px]:w-[calc(100%-168px)]">
             <div className="absolute bg-white inset-0 rounded-[30px]" />
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[65%_6%_18%_26%] min-[728px]:inset-[60%_6%_18%_26%] justify-center leading-[0] text-[#0f172a] text-[40px] min-[728px]:text-[50px] text-center tracking-[-0.9px] uppercase">
-              <p className="leading-[36px] min-[728px]:leading-[45px] whitespace-pre-wrap">100%</p>
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[65%_6%_18%_26%] min-[728px]:inset-[60%_6%_18%_26%] justify-center leading-[0] text-[#0f172a] text-[34px] min-[728px]:text-[42px] text-center tracking-[-0.9px] uppercase">
+              <p className="leading-[31px] min-[728px]:leading-[38px] whitespace-pre-wrap">{t('home.cards.balancedHydration.percentage')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[6%_10%_40%_10%] min-[728px]:inset-[6%_6%_30%_6%] justify-center leading-[22px] min-[728px]:leading-[28px] text-[#1ac0fd] text-[18px] min-[728px]:text-[24px] tracking-[-0.9px] uppercase break-words">
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[6%_10%_40%_10%] min-[728px]:inset-[6%_6%_30%_6%] justify-center leading-[20px] min-[728px]:leading-[24px] text-[#1ac0fd] text-[16px] min-[728px]:text-[20px] tracking-[-0.9px] uppercase break-words">
               <p className="mb-0">{t('home.cards.balancedHydration.balanced')}</p>
               <p className="mb-0">{t('home.cards.balancedHydration.hydration')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light mb-0">{t('home.cards.balancedHydration.every')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light">{t('home.cards.balancedHydration.day')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[84.65%_8.65%_6.46%_44.71%] min-[728px]:inset-[82%_8%_6%_44%] italic justify-center leading-[0] text-[#1ac0fd] text-[14px] min-[728px]:text-[16px] text-right">
-              <p className="leading-[24px] min-[728px]:leading-[24px] whitespace-pre-wrap">{t('home.cards.balancedHydration.source')}</p>
+            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[84.65%_8.65%_6.46%_44.71%] min-[728px]:inset-[82%_8%_6%_44%] italic justify-center leading-[0] text-[#1ac0fd] text-[11px] min-[728px]:text-[13px] text-right">
+              <p className="leading-[18px] min-[728px]:leading-[20px] whitespace-pre-wrap">{t('home.cards.balancedHydration.source')}</p>
+            </div>
+          </div>
+            {/* Side Image Right (img6) */}
+            <div className="h-[200px] min-[728px]:h-[210px] w-[122px] min-[728px]:w-[132px] min-[729px]:max-[1024px]:w-[156px] shrink-0 rounded-[24px] min-[728px]:rounded-[30px] overflow-hidden">
+              <img alt="" className="h-full w-full object-cover" src={img6} loading="lazy" />
             </div>
           </div>
         </div>
@@ -1586,26 +1598,25 @@ export function HomePageClient({
         </div>
       </div>
 
-      {/* Pure Spring Water / Balanced Hydration Cards */}
-      {/* Container for cards - centered and zoom-stable */}
-      <div className="absolute left-1/2 translate-x-[-110%] lg:translate-x-[-50%] top-[3200px] lg:top-[3200px] md:top-[2800px] sm:top-[2200px] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%] -ml-[350px]">
+      {/* Pure Spring Water / Balanced Hydration Cards — z-[35] որ desktop-ում bubble-ների վերև լինեն */}
+      <div className="absolute left-1/2 translate-x-[-50%] top-[3200px] lg:top-[3200px] md:top-[2800px] sm:top-[2200px] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%] -ml-[350px] lg:-ml-[350px] sm:-ml-0 md:-ml-0 z-[35]">
         {/* Blue Card (98%) */}
         <div className="absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[200px] left-[calc(50%+27.08%)] lg:left-[650px] md:left-[38%] sm:left-[5%] top-0 w-[448px] lg:w-[700px] md:w-[60%] sm:w-[90%]">
           <div className="absolute bg-[#1ac0fd] inset-0 rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]" />
-          <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[65.89%_3.9%_22.45%_69.14%] lg:inset-[65.89%_3.9%_22.45%_69.14%] md:inset-[65.89%_3.9%_22.45%_69.14%] sm:inset-[65.89%_3.9%_22.45%_69.14%] justify-center leading-[0] text-[54px] lg:text-[84px] md:text-[72px] sm:text-[56px] text-center text-white tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
+          <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[65.89%_3.9%_22.45%_64%] lg:inset-[65.89%_3.9%_22.45%_64%] md:inset-[65.89%_3.9%_22.45%_64%] sm:inset-[65.89%_3.9%_22.45%_64%] justify-center leading-[0] text-[54px] lg:text-[84px] md:text-[72px] sm:text-[56px] text-center text-white tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
             <p className="leading-[23px] lg:leading-[36px] md:leading-[32px] sm:leading-[28px]">{t('home.cards.pureSpringWater.percentage')}</p>
           </div>
           <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[12.83%_29.35%_58.02%_5.29%] lg:inset-[12.83%_29.35%_58.02%_5.29%] md:inset-[12.83%_29.35%_58.02%_5.29%] sm:inset-[12.83%_29.35%_58.02%_5.29%] justify-center leading-[28px] lg:leading-[44px] md:leading-[40px] sm:leading-[32px] text-[26px] lg:text-[40px] md:text-[36px] sm:text-[28px] text-white tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
             <p className="mb-0">{t('home.cards.pureSpringWater.title')}</p>
             <p className="font-['Montserrat',sans-serif] font-light">{t('home.cards.pureSpringWater.subtitle')}</p>
           </div>
-          <div className="absolute flex flex-col font-['Inter',sans-serif] font-medium inset-[83.67%_3.9%_9.33%_82.24%] lg:inset-[83.67%_3.9%_9.33%_82.24%] md:inset-[83.67%_3.9%_9.33%_82.24%] sm:inset-[83.67%_3.9%_9.33%_82.24%] italic justify-center leading-[0] text-[10px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap">
+          <div className="absolute flex flex-col font-['Inter',sans-serif] font-medium inset-[83.67%_3.9%_9.33%_70%] lg:inset-[83.67%_3.9%_9.33%_70%] md:inset-[83.67%_3.9%_9.33%_70%] sm:inset-[83.67%_3.9%_9.33%_70%] italic justify-center leading-[0] text-[10px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center text-white whitespace-nowrap min-w-0">
             <p className="leading-[14px] lg:leading-[22px] md:leading-[20px] sm:leading-[18px]">{t('home.cards.pureSpringWater.source')}</p>
           </div>
         </div>
 
-        {/* Side Image Left */}
-        <div className="absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[calc(50%-27.08%-224px)] lg:left-[350px] md:left-[20.5%] sm:left-[5%] top-0 w-[173px] lg:w-[270px] md:w-[25%] sm:w-[40%]">
+        {/* Side Image Left — mobile-ում նույն հարաբերական դիրքը ինչ desktop (35.71% / 110%) */}
+        <div className="absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[35.71%] lg:left-[350px] md:left-[20.5%] sm:left-[35.71%] top-0 w-[173px] lg:w-[270px] md:w-[25%] sm:w-[27.55%]">
           <div className="absolute inset-0 rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
               <img alt="Screenshot" className="absolute h-[149.05%] left-[-32.81%] max-w-none top-[-32.36%] w-[132.81%]" src={img5} loading="lazy" />
@@ -1614,12 +1625,12 @@ export function HomePageClient({
         </div>
       </div>
 
-      {/* White Card (100%) Container */}
-      <div className="absolute left-1/2 translate-x-[-110%] lg:translate-x-[-50%] top-[3520px] lg:top-[3520px] md:top-[3100px] sm:top-[2500px] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%] -ml-[350px]">
+      {/* White Card (100%) Container — z-[35] որ desktop-ում bubble-ների վերև լինեն */}
+      <div className="absolute left-1/2 translate-x-[-50%] top-[3520px] lg:top-[3520px] md:top-[3100px] sm:top-[2500px] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%] -ml-[350px] lg:-ml-[350px] sm:-ml-0 md:-ml-0 z-[35]">
         {/* White Card (100%) */}
         <div className="absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[20px] left-[calc(50%-27.08%)] lg:left-[350px] md:left-[20.5%] sm:left-[5%] top-0 w-[448px] lg:w-[700px] md:w-[60%] sm:w-[90%]">
           <div className="absolute bg-white inset-0 rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px] shadow-[0_20px_60px_rgba(15,23,42,0.20)]" />
-          <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[69.68%_60%_18.66%_7.42%] lg:inset-[69.68%_60%_18.66%_7.42%] md:inset-[69.68%_60%_18.66%_7.42%] sm:inset-[69.68%_60%_18.66%_7.42%] justify-center leading-[0] text-[#0f172a] text-[54px] lg:text-[84px] md:text-[72px] sm:text-[56px] text-center tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
+          <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[69.68%_52%_18.66%_12%] lg:inset-[69.68%_52%_18.66%_12%] md:inset-[69.68%_52%_18.66%_12%] sm:inset-[69.68%_52%_18.66%_12%] justify-center leading-[0] text-[#0f172a] text-[54px] lg:text-[84px] md:text-[72px] sm:text-[56px] text-center tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-nowrap">
             <p className="leading-[23px] lg:leading-[36px] md:leading-[32px] sm:leading-[28px]">{t('home.cards.balancedHydration.percentage')}</p>
           </div>
           <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-black inset-[12.83%_5.28%_58.02%_22.26%] lg:inset-[12.83%_5.28%_58.02%_22.26%] md:inset-[12.83%_5.28%_58.02%_22.26%] sm:inset-[12.83%_5.28%_58.02%_22.26%] justify-center leading-[26px] lg:leading-[38px] md:leading-[34px] sm:leading-[30px] text-[#00d1ff] text-[20px] lg:text-[32px] md:text-[28px] sm:text-[22px] text-right tracking-[-0.8px] lg:tracking-[-0.8px] md:tracking-[-0.7px] sm:tracking-[-0.5px] uppercase whitespace-normal">
@@ -1631,8 +1642,8 @@ export function HomePageClient({
           </div>
         </div>
 
-        {/* Side Image Right */}
-        <div className="absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[calc(50%+27.08%+224px)] lg:left-[1080px] md:left-[63.3%] sm:left-[55%] top-0 w-[173px] lg:w-[270px] md:w-[25%] sm:w-[40%]">
+        {/* Side Image Right — mobile-ում նույն հարաբերական դիրքը ինչ desktop (110.2%) */}
+        <div className="absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[110.2%] lg:left-[1080px] md:left-[63.3%] sm:left-[110.2%] top-0 w-[173px] lg:w-[270px] md:w-[25%] sm:w-[27.55%]">
           <div className="absolute inset-0 rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
               <img alt="Screenshot" className="absolute h-[101.64%] left-[-6.77%] max-w-none top-[-1.52%] w-[113.53%]" src={img6} loading="lazy" />
@@ -1886,7 +1897,7 @@ export function HomePageClient({
         <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-8 size-[339px] flex items-center justify-center" maxDrag={110} loading="lazy" />
       </div>
 
-      <div className="absolute flex top-[52%] right-[1%] bottom-[35.23%] left-auto items-center justify-center overflow-hidden pointer-events-none">
+      <div className="absolute z-[40] flex top-[52%] right-[1%] bottom-[35.23%] left-auto items-center justify-center overflow-visible pointer-events-none">
         <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-3 size-[228px] flex items-center justify-center" maxDrag={95} loading="lazy" />
       </div>
 

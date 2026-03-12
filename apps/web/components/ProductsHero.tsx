@@ -22,6 +22,8 @@ export function ProductsHero({ total = 0 }: ProductsHeroProps) {
     { value: 'default', label: t('products.hero.default') },
     { value: 'name-asc', label: t('products.hero.nameAsc') },
     { value: 'name-desc', label: t('products.hero.nameDesc') },
+    { value: 'price-asc', label: t('products.hero.priceAsc') },
+    { value: 'price-desc', label: t('products.hero.priceDesc') },
   ];
 
   // Load from URL params
