@@ -18,21 +18,24 @@ if (!hasDatabaseUrl) {
 
 try {
   console.log('🔄 Running database migrations...');
-  const dbPath = path.join(__dirname, '../../../packages/db');
-  
-  // Try migrate deploy first
+  const repoRoot = path.join(__dirname, '../../..');
+  const schemaPath = path.join(repoRoot, 'packages/db/prisma/schema.prisma');
+
+  // Run from repo root with explicit schema so Prisma is found (hoisted or in packages/db)
   try {
-    execSync('npm run db:migrate:deploy', {
-      cwd: dbPath,
+    execSync(`npx prisma migrate deploy --schema=${schemaPath}`, {
+      cwd: repoRoot,
       stdio: 'inherit',
+      env: { ...process.env, PATH: process.env.PATH },
     });
     console.log('✅ Migrations deployed successfully');
   } catch (migrateError) {
     console.log('⚠️  Migrate deploy failed, trying db push...');
     try {
-      execSync('npm run db:push', {
-        cwd: dbPath,
+      execSync(`npx prisma db push --schema=${schemaPath}`, {
+        cwd: repoRoot,
         stdio: 'inherit',
+        env: { ...process.env, PATH: process.env.PATH },
       });
       console.log('✅ Database pushed successfully');
     } catch (pushError) {
