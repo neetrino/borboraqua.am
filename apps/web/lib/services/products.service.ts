@@ -2,7 +2,10 @@ import { db } from "@white-shop/db";
 import { Prisma } from "@prisma/client";
 import { adminService } from "./admin.service";
 import { t } from "../i18n";
-import { ensureProductVariantAttributesColumn } from "../utils/db-ensure";
+import {
+  ensureProductPositionColumn,
+  ensureProductVariantAttributesColumn,
+} from "../utils/db-ensure";
 import {
   processImageUrl,
   smartSplitUrls,
@@ -76,6 +79,12 @@ class ProductsService {
       lang = "en",
       listOnly = false,
     } = filters;
+
+    try {
+      await ensureProductPositionColumn();
+    } catch (error: unknown) {
+      console.warn("⚠️ [PRODUCTS SERVICE] Could not ensure products.position column before listing:", error);
+    }
 
     const bestsellerProductIds: string[] = [];
 
@@ -329,6 +338,7 @@ class ProductsService {
       } catch (err: unknown) {
         const msg = (err as { message?: string })?.message ?? "";
         if (msg.includes("Unknown argument") && msg.includes("position")) {
+          await ensureProductPositionColumn();
           const orderByFallback =
             sort === "price"
               ? ({ variants: { _min: { price: "desc" as const } } } as const)

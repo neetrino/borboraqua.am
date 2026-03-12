@@ -2,7 +2,11 @@ import { db } from "@white-shop/db";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
 import { findOrCreateAttributeValue } from "../utils/variant-generator";
-import { ensureProductAttributesTable, ensureProductVariantAttributesColumn } from "../utils/db-ensure";
+import {
+  ensureProductAttributesTable,
+  ensureProductPositionColumn,
+  ensureProductVariantAttributesColumn,
+} from "../utils/db-ensure";
 import {
   processImageUrl,
   smartSplitUrls,
@@ -898,6 +902,12 @@ class AdminService {
     console.log("📦 [ADMIN SERVICE] getProducts called with filters:", filters);
     const startTime = Date.now();
 
+    try {
+      await ensureProductPositionColumn();
+    } catch (error: unknown) {
+      console.warn("⚠️ [ADMIN SERVICE] Could not ensure products.position column before listing:", error);
+    }
+
     const page = filters.page || 1;
     const limit = filters.limit || 20;
     const skip = (page - 1) * limit;
@@ -1642,6 +1652,10 @@ class AdminService {
         translationsCount: data.translations.length,
       });
 
+      if (data.position !== undefined) {
+        await ensureProductPositionColumn();
+      }
+
       const result = await db.$transaction(async (tx: any) => {
         // Set UTF-8 encoding at the start of transaction to prevent encoding errors
         // This is critical for Armenian and other Unicode characters
@@ -2154,6 +2168,10 @@ class AdminService {
       console.log('🔄 [ADMIN SERVICE] Updating product:', productId, {
         translationsCount: data.translations?.length || 0,
       });
+
+      if (data.position !== undefined) {
+        await ensureProductPositionColumn();
+      }
       
       // Check if product exists
       const existing = await db.product.findUnique({
