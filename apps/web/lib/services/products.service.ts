@@ -311,20 +311,39 @@ class ProductsService {
       }
     } else {
       total = await db.product.count({ where });
-      const orderBy =
+      const orderByWithPosition =
         sort === "price"
           ? ({ variants: { _min: { price: "desc" as const } } } as const)
           : ([
               { position: { sort: "asc" as const, nulls: "last" as const } },
               { createdAt: "desc" as const },
             ] as const);
-      products = await db.product.findMany({
-        where,
-        orderBy,
-        skip,
-        take: limit,
-        include: listInclude,
-      });
+      try {
+        products = await db.product.findMany({
+          where,
+          orderBy: orderByWithPosition,
+          skip,
+          take: limit,
+          include: listInclude,
+        });
+      } catch (err: unknown) {
+        const msg = (err as { message?: string })?.message ?? "";
+        if (msg.includes("Unknown argument") && msg.includes("position")) {
+          const orderByFallback =
+            sort === "price"
+              ? ({ variants: { _min: { price: "desc" as const } } } as const)
+              : ({ createdAt: "desc" as const } as const);
+          products = await db.product.findMany({
+            where,
+            orderBy: orderByFallback,
+            skip,
+            take: limit,
+            include: listInclude,
+          });
+        } else {
+          throw err;
+        }
+      }
     }
 
     // Get discount settings

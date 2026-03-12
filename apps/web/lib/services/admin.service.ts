@@ -997,18 +997,39 @@ class AdminService {
 
       // First, try to get products with a simpler query
       console.log("📦 [ADMIN SERVICE] Fetching products...");
-      products = await db.product.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy,
-        include: {
-          translations: true, // Get all translations, we'll filter by lang later
-          variants: true, // All variants for total stock and price (filter/sort in map)
-          labels: true,
-          categories: { include: { translations: true } },
-        },
-      });
+      try {
+        products = await db.product.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy,
+          include: {
+            translations: true, // Get all translations, we'll filter by lang later
+            variants: true, // All variants for total stock and price (filter/sort in map)
+            labels: true,
+            categories: { include: { translations: true } },
+          },
+        });
+      } catch (orderError: unknown) {
+        const msg = (orderError as { message?: string })?.message ?? "";
+        if (msg.includes("Unknown argument") && msg.includes("position")) {
+          console.warn("⚠️ [ADMIN SERVICE] Product.position not in schema, using createdAt order");
+          products = await db.product.findMany({
+            where,
+            skip,
+            take: limit,
+            orderBy: { createdAt: "desc" },
+            include: {
+              translations: true,
+              variants: true,
+              labels: true,
+              categories: { include: { translations: true } },
+            },
+          });
+        } else {
+          throw orderError;
+        }
+      }
 
       // Fix missing categories relations for products that have categoryIds but no categories relation
       // This is a one-time fix for existing products
@@ -1070,12 +1091,12 @@ class AdminService {
         console.warn('⚠️ [ADMIN SERVICE] product_variants.attributes column not found, attempting to create it...');
         try {
           await ensureProductVariantAttributesColumn();
-          // Retry the query after creating the column
+          // Retry the query after creating the column (use createdAt to avoid position schema issues)
           products = await db.product.findMany({
             where,
             skip,
             take: limit,
-            orderBy,
+            orderBy: { createdAt: "desc" },
             include: {
               translations: true, // Get all translations, we'll filter by lang later
               variants: true, // All variants for total stock and price (filter/sort in map)
