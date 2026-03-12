@@ -63,6 +63,55 @@ class ProductsService {
     return allChildIds;
   }
 
+  private async getProductPositionsMap(productIds: string[]): Promise<Map<string, number | null>> {
+    if (productIds.length === 0) {
+      return new Map();
+    }
+
+    const rows = await db.$queryRaw<Array<{ id: string; position: number | null }>>(
+      Prisma.sql`
+        SELECT "id", "position"
+        FROM "products"
+        WHERE "id" IN (${Prisma.join(productIds)})
+      `
+    );
+
+    return new Map(
+      rows.map((row) => [
+        row.id,
+        Number.isInteger(row.position) && Number(row.position) > 0 ? Number(row.position) : null,
+      ])
+    );
+  }
+
+  private sortProductsByPosition<T extends { id: string; createdAt: Date }>(
+    products: T[],
+    positions: Map<string, number | null>
+  ): T[] {
+    return [...products].sort((a, b) => {
+      const aPosition = positions.get(a.id) ?? null;
+      const bPosition = positions.get(b.id) ?? null;
+
+      if (aPosition === null && bPosition === null) {
+        return b.createdAt.getTime() - a.createdAt.getTime();
+      }
+
+      if (aPosition === null) {
+        return 1;
+      }
+
+      if (bPosition === null) {
+        return -1;
+      }
+
+      if (aPosition !== bPosition) {
+        return aPosition - bPosition;
+      }
+
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    });
+  }
+
   /**
    * Get all products with filters
    */
@@ -339,17 +388,19 @@ class ProductsService {
         const msg = (err as { message?: string })?.message ?? "";
         if (msg.includes("Unknown argument") && msg.includes("position")) {
           await ensureProductPositionColumn();
-          const orderByFallback =
-            sort === "price"
-              ? ({ variants: { _min: { price: "desc" as const } } } as const)
-              : ({ createdAt: "desc" as const } as const);
-          products = await db.product.findMany({
+          const unsortedProducts = await db.product.findMany({
             where,
-            orderBy: orderByFallback,
-            skip,
-            take: limit,
             include: listInclude,
           });
+          const positions = await this.getProductPositionsMap(unsortedProducts.map((product) => product.id));
+          const sortedProducts = this.sortProductsByPosition(unsortedProducts as Array<ProductWithRelations & { createdAt: Date }>, positions);
+
+          products = sortedProducts
+            .slice(skip, skip + limit)
+            .map((product) => ({
+              ...product,
+              position: positions.get(product.id) ?? null,
+            }));
         } else {
           throw err;
         }
