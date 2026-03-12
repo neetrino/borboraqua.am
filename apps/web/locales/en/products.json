@@ -9,7 +9,9 @@
     "sortBy": "Sort by",
     "default": "Default",
     "nameAsc": "Name: A to Z",
-    "nameDesc": "Name: Z to A"
+    "nameDesc": "Name: Z to A",
+    "priceAsc": "Price: Low to High",
+    "priceDesc": "Price: High to Low"
   },
   "filters": {
     "price": {
