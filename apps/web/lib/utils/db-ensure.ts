@@ -16,6 +16,10 @@ let attributesColumnExists = false;
 let orderQuantityColumnsChecked = false;
 let orderQuantityColumnsExist = false;
 
+// Cache for products.position column and index
+let productPositionChecked = false;
+let productPositionExists = false;
+
 /**
  * Ensures the product_attributes table exists in the database
  * This is a fallback mechanism for Vercel deployments where migrations might not run automatically
@@ -456,6 +460,68 @@ export async function ensureProductOrderQuantityColumns(): Promise<boolean> {
     console.error('❌ [DB UTILS] Unexpected error checking products order quantity columns:', errMsg, (error as { code?: string })?.code ?? '');
     orderQuantityColumnsChecked = true;
     orderQuantityColumnsExist = false;
+    return false;
+  }
+}
+
+/**
+ * Ensures the products.position column and index exist in the database
+ * This is a fallback mechanism for deployments where migrations might not run automatically
+ * Uses lazy initialization - checks only once per process
+ *
+ * @returns Promise<boolean> - true if the column exists or was created, false if creation failed
+ */
+export async function ensureProductPositionColumn(): Promise<boolean> {
+  if (productPositionChecked && productPositionExists) {
+    return true;
+  }
+
+  try {
+    await db.$queryRaw`SELECT "position" FROM "products" LIMIT 1`;
+    await db.$executeRaw`
+      CREATE INDEX IF NOT EXISTS "products_position_idx"
+      ON "products"("position")
+    `;
+    productPositionChecked = true;
+    productPositionExists = true;
+    return true;
+  } catch (error: any) {
+    if (
+      error?.code === "P2022" ||
+      error?.message?.includes("does not exist") ||
+      error?.message?.includes("products.position") ||
+      (error?.message?.includes("column") && error?.message?.includes("position"))
+    ) {
+      console.log('🔧 [DB UTILS] products.position column not found, creating...');
+
+      try {
+        await db.$executeRaw`
+          ALTER TABLE "products"
+          ADD COLUMN IF NOT EXISTS "position" INTEGER
+        `;
+
+        await db.$executeRaw`
+          CREATE INDEX IF NOT EXISTS "products_position_idx"
+          ON "products"("position")
+        `;
+
+        console.log('✅ [DB UTILS] products.position column created successfully');
+        productPositionChecked = true;
+        productPositionExists = true;
+        return true;
+      } catch (createError: unknown) {
+        const err = createError instanceof Error ? createError : new Error(String(createError));
+        console.error('❌ [DB UTILS] Failed to create products.position column:', err.message, (createError as { code?: string })?.code ?? '');
+        productPositionChecked = true;
+        productPositionExists = false;
+        return false;
+      }
+    }
+
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('❌ [DB UTILS] Unexpected error checking products.position column:', errMsg, (error as { code?: string })?.code ?? '');
+    productPositionChecked = true;
+    productPositionExists = false;
     return false;
   }
 }
