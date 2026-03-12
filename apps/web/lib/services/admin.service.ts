@@ -2817,19 +2817,27 @@ class AdminService {
         }
 
         // 5. Finally update the product record itself
-        return await tx.product.update({
-          where: { id: productId },
-          data: updateData,
-          include: {
-            translations: true,
-            variants: {
-              include: {
-                options: true,
-              },
+        // Retry without position if client was generated from schema without Product.position (e.g. Vercel before migration)
+        const doUpdate = (data: typeof updateData) =>
+          tx.product.update({
+            where: { id: productId },
+            data,
+            include: {
+              translations: true,
+              variants: { include: { options: true } },
+              labels: true,
             },
-            labels: true,
-          },
-        });
+          });
+        try {
+          return await doUpdate(updateData);
+        } catch (err: unknown) {
+          const msg = (err as { message?: string })?.message ?? '';
+          if (msg.includes('Unknown argument') && msg.includes('position')) {
+            const { position: _p, ...dataWithoutPosition } = updateData;
+            return await doUpdate(dataWithoutPosition);
+          }
+          throw err;
+        }
       }, { timeout: 30_000 });
 
       // 6. Revalidate cache for this product and related pages
