@@ -23,7 +23,7 @@ export default function ProductLoading() {
       </div>
 
       {/* Desktop skeleton */}
-      <div className="hidden lg:grid lg:grid-cols-[55%_45%] gap-12 items-start">
+      <div className="hidden lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] gap-8 xl:gap-12 items-start">
         {/* Left: image area */}
         <div className="flex flex-row gap-4">
           {/* Thumbnails */}

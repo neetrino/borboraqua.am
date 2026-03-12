@@ -6,6 +6,7 @@ import { FeaturedProductCard, type FeaturedProduct, addToCart } from './icons/gl
 import { useTranslation } from '../lib/i18n-client';
 import { useAuth } from '../lib/auth/AuthContext';
 import { formatPrice, getStoredCurrency, initializeCurrencyRates } from '../lib/currency';
+import { shouldUseCompactLayout } from '../lib/device-layout';
 
 interface Product {
   id: string;
@@ -80,11 +81,11 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     };
   }, []);
 
-  // Detect mobile screen size using matchMedia for accurate responsive detection even with zoom
+  // Detect mobile screen size by viewport to support small desktop screens too.
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 767px)'); // md breakpoint (768px) - tablet is not mobile
     const checkMobile = () => {
-      setIsMobile(mediaQuery.matches);
+      setIsMobile(shouldUseCompactLayout() && mediaQuery.matches);
     };
     
     checkMobile();
@@ -103,10 +104,9 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
     }
   }, []);
 
-  // Detect tablet screen size (768px - 1279px) for shop page - use mobile card on tablet
-  // This covers md (768px) and lg (1024px) breakpoints, but not xl (1280px+)
+  // Tablet layout is allowed up to 1024px, including narrow desktop viewports.
   useEffect(() => {
-    const tabletQuery = window.matchMedia('(min-width: 768px) and (max-width: 1279px)');
+    const tabletQuery = window.matchMedia('(min-width: 768px) and (max-width: 1024px)');
     const checkTablet = () => {
       setIsTablet(tabletQuery.matches);
     };

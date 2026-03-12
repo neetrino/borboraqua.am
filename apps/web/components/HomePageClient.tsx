@@ -7,6 +7,7 @@ import { formatPrice, getStoredCurrency, setStoredCurrency, initializeCurrencyRa
 import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } from '../lib/language';
 import { useAuth } from '../lib/auth/AuthContext';
 import { useTranslation } from '../lib/i18n-client';
+import { shouldUseCompactLayout } from '../lib/device-layout';
 
 import { useInstantSearch } from '../hooks/useInstantSearch';
 import { SearchDropdown } from './SearchDropdown';
@@ -157,24 +158,21 @@ export function HomePageClient({
   const languageMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // State to track if device is desktop (based on screen width, not viewport - zoom-independent)
-  const [isDesktopScreen, setIsDesktopScreen] = useState(false);
+  // Mobile/tablet layout runs on compact viewport widths (<= 1024px).
+  const [isTouchPhoneOrTabletLayout, setIsTouchPhoneOrTabletLayout] = useState(false);
 
-  // Check if screen is desktop size (zoom-independent check)
+  // Re-check on resize/orientation for foldables/tablets.
   useEffect(() => {
-    const checkDesktopScreen = () => {
-      // Use screen.width instead of window.innerWidth to be zoom-independent
-      // Desktop screens are typically 1280px or wider
-      setIsDesktopScreen(typeof window !== 'undefined' && window.screen.width >= 1280);
+    const checkTouchLayout = () => {
+      setIsTouchPhoneOrTabletLayout(shouldUseCompactLayout());
     };
-    
-    checkDesktopScreen();
-    // Listen to orientation changes and window resize (but use screen.width which doesn't change with zoom)
-    window.addEventListener('resize', checkDesktopScreen);
-    window.addEventListener('orientationchange', checkDesktopScreen);
+
+    checkTouchLayout();
+    window.addEventListener('resize', checkTouchLayout);
+    window.addEventListener('orientationchange', checkTouchLayout);
     return () => {
-      window.removeEventListener('resize', checkDesktopScreen);
-      window.removeEventListener('orientationchange', checkDesktopScreen);
+      window.removeEventListener('resize', checkTouchLayout);
+      window.removeEventListener('orientationchange', checkTouchLayout);
     };
   }, []);
 
@@ -265,7 +263,7 @@ export function HomePageClient({
       if (languageMenuRef.current && !languageMenuRef.current.contains(event.target as Node)) {
         setShowLanguageMenu(false);
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node) && !(event.target as HTMLElement).closest?.('[data-user-menu-dropdown]')) {
         setShowUserMenu(false);
       }
       // Mobile menu closes when clicking on overlay (handled in JSX)
@@ -399,14 +397,12 @@ export function HomePageClient({
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      // Move to previous mode (2 products back for mobile, 3 for desktop)
-      // Use matchMedia for accurate responsive detection even with zoom
-      const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches;
-      const step = isMobile ? 4 : 3;
+      // Move to previous mode (4 products for touch mobile/tablet, 3 for desktop/laptop).
+      const step = isTouchPhoneOrTabletLayout ? 4 : 3;
       const newIndex = prevIndex - step;
       // If we go below 0, loop to the last valid index
       if (newIndex < 0) {
-        const maxIndex = isMobile 
+        const maxIndex = isTouchPhoneOrTabletLayout
           ? Math.max(0, Math.floor((featuredProducts.length - 4) / 4) * 4) 
           : Math.max(0, Math.floor((featuredProducts.length - 3) / 3) * 3);
         return maxIndex;
@@ -446,13 +442,11 @@ export function HomePageClient({
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      // Move to next mode (4 products forward for mobile, 3 for desktop)
-      // Use matchMedia for accurate responsive detection even with zoom
-      const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches;
-      const step = isMobile ? 4 : 3;
+      // Move to next mode (4 products for touch mobile/tablet, 3 for desktop/laptop).
+      const step = isTouchPhoneOrTabletLayout ? 4 : 3;
       const newIndex = prevIndex + step;
       // If we exceed the max, loop back to start (0)
-      const maxIndex = isMobile 
+      const maxIndex = isTouchPhoneOrTabletLayout
         ? Math.max(0, Math.floor((featuredProducts.length - 4) / 4) * 4) 
         : Math.max(0, Math.floor((featuredProducts.length - 3) / 3) * 3);
       if (newIndex > maxIndex) {
@@ -510,8 +504,8 @@ export function HomePageClient({
 
   return (
     <div className="w-full bg-white overflow-x-hidden">
-      {/* Mobile / Tablet Version - Visible up to xl, but hidden on desktop screens (zoom-independent) */}
-      <div className={`${isDesktopScreen ? 'hidden' : 'xl:hidden'} home-mobile-trusted-by-root bg-white relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden max-w-full`}>
+      {/* Mobile / Tablet Version - render only on touch phone/tablet devices */}
+      <div className={`${isTouchPhoneOrTabletLayout ? 'block' : 'hidden'} home-mobile-trusted-by-root bg-white relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden max-w-full`}>
         {/* Mobile Header (hidden when menu/search popups are open) - same background as TopHeaderBar */}
         {!showMobileMenu && !showSearchModal && (
         <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-3 pt-3 pb-1 max-w-full border-b border-black/5 mobile-header-bg">
@@ -625,7 +619,7 @@ export function HomePageClient({
 
         {/* Mobile Menu Overlay */}
         {showMobileMenu && (
-          <div className={`fixed inset-0 bg-gradient-to-b from-[#62b3e8] to-[rgba(11, 55, 168, 0.75)] backdrop-blur-sm z-[100] ${isDesktopScreen ? 'hidden' : 'xl:hidden'} flex items-center justify-center`} onClick={() => setShowMobileMenu(false)}>
+          <div className={`fixed inset-0 bg-gradient-to-b from-[#62b3e8] to-[rgba(11, 55, 168, 0.75)] backdrop-blur-sm z-[100] ${isTouchPhoneOrTabletLayout ? 'flex' : 'hidden'} items-center justify-center`} onClick={() => setShowMobileMenu(false)}>
             <div 
               className="relative rounded-2xl border shadow-2xl w-[280px] max-w-[90%] p-8 animate-in fade-in zoom-in-95 duration-300"
               style={{
@@ -1233,10 +1227,10 @@ export function HomePageClient({
         {/* Mobile Footer - Removed from all pages */}
       </div>
 
-      {/* Desktop Version - Only for extra large screens (zoom-independent) */}
+      {/* Desktop Version - always for desktop/laptop devices */}
       <div
         ref={containerRef}
-        className={`${isDesktopScreen ? 'block' : 'hidden xl:block'} bg-white relative w-full mx-auto h-[6000px] home-page-container overflow-x-hidden overflow-y-hidden`}
+        className={`${isTouchPhoneOrTabletLayout ? 'hidden' : 'block'} bg-white relative w-full mx-auto h-[6000px] home-page-container overflow-x-hidden overflow-y-hidden`}
       >
       <Header
         router={router}
@@ -1274,7 +1268,7 @@ export function HomePageClient({
       
 
       {/* Hero Section - Main Content */}
-      <div className="absolute content-stretch flex items-end justify-center left-[calc(50%+0.5px)] px-[20px] md:px-[16px] sm:px-[12px] top-[480px] lg:top-[480px] md:top-[400px] sm:top-[280px] translate-x-[-50%] w-[800px] lg:w-[800px] md:w-[90%] sm:w-[95%]">
+      <div className="absolute content-stretch flex items-end justify-center left-[calc(50%+0.5px)] px-[20px] md:px-[16px] sm:px-[12px] top-[480px] lg:top-[520px] xl:top-[480px] md:top-[400px] sm:top-[280px] translate-x-[-50%] w-[800px] lg:w-[800px] md:w-[90%] sm:w-[95%]">
         <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-center justify-center relative shrink-0 w-[800px] lg:w-[800px] md:w-full sm:w-full">
           {/* Experience Purity Label */}
           <div className="content-stretch flex gap-[10px] lg:gap-[10px] md:gap-[10px] sm:gap-[8px] items-center relative shrink-0 w-full">
@@ -1501,7 +1495,7 @@ export function HomePageClient({
           {/* Blue Underline */}
         </div>
       </div>
-      {/* Navigation Arrows - Only show if we have more than 3 products - Outside overflow-hidden container */}
+      {/* Navigation Arrows - Only show if we have more than 3 products; max() prevents cutoff at 1152px, gap widens on large screens */}
       {featuredProducts.length > 3 && (
         <>
           {/* Next Button - Left side (աջ տանի) */}
@@ -1514,7 +1508,7 @@ export function HomePageClient({
               }
               handleNextProducts(e);
             }}
-            className="left-[calc(50%-580px)] lg:left-[calc(50%-580px)] md:left-[calc(50%-500px)] sm:left-[calc(50%-400px)] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1090px]"
+            className="left-[max(8px,calc(50%-580px))] sm:left-[max(8px,calc(50%-400px))] md:left-[max(8px,calc(50%-500px))] lg:left-[max(8px,calc(50%-580px))] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1090px]"
             ariaLabel={t('home.trustedBy.nextProducts')}
           />
 
@@ -1528,7 +1522,7 @@ export function HomePageClient({
               }
               handlePreviousProducts(e);
             }}
-            className="right-[calc(50%-580px)] lg:right-[calc(50%-580px)] md:right-[calc(50%-500px)] sm:right-[calc(50%-400px)] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1110px]"
+            className="right-[max(8px,calc(50%-580px))] sm:right-[max(8px,calc(50%-400px))] md:right-[max(8px,calc(50%-500px))] lg:right-[max(8px,calc(50%-580px))] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1110px]"
             ariaLabel={t('home.trustedBy.previousProducts')}
           />
         </>
@@ -1637,18 +1631,18 @@ export function HomePageClient({
             </div>
           </div>
         </div>
-        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[64%_13.33%_19%_13.6%] lg:inset-[64%_13.33%_19%_13.6%] md:inset-[64%_13.33%_19%_13.6%] sm:inset-[58%_13.33%_5%_13.6%] justify-center leading-[18px] lg:leading-[22px] md:leading-[20px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[11px] text-center z-[10]">
+        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[64%_13.33%_19%_13.6%] lg:inset-[60%_11%_12%_11%] md:inset-[64%_13.33%_19%_13.6%] sm:inset-[58%_13.33%_5%_13.6%] justify-center leading-[18px] lg:leading-[17px] md:leading-[20px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[12px] md:text-[14px] sm:text-[11px] text-center z-[10]">
           <p className="mb-0">{t('home.whyChooseUs.richInMinerals.description')}</p>
           <p className="mb-0">{t('home.whyChooseUs.richInMinerals.descriptionLine1')}</p>
           <p className="mb-0">{t('home.whyChooseUs.richInMinerals.descriptionLine2')}</p>
         </div>
-        <div className={`absolute flex flex-col font-['Montserrat',sans-serif] font-bold ${lang === 'ru' ? 'inset-[34%_12%_56%_12%] lg:inset-[38%_12%_52%_12%]' : 'inset-[38%_12%_52%_12%] lg:inset-[42%_12%_48%_12%]'} md:inset-[38%_12%_52%_12%] sm:inset-[36%_12%_54%_12%] justify-center leading-[0] text-[#0f172a] text-[13px] lg:text-[16px] md:text-[16px] sm:text-[13px] text-center uppercase whitespace-normal`}>
+        <div className={`absolute flex flex-col font-['Montserrat',sans-serif] font-bold ${lang === 'ru' ? 'inset-[34%_12%_56%_12%] lg:inset-[34%_10%_56%_10%]' : 'inset-[38%_12%_52%_12%] lg:inset-[36%_10%_54%_10%]'} md:inset-[38%_12%_52%_12%] sm:inset-[36%_12%_54%_12%] justify-center leading-[0] text-[#0f172a] text-[13px] lg:text-[14px] md:text-[16px] sm:text-[13px] text-center uppercase whitespace-normal`}>
           <p className="leading-[18px] lg:leading-[22px] md:leading-[22px] sm:leading-[18px]">{t('home.whyChooseUs.richInMinerals.title')}</p>
         </div>
       </div>
 
-      {/* Card 2: Non-Carbonated */}
-      <div className="absolute h-[200px] lg:h-[250px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[-700px] md:translate-x-[-50%] sm:translate-x-[-50%] top-[4580px] lg:top-[4580px] md:top-[4000px] sm:top-[3280px] w-[272px] lg:w-[340px] md:w-[45%] sm:w-[90%] z-[100]">
+      {/* Card 2: Non-Carbonated - translate scales so layout fits at 1152px */}
+      <div className="absolute h-[200px] lg:h-[250px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[max(-540px,-47vw)] md:translate-x-[-50%] sm:translate-x-[-50%] top-[4580px] lg:top-[4580px] md:top-[4000px] sm:top-[3280px] w-[272px] lg:w-[340px] md:w-[45%] sm:w-[90%] z-[100]">
         <div className="absolute bg-white inset-[13.97%_0_0_0] rounded-[30px] lg:rounded-[37px]" />
         <div className="absolute aspect-[100/100] left-[37.07%] overflow-clip right-[32%] lg:left-[36%] lg:right-[36%] top-0">
           <div className="absolute inset-[10.22%_10.23%_61.04%_62.5%]">
@@ -1665,18 +1659,18 @@ export function HomePageClient({
             <img alt="Top" className="block max-w-none size-full" src={img9} loading="lazy" />
           </div>
         </div>
-        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[63.5%_13.33%_22%_13.6%] lg:inset-[63.5%_13.33%_22%_13.6%] md:inset-[63.5%_13.33%_22%_13.6%] sm:inset-[57%_13.33%_7%_13.6%] justify-center leading-[14px] lg:leading-[18px] md:leading-[18px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[11px] text-center z-[10]">
+        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[63.5%_13.33%_22%_13.6%] lg:inset-[60%_11%_12%_11%] md:inset-[63.5%_13.33%_22%_13.6%] sm:inset-[57%_13.33%_7%_13.6%] justify-center leading-[14px] lg:leading-[16px] md:leading-[18px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[12px] md:text-[14px] sm:text-[11px] text-center z-[10]">
           <p className="mb-0">{t('home.whyChooseUs.nonCarbonated.description')}</p>
           <p className="mb-0">{t('home.whyChooseUs.nonCarbonated.descriptionLine1')}</p>
           <p className="mb-0">{t('home.whyChooseUs.nonCarbonated.descriptionLine2')}</p>
         </div>
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[35%_12%_55%_12%] lg:inset-[39%_12%_51%_12%] md:inset-[35%_12%_55%_12%] sm:inset-[33%_12%_57%_12%] justify-center leading-[0] text-[#0f172a] text-[13px] lg:text-[16px] md:text-[16px] sm:text-[13px] text-center uppercase whitespace-normal">
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[35%_12%_55%_12%] lg:inset-[34%_10%_56%_10%] md:inset-[35%_12%_55%_12%] sm:inset-[33%_12%_57%_12%] justify-center leading-[0] text-[#0f172a] text-[13px] lg:text-[14px] md:text-[16px] sm:text-[13px] text-center uppercase whitespace-normal">
           <p className="leading-[18px] lg:leading-[22px] md:leading-[22px] sm:leading-[18px]">{t('home.whyChooseUs.nonCarbonated.title')}</p>
         </div>
       </div>
 
-      {/* Card 3: No Artificial Ingredients */}
-      <div className="absolute h-[204px] lg:h-[255px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[330px] md:translate-x-[-50%] sm:translate-x-[-50%] top-[4430px] lg:top-[4430px] md:top-[4300px] sm:top-[3560px] w-[272px] lg:w-[340px] md:w-[45%] sm:w-[90%] z-[100]">
+      {/* Card 3: No Artificial Ingredients - translate scales so no right cutoff at 1152px */}
+      <div className="absolute h-[204px] lg:h-[255px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[min(260px,20vw)] md:translate-x-[-50%] sm:translate-x-[-50%] top-[4430px] lg:top-[4430px] md:top-[4300px] sm:top-[3560px] w-[272px] lg:w-[340px] md:w-[45%] sm:w-[90%] z-[100]">
         <div className="absolute bg-white inset-[15.83%_0_0_0] rounded-[30px] lg:rounded-[37px]" />
         <div className="absolute aspect-[100/100] left-[34.53%] right-[34.53%] lg:left-[38%] lg:right-[38%] top-0">
           <div className="absolute inset-[5.88%_0_26.15%_50.33%] overflow-hidden">
@@ -1691,12 +1685,12 @@ export function HomePageClient({
             <img alt="Top" className="block max-w-none size-full" src={img12} loading="lazy" />
           </div>
         </div>
-        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[63%_10.4%_20%_10.67%] lg:inset-[63%_10.4%_20%_10.67%] md:inset-[63%_10.4%_20%_10.67%] sm:inset-[57%_10.4%_8%_10.67%] justify-center leading-[18px] lg:leading-[22px] md:leading-[20px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[11px] text-center z-[10]">
+        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[63%_10.4%_20%_10.67%] lg:inset-[60%_10%_12%_10%] md:inset-[63%_10.4%_20%_10.67%] sm:inset-[57%_10.4%_8%_10.67%] justify-center leading-[18px] lg:leading-[16px] md:leading-[20px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[12px] md:text-[14px] sm:text-[11px] text-center z-[10]">
           <p className="mb-0">{t('home.whyChooseUs.noArtificialIngredients.description')}</p>
           <p className="mb-0">{t('home.whyChooseUs.noArtificialIngredients.descriptionLine1')}</p>
           <p className="mb-0">{t('home.whyChooseUs.noArtificialIngredients.descriptionLine2')}</p>
         </div>
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[33%_5%_57%_5%] lg:inset-[37%_5%_53%_5%] md:inset-[33%_5%_57%_5%] sm:inset-[31%_5%_59%_5%] justify-center leading-[0] text-[#0f172a] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center uppercase whitespace-nowrap overflow-hidden">
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[33%_5%_57%_5%] lg:inset-[34%_7%_56%_7%] md:inset-[33%_5%_57%_5%] sm:inset-[31%_5%_59%_5%] justify-center leading-[0] text-[#0f172a] text-[12px] lg:text-[13px] md:text-[14px] sm:text-[12px] text-center uppercase whitespace-normal overflow-hidden">
           <p className="leading-[16px] lg:leading-[20px] md:leading-[20px] sm:leading-[16px]">{t('home.whyChooseUs.noArtificialIngredients.title')}</p>
         </div>
       </div>
@@ -1806,8 +1800,8 @@ export function HomePageClient({
             </div>
           </div>
 
-          {/* Navigation Arrows */}
-          <div className="absolute content-stretch flex items-center justify-between left-[107px] right-[107px] lg:left-[134px] lg:right-[134px] top-[calc(50%+40px)] lg:top-[calc(50%+50.25px)] translate-y-[-50%] z-[100]">
+          {/* Navigation Arrows - inset shrinks on larger screens so gap between arrows widens (was: narrows) */}
+          <div className="absolute content-stretch flex items-center justify-between left-[clamp(80px,134px-5vw,134px)] right-[clamp(80px,134px-5vw,134px)] top-[calc(50%+40px)] lg:top-[calc(50%+50.25px)] translate-y-[-50%] z-[100]">
             {/* Next Button - Left side (աջ տանի) */}
             <FeaturedProductsNavigationArrow
               direction="next"

@@ -1531,7 +1531,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Mobile: Image first, then info */}
-      <div className="flex flex-col lg:grid lg:grid-cols-[55%_45%] gap-12 items-start">
+      <div className="flex flex-col lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] gap-8 xl:gap-12 items-start">
         {/* Mobile: Image section - shown first */}
         <div className="w-full lg:hidden mb-6">
           <div
@@ -1823,7 +1823,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
         </div>
 
         {/* Mobile: Info section - shown second */}
-        <div className="flex flex-col h-full w-full lg:w-auto">
+        <div className="flex flex-col h-full w-full min-w-0 lg:w-auto">
           <div className="flex-1">
             {/* Mobile: Brand name on top */}
             {product.brand && <p className="text-sm text-gray-500 mb-2 lg:mb-2">{product.brand.name}</p>}
@@ -2239,14 +2239,14 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
                 </p>
               </div>
             )}
-            <div className="flex items-center gap-3 pt-2 border-t">
+            <div className="flex flex-wrap items-center gap-3 pt-2 border-t">
               {/* Mobile: Quantity selector with glassmorphism style */}
-              <div className="flex items-center border border-white/30 rounded-[72px] overflow-clip bg-white/10 backdrop-blur-md lg:bg-white lg:backdrop-blur-none">
+              <div className="flex shrink-0 items-center border border-white/30 rounded-[72px] overflow-clip bg-white/10 backdrop-blur-md lg:bg-white lg:backdrop-blur-none">
                 <button onClick={() => adjustQuantity(-1)} className="w-12 h-12 flex items-center justify-center text-gray-900 hover:bg-white/20 lg:hover:bg-gray-100">-</button>
                 <div className="w-12 text-center font-bold text-gray-900">{quantity}</div>
                 <button onClick={() => adjustQuantity(1)} className="w-12 h-12 flex items-center justify-center text-gray-900 hover:bg-white/20 lg:hover:bg-gray-100">+</button>
               </div>
-              <button disabled={!canAddToCart || isAddingToCart} className="flex-1 h-[48px] bg-[#00d1ff] text-white rounded-[34px] uppercase font-bold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-[#00b8e6] transition-colors"
+              <button disabled={!canAddToCart || isAddingToCart} className="flex-1 min-w-0 h-[48px] px-4 bg-[#00d1ff] text-white rounded-[34px] uppercase font-bold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-[#00b8e6] transition-colors"
                 onClick={async () => {
                   if (!canAddToCart || !product || !currentVariant) return;
                   setIsAddingToCart(true);
