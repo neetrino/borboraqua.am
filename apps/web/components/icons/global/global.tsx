@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -187,6 +188,8 @@ export function Header({
   const [language, setLanguage] = useState<LanguageCode>('hy');
   const [currency, setCurrency] = useState<CurrencyCode>('AMD');
   const [showLangCurrencyMenu, setShowLangCurrencyMenu] = useState(false);
+  const [langCurrencyMenuRect, setLangCurrencyMenuRect] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [userMenuRect, setUserMenuRect] = useState<{ top: number; left: number; width: number } | null>(null);
   const langCurrencyMenuRef = useRef<HTMLDivElement | null>(null);
   const imgLanguageIcon = "/assets/home/Vector.svg";
 
@@ -236,11 +239,33 @@ export function Header({
     };
   }, []);
 
+  // Measure trigger position when opening (for portal dropdown)
+  useEffect(() => {
+    if (!showLangCurrencyMenu || !langCurrencyMenuRef.current) {
+      setLangCurrencyMenuRect(null);
+      return;
+    }
+    const rect = langCurrencyMenuRef.current.getBoundingClientRect();
+    setLangCurrencyMenuRect({ top: rect.bottom, left: rect.left, width: rect.width });
+  }, [showLangCurrencyMenu]);
+
+  useEffect(() => {
+    if (!showUserMenu || !userMenuRef?.current) {
+      setUserMenuRect(null);
+      return;
+    }
+    const rect = userMenuRef.current.getBoundingClientRect();
+    setUserMenuRect({ top: rect.bottom, left: rect.left, width: rect.width });
+  }, [showUserMenu, userMenuRef]);
+
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (langCurrencyMenuRef.current && !langCurrencyMenuRef.current.contains(event.target as Node)) {
-        setShowLangCurrencyMenu(false);
+        const target = event.target as HTMLElement;
+        if (!target.closest('[data-lang-currency-dropdown]')) {
+          setShowLangCurrencyMenu(false);
+        }
       }
     };
 
@@ -306,18 +331,18 @@ export function Header({
   return (
     <>
       {/* Header Section - Navigation Bar */}
-      <div data-hide-on-product-zoom className={`fixed ${bgClass} backdrop-blur-[15px] content-stretch flex flex-col h-[66px] md:h-[60px] sm:h-[52px] items-center justify-center left-1/2 px-[28px] md:px-[22px] sm:px-[14px] rounded-[64px] md:rounded-[56px] sm:rounded-[40px] ${topPosition} translate-x-[-50%] w-[1200px] xl:w-[1200px] lg:w-[1100px] md:w-[90%] sm:w-[95%] z-[150] border ${borderClass} ${shadowClass}`}>
-        <div className="content-stretch flex gap-[70px] lg:gap-[60px] md:gap-[45px] sm:gap-[12px] h-[42px] md:h-[38px] sm:h-[34px] items-center justify-center relative shrink-0">
+      <div data-hide-on-product-zoom className={`fixed ${bgClass} backdrop-blur-[15px] flex flex-col h-[70px] md:h-[64px] lg:h-[62px] xl:h-[58px] sm:h-[56px] items-center justify-center left-1/2 px-[28px] md:px-[22px] lg:px-[20px] xl:px-[18px] sm:px-[14px] rounded-[64px] md:rounded-[56px] lg:rounded-[54px] xl:rounded-[50px] sm:rounded-[40px] ${topPosition} translate-x-[-50%] w-[min(1200px,calc(100vw-24px))] lg:w-[min(1100px,calc(100vw-24px))] md:w-[90%] sm:w-[95%] min-w-0 max-w-[calc(100vw-24px)] overflow-hidden z-[150] border ${borderClass} ${shadowClass}`}>
+        <div className="flex w-full min-w-0 max-w-full gap-[12px] sm:gap-[12px] md:gap-[45px] lg:gap-[clamp(38px,4vw,56px)] h-[46px] md:h-[42px] lg:h-[42px] xl:h-[40px] sm:h-[38px] items-center justify-center shrink-0">
           {/* Logo */}
           <div
             onClick={() => router.push('/')}
-            className="h-[31px] md:h-[26px] sm:h-[22px] relative shrink-0 w-[101px] md:w-[85px] sm:w-[72px] cursor-pointer"
+            className="h-[31px] md:h-[26px] lg:h-[29px] xl:h-[27px] sm:h-[22px] relative shrink-0 w-[101px] md:w-[85px] lg:w-[96px] xl:w-[92px] sm:w-[72px] cursor-pointer"
           >
             <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={imgBorborAguaLogoColorB2024Colored1} />
           </div>
 
           {/* Navigation Menu - active item highlighted */}
-          <div className={`content-stretch flex font-['Inter:Bold',sans-serif] font-bold gap-[50px] lg:gap-[50px] md:gap-[24px] sm:gap-[12px] items-end justify-center leading-[0] not-italic relative shrink-0 text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-[#151e21] uppercase whitespace-nowrap sm:hidden md:flex`}>
+          <div className={`flex min-w-0 flex-1 justify-center font-['Inter:Bold',sans-serif] font-bold gap-[12px] md:gap-[24px] lg:gap-[clamp(24px,2.8vw,40px)] items-end leading-[0] not-italic shrink-0 text-[14px] xl:text-[13px] lg:text-[12px] md:text-[14px] sm:text-[12px] text-[#151e21] uppercase whitespace-nowrap sm:hidden md:flex`}>
             <div
               onClick={() => router.push('/')}
               className={`flex flex-col justify-center relative shrink-0 cursor-pointer border-b-2 transition-colors ${pathname === '/' ? 'border-[#1ac0fd] text-[#1ac0fd]' : 'border-transparent hover:text-[#1ac0fd]/80'}`}
@@ -357,7 +382,7 @@ export function Header({
           </div>
 
           {/* Header Icons - Separate Vector Groups */}
-          <div className="content-stretch flex gap-[20px] lg:gap-[18px] md:gap-[16px] sm:gap-[10px] items-center justify-center relative shrink-0 ml-[20px] md:ml-[16px] sm:ml-[12px]">
+             <div className="flex shrink-0 gap-[14px] md:gap-[16px] lg:gap-[18px] items-center justify-center ml-[16px] md:ml-[18px] lg:ml-[20px]">
             {/* Language & Currency Selector */}
             <div className="relative" ref={langCurrencyMenuRef}>
               <button
@@ -398,45 +423,50 @@ export function Header({
                 </svg>
               </button>
 
-              {/* Dropdown Menu */}
-              {showLangCurrencyMenu && (
-                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                  {/* Language Section */}
-                  <div className="px-3 py-2 border-b border-gray-200">
-                    <div className="text-xs font-semibold text-blue-600 uppercase mb-2">Language</div>
-                    {Object.entries(LANGUAGES).map(([code, lang]) => (
-                      <button
-                        key={code}
-                        onClick={() => handleLanguageChange(code as LanguageCode)}
-                        className={`w-full text-left px-3 py-2 text-sm rounded transition-all duration-150 ${
-                          language === code
-                            ? 'bg-gray-100 text-gray-900 font-semibold'
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {lang.name}
-                      </button>
-                    ))}
-                  </div>
-                  {/* Currency Section */}
-                  <div className="px-3 py-2">
-                    <div className="text-xs font-semibold text-blue-600 uppercase mb-2">Currency</div>
-                    {(['USD', 'AMD', 'EUR', 'RUB', 'GEL'] as CurrencyCode[]).map((code) => (
-                      <button
-                        key={code}
-                        onClick={() => handleCurrencyChange(code)}
-                        className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
-                          currency === code
-                            ? 'bg-gray-100 text-gray-900 font-semibold cursor-default'
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {code}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Dropdown Menu - rendered in portal so it is not clipped by header overflow and has correct z-index */}
+              {showLangCurrencyMenu && langCurrencyMenuRect && typeof document !== 'undefined' &&
+                createPortal(
+                  <div
+                    data-lang-currency-dropdown
+                    className="fixed w-48 bg-white rounded-lg shadow-lg z-[10002] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                    style={{ top: langCurrencyMenuRect.top + 8, left: langCurrencyMenuRect.left }}
+                  >
+                    <div className="px-3 py-2 border-b border-gray-200">
+                      <div className="text-xs font-semibold text-blue-600 uppercase mb-2">Language</div>
+                      {Object.entries(LANGUAGES).map(([code, lang]) => (
+                        <button
+                          key={code}
+                          onClick={() => handleLanguageChange(code as LanguageCode)}
+                          className={`w-full text-left px-3 py-2 text-sm rounded transition-all duration-150 ${
+                            language === code
+                              ? 'bg-gray-100 text-gray-900 font-semibold'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {lang.name}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="px-3 py-2">
+                      <div className="text-xs font-semibold text-blue-600 uppercase mb-2">Currency</div>
+                      {(['USD', 'AMD', 'EUR', 'RUB', 'GEL'] as CurrencyCode[]).map((code) => (
+                        <button
+                          key={code}
+                          onClick={() => handleCurrencyChange(code)}
+                          className={`w-full text-left px-3 py-2 text-sm rounded transition-colors ${
+                            currency === code
+                              ? 'bg-gray-100 text-gray-900 font-semibold cursor-default'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {code}
+                        </button>
+                      ))}
+                    </div>
+                  </div>,
+                  document.body
+                )
+              }
             </div>
 
             {/* Search Icon */}
@@ -455,7 +485,7 @@ export function Header({
               <HeaderCartIcon size={20} className="brightness-0" />
               {/* Cart Count Badge */}
               {cartCount > 0 && (
-                <span className="absolute -top-5 -right-4 bg-[#00d1ff] text-white text-[10px] font-bold rounded-full min-w-[16px] h-5 px-1.5 flex items-center justify-center border-2 border-white">
+                <span className="absolute -top-5 -right-4 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-5 px-1.5 flex items-center justify-center border-2 border-white">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
@@ -474,39 +504,46 @@ export function Header({
                     className="w-full h-full brightness-0"
                   />
                 </div>
-                {showUserMenu && (
-                  <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                    <button
-                      onClick={() => {
-                        router.push('/profile');
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-150"
+                {showUserMenu && userMenuRect && typeof document !== 'undefined' &&
+                  createPortal(
+                    <div
+                      data-user-menu-dropdown
+                      className="fixed w-48 bg-white rounded-lg shadow-lg z-[10002] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200"
+                      style={{ top: userMenuRect.top + 8, left: userMenuRect.left + userMenuRect.width - 192 }}
                     >
-                      {t('common.navigation.profile')}
-                    </button>
-                    {isAdmin && (
                       <button
                         onClick={() => {
-                          router.push('/admin');
+                          router.push('/profile');
                           setShowUserMenu(false);
                         }}
                         className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-150"
                       >
-                        {t('common.navigation.adminPanel')}
+                        {t('common.navigation.profile')}
                       </button>
-                    )}
-                    <button
-                      onClick={() => {
-                        handleLogout();
-                        setShowUserMenu(false);
-                      }}
-                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-150"
-                    >
-                      {t('common.navigation.logout')}
-                    </button>
-                  </div>
-                )}
+                      {isAdmin && (
+                        <button
+                          onClick={() => {
+                            router.push('/admin');
+                            setShowUserMenu(false);
+                          }}
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-all duration-150"
+                        >
+                          {t('common.navigation.adminPanel')}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-150"
+                      >
+                        {t('common.navigation.logout')}
+                      </button>
+                    </div>,
+                    document.body
+                  )
+                }
               </div>
             ) : (
               <div
@@ -582,6 +619,15 @@ function StoreDownloadBadge({
   );
 }
 
+function StoreDownloadBadges({ className = '' }: { className?: string }) {
+  return (
+    <div className={`flex items-center gap-1.5 ${className}`}>
+      <StoreDownloadBadge store="google-play" href={ANDROID_APP_URL} />
+      <StoreDownloadBadge store="app-store" href={IOS_APP_URL} />
+    </div>
+  );
+}
+
 export function Footer({ router, t, isHomePage = false }: FooterProps) {
   return (
     <>
@@ -607,10 +653,11 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
         </div>
         {/* Dark overlay for better text readability */}
         <div className="absolute inset-0" />
-        <div className="absolute h-[400px] lg:h-[400px] md:h-[400px] sm:h-[350px] left-[calc(50%+0.5px)] top-[200px] lg:top-[200px] md:top-[180px] sm:top-[120px] translate-x-[-50%] w-[1080px] lg:w-[1080px] md:w-[90%] sm:w-[95%] relative z-10 px-[20px] lg:px-[20px] md:px-[40px] sm:px-[20px]">
-          <div className="absolute content-stretch flex gap-[100px] lg:gap-[100px] md:gap-[80px] sm:gap-[50px] items-start justify-start left-[calc(50%-16px)] top-[100px] translate-x-[-50%] flex-col md:flex-row sm:flex-col">
-            {/* Column 1: Logo + Description */}
-            <div className="flex flex-col h-[280px] lg:h-[280px] md:h-[280px] sm:h-auto relative shrink-0 w-[300px] lg:w-[300px] md:w-[45%] sm:w-full gap-[12px] lg:gap-[12px] md:gap-[14px] sm:gap-[14px]">
+        {/* Content width grows with viewport then approaches max (gets closer on large screens) */}
+        <div className="absolute h-[400px] lg:h-[400px] md:h-[400px] sm:h-[350px] left-1/2 top-[200px] lg:top-[200px] md:top-[180px] sm:top-[120px] -translate-x-1/2 w-[95%] md:w-[90%] max-w-[1080px] relative z-10 px-[20px] lg:px-[20px] md:px-[40px] sm:px-[20px]">
+          <div className="absolute content-stretch flex gap-[clamp(50px,7vw,100px)] items-start justify-start left-[calc(50%+32px)] lg:left-[calc(50%+36px)] top-[100px] translate-x-[-50%] flex-col md:flex-row sm:flex-col">
+            {/* Column 1: Logo + Description + Store badges — մի քիչ ձախ, գծի հետ մի ուղղությամբ */}
+            <div className="flex flex-col h-[280px] lg:h-[280px] md:h-[280px] sm:h-auto relative shrink-0 w-[300px] lg:w-[300px] md:w-[45%] sm:w-full gap-[clamp(12px,1.2vw,14px)]">
               <div className="content-stretch flex h-[14px] items-center left-0 top-0 w-[300px] lg:w-[300px] md:w-full sm:w-full">
                 <div className="h-[30px] lg:h-[30px] md:h-[30px] sm:h-[26px] relative shrink-0 w-[100px] lg:w-[100px] md:w-[95px] sm:w-[80px]">
                   <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={imgBorborAguaLogoColorB2024Colored1} />
@@ -623,18 +670,22 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                   </p>
                 </div>
               </div>
+              {/* Store badges — ներքևի հատված «Նյու Ակվա» նկարագրության */}
+              <div className="mt-4">
+                <StoreDownloadBadges />
+              </div>
             </div>
 
             {/* Column 2-4: Site Map, Policies, Contact */}
-            <div className="content-stretch flex gap-[185px] lg:gap-[185px] md:gap-[80px] sm:gap-[40px] items-start relative shrink-0 flex-col md:flex-row sm:flex-col">
+            <div className="content-stretch flex gap-[clamp(40px,12vw,185px)] items-start relative shrink-0 flex-col md:flex-row sm:flex-col">
               {/* Column 2: Site Map */}
-              <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-start relative shrink-0 w-[94px] lg:w-[94px] md:w-[45%] sm:w-full">
+              <div className="content-stretch flex flex-col gap-[clamp(16px,1.8vw,20px)] items-start relative shrink-0 w-[94px] lg:w-[94px] md:w-[45%] sm:w-full">
                 <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
                   <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white tracking-[1.3px] lg:tracking-[1.3px] md:tracking-[1.2px] sm:tracking-[1px] uppercase w-full">
                     <p className="leading-[18px] lg:leading-[18px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.siteMap.title')}</p>
                   </div>
                 </div>
-                <div className="content-stretch flex flex-row flex-wrap gap-[16px] lg:gap-[16px] md:gap-[14px] sm:gap-[12px] items-start relative shrink-0 w-full">
+                <div className="content-stretch flex flex-row flex-wrap gap-[clamp(12px,1.2vw,16px)] items-start relative shrink-0 w-full">
                   <div
                     onClick={() => router.push('/about')}
                     className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
@@ -663,13 +714,13 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
               </div>
 
               {/* Column 3: Policies */}
-              <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-start relative shrink-0 w-[140px] lg:w-[140px] md:w-[45%] sm:w-full">
+              <div className="content-stretch flex flex-col gap-[clamp(16px,1.8vw,20px)] items-start relative shrink-0 w-[140px] lg:w-[140px] md:w-[45%] sm:w-full">
                 <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
                   <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white tracking-[1.4px] lg:tracking-[1.4px] md:tracking-[1.4px] sm:tracking-[1.2px] uppercase w-full">
                     <p className="leading-[18px] lg:leading-[18px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.policies.title')}</p>
                   </div>
                 </div>
-                <div className="content-stretch flex flex-row flex-wrap gap-[16px] lg:gap-[16px] md:gap-[14px] sm:gap-[12px] items-start relative shrink-0 w-full">
+                <div className="content-stretch flex flex-row flex-wrap gap-[clamp(12px,1.2vw,16px)] items-start relative shrink-0 w-full">
                   <div
                     onClick={() => router.push('/privacy')}
                     className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words cursor-pointer hover:opacity-80 transition-opacity"
@@ -692,13 +743,13 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
               </div>
 
               {/* Column 4: Contact */}
-              <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-start relative shrink-0 w-[215px] lg:w-[215px] md:w-[45%] sm:w-full">
+              <div className="content-stretch flex flex-col gap-[clamp(16px,1.8vw,20px)] items-start relative shrink-0 w-[215px] lg:w-[215px] md:w-[45%] sm:w-full">
                 <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
                   <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[21px] lg:text-[21px] md:text-[20px] sm:text-[18px] text-white tracking-[1.6px] lg:tracking-[1.6px] md:tracking-[1.5px] sm:tracking-[1.2px] uppercase w-full">
                     <p className="leading-[18px] lg:leading-[18px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.contact.title')}</p>
                 </div>
                 </div>
-                <div className="content-stretch flex flex-row flex-wrap gap-[14px] lg:gap-[14px] md:gap-[12px] sm:gap-[10px] items-start relative shrink-0 w-[215px] lg:w-[215px] md:w-full sm:w-full">
+                <div className="content-stretch flex flex-row flex-wrap gap-[clamp(10px,1vw,14px)] items-start relative shrink-0 w-[215px] lg:w-[215px] md:w-full sm:w-full">
                   <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
                     <p className="font-['Inter',sans-serif] font-normal mb-0">
                       <span className="leading-[24px]">{t('home.footer.contact.office')} </span>
@@ -734,32 +785,26 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
             </div>
           </div>
 
-          {/* Social Media Icons */}
-          <div className="absolute content-stretch flex gap-[14px] lg:gap-[14px] md:gap-[16px] sm:gap-[16px] h-[32px] lg:h-[32px] md:h-[36px] sm:h-[36px] items-center left-[-90px] lg:left-[-90px] md:left-[-120px] sm:left-[-150px] pt-[7px] lg:pt-[7px] md:pt-[8px] sm:pt-[8px] top-[295px] lg:top-[295px] md:top-[332px] sm:top-[332px] w-[300px] lg:w-[300px] md:w-[336px] sm:w-[336px]">
-            <div className="relative shrink-0 size-[28px] lg:size-[28px] md:size-[32px] sm:size-[32px] cursor-pointer hover:opacity-80 transition-opacity">
+          {/* Social Media Icons - left scales with viewport so they don't get cut off on small screens */}
+          <div className="absolute content-stretch flex gap-[clamp(14px,1.2vw,16px)] h-[clamp(32px,3vw,36px)] items-center left-[max(-90px,max(-2.5vw,min(-8vw,0px)))] pt-[clamp(7px,0.6vw,8px)] top-[295px] lg:top-[295px] md:top-[332px] sm:top-[332px] w-[clamp(300px,25vw,336px)]">
+            <div className="relative shrink-0 size-[clamp(28px,2.5vw,32px)] cursor-pointer hover:opacity-80 transition-opacity">
               <img alt="Instagram" className="block max-w-none size-full" src={socialInstagram} onClick={() => window.open('https://www.instagram.com/borbor_aqua/', '_blank')} />
             </div>
-            <div className="relative shrink-0 size-[28px] lg:size-[28px] md:size-[32px] sm:size-[32px] cursor-pointer hover:opacity-80 transition-opacity">
+            <div className="relative shrink-0 size-[clamp(28px,2.5vw,32px)] cursor-pointer hover:opacity-80 transition-opacity">
               <img alt="Facebook" className="block max-w-none size-full" src={socialFacebook} onClick={() => window.open('https://www.facebook.com/borbor.aqua', '_blank')} />
             </div>
-            <div className="relative shrink-0 size-[28px] lg:size-[28px] md:size-[32px] sm:size-[32px] cursor-pointer hover:opacity-80 transition-opacity">
+            <div className="relative shrink-0 size-[clamp(28px,2.5vw,32px)] cursor-pointer hover:opacity-80 transition-opacity">
               <img alt="WhatsApp" className="block max-w-none size-full" src={socialWhatsapp} />
             </div>
-            <div className="relative shrink-0 size-[28px] lg:size-[28px] md:size-[32px] sm:size-[32px] cursor-pointer hover:opacity-80 transition-opacity">
+            <div className="relative shrink-0 size-[clamp(28px,2.5vw,32px)] cursor-pointer hover:opacity-80 transition-opacity">
               <img alt="Telegram" className="block max-w-none size-full" src={socialTelegram} />
             </div>
           </div>
-
-          {/* Store download badges (Figma footer) */}
-          <div className="absolute right-[-30px] lg:right-[-30px] md:right-[12px] top-[310px] lg:top-[310px] md:top-[352px] hidden md:flex items-center gap-1.5">
-            <StoreDownloadBadge store="google-play" href={ANDROID_APP_URL} />
-            <StoreDownloadBadge store="app-store" href={IOS_APP_URL} />
-          </div>
         </div>
 
-        {/* Copyright & Payment Icons - Full width border on desktop */}
-        <div className="absolute border-[#e2e8f0] border-solid border-t left-[calc(50%-25px)] top-[550px] lg:top-[550px] md:top-[520px] sm:top-[480px] translate-x-[-50%] w-[1200px] lg:w-[1200px] md:w-[90%] sm:w-[95%] z-10">
-          <div className="max-w-[1200px] lg:max-w-[1200px] mx-auto px-[20px] lg:px-[20px] md:px-[50px] sm:px-[30px] pt-[36px] lg:pt-[36px] md:pt-[32px] sm:pt-[24px] content-stretch flex items-center justify-between flex-col sm:flex-col md:flex-row">
+        {/* Copyright & Payment Icons - Full width border on desktop; position and width scale with viewport */}
+        <div className="absolute border-[#e2e8f0] border-solid border-t left-1/2 -translate-x-1/2 top-[550px] lg:top-[550px] md:top-[520px] sm:top-[480px] w-[95%] md:w-[90%] max-w-[1200px] z-10">
+          <div className="w-full mx-auto px-[clamp(20px,4vw,50px)] pt-[clamp(24px,4vw,36px)] content-stretch flex items-center justify-between flex-col sm:flex-col md:flex-row">
             <div className="relative shrink-0">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center justify-center relative">
                 <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[12px] lg:text-[12px] md:text-[11px] sm:text-[10px] text-white whitespace-nowrap">

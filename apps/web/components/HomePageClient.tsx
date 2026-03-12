@@ -7,6 +7,7 @@ import { formatPrice, getStoredCurrency, setStoredCurrency, initializeCurrencyRa
 import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } from '../lib/language';
 import { useAuth } from '../lib/auth/AuthContext';
 import { useTranslation } from '../lib/i18n-client';
+import { shouldUseCompactLayout } from '../lib/device-layout';
 
 import { useInstantSearch } from '../hooks/useInstantSearch';
 import { SearchDropdown } from './SearchDropdown';
@@ -41,12 +42,15 @@ const img13 = "/assets/home/img13.svg";
 
 const img14 = "/assets/home/img14.svg";
 
+const zovcIconeWebp = "/assets/home/zovcIcone.webp";
 // Shared configuration for "Trusted By" logos (used on both desktop and mobile)
 const TRUSTED_BY_LOGOS = [
   { src: imgSas20Logo1, alt: 'Partner Logo 1' },
   { src: kaiserLogo, alt: 'Partner Logo 2' },
   { src: imgLogo1, alt: 'Partner Logo 3' },
+  { src: zovcIconeWebp, alt: 'Partner Logo 4' },
 ];
+const TRUSTED_BY_COUNT = TRUSTED_BY_LOGOS.length;
 const img15 = "/assets/home/img15.svg";
 const img16 = "/assets/home/img16.svg";
 const img18 = "/assets/home/img18.svg";
@@ -115,6 +119,7 @@ export function HomePageClient({
 
   // State for Trusted By section pagination
   const [trustedByIndex, setTrustedByIndex] = useState(0);
+  const [trustedByFading, setTrustedByFading] = useState(false);
 
   // Removed scaling logic - using Tailwind responsive classes instead
   // This prevents zoom issues and conflicts with responsive design
@@ -157,24 +162,21 @@ export function HomePageClient({
   const languageMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  // State to track if device is desktop (based on screen width, not viewport - zoom-independent)
-  const [isDesktopScreen, setIsDesktopScreen] = useState(false);
+  // Mobile/tablet layout runs on compact viewport widths (<= 1024px).
+  const [isTouchPhoneOrTabletLayout, setIsTouchPhoneOrTabletLayout] = useState(false);
 
-  // Check if screen is desktop size (zoom-independent check)
+  // Re-check on resize/orientation for foldables/tablets.
   useEffect(() => {
-    const checkDesktopScreen = () => {
-      // Use screen.width instead of window.innerWidth to be zoom-independent
-      // Desktop screens are typically 1280px or wider
-      setIsDesktopScreen(typeof window !== 'undefined' && window.screen.width >= 1280);
+    const checkTouchLayout = () => {
+      setIsTouchPhoneOrTabletLayout(shouldUseCompactLayout());
     };
-    
-    checkDesktopScreen();
-    // Listen to orientation changes and window resize (but use screen.width which doesn't change with zoom)
-    window.addEventListener('resize', checkDesktopScreen);
-    window.addEventListener('orientationchange', checkDesktopScreen);
+
+    checkTouchLayout();
+    window.addEventListener('resize', checkTouchLayout);
+    window.addEventListener('orientationchange', checkTouchLayout);
     return () => {
-      window.removeEventListener('resize', checkDesktopScreen);
-      window.removeEventListener('orientationchange', checkDesktopScreen);
+      window.removeEventListener('resize', checkTouchLayout);
+      window.removeEventListener('orientationchange', checkTouchLayout);
     };
   }, []);
 
@@ -265,7 +267,7 @@ export function HomePageClient({
       if (languageMenuRef.current && !languageMenuRef.current.contains(event.target as Node)) {
         setShowLanguageMenu(false);
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node) && !(event.target as HTMLElement).closest?.('[data-user-menu-dropdown]')) {
         setShowUserMenu(false);
       }
       // Mobile menu closes when clicking on overlay (handled in JSX)
@@ -399,14 +401,12 @@ export function HomePageClient({
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      // Move to previous mode (2 products back for mobile, 3 for desktop)
-      // Use matchMedia for accurate responsive detection even with zoom
-      const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches;
-      const step = isMobile ? 4 : 3;
+      // Move to previous mode (4 products for touch mobile/tablet, 3 for desktop/laptop).
+      const step = isTouchPhoneOrTabletLayout ? 4 : 3;
       const newIndex = prevIndex - step;
       // If we go below 0, loop to the last valid index
       if (newIndex < 0) {
-        const maxIndex = isMobile 
+        const maxIndex = isTouchPhoneOrTabletLayout
           ? Math.max(0, Math.floor((featuredProducts.length - 4) / 4) * 4) 
           : Math.max(0, Math.floor((featuredProducts.length - 3) / 3) * 3);
         return maxIndex;
@@ -424,8 +424,7 @@ export function HomePageClient({
       e.stopPropagation();
     }
     setTrustedByIndex((prevIndex) => {
-      // Move to previous logo (0 -> 2, 1 -> 0, 2 -> 1)
-      return prevIndex === 0 ? 2 : prevIndex - 1;
+      return prevIndex === 0 ? TRUSTED_BY_COUNT - 1 : prevIndex - 1;
     });
   };
 
@@ -435,10 +434,27 @@ export function HomePageClient({
       e.stopPropagation();
     }
     setTrustedByIndex((prevIndex) => {
-      // Move to next logo (0 -> 1, 1 -> 2, 2 -> 0)
-      return prevIndex === 2 ? 0 : prevIndex + 1;
+      return prevIndex === TRUSTED_BY_COUNT - 1 ? 0 : prevIndex + 1;
     });
   };
+
+  // Auto-rotate Trusted By logos: 4s interval, fade out → change → fade in (not instant)
+  useEffect(() => {
+    const TRUSTED_BY_AUTO_SCROLL_MS = 4000;
+    const TRUSTED_BY_FADE_MS = 350;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const id = setInterval(() => {
+      setTrustedByFading(true);
+      timeoutId = setTimeout(() => {
+        setTrustedByIndex((prev) => (prev === TRUSTED_BY_COUNT - 1 ? 0 : prev + 1));
+        setTrustedByFading(false);
+      }, TRUSTED_BY_FADE_MS);
+    }, TRUSTED_BY_AUTO_SCROLL_MS);
+    return () => {
+      clearInterval(id);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   const handleNextProducts = (e?: React.MouseEvent) => {
     if (e) {
@@ -446,13 +462,11 @@ export function HomePageClient({
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      // Move to next mode (4 products forward for mobile, 3 for desktop)
-      // Use matchMedia for accurate responsive detection even with zoom
-      const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches;
-      const step = isMobile ? 4 : 3;
+      // Move to next mode (4 products for touch mobile/tablet, 3 for desktop/laptop).
+      const step = isTouchPhoneOrTabletLayout ? 4 : 3;
       const newIndex = prevIndex + step;
       // If we exceed the max, loop back to start (0)
-      const maxIndex = isMobile 
+      const maxIndex = isTouchPhoneOrTabletLayout
         ? Math.max(0, Math.floor((featuredProducts.length - 4) / 4) * 4) 
         : Math.max(0, Math.floor((featuredProducts.length - 3) / 3) * 3);
       if (newIndex > maxIndex) {
@@ -510,8 +524,8 @@ export function HomePageClient({
 
   return (
     <div className="w-full bg-white overflow-x-hidden">
-      {/* Mobile / Tablet Version - Visible up to xl, but hidden on desktop screens (zoom-independent) */}
-      <div className={`${isDesktopScreen ? 'hidden' : 'xl:hidden'} home-mobile-trusted-by-root bg-white relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden max-w-full`}>
+      {/* Mobile / Tablet Version - render only on touch phone/tablet devices */}
+      <div className={`${isTouchPhoneOrTabletLayout ? 'block' : 'hidden'} home-mobile-trusted-by-root bg-white relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden max-w-full`}>
         {/* Mobile Header (hidden when menu/search popups are open) - same background as TopHeaderBar */}
         {!showMobileMenu && !showSearchModal && (
         <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-3 pt-3 pb-1 max-w-full border-b border-black/5 mobile-header-bg">
@@ -625,7 +639,7 @@ export function HomePageClient({
 
         {/* Mobile Menu Overlay */}
         {showMobileMenu && (
-          <div className={`fixed inset-0 bg-gradient-to-b from-[#62b3e8] to-[rgba(11, 55, 168, 0.75)] backdrop-blur-sm z-[100] ${isDesktopScreen ? 'hidden' : 'xl:hidden'} flex items-center justify-center`} onClick={() => setShowMobileMenu(false)}>
+          <div className={`fixed inset-0 bg-gradient-to-b from-[#62b3e8] to-[rgba(11, 55, 168, 0.75)] backdrop-blur-sm z-[100] ${isTouchPhoneOrTabletLayout ? 'flex' : 'hidden'} items-center justify-center`} onClick={() => setShowMobileMenu(false)}>
             <div 
               className="relative rounded-2xl border shadow-2xl w-[280px] max-w-[90%] p-8 animate-in fade-in zoom-in-95 duration-300"
               style={{
@@ -882,8 +896,8 @@ export function HomePageClient({
        
 
 
-        {/* Mobile Hero Text — կենտրոն, բոլոր տեքստերը սպիտակ */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-1/2 top-[241px] w-full max-w-[380px] px-6 z-10">
+        {/* Mobile Hero Text — կենտրոն; 729+ մի քիչ էլ ներքև */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-1/2 top-[272px] min-[729px]:top-[340px] w-full max-w-[380px] px-6 z-10">
           <div className="flex flex-col font-['Montserrat',sans-serif] justify-center text-center leading-[40px] relative shrink-0 text-[34px] text-white w-full">
             <p className="mb-0 font-black hero-headline-underline">{t('home.hero.your')}</p>
             <p className="mb-0 font-light hero-headline-underline">{t('home.hero.dailyDose')}</p>
@@ -895,8 +909,8 @@ export function HomePageClient({
         {/* Mobile Hero Text Bottom Gradient Overlay */}
 
 
-        {/* Mobile Experience Purity Label — մեջտեղ, սպիտակ */}
-        <div className="-translate-x-1/2 absolute content-stretch flex gap-[12px] items-center justify-center left-1/2 top-[221px] w-full max-w-[380px] px-6 z-[10]">
+        {/* Mobile Experience Purity Label — մեջտեղ, սպիտակ; 729+ մի քիչ էլ ներքև */}
+        <div className="-translate-x-1/2 absolute content-stretch flex gap-[12px] items-center justify-center left-1/2 top-[252px] min-[729px]:top-[320px] w-full max-w-[380px] px-6 z-[10]">
           <div className="bg-white h-[2px] shrink-0 w-[48px]" />
           <div className="content-stretch flex flex-col items-start relative shrink-0">
             <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase whitespace-nowrap">
@@ -905,8 +919,8 @@ export function HomePageClient({
           </div>
         </div>
 
-        {/* Mobile Subtitle — սպիտակ */}
-        <div className="absolute content-stretch flex flex-col items-center justify-center left-[32px] right-[32px] top-[414px]">
+        {/* Mobile Subtitle — սպիտակ; 729+ մի քիչ էլ ներքև */}
+        <div className="absolute content-stretch flex flex-col items-center justify-center left-[32px] right-[32px] top-[448px] min-[729px]:top-[520px]">
           <div className="flex flex-col font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white text-center break-words z-[10]">
             <p className="leading-[26px]">{t('home.hero.subtitle')}</p>
           </div>
@@ -915,11 +929,11 @@ export function HomePageClient({
         
 
 
-        {/* Mobile CTA Buttons */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col min-[728px]:flex-row gap-[8px] min-[728px]:gap-[12px] h-[136px] min-[728px]:h-[60px] items-center justify-end left-1/2 pt-[16px] min-[728px]:pt-0 top-[600px] min-[728px]:top-[680px] w-full max-w-[430px] min-[728px]:max-w-[600px] px-4 z-10">
+        {/* Mobile CTA Buttons — 729+ մի քիչ ներքև */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col min-[728px]:flex-row gap-[16px] min-[728px]:gap-[12px] min-[728px]:h-[60px] items-center justify-end left-1/2 pt-[16px] min-[728px]:pt-0 top-[550px] min-[728px]:top-[680px] min-[729px]:top-[740px] w-full max-w-[430px] min-[728px]:max-w-[600px] px-4 z-10">
           <button
             onClick={() => router.push('/products')}
-            className="bg-[#31daff] content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#31daff]/50 hover:scale-105 active:scale-95"
+            className="bg-[#31daff] content-stretch flex flex-col h-[72px] min-[728px]:h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#31daff]/50 hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white whitespace-nowrap">
               <p className="leading-[24px]">{t('home.hero.shopNow')}</p>
@@ -927,7 +941,7 @@ export function HomePageClient({
           </button>
           <button
             onClick={() => router.push('/about')}
-            className="bg-[rgba(0,0,0,0)] border-2 border-white/30 content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:shadow-lg hover:shadow-white/20 hover:scale-105 active:scale-95"
+            className="bg-[rgba(0,0,0,0)] border-2 border-white/30 content-stretch flex flex-col h-[72px] min-[728px]:h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:shadow-lg hover:shadow-white/20 hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold h-[19px] justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
               <p className="leading-[24px] whitespace-nowrap">{t('home.hero.learnMore')}</p>
@@ -1091,7 +1105,7 @@ export function HomePageClient({
 
         {/* Mobile Trusted By Logo - single logo on mobile, 2 logos on tablet (728px+) */}
         {/* Mobile: Single logo */}
-        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[2600px] min-[728px]:hidden w-full z-0">
+        <div className={`-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[2600px] min-[728px]:hidden w-full z-0 transition-opacity duration-300 ${trustedByFading ? 'opacity-0' : 'opacity-100'}`}>
           <div className="h-[72px] relative shrink-0 w-[260px]">
             <img
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
@@ -1102,7 +1116,7 @@ export function HomePageClient({
           </div>
         </div>
         {/* Tablet: 2 logos grid from 728px - no arrows */}
-        <div className="-translate-x-1/2 absolute content-stretch grid grid-cols-2 gap-4 items-center justify-center left-1/2 top-[2600px] min-[728px]:top-[2900px] hidden min-[728px]:grid xl:hidden w-full max-w-[600px] z-0">
+        <div className={`-translate-x-1/2 absolute content-stretch grid grid-cols-2 gap-4 items-center justify-center left-1/2 top-[2600px] min-[728px]:top-[2900px] hidden min-[728px]:grid xl:hidden w-full max-w-[600px] z-0 transition-opacity duration-300 ${trustedByFading ? 'opacity-0' : 'opacity-100'}`}>
           <div className="h-[72px] relative shrink-0 w-auto flex items-center justify-center">
             <img
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
@@ -1113,9 +1127,9 @@ export function HomePageClient({
           </div>
           <div className="h-[72px] relative shrink-0 w-auto flex items-center justify-center">
             <img
-              alt={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % 3].alt}
+              alt={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % TRUSTED_BY_COUNT].alt}
               className="max-w-none object-contain pointer-events-none h-full w-auto"
-              src={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % 3].src}
+              src={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % TRUSTED_BY_COUNT].src}
               loading="eager"
             />
           </div>
@@ -1189,6 +1203,16 @@ export function HomePageClient({
             }`}
             aria-label={t('home.trustedBy.showThirdPartner')}
           />
+          <button
+            type="button"
+            onClick={() => setTrustedByIndex(3)}
+            className={`rounded-full transition-all duration-300 ${
+              trustedByIndex === 3
+                ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
+            }`}
+            aria-label={t('home.trustedBy.showFourthPartner')}
+          />
         </div>
 
         {/* Tablet: Pagination dots only (728px - xl) */}
@@ -1223,6 +1247,16 @@ export function HomePageClient({
             }`}
             aria-label={t('home.trustedBy.showThirdPartner')}
           />
+          <button
+            type="button"
+            onClick={() => setTrustedByIndex(3)}
+            className={`rounded-full transition-all duration-300 ${
+              trustedByIndex === 3
+                ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
+            }`}
+            aria-label={t('home.trustedBy.showFourthPartner')}
+          />
         </div>
 
         {/* Mobile/Tablet Spacer — 600px կրճատված (spacer բարձրություն) */}
@@ -1233,10 +1267,10 @@ export function HomePageClient({
         {/* Mobile Footer - Removed from all pages */}
       </div>
 
-      {/* Desktop Version - Only for extra large screens (zoom-independent) */}
+      {/* Desktop Version - always for desktop/laptop devices */}
       <div
         ref={containerRef}
-        className={`${isDesktopScreen ? 'block' : 'hidden xl:block'} bg-white relative w-full mx-auto h-[6000px] home-page-container overflow-x-hidden overflow-y-hidden`}
+        className={`${isTouchPhoneOrTabletLayout ? 'hidden' : 'block'} bg-white relative w-full mx-auto h-[6000px] home-page-container overflow-x-hidden overflow-y-hidden`}
       >
       <Header
         router={router}
@@ -1273,9 +1307,9 @@ export function HomePageClient({
        
       
 
-      {/* Hero Section - Main Content */}
-      <div className="absolute content-stretch flex items-end justify-center left-[calc(50%+0.5px)] px-[20px] md:px-[16px] sm:px-[12px] top-[480px] lg:top-[480px] md:top-[400px] sm:top-[280px] translate-x-[-50%] w-[800px] lg:w-[800px] md:w-[90%] sm:w-[95%]">
-        <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-center justify-center relative shrink-0 w-[800px] lg:w-[800px] md:w-full sm:w-full">
+      {/* Hero Section - Main Content; միայն տեքստը մի քիչ էլ ներքև (pt + button -mt) */}
+      <div className="absolute content-stretch flex items-end justify-center left-[calc(50%+0.5px)] px-[20px] md:px-[16px] sm:px-[12px] top-[480px] sm:top-[280px] md:top-[500px] min-[729px]:top-[500px] lg:top-[520px] xl:top-[480px] translate-x-[-50%] w-[800px] lg:w-[800px] md:w-[90%] sm:w-[95%] z-20">
+        <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-center justify-center relative shrink-0 w-[800px] lg:w-[800px] md:w-full sm:w-full pt-4 min-[729px]:pt-6 max-lg:min-[729px]:pt-6">
           {/* Experience Purity Label */}
           <div className="content-stretch flex gap-[10px] lg:gap-[10px] md:gap-[10px] sm:gap-[8px] items-center relative shrink-0 w-full">
             <div className="bg-white h-[2px] lg:h-[2px] md:h-[1.5px] sm:h-[1.5px] shrink-0 w-[40px] lg:w-[40px] md:w-[40px] sm:w-[32px]" />
@@ -1501,7 +1535,7 @@ export function HomePageClient({
           {/* Blue Underline */}
         </div>
       </div>
-      {/* Navigation Arrows - Only show if we have more than 3 products - Outside overflow-hidden container */}
+      {/* Navigation Arrows - Only show if we have more than 3 products; max() prevents cutoff at 1152px, gap widens on large screens */}
       {featuredProducts.length > 3 && (
         <>
           {/* Next Button - Left side (աջ տանի) */}
@@ -1514,7 +1548,7 @@ export function HomePageClient({
               }
               handleNextProducts(e);
             }}
-            className="left-[calc(50%-580px)] lg:left-[calc(50%-580px)] md:left-[calc(50%-500px)] sm:left-[calc(50%-400px)] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1090px]"
+            className="left-[max(8px,calc(50%-580px))] sm:left-[max(8px,calc(50%-400px))] md:left-[max(8px,calc(50%-500px))] lg:left-[max(8px,calc(50%-580px))] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1090px]"
             ariaLabel={t('home.trustedBy.nextProducts')}
           />
 
@@ -1528,7 +1562,7 @@ export function HomePageClient({
               }
               handlePreviousProducts(e);
             }}
-            className="right-[calc(50%-580px)] lg:right-[calc(50%-580px)] md:right-[calc(50%-500px)] sm:right-[calc(50%-400px)] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1110px]"
+            className="right-[max(8px,calc(50%-580px))] sm:right-[max(8px,calc(50%-400px))] md:right-[max(8px,calc(50%-500px))] lg:right-[max(8px,calc(50%-580px))] top-[1580px] lg:top-[1580px] md:top-[1350px] sm:top-[1110px]"
             ariaLabel={t('home.trustedBy.previousProducts')}
           />
         </>
@@ -1637,18 +1671,18 @@ export function HomePageClient({
             </div>
           </div>
         </div>
-        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[64%_13.33%_19%_13.6%] lg:inset-[64%_13.33%_19%_13.6%] md:inset-[64%_13.33%_19%_13.6%] sm:inset-[58%_13.33%_5%_13.6%] justify-center leading-[18px] lg:leading-[22px] md:leading-[20px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[11px] text-center z-[10]">
+        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[64%_13.33%_19%_13.6%] lg:inset-[60%_11%_12%_11%] md:inset-[64%_13.33%_19%_13.6%] sm:inset-[58%_13.33%_5%_13.6%] justify-center leading-[18px] lg:leading-[17px] md:leading-[20px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[12px] md:text-[14px] sm:text-[11px] text-center z-[10]">
           <p className="mb-0">{t('home.whyChooseUs.richInMinerals.description')}</p>
           <p className="mb-0">{t('home.whyChooseUs.richInMinerals.descriptionLine1')}</p>
           <p className="mb-0">{t('home.whyChooseUs.richInMinerals.descriptionLine2')}</p>
         </div>
-        <div className={`absolute flex flex-col font-['Montserrat',sans-serif] font-bold ${lang === 'ru' ? 'inset-[34%_12%_56%_12%] lg:inset-[38%_12%_52%_12%]' : 'inset-[38%_12%_52%_12%] lg:inset-[42%_12%_48%_12%]'} md:inset-[38%_12%_52%_12%] sm:inset-[36%_12%_54%_12%] justify-center leading-[0] text-[#0f172a] text-[13px] lg:text-[16px] md:text-[16px] sm:text-[13px] text-center uppercase whitespace-normal`}>
+        <div className={`absolute flex flex-col font-['Montserrat',sans-serif] font-bold ${lang === 'ru' ? 'inset-[34%_12%_56%_12%] lg:inset-[34%_10%_56%_10%]' : 'inset-[38%_12%_52%_12%] lg:inset-[36%_10%_54%_10%]'} md:inset-[38%_12%_52%_12%] sm:inset-[36%_12%_54%_12%] justify-center leading-[0] text-[#0f172a] text-[13px] lg:text-[14px] md:text-[16px] sm:text-[13px] text-center uppercase whitespace-normal`}>
           <p className="leading-[18px] lg:leading-[22px] md:leading-[22px] sm:leading-[18px]">{t('home.whyChooseUs.richInMinerals.title')}</p>
         </div>
       </div>
 
-      {/* Card 2: Non-Carbonated */}
-      <div className="absolute h-[200px] lg:h-[250px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[-700px] md:translate-x-[-50%] sm:translate-x-[-50%] top-[4580px] lg:top-[4580px] md:top-[4000px] sm:top-[3280px] w-[272px] lg:w-[340px] md:w-[45%] sm:w-[90%] z-[100]">
+      {/* Card 2: Non-Carbonated - translate scales so layout fits at 1152px */}
+      <div className="absolute h-[200px] lg:h-[250px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[max(-540px,-47vw)] md:translate-x-[-50%] sm:translate-x-[-50%] top-[4580px] lg:top-[4580px] md:top-[4000px] sm:top-[3280px] w-[272px] lg:w-[340px] md:w-[45%] sm:w-[90%] z-[100]">
         <div className="absolute bg-white inset-[13.97%_0_0_0] rounded-[30px] lg:rounded-[37px]" />
         <div className="absolute aspect-[100/100] left-[37.07%] overflow-clip right-[32%] lg:left-[36%] lg:right-[36%] top-0">
           <div className="absolute inset-[10.22%_10.23%_61.04%_62.5%]">
@@ -1665,18 +1699,18 @@ export function HomePageClient({
             <img alt="Top" className="block max-w-none size-full" src={img9} loading="lazy" />
           </div>
         </div>
-        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[63.5%_13.33%_22%_13.6%] lg:inset-[63.5%_13.33%_22%_13.6%] md:inset-[63.5%_13.33%_22%_13.6%] sm:inset-[57%_13.33%_7%_13.6%] justify-center leading-[14px] lg:leading-[18px] md:leading-[18px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[11px] text-center z-[10]">
+        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[63.5%_13.33%_22%_13.6%] lg:inset-[60%_11%_12%_11%] md:inset-[63.5%_13.33%_22%_13.6%] sm:inset-[57%_13.33%_7%_13.6%] justify-center leading-[14px] lg:leading-[16px] md:leading-[18px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[12px] md:text-[14px] sm:text-[11px] text-center z-[10]">
           <p className="mb-0">{t('home.whyChooseUs.nonCarbonated.description')}</p>
           <p className="mb-0">{t('home.whyChooseUs.nonCarbonated.descriptionLine1')}</p>
           <p className="mb-0">{t('home.whyChooseUs.nonCarbonated.descriptionLine2')}</p>
         </div>
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[35%_12%_55%_12%] lg:inset-[39%_12%_51%_12%] md:inset-[35%_12%_55%_12%] sm:inset-[33%_12%_57%_12%] justify-center leading-[0] text-[#0f172a] text-[13px] lg:text-[16px] md:text-[16px] sm:text-[13px] text-center uppercase whitespace-normal">
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[35%_12%_55%_12%] lg:inset-[34%_10%_56%_10%] md:inset-[35%_12%_55%_12%] sm:inset-[33%_12%_57%_12%] justify-center leading-[0] text-[#0f172a] text-[13px] lg:text-[14px] md:text-[16px] sm:text-[13px] text-center uppercase whitespace-normal">
           <p className="leading-[18px] lg:leading-[22px] md:leading-[22px] sm:leading-[18px]">{t('home.whyChooseUs.nonCarbonated.title')}</p>
         </div>
       </div>
 
-      {/* Card 3: No Artificial Ingredients */}
-      <div className="absolute h-[204px] lg:h-[255px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[330px] md:translate-x-[-50%] sm:translate-x-[-50%] top-[4430px] lg:top-[4430px] md:top-[4300px] sm:top-[3560px] w-[272px] lg:w-[340px] md:w-[45%] sm:w-[90%] z-[100]">
+      {/* Card 3: No Artificial Ingredients - translate scales so no right cutoff at 1152px */}
+      <div className="absolute h-[204px] lg:h-[255px] md:h-[240px] sm:h-[220px] left-1/2 translate-x-[-50%] lg:translate-x-[min(260px,20vw)] md:translate-x-[-50%] sm:translate-x-[-50%] top-[4430px] lg:top-[4430px] md:top-[4300px] sm:top-[3560px] w-[272px] lg:w-[340px] md:w-[45%] sm:w-[90%] z-[100]">
         <div className="absolute bg-white inset-[15.83%_0_0_0] rounded-[30px] lg:rounded-[37px]" />
         <div className="absolute aspect-[100/100] left-[34.53%] right-[34.53%] lg:left-[38%] lg:right-[38%] top-0">
           <div className="absolute inset-[5.88%_0_26.15%_50.33%] overflow-hidden">
@@ -1691,12 +1725,12 @@ export function HomePageClient({
             <img alt="Top" className="block max-w-none size-full" src={img12} loading="lazy" />
           </div>
         </div>
-        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[63%_10.4%_20%_10.67%] lg:inset-[63%_10.4%_20%_10.67%] md:inset-[63%_10.4%_20%_10.67%] sm:inset-[57%_10.4%_8%_10.67%] justify-center leading-[18px] lg:leading-[22px] md:leading-[20px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[11px] text-center z-[10]">
+        <div className="absolute flex flex-col font-['Inter',sans-serif] font-normal inset-[63%_10.4%_20%_10.67%] lg:inset-[60%_10%_12%_10%] md:inset-[63%_10.4%_20%_10.67%] sm:inset-[57%_10.4%_8%_10.67%] justify-center leading-[18px] lg:leading-[16px] md:leading-[20px] sm:leading-[14px] not-italic text-[#64748b] text-[12px] lg:text-[12px] md:text-[14px] sm:text-[11px] text-center z-[10]">
           <p className="mb-0">{t('home.whyChooseUs.noArtificialIngredients.description')}</p>
           <p className="mb-0">{t('home.whyChooseUs.noArtificialIngredients.descriptionLine1')}</p>
           <p className="mb-0">{t('home.whyChooseUs.noArtificialIngredients.descriptionLine2')}</p>
         </div>
-        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[33%_5%_57%_5%] lg:inset-[37%_5%_53%_5%] md:inset-[33%_5%_57%_5%] sm:inset-[31%_5%_59%_5%] justify-center leading-[0] text-[#0f172a] text-[12px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center uppercase whitespace-nowrap overflow-hidden">
+        <div className="absolute flex flex-col font-['Montserrat',sans-serif] font-bold inset-[33%_5%_57%_5%] lg:inset-[34%_7%_56%_7%] md:inset-[33%_5%_57%_5%] sm:inset-[31%_5%_59%_5%] justify-center leading-[0] text-[#0f172a] text-[12px] lg:text-[13px] md:text-[14px] sm:text-[12px] text-center uppercase whitespace-normal overflow-hidden">
           <p className="leading-[16px] lg:leading-[20px] md:leading-[20px] sm:leading-[16px]">{t('home.whyChooseUs.noArtificialIngredients.title')}</p>
         </div>
       </div>
@@ -1719,56 +1753,30 @@ export function HomePageClient({
               <p className="leading-[14px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">{t('home.trustedBy.subtitle')}</p>
             </div>
           </div>
-          {/* Partner Logos - Show all 3 at once, active one is larger */}
-          <div className="absolute content-stretch flex items-center justify-center gap-[40px] lg:gap-[50px] md:gap-[40px] sm:gap-[30px] left-[calc(50%+0.5px)] top-[68px] lg:top-[85px] md:top-[96px] sm:top-[96px] translate-x-[-50%] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%] h-[104px] lg:h-[130px] md:h-[144px] sm:h-[144px]">
-            {/* Logo 0 - sas20 logo */}
-            <div 
-              className={`relative shrink-0 transition-all duration-300 cursor-pointer ${
-                trustedByIndex === 0 
-                  ? 'h-[104px] w-[128px] lg:h-[130px] lg:w-[160px] scale-110' 
-                  : 'h-[72px] w-[90px] lg:h-[90px] lg:w-[112px] opacity-70 hover:opacity-90'
-              }`}
-              onClick={() => setTrustedByIndex(0)}
-            >
-              <img 
-                alt="Partner Logo" 
-                className="absolute inset-0 max-w-none object-contain pointer-events-none size-full" 
-                src={imgSas20Logo1}
-                loading="lazy"
-              />
-            </div>
-            {/* Logo 1 - image6e */}
-            <div 
-              className={`relative shrink-0 transition-all duration-300 cursor-pointer ${
-                trustedByIndex === 1 
-                  ? 'h-[104px] w-[160px] lg:h-[130px] lg:w-[200px] scale-110' 
-                  : 'h-[72px] w-[110px] lg:h-[90px] lg:w-[138px] opacity-70 hover:opacity-90'
-              }`}
-              onClick={() => setTrustedByIndex(1)}
-            >
-              <img 
-                alt="Partner Logo" 
-                className="absolute inset-0 max-w-none object-contain pointer-events-none size-full" 
-                src={kaiserLogo}
-                loading="lazy"
-              />
-            </div>
-            {/* Logo 2 - logo 1 */}
-            <div 
-              className={`relative shrink-0 transition-all duration-300 cursor-pointer ${
-                trustedByIndex === 2 
-                  ? 'h-[104px] w-[176px] lg:h-[130px] lg:w-[220px] scale-110' 
-                  : 'h-[72px] w-[123px] lg:h-[90px] lg:w-[154px] opacity-70 hover:opacity-90'
-              }`}
-              onClick={() => setTrustedByIndex(2)}
-            >
-              <img 
-                alt="Partner Logo" 
-                className="absolute inset-0 max-w-none object-contain pointer-events-none size-full" 
-                src={imgLogo1}
-                loading="lazy"
-              />
-            </div>
+          {/* Partner Logos - Desktop: show 3 at a time (prev, current, next) */}
+          <div className={`absolute content-stretch flex items-center justify-center gap-[40px] lg:gap-[50px] md:gap-[40px] sm:gap-[30px] left-[calc(50%+0.5px)] top-[68px] lg:top-[85px] md:top-[96px] sm:top-[96px] translate-x-[-50%] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%] h-[104px] lg:h-[130px] md:h-[144px] sm:h-[144px] transition-opacity duration-300 ${trustedByFading ? 'opacity-0' : 'opacity-100'}`}>
+            {[
+              (trustedByIndex - 1 + TRUSTED_BY_COUNT) % TRUSTED_BY_COUNT,
+              trustedByIndex,
+              (trustedByIndex + 1) % TRUSTED_BY_COUNT,
+            ].map((logoIndex) => (
+              <div
+                key={logoIndex}
+                className={`relative shrink-0 transition-all duration-300 cursor-pointer ${
+                  logoIndex === trustedByIndex
+                    ? 'h-[104px] w-[160px] lg:h-[130px] lg:w-[200px] scale-110'
+                    : 'h-[72px] w-[110px] lg:h-[90px] lg:w-[138px] opacity-70 hover:opacity-90'
+                }`}
+                onClick={() => setTrustedByIndex(logoIndex)}
+              >
+                <img
+                  alt={TRUSTED_BY_LOGOS[logoIndex].alt}
+                  className="absolute inset-0 max-w-none object-contain pointer-events-none size-full"
+                  src={TRUSTED_BY_LOGOS[logoIndex].src}
+                  loading="lazy"
+                />
+              </div>
+            ))}
           </div>
           {/* Pagination Dots - visible by default (gray when inactive) */}
           <div className="absolute content-stretch flex h-[39px] lg:h-[49px] items-center justify-center left-[24px] pt-[26px] lg:pt-[32px] right-[24px] top-[162px] lg:top-[202px] z-[100]">
@@ -1803,11 +1811,21 @@ export function HomePageClient({
                 }`}
                 aria-label={t('home.trustedBy.showThirdPartner')}
               />
+              <button
+                type="button"
+                onClick={() => setTrustedByIndex(3)}
+                className={`rounded-[9999px] transition-all duration-300 ${
+                  trustedByIndex === 3
+                    ? 'bg-[#00d1ff] h-[8px] w-[19px] lg:h-[10px] lg:w-[24px]'
+                    : 'bg-gray-400 size-[8px] lg:size-[10px] hover:bg-[#00d1ff]/60 cursor-pointer'
+                }`}
+                aria-label={t('home.trustedBy.showFourthPartner')}
+              />
             </div>
           </div>
 
-          {/* Navigation Arrows */}
-          <div className="absolute content-stretch flex items-center justify-between left-[107px] right-[107px] lg:left-[134px] lg:right-[134px] top-[calc(50%+40px)] lg:top-[calc(50%+50.25px)] translate-y-[-50%] z-[100]">
+          {/* Navigation Arrows - inset shrinks on larger screens so gap between arrows widens (was: narrows) */}
+          <div className="absolute content-stretch flex items-center justify-between left-[clamp(50px,134px-6vw,134px)] right-[clamp(50px,134px-6vw,134px)] top-[calc(50%+40px)] lg:top-[calc(50%+50.25px)] translate-y-[-50%] z-[100]">
             {/* Next Button - Left side (աջ տանի) */}
             <FeaturedProductsNavigationArrow
               direction="next"

@@ -11,6 +11,7 @@ import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } fr
 import { formatPrice as formatPriceCurrency, getStoredCurrency } from '../lib/currency';
 import { useInstantSearch } from '../hooks/useInstantSearch';
 import { SearchDropdown } from './SearchDropdown';
+import { shouldUseCompactLayout } from '../lib/device-layout';
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,6 +22,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const isProductsPage = pathname.startsWith('/products');
   const isAdminPage = pathname.startsWith('/admin');
   const isProfilePage = pathname.startsWith('/profile');
+  const [isTouchPhoneOrTabletLayout, setIsTouchPhoneOrTabletLayout] = useState(false);
 
   // State for header navigation
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -59,7 +61,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       if (languageMenuRef.current && !languageMenuRef.current.contains(event.target as Node)) {
         setShowLanguageMenu(false);
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node) && !(event.target as HTMLElement).closest?.('[data-user-menu-dropdown]')) {
         setShowUserMenu(false);
       }
       if (searchModalRef.current && !searchModalRef.current.contains(event.target as Node)) {
@@ -70,6 +72,22 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Keep layout selection independent from browser zoom.
+  useEffect(() => {
+    const checkTouchLayout = () => {
+      setIsTouchPhoneOrTabletLayout(shouldUseCompactLayout());
+    };
+
+    checkTouchLayout();
+    window.addEventListener('resize', checkTouchLayout);
+    window.addEventListener('orientationchange', checkTouchLayout);
+
+    return () => {
+      window.removeEventListener('resize', checkTouchLayout);
+      window.removeEventListener('orientationchange', checkTouchLayout);
     };
   }, []);
 
@@ -158,7 +176,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
           {children}
         </main>
         {/* Mobile Bottom Navigation - Only visible on mobile */}
-        <MobileBottomNavigation />
+        {isTouchPhoneOrTabletLayout && <MobileBottomNavigation />}
       </>
     );
   }
@@ -166,7 +184,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div className={`relative flex min-h-screen flex-col pb-16 lg:pb-0 overflow-x-hidden ${isAdminPage || isProfilePage ? 'bg-white' : 'app-page-background'}`}>
       {/* Top Header Bar - Only visible on mobile, hidden when a popup is open */}
-      {!showMobileMenu && !showSearchModal && !globalModalOpen && (
+      {isTouchPhoneOrTabletLayout && !showMobileMenu && !showSearchModal && !globalModalOpen && (
         <TopHeaderBar
           router={router}
           pathname={pathname}
@@ -177,45 +195,51 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Mobile Menu - Only visible on mobile */}
-      <MobileMenu
-        router={router}
-        t={t}
-        showMobileMenu={showMobileMenu}
-        setShowMobileMenu={setShowMobileMenu}
-        isLoggedIn={isLoggedIn}
-        isAdmin={isAdmin}
-        handleLogout={handleLogout}
-        showLanguageMenu={showLanguageMenu}
-        setShowLanguageMenu={setShowLanguageMenu}
-      />
+      {isTouchPhoneOrTabletLayout && (
+        <MobileMenu
+          router={router}
+          t={t}
+          showMobileMenu={showMobileMenu}
+          setShowMobileMenu={setShowMobileMenu}
+          isLoggedIn={isLoggedIn}
+          isAdmin={isAdmin}
+          handleLogout={handleLogout}
+          showLanguageMenu={showLanguageMenu}
+          setShowLanguageMenu={setShowLanguageMenu}
+        />
+      )}
 
       {/* Mobile Search - Only visible on mobile */}
-      <MobileSearch
-        t={t}
-        showSearchModal={showSearchModal}
-        setShowSearchModal={setShowSearchModal}
-        closeSearchModal={closeSearchModal}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        handleSearch={handleSearch}
-        searchResults={searchResults}
-        searchLoading={searchLoading}
-        searchError={searchError}
-        searchSelectedIndex={searchSelectedIndex}
-        handleSearchKeyDown={handleSearchKeyDown}
-        onSearchResultClick={handleSearchResultClick}
-        formatPriceForSearch={formatPriceForSearch}
-        onSearchSeeAll={(q) => {
-          router.push(`/products?search=${encodeURIComponent(q)}`);
-          closeSearchModal();
-        }}
-      />
+      {isTouchPhoneOrTabletLayout && (
+        <MobileSearch
+          t={t}
+          showSearchModal={showSearchModal}
+          setShowSearchModal={setShowSearchModal}
+          closeSearchModal={closeSearchModal}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          handleSearch={handleSearch}
+          searchResults={searchResults}
+          searchLoading={searchLoading}
+          searchError={searchError}
+          searchSelectedIndex={searchSelectedIndex}
+          handleSearchKeyDown={handleSearchKeyDown}
+          onSearchResultClick={handleSearchResultClick}
+          formatPriceForSearch={formatPriceForSearch}
+          onSearchSeeAll={(q) => {
+            router.push(`/products?search=${encodeURIComponent(q)}`);
+            closeSearchModal();
+          }}
+        />
+      )}
       
       {/* Spacer section at the top - increases page height */}
-      <div className="hidden xl:block w-full bg-transparent h-[80px] md:h-[70px] sm:h-[60px] flex-shrink-0 relative z-10" />
+      {!isTouchPhoneOrTabletLayout && (
+        <div className="w-full bg-transparent h-[80px] flex-shrink-0 relative z-10" />
+      )}
       {/* Desktop Header - Only visible on desktop and hidden when any global popup is open */}
-      {!showSearchModal && !globalModalOpen && (
-        <div className="hidden xl:block">
+      {!isTouchPhoneOrTabletLayout && !showSearchModal && !globalModalOpen && (
+        <div>
           <Header
             router={router}
             t={t}
@@ -232,30 +256,34 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
         </div>
       )}
       {/* Breadcrumb - Only visible on desktop, integrated into content */}
-      <div className="hidden xl:block pt-14">
-        <Breadcrumb />
-      </div>
+      {!isTouchPhoneOrTabletLayout && (
+        <div className="pt-14">
+          <Breadcrumb />
+        </div>
+      )}
       <main
         className={`flex-1 w-full relative z-10 ${
           isProductsPage 
-            ? 'pt-20 xl:pt-4 pb-0 xl:pb-0'
-            : 'pt-20 xl:pt-0 pb-0 xl:pb-0'
+            ? (isTouchPhoneOrTabletLayout ? 'pt-20 pb-0' : 'pt-4 pb-0')
+            : (isTouchPhoneOrTabletLayout ? 'pt-20 pb-0' : 'pt-0 pb-0')
         }`}
       >
         {children}
       </main>
       {/* Desktop Footer - Only visible on desktop */}
-      <div className="hidden xl:block">
-        <Footer router={router} t={t} isHomePage={false} />
-      </div>
+      {!isTouchPhoneOrTabletLayout && (
+        <div>
+          <Footer router={router} t={t} isHomePage={false} />
+        </div>
+      )}
       {/* Mobile Footer - Removed from all pages */}
       {/* Mobile Bottom Navigation - Only visible on mobile */}
-      <MobileBottomNavigation />
+      {isTouchPhoneOrTabletLayout && <MobileBottomNavigation />}
 
       {/* Desktop Search Modal - Only visible on desktop */}
-      {showSearchModal && (
+      {showSearchModal && !isTouchPhoneOrTabletLayout && (
         <div 
-          className="hidden xl:flex fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[200] items-start justify-center pt-16 px-4"
+          className="fixed inset-0 bg-[#62b3e8]/30 backdrop-blur-sm z-[200] flex items-start justify-center pt-16 px-4"
           onClick={() => closeSearchModal()}
         >
           <div

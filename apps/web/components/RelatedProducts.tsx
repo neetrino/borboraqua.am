@@ -10,6 +10,7 @@ import { t } from '../lib/i18n';
 import { useAuth } from '../lib/auth/AuthContext';
 import { FeaturedProductCard, type FeaturedProduct, addToCart, FeaturedProductsNavigationArrow } from './icons/global/global';
 import { useTranslation } from '../lib/i18n-client';
+import { DESKTOP_LAYOUT_MIN_WIDTH } from '../lib/device-layout';
 
 interface RelatedProduct {
   id: string;
@@ -69,6 +70,8 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set());
   const [isMobile, setIsMobile] = useState(false);
+  /** Visible cards: 2 when &lt;768px, 3 when 768–1024 and &gt;1024 */
+  const [visibleCount, setVisibleCount] = useState(3);
   // Initialize language with default to match server-side and prevent hydration mismatch
   const [language, setLanguage] = useState<LanguageCode>('hy');
   // Initialize currency with 'AMD' to match server-side default and prevent hydration mismatch
@@ -110,13 +113,13 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
     };
   }, []);
 
-  // Detect mobile screen size
+  // Up to and including 1024px: mobile productCar layout. Above 1024px: laptop single-page style.
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    const mediaQuery = window.matchMedia(`(max-width: ${DESKTOP_LAYOUT_MIN_WIDTH - 1}px)`);
     const checkMobile = () => {
       setIsMobile(mediaQuery.matches);
     };
-    
+
     checkMobile();
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener('change', checkMobile);
@@ -129,6 +132,15 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
         window.removeEventListener('resize', checkMobile);
       };
     }
+  }, []);
+
+  // Visible count: 2 when <768px, 3 when 768–1024 and >1024.
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const update = () => setVisibleCount(mq.matches ? 2 : 3);
+    update();
+    mq.addEventListener?.('change', update);
+    return () => mq.removeEventListener?.('change', update);
   }, []);
 
   useEffect(() => {
@@ -203,7 +215,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      const visibleCount = isMobile ? 2 : 3;
+      const count = visibleCount;
       // Calculate current page (0-based)
       const currentPage = Math.floor(prevIndex / visibleCount);
       // Move to previous page
@@ -224,7 +236,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      const visibleCount = isMobile ? 2 : 3;
+      const count = visibleCount;
       // Calculate current page (0-based)
       const currentPage = Math.floor(prevIndex / visibleCount);
       // Move to next page
@@ -349,12 +361,15 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
             <p className="text-gray-500 text-lg">{t(language, 'product.noRelatedProducts')}</p>
           </div>
         ) : (
-          // Products Carousel - Mobile: same UI as ProductsGrid (grid, no wrapper, same props)
+          // Full-viewport wrapper so arrow positions (50%) are relative to viewport, not max-w-7xl
+          <div className="relative w-screen overflow-visible" style={{ marginLeft: 'calc(-50vw + 50%)' }}>
+            <div className="max-w-7xl mx-auto">
+          {/* Products Carousel - Mobile: same UI as ProductsGrid (grid, no wrapper, same props) */}
           <div className="relative overflow-visible">
             {isMobile ? (
-              /* Mobile: identical to ProductsGrid - grid, direct card children, isMobile so bottle card shows */
-              <div className="grid grid-cols-2 gap-4 sm:gap-6">
-                {products.slice(carouselIndex, carouselIndex + 2).map((product) => {
+              /* Mobile: 2 cards <768px, 3 cards 768–1024; productCar style */
+              <div className={`grid gap-4 sm:gap-6 ${visibleCount === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                {products.slice(carouselIndex, carouselIndex + visibleCount).map((product) => {
                   const featuredProduct = convertToFeaturedProduct(product);
                   const productHref = product.slug ? `/products/${encodeURIComponent(product.slug.trim())}` : null;
                   return (
@@ -405,7 +420,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
             )}
 
             {/* Navigation Arrows and Pagination - Mobile: arrows next to pagination, Desktop: arrows on sides */}
-            {products.length > (isMobile ? 2 : 3) && (
+            {products.length > visibleCount && (
               <>
                 {isMobile ? (
                   // Mobile: Arrows next to pagination dots
@@ -421,7 +436,7 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                     {/* Pagination Dots */}
                     <div className="flex items-center justify-center gap-2">
                       {(() => {
-                        const visibleCount = 2;
+                        const count = visibleCount;
                         const totalPages = Math.ceil(products.length / visibleCount);
                         return Array.from({ length: totalPages }).map((_, index) => {
                           const pageStartIndex = index * visibleCount;
@@ -453,28 +468,12 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                     />
                   </div>
                 ) : (
-                  // Desktop: Arrows on sides, pagination below
+                  // Desktop: only pagination below; arrows are rendered outside max-w-7xl (see below)
                   <>
-                    {/* Next Button - Left side */}
-                    <FeaturedProductsNavigationArrow
-                      direction="next"
-                      onClick={handleNextProducts}
-                      className="left-[calc(50%-580px)] lg:left-[calc(50%-580px)] md:left-[calc(50%-530px)] top-1/2 -translate-y-1/2 border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
-                      ariaLabel="Next products"
-                    />
-
-                    {/* Previous Button - Right side */}
-                    <FeaturedProductsNavigationArrow
-                      direction="prev"
-                      onClick={handlePreviousProducts}
-                      className="right-[calc(50%-580px)] lg:right-[calc(50%-580px)] md:right-[calc(50%-530px)] top-1/2 -translate-y-1/2 border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
-                      ariaLabel="Previous products"
-                    />
-
                     {/* Pagination Dots */}
                     <div className="flex items-center justify-center gap-2 mt-6">
                       {(() => {
-                        const visibleCount = 3;
+                        const count = visibleCount;
                         const totalPages = Math.ceil(products.length / visibleCount);
                         return Array.from({ length: totalPages }).map((_, index) => {
                           const pageStartIndex = index * visibleCount;
@@ -498,6 +497,25 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                     </div>
                   </>
                 )}
+              </>
+            )}
+          </div>
+            </div>
+            {/* Desktop arrows: direct children of full-viewport wrapper so 50% = viewport center; more middle space */}
+            {!isMobile && products.length > visibleCount && (
+              <>
+                <FeaturedProductsNavigationArrow
+                  direction="next"
+                  onClick={handleNextProducts}
+                  className="absolute left-[max(8px,calc(50%-560px))] md:left-[max(8px,calc(50%-520px))] lg:left-[max(8px,calc(50%-560px))] top-1/2 -translate-y-1/2 border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
+                  ariaLabel="Next products"
+                />
+                <FeaturedProductsNavigationArrow
+                  direction="prev"
+                  onClick={handlePreviousProducts}
+                  className="absolute right-[max(8px,calc(50%-560px))] md:right-[max(8px,calc(50%-520px))] lg:right-[max(8px,calc(50%-560px))] top-1/2 -translate-y-1/2 border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
+                  ariaLabel="Previous products"
+                />
               </>
             )}
           </div>
