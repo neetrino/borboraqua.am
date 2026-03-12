@@ -485,7 +485,7 @@ export function Header({
               <HeaderCartIcon size={20} className="brightness-0" />
               {/* Cart Count Badge */}
               {cartCount > 0 && (
-                <span className="absolute -top-5 -right-4 bg-[#00d1ff] text-white text-[10px] font-bold rounded-full min-w-[16px] h-5 px-1.5 flex items-center justify-center border-2 border-white">
+                <span className="absolute -top-5 -right-4 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-5 px-1.5 flex items-center justify-center border-2 border-white">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}
@@ -619,6 +619,15 @@ function StoreDownloadBadge({
   );
 }
 
+function StoreDownloadBadges({ className = '' }: { className?: string }) {
+  return (
+    <div className={`flex items-center gap-1.5 ${className}`}>
+      <StoreDownloadBadge store="google-play" href={ANDROID_APP_URL} />
+      <StoreDownloadBadge store="app-store" href={IOS_APP_URL} />
+    </div>
+  );
+}
+
 export function Footer({ router, t, isHomePage = false }: FooterProps) {
   return (
     <>
@@ -646,8 +655,8 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
         <div className="absolute inset-0" />
         {/* Content width grows with viewport then approaches max (gets closer on large screens) */}
         <div className="absolute h-[400px] lg:h-[400px] md:h-[400px] sm:h-[350px] left-1/2 top-[200px] lg:top-[200px] md:top-[180px] sm:top-[120px] -translate-x-1/2 w-[95%] md:w-[90%] max-w-[1080px] relative z-10 px-[20px] lg:px-[20px] md:px-[40px] sm:px-[20px]">
-          <div className="absolute content-stretch flex gap-[clamp(50px,7vw,100px)] items-start justify-start left-[calc(50%-16px)] top-[100px] translate-x-[-50%] flex-col md:flex-row sm:flex-col">
-            {/* Column 1: Logo + Description */}
+          <div className="absolute content-stretch flex gap-[clamp(50px,7vw,100px)] items-start justify-start left-[calc(50%+32px)] lg:left-[calc(50%+36px)] top-[100px] translate-x-[-50%] flex-col md:flex-row sm:flex-col">
+            {/* Column 1: Logo + Description + Store badges — մի քիչ ձախ, գծի հետ մի ուղղությամբ */}
             <div className="flex flex-col h-[280px] lg:h-[280px] md:h-[280px] sm:h-auto relative shrink-0 w-[300px] lg:w-[300px] md:w-[45%] sm:w-full gap-[clamp(12px,1.2vw,14px)]">
               <div className="content-stretch flex h-[14px] items-center left-0 top-0 w-[300px] lg:w-[300px] md:w-full sm:w-full">
                 <div className="h-[30px] lg:h-[30px] md:h-[30px] sm:h-[26px] relative shrink-0 w-[100px] lg:w-[100px] md:w-[95px] sm:w-[80px]">
@@ -660,6 +669,10 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                     {t('home.footer.description')}
                   </p>
                 </div>
+              </div>
+              {/* Store badges — ներքևի հատված «Նյու Ակվա» նկարագրության */}
+              <div className="mt-4">
+                <StoreDownloadBadges />
               </div>
             </div>
 
@@ -786,12 +799,6 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
             <div className="relative shrink-0 size-[clamp(28px,2.5vw,32px)] cursor-pointer hover:opacity-80 transition-opacity">
               <img alt="Telegram" className="block max-w-none size-full" src={socialTelegram} />
             </div>
-          </div>
-
-          {/* Store download badges (Figma footer) */}
-          <div className="absolute right-[-30px] lg:right-[-30px] md:right-[12px] top-[310px] lg:top-[310px] md:top-[352px] hidden md:flex items-center gap-1.5">
-            <StoreDownloadBadge store="google-play" href={ANDROID_APP_URL} />
-            <StoreDownloadBadge store="app-store" href={IOS_APP_URL} />
           </div>
         </div>
 

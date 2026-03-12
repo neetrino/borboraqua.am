@@ -1023,7 +1023,7 @@ export function MobileBottomNavigation() {
               />
               {/* Cart Count Badge */}
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#00d1ff] text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1.5 flex items-center justify-center border-2 border-white">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 px-1.5 flex items-center justify-center border-2 border-white">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}

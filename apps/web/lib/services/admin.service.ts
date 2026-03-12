@@ -1371,7 +1371,7 @@ class AdminService {
       attributeIds: allAttributeIds, // All attribute IDs that this product has
       published: product.published,
       featured: (product as any).featured || false,
-      position: (product as any).position ?? null,
+      position: product.position ?? null,
       minimumOrderQuantity: (product as any).minimumOrderQuantity ?? 1,
       orderQuantityIncrement: (product as any).orderQuantityIncrement ?? 1,
       media: Array.isArray(product.media) ? product.media : [],
@@ -2014,7 +2014,7 @@ class AdminService {
             labels: true,
           },
         });
-      });
+      }, { timeout: 30_000 });
 
       // Revalidate cache
       try {
@@ -2105,6 +2105,7 @@ class AdminService {
       }
 
       // Execute everything in a transaction for atomicity and speed
+      // Timeout 30s: product update does many queries (translations, variants, labels, attributes)
       const result = await db.$transaction(async (tx: any) => {
         // Set UTF-8 encoding at the start of transaction to prevent encoding errors
         // This is critical for Armenian and other Unicode characters
@@ -2173,7 +2174,7 @@ class AdminService {
         if (data.minimumOrderQuantity !== undefined) updateData.minimumOrderQuantity = data.minimumOrderQuantity;
         if (data.orderQuantityIncrement !== undefined) updateData.orderQuantityIncrement = data.orderQuantityIncrement;
 
-        const existingPositionRaw = (existing as any).position;
+        const existingPositionRaw = existing.position;
         const existingPosition = Number.isInteger(existingPositionRaw) && existingPositionRaw > 0
           ? existingPositionRaw
           : null;
@@ -2768,7 +2769,7 @@ class AdminService {
             labels: true,
           },
         });
-      });
+      }, { timeout: 30_000 });
 
       // 6. Revalidate cache for this product and related pages
       try {

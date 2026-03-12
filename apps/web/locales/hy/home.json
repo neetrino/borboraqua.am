@@ -14,7 +14,7 @@
     "dailyDose": "լուծումներ՝",
     "of": "մաքուր և",
     "freshness": "որակյալ ջրի համար",
-    "subtitle": "BORBOR AQUA — ընտրություն առողջ կյանքի համար",
+    "subtitle": "BORBOR AQUA — Մաքրություն և թարմություն յուրաքանչյուր կաթիլում:",
     "shopNow": "Գնել հիմա",
     "learnMore": "Իմանալ ավելին"
   },
@@ -44,7 +44,7 @@
     "refreshesThe": "թարմացնում է",
     "bodyAnd": "մարմինը և",
     "restores": "վերականգնում",
-    "descriptionLine1": "Բյուրեղային մաքրություն, որը թարմացնում և",
+    "descriptionLine1": "Բյուրեղայա մաքրություն, որը թարմացնում և",
     "descriptionLine2": "վերականգնում է մարմինը:"
   },
   "cards": {
@@ -93,10 +93,11 @@
   },
   "trustedBy": {
     "title": "ՎՍՏԱՀՈՒՄ ԵՆ",
-    "subtitle": "Արդյունաբերության առաջատար գործընկերներ",
+    "subtitle": "Արտադրության առաջատար գործընկերներ",
     "showFirstPartner": "Ցուցադրել առաջին գործընկերին",
     "showSecondPartner": "Ցուցադրել երկրորդ գործընկերին",
     "showThirdPartner": "Ցուցադրել երրորդ գործընկերին",
+    "showFourthPartner": "Ցուցադրել չորրորդ գործընկերին",
     "showFirstFeaturedProducts": "Ցուցադրել առաջին առաջարկվող ապրանքները",
     "showMiddleFeaturedProducts": "Ցուցադրել միջին առաջարկվող ապրանքները",
     "showLastFeaturedProducts": "Ցուցադրել վերջին առաջարկվող ապրանքները",

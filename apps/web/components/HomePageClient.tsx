@@ -42,12 +42,15 @@ const img13 = "/assets/home/img13.svg";
 
 const img14 = "/assets/home/img14.svg";
 
+const zovcIconeWebp = "/assets/home/zovcIcone.webp";
 // Shared configuration for "Trusted By" logos (used on both desktop and mobile)
 const TRUSTED_BY_LOGOS = [
   { src: imgSas20Logo1, alt: 'Partner Logo 1' },
   { src: kaiserLogo, alt: 'Partner Logo 2' },
   { src: imgLogo1, alt: 'Partner Logo 3' },
+  { src: zovcIconeWebp, alt: 'Partner Logo 4' },
 ];
+const TRUSTED_BY_COUNT = TRUSTED_BY_LOGOS.length;
 const img15 = "/assets/home/img15.svg";
 const img16 = "/assets/home/img16.svg";
 const img18 = "/assets/home/img18.svg";
@@ -116,6 +119,7 @@ export function HomePageClient({
 
   // State for Trusted By section pagination
   const [trustedByIndex, setTrustedByIndex] = useState(0);
+  const [trustedByFading, setTrustedByFading] = useState(false);
 
   // Removed scaling logic - using Tailwind responsive classes instead
   // This prevents zoom issues and conflicts with responsive design
@@ -420,8 +424,7 @@ export function HomePageClient({
       e.stopPropagation();
     }
     setTrustedByIndex((prevIndex) => {
-      // Move to previous logo (0 -> 2, 1 -> 0, 2 -> 1)
-      return prevIndex === 0 ? 2 : prevIndex - 1;
+      return prevIndex === 0 ? TRUSTED_BY_COUNT - 1 : prevIndex - 1;
     });
   };
 
@@ -431,10 +434,27 @@ export function HomePageClient({
       e.stopPropagation();
     }
     setTrustedByIndex((prevIndex) => {
-      // Move to next logo (0 -> 1, 1 -> 2, 2 -> 0)
-      return prevIndex === 2 ? 0 : prevIndex + 1;
+      return prevIndex === TRUSTED_BY_COUNT - 1 ? 0 : prevIndex + 1;
     });
   };
+
+  // Auto-rotate Trusted By logos: 4s interval, fade out → change → fade in (not instant)
+  useEffect(() => {
+    const TRUSTED_BY_AUTO_SCROLL_MS = 4000;
+    const TRUSTED_BY_FADE_MS = 350;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const id = setInterval(() => {
+      setTrustedByFading(true);
+      timeoutId = setTimeout(() => {
+        setTrustedByIndex((prev) => (prev === TRUSTED_BY_COUNT - 1 ? 0 : prev + 1));
+        setTrustedByFading(false);
+      }, TRUSTED_BY_FADE_MS);
+    }, TRUSTED_BY_AUTO_SCROLL_MS);
+    return () => {
+      clearInterval(id);
+      clearTimeout(timeoutId);
+    };
+  }, []);
 
   const handleNextProducts = (e?: React.MouseEvent) => {
     if (e) {
@@ -876,8 +896,8 @@ export function HomePageClient({
        
 
 
-        {/* Mobile Hero Text — կենտրոն, բոլոր տեքստերը սպիտակ */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-1/2 top-[241px] w-full max-w-[380px] px-6 z-10">
+        {/* Mobile Hero Text — կենտրոն; 729+ մի քիչ էլ ներքև */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-1/2 top-[272px] min-[729px]:top-[340px] w-full max-w-[380px] px-6 z-10">
           <div className="flex flex-col font-['Montserrat',sans-serif] justify-center text-center leading-[40px] relative shrink-0 text-[34px] text-white w-full">
             <p className="mb-0 font-black hero-headline-underline">{t('home.hero.your')}</p>
             <p className="mb-0 font-light hero-headline-underline">{t('home.hero.dailyDose')}</p>
@@ -889,8 +909,8 @@ export function HomePageClient({
         {/* Mobile Hero Text Bottom Gradient Overlay */}
 
 
-        {/* Mobile Experience Purity Label — մեջտեղ, սպիտակ */}
-        <div className="-translate-x-1/2 absolute content-stretch flex gap-[12px] items-center justify-center left-1/2 top-[221px] w-full max-w-[380px] px-6 z-[10]">
+        {/* Mobile Experience Purity Label — մեջտեղ, սպիտակ; 729+ մի քիչ էլ ներքև */}
+        <div className="-translate-x-1/2 absolute content-stretch flex gap-[12px] items-center justify-center left-1/2 top-[252px] min-[729px]:top-[320px] w-full max-w-[380px] px-6 z-[10]">
           <div className="bg-white h-[2px] shrink-0 w-[48px]" />
           <div className="content-stretch flex flex-col items-start relative shrink-0">
             <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[14px] text-white tracking-[1.4px] uppercase whitespace-nowrap">
@@ -899,8 +919,8 @@ export function HomePageClient({
           </div>
         </div>
 
-        {/* Mobile Subtitle — սպիտակ */}
-        <div className="absolute content-stretch flex flex-col items-center justify-center left-[32px] right-[32px] top-[414px]">
+        {/* Mobile Subtitle — սպիտակ; 729+ մի քիչ էլ ներքև */}
+        <div className="absolute content-stretch flex flex-col items-center justify-center left-[32px] right-[32px] top-[448px] min-[729px]:top-[520px]">
           <div className="flex flex-col font-['Inter',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[18px] text-white text-center break-words z-[10]">
             <p className="leading-[26px]">{t('home.hero.subtitle')}</p>
           </div>
@@ -909,11 +929,11 @@ export function HomePageClient({
         
 
 
-        {/* Mobile CTA Buttons */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col min-[728px]:flex-row gap-[8px] min-[728px]:gap-[12px] h-[136px] min-[728px]:h-[60px] items-center justify-end left-1/2 pt-[16px] min-[728px]:pt-0 top-[600px] min-[728px]:top-[680px] w-full max-w-[430px] min-[728px]:max-w-[600px] px-4 z-10">
+        {/* Mobile CTA Buttons — 729+ մի քիչ ներքև */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col min-[728px]:flex-row gap-[16px] min-[728px]:gap-[12px] min-[728px]:h-[60px] items-center justify-end left-1/2 pt-[16px] min-[728px]:pt-0 top-[550px] min-[728px]:top-[680px] min-[729px]:top-[740px] w-full max-w-[430px] min-[728px]:max-w-[600px] px-4 z-10">
           <button
             onClick={() => router.push('/products')}
-            className="bg-[#31daff] content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#31daff]/50 hover:scale-105 active:scale-95"
+            className="bg-[#31daff] content-stretch flex flex-col h-[72px] min-[728px]:h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#31daff]/50 hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white whitespace-nowrap">
               <p className="leading-[24px]">{t('home.hero.shopNow')}</p>
@@ -921,7 +941,7 @@ export function HomePageClient({
           </button>
           <button
             onClick={() => router.push('/about')}
-            className="bg-[rgba(0,0,0,0)] border-2 border-white/30 content-stretch flex flex-col h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:shadow-lg hover:shadow-white/20 hover:scale-105 active:scale-95"
+            className="bg-[rgba(0,0,0,0)] border-2 border-white/30 content-stretch flex flex-col h-[72px] min-[728px]:h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:shadow-lg hover:shadow-white/20 hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold h-[19px] justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
               <p className="leading-[24px] whitespace-nowrap">{t('home.hero.learnMore')}</p>
@@ -1085,7 +1105,7 @@ export function HomePageClient({
 
         {/* Mobile Trusted By Logo - single logo on mobile, 2 logos on tablet (728px+) */}
         {/* Mobile: Single logo */}
-        <div className="-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[2600px] min-[728px]:hidden w-full z-0">
+        <div className={`-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[2600px] min-[728px]:hidden w-full z-0 transition-opacity duration-300 ${trustedByFading ? 'opacity-0' : 'opacity-100'}`}>
           <div className="h-[72px] relative shrink-0 w-[260px]">
             <img
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
@@ -1096,7 +1116,7 @@ export function HomePageClient({
           </div>
         </div>
         {/* Tablet: 2 logos grid from 728px - no arrows */}
-        <div className="-translate-x-1/2 absolute content-stretch grid grid-cols-2 gap-4 items-center justify-center left-1/2 top-[2600px] min-[728px]:top-[2900px] hidden min-[728px]:grid xl:hidden w-full max-w-[600px] z-0">
+        <div className={`-translate-x-1/2 absolute content-stretch grid grid-cols-2 gap-4 items-center justify-center left-1/2 top-[2600px] min-[728px]:top-[2900px] hidden min-[728px]:grid xl:hidden w-full max-w-[600px] z-0 transition-opacity duration-300 ${trustedByFading ? 'opacity-0' : 'opacity-100'}`}>
           <div className="h-[72px] relative shrink-0 w-auto flex items-center justify-center">
             <img
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
@@ -1107,9 +1127,9 @@ export function HomePageClient({
           </div>
           <div className="h-[72px] relative shrink-0 w-auto flex items-center justify-center">
             <img
-              alt={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % 3].alt}
+              alt={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % TRUSTED_BY_COUNT].alt}
               className="max-w-none object-contain pointer-events-none h-full w-auto"
-              src={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % 3].src}
+              src={TRUSTED_BY_LOGOS[(trustedByIndex + 1) % TRUSTED_BY_COUNT].src}
               loading="eager"
             />
           </div>
@@ -1183,6 +1203,16 @@ export function HomePageClient({
             }`}
             aria-label={t('home.trustedBy.showThirdPartner')}
           />
+          <button
+            type="button"
+            onClick={() => setTrustedByIndex(3)}
+            className={`rounded-full transition-all duration-300 ${
+              trustedByIndex === 3
+                ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
+            }`}
+            aria-label={t('home.trustedBy.showFourthPartner')}
+          />
         </div>
 
         {/* Tablet: Pagination dots only (728px - xl) */}
@@ -1216,6 +1246,16 @@ export function HomePageClient({
                 : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
             }`}
             aria-label={t('home.trustedBy.showThirdPartner')}
+          />
+          <button
+            type="button"
+            onClick={() => setTrustedByIndex(3)}
+            className={`rounded-full transition-all duration-300 ${
+              trustedByIndex === 3
+                ? 'bg-[#00d1ff] h-[8px] w-[20px]'
+                : 'bg-white size-[8px] hover:bg-[#00d1ff]/50'
+            }`}
+            aria-label={t('home.trustedBy.showFourthPartner')}
           />
         </div>
 
@@ -1267,9 +1307,9 @@ export function HomePageClient({
        
       
 
-      {/* Hero Section - Main Content */}
-      <div className="absolute content-stretch flex items-end justify-center left-[calc(50%+0.5px)] px-[20px] md:px-[16px] sm:px-[12px] top-[480px] lg:top-[520px] xl:top-[480px] md:top-[400px] sm:top-[280px] translate-x-[-50%] w-[800px] lg:w-[800px] md:w-[90%] sm:w-[95%]">
-        <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-center justify-center relative shrink-0 w-[800px] lg:w-[800px] md:w-full sm:w-full">
+      {/* Hero Section - Main Content; միայն տեքստը մի քիչ էլ ներքև (pt + button -mt) */}
+      <div className="absolute content-stretch flex items-end justify-center left-[calc(50%+0.5px)] px-[20px] md:px-[16px] sm:px-[12px] top-[480px] sm:top-[280px] md:top-[500px] min-[729px]:top-[500px] lg:top-[520px] xl:top-[480px] translate-x-[-50%] w-[800px] lg:w-[800px] md:w-[90%] sm:w-[95%] z-20">
+        <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-center justify-center relative shrink-0 w-[800px] lg:w-[800px] md:w-full sm:w-full pt-4 min-[729px]:pt-6 max-lg:min-[729px]:pt-6">
           {/* Experience Purity Label */}
           <div className="content-stretch flex gap-[10px] lg:gap-[10px] md:gap-[10px] sm:gap-[8px] items-center relative shrink-0 w-full">
             <div className="bg-white h-[2px] lg:h-[2px] md:h-[1.5px] sm:h-[1.5px] shrink-0 w-[40px] lg:w-[40px] md:w-[40px] sm:w-[32px]" />
@@ -1713,56 +1753,30 @@ export function HomePageClient({
               <p className="leading-[14px] lg:leading-[16px] md:leading-[14px] sm:leading-[12px]">{t('home.trustedBy.subtitle')}</p>
             </div>
           </div>
-          {/* Partner Logos - Show all 3 at once, active one is larger */}
-          <div className="absolute content-stretch flex items-center justify-center gap-[40px] lg:gap-[50px] md:gap-[40px] sm:gap-[30px] left-[calc(50%+0.5px)] top-[68px] lg:top-[85px] md:top-[96px] sm:top-[96px] translate-x-[-50%] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%] h-[104px] lg:h-[130px] md:h-[144px] sm:h-[144px]">
-            {/* Logo 0 - sas20 logo */}
-            <div 
-              className={`relative shrink-0 transition-all duration-300 cursor-pointer ${
-                trustedByIndex === 0 
-                  ? 'h-[104px] w-[128px] lg:h-[130px] lg:w-[160px] scale-110' 
-                  : 'h-[72px] w-[90px] lg:h-[90px] lg:w-[112px] opacity-70 hover:opacity-90'
-              }`}
-              onClick={() => setTrustedByIndex(0)}
-            >
-              <img 
-                alt="Partner Logo" 
-                className="absolute inset-0 max-w-none object-contain pointer-events-none size-full" 
-                src={imgSas20Logo1}
-                loading="lazy"
-              />
-            </div>
-            {/* Logo 1 - image6e */}
-            <div 
-              className={`relative shrink-0 transition-all duration-300 cursor-pointer ${
-                trustedByIndex === 1 
-                  ? 'h-[104px] w-[160px] lg:h-[130px] lg:w-[200px] scale-110' 
-                  : 'h-[72px] w-[110px] lg:h-[90px] lg:w-[138px] opacity-70 hover:opacity-90'
-              }`}
-              onClick={() => setTrustedByIndex(1)}
-            >
-              <img 
-                alt="Partner Logo" 
-                className="absolute inset-0 max-w-none object-contain pointer-events-none size-full" 
-                src={kaiserLogo}
-                loading="lazy"
-              />
-            </div>
-            {/* Logo 2 - logo 1 */}
-            <div 
-              className={`relative shrink-0 transition-all duration-300 cursor-pointer ${
-                trustedByIndex === 2 
-                  ? 'h-[104px] w-[176px] lg:h-[130px] lg:w-[220px] scale-110' 
-                  : 'h-[72px] w-[123px] lg:h-[90px] lg:w-[154px] opacity-70 hover:opacity-90'
-              }`}
-              onClick={() => setTrustedByIndex(2)}
-            >
-              <img 
-                alt="Partner Logo" 
-                className="absolute inset-0 max-w-none object-contain pointer-events-none size-full" 
-                src={imgLogo1}
-                loading="lazy"
-              />
-            </div>
+          {/* Partner Logos - Desktop: show 3 at a time (prev, current, next) */}
+          <div className={`absolute content-stretch flex items-center justify-center gap-[40px] lg:gap-[50px] md:gap-[40px] sm:gap-[30px] left-[calc(50%+0.5px)] top-[68px] lg:top-[85px] md:top-[96px] sm:top-[96px] translate-x-[-50%] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%] h-[104px] lg:h-[130px] md:h-[144px] sm:h-[144px] transition-opacity duration-300 ${trustedByFading ? 'opacity-0' : 'opacity-100'}`}>
+            {[
+              (trustedByIndex - 1 + TRUSTED_BY_COUNT) % TRUSTED_BY_COUNT,
+              trustedByIndex,
+              (trustedByIndex + 1) % TRUSTED_BY_COUNT,
+            ].map((logoIndex) => (
+              <div
+                key={logoIndex}
+                className={`relative shrink-0 transition-all duration-300 cursor-pointer ${
+                  logoIndex === trustedByIndex
+                    ? 'h-[104px] w-[160px] lg:h-[130px] lg:w-[200px] scale-110'
+                    : 'h-[72px] w-[110px] lg:h-[90px] lg:w-[138px] opacity-70 hover:opacity-90'
+                }`}
+                onClick={() => setTrustedByIndex(logoIndex)}
+              >
+                <img
+                  alt={TRUSTED_BY_LOGOS[logoIndex].alt}
+                  className="absolute inset-0 max-w-none object-contain pointer-events-none size-full"
+                  src={TRUSTED_BY_LOGOS[logoIndex].src}
+                  loading="lazy"
+                />
+              </div>
+            ))}
           </div>
           {/* Pagination Dots - visible by default (gray when inactive) */}
           <div className="absolute content-stretch flex h-[39px] lg:h-[49px] items-center justify-center left-[24px] pt-[26px] lg:pt-[32px] right-[24px] top-[162px] lg:top-[202px] z-[100]">
@@ -1797,11 +1811,21 @@ export function HomePageClient({
                 }`}
                 aria-label={t('home.trustedBy.showThirdPartner')}
               />
+              <button
+                type="button"
+                onClick={() => setTrustedByIndex(3)}
+                className={`rounded-[9999px] transition-all duration-300 ${
+                  trustedByIndex === 3
+                    ? 'bg-[#00d1ff] h-[8px] w-[19px] lg:h-[10px] lg:w-[24px]'
+                    : 'bg-gray-400 size-[8px] lg:size-[10px] hover:bg-[#00d1ff]/60 cursor-pointer'
+                }`}
+                aria-label={t('home.trustedBy.showFourthPartner')}
+              />
             </div>
           </div>
 
           {/* Navigation Arrows - inset shrinks on larger screens so gap between arrows widens (was: narrows) */}
-          <div className="absolute content-stretch flex items-center justify-between left-[clamp(80px,134px-5vw,134px)] right-[clamp(80px,134px-5vw,134px)] top-[calc(50%+40px)] lg:top-[calc(50%+50.25px)] translate-y-[-50%] z-[100]">
+          <div className="absolute content-stretch flex items-center justify-between left-[clamp(50px,134px-6vw,134px)] right-[clamp(50px,134px-6vw,134px)] top-[calc(50%+40px)] lg:top-[calc(50%+50.25px)] translate-y-[-50%] z-[100]">
             {/* Next Button - Left side (աջ տանի) */}
             <FeaturedProductsNavigationArrow
               direction="next"
