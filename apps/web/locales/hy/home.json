@@ -25,6 +25,18 @@
     "adding": "Ավելացվում է...",
     "addToCart": "Ավելացնել զամբյուղ"
   },
+  "featuredCategories": {
+    "title": "ԿԱՏԵԳՈՐԻԱՆԵՐ",
+    "sectionLabel": "Առաջարկվող կատեգորիաներ",
+    "items": {
+      "smallPack": "0.25L / 0.33L",
+      "mediumPack": "0.5L",
+      "largePack": "1L",
+      "bulkPack": "5L / 19L",
+      "coolers": "Սառեցուցիչներ",
+      "accessories": "Աքսեսուարներ"
+    }
+  },
   "waterEnergy": {
     "title": "ՋՐԻ ԷՆԵՐԳԻԱ",
     "orderNow": "Պատվիրել հիմա",
@@ -69,6 +81,12 @@
       "day": "ՕՐ",
       "source": "Մաքուր հանքանյութեր"
     }
+  },
+  "bottleShowcase": {
+    "titleLine1": "ԲՆՈՒԹՅԱՆ",
+    "titleLine2": "ԿԱՏԱՐԵԼՈՒԹՅՈՒՆԸ",
+    "subtitle": "Մաքուր պահեր ժամանակի մեջ",
+    "imageAlt": "Borbor Aqua շիշ"
   },
   "whyChooseUs": {
     "title": "ԻՆՉՈՒ՞ ԸՆՏՐԵԼ ՄԵԶ",

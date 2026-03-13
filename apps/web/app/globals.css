@@ -419,7 +419,7 @@
 
   /* Trusted By shape — մեկ տեղից. էջի բարձրությունը հաշվարկվում է ըստ shape-ի */
   .home-mobile-trusted-by-root {
-    --trusted-by-top: 2460px;
+    --trusted-by-top: 2823px;
     --trusted-by-shape-h: 420px;
     min-height: calc(var(--trusted-by-top) + var(--trusted-by-shape-h));
   }

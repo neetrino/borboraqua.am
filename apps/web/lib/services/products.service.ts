@@ -17,6 +17,7 @@ interface ProductFilters {
   category?: string;
   search?: string;
   filter?: string;
+  sizes?: string;
   minPrice?: number;
   maxPrice?: number;
   sort?: string;
@@ -120,6 +121,7 @@ class ProductsService {
       category,
       search,
       filter,
+      sizes,
       minPrice,
       maxPrice,
       sort = "createdAt",
@@ -188,13 +190,18 @@ class ProductsService {
       ];
     }
 
-    // Add category filter
+    // Add category filter (supports comma-separated slugs for grouped cards)
     if (category) {
-      let categoryDoc = await db.category.findFirst({
+      const requestedCategorySlugs = category
+        .split(",")
+        .map((slug) => slug.trim())
+        .filter(Boolean);
+
+      const localizedCategoryDocs = await db.category.findMany({
         where: {
           translations: {
             some: {
-              slug: category,
+              slug: { in: requestedCategorySlugs },
               locale: lang,
             },
           },
@@ -203,33 +210,45 @@ class ProductsService {
         },
       });
 
-      // If category not found in current language, try to find it in other languages (fallback)
-      if (!categoryDoc) {
-        categoryDoc = await db.category.findFirst({
+      let categoryDocs = localizedCategoryDocs;
+
+      // If some categories are not found in current language, try to find them in any language.
+      if (categoryDocs.length !== requestedCategorySlugs.length) {
+        const fallbackCategoryDocs = await db.category.findMany({
           where: {
             translations: {
               some: {
-                slug: category,
+                slug: { in: requestedCategorySlugs },
               },
             },
             published: true,
             deletedAt: null,
           },
         });
-        
+
+        const mergedCategoryDocs = new Map<string, (typeof fallbackCategoryDocs)[number]>();
+        [...categoryDocs, ...fallbackCategoryDocs].forEach((doc) => {
+          mergedCategoryDocs.set(doc.id, doc);
+        });
+        categoryDocs = Array.from(mergedCategoryDocs.values());
       }
 
-      if (categoryDoc) {
-        // Get all child categories (subcategories) recursively
-        const childCategoryIds = await this.getAllChildCategoryIds(categoryDoc.id);
-        const allCategoryIds = [categoryDoc.id, ...childCategoryIds];
-        
-        // Build OR conditions for all categories (parent + children)
+      if (categoryDocs.length > 0) {
+        const allCategoryIdsSet = new Set<string>();
+
+        for (const categoryDoc of categoryDocs) {
+          allCategoryIdsSet.add(categoryDoc.id);
+          const childCategoryIds = await this.getAllChildCategoryIds(categoryDoc.id);
+          childCategoryIds.forEach((childId) => allCategoryIdsSet.add(childId));
+        }
+
+        const allCategoryIds = Array.from(allCategoryIdsSet);
+
         const categoryConditions = allCategoryIds.flatMap((catId: string) => [
           { primaryCategoryId: catId },
           { categoryIds: { has: catId } },
         ]);
-        
+
         if (where.OR) {
           where.AND = [
             { OR: where.OR },
@@ -252,6 +271,73 @@ class ProductsService {
             totalPages: 0,
           },
         };
+      }
+    }
+
+    // Add size filter from products page URL params.
+    if (sizes) {
+      const requestedSizes = sizes
+        .split(",")
+        .map((size) => size.trim().toLowerCase())
+        .filter(Boolean);
+
+      if (requestedSizes.length > 0) {
+        const sizeConditions = requestedSizes.flatMap((size) => ([
+          {
+            variants: {
+              some: {
+                options: {
+                  some: {
+                    OR: [
+                      {
+                        attributeValue: {
+                          value: {
+                            equals: size,
+                            mode: "insensitive",
+                          },
+                          attribute: { key: "size" },
+                        },
+                      },
+                      {
+                        attributeValue: {
+                          translations: {
+                            some: {
+                              label: {
+                                equals: size,
+                                mode: "insensitive",
+                              },
+                            },
+                          },
+                          attribute: { key: "size" },
+                        },
+                      },
+                      {
+                        attributeKey: "size",
+                        value: {
+                          equals: size,
+                          mode: "insensitive",
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          {
+            variants: {
+              some: {
+                attributes: {
+                  path: ["size"],
+                  array_contains: [size],
+                },
+              },
+            },
+          },
+        ]));
+
+        const existingAnd = Array.isArray(where.AND) ? where.AND : [];
+        where.AND = [...existingAnd, { OR: sizeConditions }];
       }
     }
 

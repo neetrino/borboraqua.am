@@ -25,6 +25,18 @@
     "adding": "Adding...",
     "addToCart": "Add to Cart"
   },
+  "featuredCategories": {
+    "title": "CATEGORIES",
+    "sectionLabel": "Featured categories",
+    "items": {
+      "smallPack": "0.25L / 0.33L",
+      "mediumPack": "0.5L",
+      "largePack": "1L",
+      "bulkPack": "5L / 19L",
+      "coolers": "Coolers",
+      "accessories": "Accessories"
+    }
+  },
   "waterEnergy": {
     "title": "WATER ENERGY",
     "orderNow": "Order Now",
@@ -69,6 +81,12 @@
       "day": "DAY",
       "source": "Clean Minerals"
     }
+  },
+  "bottleShowcase": {
+    "titleLine1": "NATURE'S",
+    "titleLine2": "PERFECTION",
+    "subtitle": "Pure moments in time",
+    "imageAlt": "Borbor Aqua bottle"
   },
   "whyChooseUs": {
     "title": "WHY CHOOSE US",
