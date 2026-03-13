@@ -1907,9 +1907,12 @@ class AdminService {
 
             const price = typeof variant.price === 'number' ? variant.price : parseFloat(String(variant.price));
             const stock = typeof variant.stock === 'number' ? variant.stock : parseInt(String(variant.stock), 10);
-            const compareAtPrice = variant.compareAtPrice !== undefined && variant.compareAtPrice !== null && variant.compareAtPrice !== ''
-              ? (typeof variant.compareAtPrice === 'number' ? variant.compareAtPrice : parseFloat(String(variant.compareAtPrice)))
-              : undefined;
+            // Explicit null when empty so DB stores no discount (Prisma create accepts null)
+            const rawCompare = variant.compareAtPrice;
+            const compareAtPrice =
+              rawCompare !== undefined && rawCompare !== null && String(rawCompare).trim() !== ''
+                ? (typeof rawCompare === 'number' ? rawCompare : parseFloat(String(rawCompare)))
+                : null;
 
             // Generate unique SKU for this variant
             const uniqueSku = await this.generateUniqueSku(
@@ -2738,9 +2741,12 @@ class AdminService {
 
               const price = typeof variant.price === 'number' ? variant.price : parseFloat(String(variant.price));
               const stock = typeof variant.stock === 'number' ? variant.stock : parseInt(String(variant.stock), 10);
-              const compareAtPrice = variant.compareAtPrice !== undefined && variant.compareAtPrice !== null && variant.compareAtPrice !== ''
-                ? (typeof variant.compareAtPrice === 'number' ? variant.compareAtPrice : parseFloat(String(variant.compareAtPrice)))
-                : undefined;
+              // Explicit null when empty so DB is updated and discount is cleared (Prisma ignores undefined)
+              const rawCompare = variant.compareAtPrice;
+              const compareAtPrice =
+                rawCompare !== undefined && rawCompare !== null && String(rawCompare).trim() !== ''
+                  ? (typeof rawCompare === 'number' ? rawCompare : parseFloat(String(rawCompare)))
+                  : null;
 
               if (isNaN(price) || price < 0) {
                 throw new Error(`Invalid price value: ${variant.price}`);

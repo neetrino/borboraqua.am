@@ -14,6 +14,9 @@ import { SearchDropdown } from './SearchDropdown';
 
 import { Header, Footer, Button, addToCart, FeaturedProductCard, type FeaturedProduct, FeaturedProductsNavigationArrow } from './icons/global/global';
 import { DraggableBulb } from '../components/DraggableBulb';
+import { MobileFeaturedCategories } from './MobileFeaturedCategories';
+import { MobileBottleShowcase } from './MobileBottleShowcase';
+import { DesktopFeaturedCategories } from './DesktopFeaturedCategories';
 
 // Local image paths - Images stored in public/assets/home/
 const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
@@ -525,7 +528,7 @@ export function HomePageClient({
   return (
     <div className="w-full bg-white overflow-x-hidden">
       {/* Mobile / Tablet Version - render only on touch phone/tablet devices */}
-      <div className={`${isTouchPhoneOrTabletLayout ? 'block' : 'hidden'} home-mobile-trusted-by-root bg-white relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden max-w-full`}>
+      <div className={`${isTouchPhoneOrTabletLayout ? 'block' : 'hidden'} home-mobile-trusted-by-root bg-transparent relative w-full max-w-[430px] sm:max-w-none mx-auto min-h-screen overflow-x-hidden max-w-full`}>
         {/* Mobile Header (hidden when menu/search popups are open) - same background as TopHeaderBar */}
         {!showMobileMenu && !showSearchModal && (
         <div className="sticky top-0 left-0 right-0 z-50 flex items-center justify-between px-3 pt-3 pb-1 max-w-full border-b border-black/5 mobile-header-bg">
@@ -823,7 +826,7 @@ export function HomePageClient({
           className="absolute left-0 right-0 w-full z-0"
           style={{
             top: '860px',
-            height: '1620px',
+            height: 'calc(var(--trusted-by-top) - 860px)',
             background: 'linear-gradient(to bottom,rgb(99, 169, 209) 0%, #6badd2 6%,rgb(167, 209, 231) 14%,rgb(186, 217, 234) 28%, #c8e4f5 45%, #dceef9 62%,rgb(166, 209, 233) 100%)',
           }}
           aria-hidden
@@ -930,28 +933,28 @@ export function HomePageClient({
 
 
         {/* Mobile CTA Buttons — 729+ մի քիչ ներքև */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col min-[728px]:flex-row gap-[16px] min-[728px]:gap-[12px] min-[728px]:h-[60px] items-center justify-end left-1/2 pt-[16px] min-[728px]:pt-0 top-[550px] min-[728px]:top-[680px] min-[729px]:top-[740px] w-full max-w-[430px] min-[728px]:max-w-[600px] px-4 z-10">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col min-[728px]:flex-row gap-[14px] min-[728px]:gap-[12px] min-[728px]:h-[60px] items-center justify-end left-1/2 pt-[12px] min-[728px]:pt-0 top-[525px] min-[728px]:top-[590px] min-[729px]:top-[630px] w-full max-w-[430px] min-[728px]:max-w-[600px] px-4 z-10">
           <button
             onClick={() => router.push('/products')}
-            className="bg-[#31daff] content-stretch flex flex-col h-[72px] min-[728px]:h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#31daff]/50 hover:scale-105 active:scale-95"
+            className="bg-[#31daff] content-stretch flex flex-col h-[62px] min-[728px]:h-[60px] items-center justify-center px-[34px] min-[728px]:px-[32px] py-[12px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[340px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#31daff]/50 hover:scale-105 active:scale-95"
           >
-            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white whitespace-nowrap">
-              <p className="leading-[24px]">{t('home.hero.shopNow')}</p>
+            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[15px] text-white whitespace-nowrap">
+              <p className="leading-[22px]">{t('home.hero.shopNow')}</p>
             </div>
           </button>
           <button
             onClick={() => router.push('/about')}
-            className="bg-[rgba(0,0,0,0)] border-2 border-white/30 content-stretch flex flex-col h-[72px] min-[728px]:h-[60px] items-center justify-center px-[40px] min-[728px]:px-[32px] py-[16px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[368px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:shadow-lg hover:shadow-white/20 hover:scale-105 active:scale-95"
+            className="bg-[rgba(0,0,0,0)] border-2 border-white/30 content-stretch flex flex-col h-[62px] min-[728px]:h-[60px] items-center justify-center px-[34px] min-[728px]:px-[32px] py-[12px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[340px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-white/10 hover:border-white/50 hover:shadow-lg hover:shadow-white/20 hover:scale-105 active:scale-95"
           >
-            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold h-[19px] justify-center leading-[0] not-italic relative shrink-0 text-[16px] text-white">
-              <p className="leading-[24px] whitespace-nowrap">{t('home.hero.learnMore')}</p>
+            <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold h-[18px] justify-center leading-[0] not-italic relative shrink-0 text-[15px] text-white">
+              <p className="leading-[22px] whitespace-nowrap">{t('home.hero.learnMore')}</p>
             </div>
           </button>
         </div>
 
 
         {/* Mobile Featured Products – նույն գույները ինչ մնացած section / app-page-background */}
-       
+        <MobileFeaturedCategories />
 
         {/* Mobile Featured Products Section */}
         <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[6px] items-center justify-center left-1/2 top-[923px] w-full max-w-[429px] px-4 z-10">
@@ -1043,49 +1046,51 @@ export function HomePageClient({
           </button>
         </div>
         {/* Mobile / Tablet Stats Cards — պլանշետում ցածր, overlap չլինի; img5/img6 ինչպես desktop */}
-        <div className="-translate-x-1/2 absolute left-1/2 top-[1900px] min-[728px]:top-[2210px] w-full max-w-[calc(100%-2rem)] min-[728px]:max-w-[min(92vw,960px)] max-lg:min-[729px]:max-w-[min(82vw,760px)] xl:max-w-[700px] px-4">
+        <div className="-translate-x-1/2 absolute left-1/2 top-[1865px] min-[728px]:top-[2210px] w-full max-w-[calc(100%-2rem)] min-[728px]:max-w-[min(92vw,960px)] max-lg:min-[729px]:max-w-[min(82vw,760px)] xl:max-w-[700px] px-4">
           <div className="flex gap-[8px] min-[728px]:gap-[12px] items-start content-stretch">
-            {/* Side Image Left (img5) */}
-            <div className="h-[200px] min-[728px]:h-[210px] w-[96px] min-[728px]:w-[132px] min-[729px]:max-[1024px]:w-[156px] shrink-0 rounded-[24px] min-[728px]:rounded-[30px] overflow-hidden">
+            {/* Side Image Left (img5) — մոբայլում թաքցված */}
+            <div className="hidden min-[728px]:block h-[200px] min-[728px]:h-[210px] w-[96px] min-[728px]:w-[132px] min-[729px]:max-[1024px]:w-[156px] shrink-0 rounded-[24px] min-[728px]:rounded-[30px] overflow-hidden">
               <img alt="" className="h-full w-full object-cover" src={img5} loading="lazy" />
             </div>
-            <div className="h-[200px] min-[728px]:h-[210px] relative flex-1 min-w-0 min-[729px]:max-[1024px]:flex-none min-[729px]:max-[1024px]:w-[calc(100%-168px)]">
-            <div className="absolute bg-[#1ac0fd] inset-0 rounded-[30px]" />
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[70%_6%_18%_40%] min-[728px]:inset-[65%_6%_18%_40%] justify-center leading-[0] text-[34px] min-[728px]:text-[42px] text-center text-white tracking-[-0.9px] uppercase">
+            <div className="h-[260px] min-[728px]:h-[210px] relative flex-1 min-w-0 min-[729px]:max-[1024px]:flex-none min-[729px]:max-[1024px]:w-[calc(100%-168px)] overflow-hidden rounded-l-full rounded-r-[34px] min-[728px]:rounded-r-[30px]">
+            <div className="absolute bg-white inset-0  rounded-r-[34px] min-[728px]:rounded-r-[30px]" />
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[70%_6%_18%_30%] min-[728px]:inset-[65%_6%_18%_30%] justify-center leading-[0] text-[34px] min-[728px]:text-[42px] text-center text-[#1ac0fd] tracking-[-0.9px] uppercase">
               <p className="leading-[31px] min-[728px]:leading-[38px] whitespace-pre-wrap">{t('home.cards.pureSpringWater.percentage')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[6%_10%_40%_10%] min-[728px]:inset-[6%_6%_30%_6%] justify-center leading-[20px] min-[728px]:leading-[24px] text-[16px] min-[728px]:text-[20px] text-white text-left tracking-[-0.9px] uppercase break-words">
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[6%_10%_40%_18%] min-[728px]:inset-[6%_6%_30%_18%] justify-center leading-[20px] min-[728px]:leading-[24px] text-[16px] min-[728px]:text-[20px] text-[#0f172a] text-left tracking-[-0.9px] uppercase break-words">
               <p className="mb-0">{t('home.cards.pureSpringWater.pure')}</p>
               <p className="mb-0">{t('home.cards.pureSpringWater.spring')}</p>
               <p className="mb-0">{t('home.cards.pureSpringWater.water')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light mb-0">{t('home.cards.pureSpringWater.from')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light">{t('home.cards.pureSpringWater.armenia')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[82%_8%_6%_40%] min-[728px]:inset-[80%_8%_6%_40%] italic justify-center leading-[0] text-[10px] min-[728px]:text-[12px] text-right text-white">
+            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[82%_8%_6%_40%] min-[728px]:inset-[80%_8%_6%_40%] italic justify-center leading-[0] text-[10px] min-[728px]:text-[12px] text-right text-[#1ac0fd]">
               <p className="leading-[15px] min-[728px]:leading-[18px] whitespace-pre-wrap">{t('home.cards.pureSpringWater.source')}</p>
             </div>
           </div>
           </div>
         </div>
-        <div className="-translate-x-1/2 absolute left-1/2 top-[2150px] min-[728px]:top-[2470px] w-full max-w-[calc(100%-2rem)] min-[728px]:max-w-[min(92vw,960px)] max-lg:min-[729px]:max-w-[min(82vw,760px)] xl:max-w-[700px] px-4">
+        <MobileBottleShowcase imageSrc={img17} />
+        <div className="-translate-x-1/2 absolute left-1/2 top-[2505px] min-[728px]:top-[2470px] w-full max-w-[calc(100%-2rem)] min-[728px]:max-w-[min(92vw,960px)] max-lg:min-[729px]:max-w-[min(82vw,760px)] xl:max-w-[700px] px-4">
           <div className="flex gap-[8px] min-[728px]:gap-[12px] items-start content-stretch">
-          <div className="h-[200px] min-[728px]:h-[210px] relative flex-1 min-w-0 min-[729px]:max-[1024px]:flex-none min-[729px]:max-[1024px]:w-[calc(100%-168px)]">
-            <div className="absolute bg-white inset-0 rounded-[30px]" />
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[65%_6%_18%_26%] min-[728px]:inset-[60%_6%_18%_26%] justify-center leading-[0] text-[#0f172a] text-[34px] min-[728px]:text-[42px] text-center tracking-[-0.9px] uppercase">
+            
+          <div className="h-[260px] min-[728px]:h-[210px] relative flex-1 min-w-0 min-[729px]:max-[1024px]:flex-none min-[729px]:max-[1024px]:w-[calc(100%-168px)] overflow-hidden rounded-l-[34px] ">
+            <div className="absolute bg-white inset-0 rounded-l-[34px] rounded-tr-[34px] rounded-br-[120px]" />
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[-45%_6%_18%_26%] min-[728px]:inset-[60%_6%_18%_26%] justify-center leading-[0] text-[#0f172a] text-[34px] min-[728px]:text-[42px] text-center tracking-[-0.9px] uppercase">
               <p className="leading-[31px] min-[728px]:leading-[38px] whitespace-pre-wrap">{t('home.cards.balancedHydration.percentage')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[6%_10%_40%_10%] min-[728px]:inset-[6%_6%_30%_6%] justify-center leading-[20px] min-[728px]:leading-[24px] text-[#1ac0fd] text-[16px] min-[728px]:text-[20px] tracking-[-0.9px] uppercase break-words">
+            <div className="absolute flex flex-col font-['Montserrat:Black',sans-serif] font-black inset-[65%_10%_40%_10%] min-[728px]:inset-[6%_6%_30%_6%] justify-center leading-[20px] min-[728px]:leading-[24px] text-[#1ac0fd] text-[16px] min-[728px]:text-[20px] tracking-[-0.9px] uppercase break-words">
               <p className="mb-0">{t('home.cards.balancedHydration.balanced')}</p>
               <p className="mb-0">{t('home.cards.balancedHydration.hydration')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light mb-0">{t('home.cards.balancedHydration.every')}</p>
               <p className="font-['Montserrat:Light',sans-serif] font-light">{t('home.cards.balancedHydration.day')}</p>
             </div>
-            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[84.65%_8.65%_6.46%_44.71%] min-[728px]:inset-[82%_8%_6%_44%] italic justify-center leading-[0] text-[#1ac0fd] text-[11px] min-[728px]:text-[13px] text-right">
+            <div className="absolute flex flex-col font-['Inter:Medium_Italic',sans-serif] font-medium inset-[8%_8.65%_38%_44.71%] min-[728px]:inset-[55%_8%_40%_44%] italic justify-center leading-[0] text-[#1ac0fd] text-[11px] min-[728px]:text-[13px] text-right">
               <p className="leading-[18px] min-[728px]:leading-[20px] whitespace-pre-wrap">{t('home.cards.balancedHydration.source')}</p>
             </div>
           </div>
-            {/* Side Image Right (img6) */}
-            <div className="h-[200px] min-[728px]:h-[210px] w-[122px] min-[728px]:w-[132px] min-[729px]:max-[1024px]:w-[156px] shrink-0 rounded-[24px] min-[728px]:rounded-[30px] overflow-hidden">
+            {/* Side Image Right (img6) — մոբայլում թաքցված */}
+            <div className="hidden min-[728px]:block h-[200px] min-[728px]:h-[210px] w-[122px] min-[728px]:w-[132px] min-[729px]:max-[1024px]:w-[156px] shrink-0 rounded-[24px] min-[728px]:rounded-[30px] overflow-hidden">
               <img alt="" className="h-full w-full object-cover" src={img6} loading="lazy" />
             </div>
           </div>
@@ -1095,7 +1100,7 @@ export function HomePageClient({
       
 
         {/* Mobile / Tablet Trusted By Section — պլանշետում ցածր */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-center justify-center left-[calc(50%+0.5px)] top-[2463px] min-[728px]:top-[2760px] w-full max-w-[429px] z-10">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-center justify-center left-[calc(50%+0.5px)] top-[2823px] min-[728px]:top-[2760px] w-full max-w-[429px] z-10">
           <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
             <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
               <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[40px] text-center tracking-[-0.9px] uppercase w-full">
@@ -1117,7 +1122,7 @@ export function HomePageClient({
 
         {/* Mobile Trusted By Logo - single logo on mobile, 2 logos on tablet (728px+) */}
         {/* Mobile: Single logo */}
-        <div className={`-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[2600px] min-[728px]:hidden w-full z-0 transition-opacity duration-300 ${trustedByFading ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`-translate-x-1/2 absolute content-stretch flex items-center justify-center left-1/2 top-[2960px] min-[728px]:hidden w-full z-0 transition-opacity duration-300 ${trustedByFading ? 'opacity-0' : 'opacity-100'}`}>
           <div className="h-[72px] relative shrink-0 w-[260px]">
             <img
               alt={TRUSTED_BY_LOGOS[trustedByIndex].alt}
@@ -1148,7 +1153,7 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Trusted By Navigation - visible only < 728px */}
-        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-1/2 top-[2600px] w-full max-w-[470px] min-[728px]:hidden px-4 z-20">
+        <div className="-translate-x-1/2 absolute content-stretch flex h-[41px] items-center justify-between left-1/2 top-[2960px] w-full max-w-[470px] min-[728px]:hidden px-4 z-20">
           <FeaturedProductsNavigationArrow
             direction="prev"
             onClick={handlePreviousTrustedBy}
@@ -1184,7 +1189,7 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Trusted By Pagination Dots */}
-        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[2700px] min-[728px]:top-[3000px] min-[728px]:hidden">
+        <div className="-translate-x-1/2 absolute flex items-center justify-center gap-[10px] left-1/2 top-[3060px] min-[728px]:top-[3000px] min-[728px]:hidden">
           <button
             type="button"
             onClick={() => setTrustedByIndex(0)}
@@ -1272,7 +1277,7 @@ export function HomePageClient({
         </div>
 
         {/* Mobile/Tablet Spacer — 600px կրճատված (spacer բարձրություն) */}
-        <div className="-translate-x-1/2 absolute left-1/2 top-[2700px] min-[728px]:top-[3150px] w-full h-0 min-[728px]:h-[50px]" />
+        <div className="-translate-x-1/2 absolute left-1/2 top-[3060px] min-[728px]:top-[3150px] w-full h-0 min-[728px]:h-[50px]" />
 
      
 
@@ -1429,6 +1434,7 @@ export function HomePageClient({
           }}
         />
         <div className="absolute h-[870px] lg:h-[870px] md:h-[750px] sm:h-[600px] left-1/2 translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%] top-[160px] lg:top-[160px] md:top-[120px] sm:top-[100px] relative z-10">
+          <DesktopFeaturedCategories />
           {/* Section Header */}
           <div className="absolute content-stretch flex flex-col gap-[14px] lg:gap-[14px] md:gap-[12px] sm:gap-[10px] items-start left-0 lg:left-0 md:left-[16px] sm:left-[12px] right-0 lg:right-0 md:right-[16px] sm:right-[12px] -top-[40px] lg:-top-[40px] md:top-[0px] sm:top-[0px]">
             <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
@@ -1615,8 +1621,8 @@ export function HomePageClient({
           </div>
         </div>
 
-        {/* Side Image Left — mobile-ում նույն հարաբերական դիրքը ինչ desktop (35.71% / 110%) */}
-        <div className="absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[35.71%] lg:left-[350px] md:left-[20.5%] sm:left-[35.71%] top-0 w-[173px] lg:w-[270px] md:w-[25%] sm:w-[27.55%]">
+        {/* Side Image Left (img5) — մոբայլում թաքցված */}
+        <div className="hidden sm:block absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[35.71%] lg:left-[350px] md:left-[20.5%] sm:left-[35.71%] top-0 w-[173px] lg:w-[270px] md:w-[25%] sm:w-[27.55%]">
           <div className="absolute inset-0 rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
               <img alt="Screenshot" className="absolute h-[149.05%] left-[-32.81%] max-w-none top-[-32.36%] w-[132.81%]" src={img5} loading="lazy" />
@@ -1642,8 +1648,8 @@ export function HomePageClient({
           </div>
         </div>
 
-        {/* Side Image Right — mobile-ում նույն հարաբերական դիրքը ինչ desktop (110.2%) */}
-        <div className="absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[110.2%] lg:left-[1080px] md:left-[63.3%] sm:left-[110.2%] top-0 w-[173px] lg:w-[270px] md:w-[25%] sm:w-[27.55%]">
+        {/* Side Image Right (img6) — մոբայլում թաքցված */}
+        <div className="hidden sm:block absolute h-[192px] lg:h-[300px] md:h-[280px] sm:h-[240px] left-[110.2%] lg:left-[1080px] md:left-[63.3%] sm:left-[110.2%] top-0 w-[173px] lg:w-[270px] md:w-[25%] sm:w-[27.55%]">
           <div className="absolute inset-0 rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
             <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[21px] lg:rounded-[32px] md:rounded-[30px] sm:rounded-[24px]">
               <img alt="Screenshot" className="absolute h-[101.64%] left-[-6.77%] max-w-none top-[-1.52%] w-[113.53%]" src={img6} loading="lazy" />

@@ -25,6 +25,18 @@
     "adding": "Добавление...",
     "addToCart": "Добавить в корзину"
   },
+  "featuredCategories": {
+    "title": "КАТЕГОРИИ",
+    "sectionLabel": "Рекомендуемые категории",
+    "items": {
+      "smallPack": "0.25L / 0.33L",
+      "mediumPack": "0.5L",
+      "largePack": "1L",
+      "bulkPack": "5L / 19L",
+      "coolers": "Кулеры",
+      "accessories": "Аксессуары"
+    }
+  },
   "waterEnergy": {
     "title": "ЭНЕРГИЯ ВОДЫ"
   },
@@ -67,6 +79,12 @@
       "day": "ДЕНЬ",
       "source": "Чистые минералы"
     }
+  },
+  "bottleShowcase": {
+    "titleLine1": "СОВЕРШЕНСТВО",
+    "titleLine2": "ПРИРОДЫ",
+    "subtitle": "Чистые моменты во времени",
+    "imageAlt": "Бутылка Borbor Aqua"
   },
   "whyChooseUs": {
     "title": "ПОЧЕМУ ВЫБИРАЮТ НАС",
