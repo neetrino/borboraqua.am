@@ -17,6 +17,7 @@ import { DraggableBulb } from '../components/DraggableBulb';
 import { MobileFeaturedCategories } from './MobileFeaturedCategories';
 import { MobileBottleShowcase } from './MobileBottleShowcase';
 import { DesktopFeaturedCategories } from './DesktopFeaturedCategories';
+import { getFeaturedCategoryConfig, type FeaturedCategoryId } from './featuredCategories.config';
 
 // Local image paths - Images stored in public/assets/home/
 const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
@@ -77,6 +78,7 @@ interface Product {
   description?: string;
   category?: string; // Primary category title
   categories?: string[]; // All category titles (when listOnly)
+  categorySlugs?: string[];
   price: number;
   image: string | null;
   inStock: boolean;
@@ -118,6 +120,7 @@ export function HomePageClient({
   const [productsLoading, setProductsLoading] = useState(!serverDataProvided);
   const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set());
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [selectedFeaturedCategoryId, setSelectedFeaturedCategoryId] = useState<FeaturedCategoryId | null>(null);
   
 
   // State for Trusted By section pagination
@@ -128,6 +131,51 @@ export function HomePageClient({
   // This prevents zoom issues and conflicts with responsive design
 
   // Carousel index tracking (removed debug logs for production)
+
+  const selectedFeaturedCategory = useMemo(
+    () => (
+      selectedFeaturedCategoryId
+        ? getFeaturedCategoryConfig(selectedFeaturedCategoryId)
+        : undefined
+    ),
+    [selectedFeaturedCategoryId]
+  );
+
+  const featuredProductsHref = useMemo(() => {
+    if (!selectedFeaturedCategory) {
+      return '/products';
+    }
+
+    const params = new URLSearchParams();
+    params.set('category', selectedFeaturedCategory.categorySlugs.join(','));
+    return `/products?${params.toString()}`;
+  }, [selectedFeaturedCategory]);
+
+  const displayedFeaturedProducts = useMemo(() => {
+    if (!selectedFeaturedCategory) {
+      return featuredProducts;
+    }
+
+    return featuredProducts.filter((product) =>
+      product.categorySlugs?.some((slug) =>
+        selectedFeaturedCategory.categorySlugs.some((categorySlug) => categorySlug === slug)
+      )
+    );
+  }, [featuredProducts, selectedFeaturedCategory]);
+
+  const desktopFeaturedPageIndices = useMemo(
+    () => Array.from(
+      { length: Math.ceil(displayedFeaturedProducts.length / 3) },
+      (_, index) => index * 3
+    ),
+    [displayedFeaturedProducts.length]
+  );
+
+  const handleFeaturedCategorySelect = (categoryId: FeaturedCategoryId) => {
+    setSelectedFeaturedCategoryId((prevCategoryId) =>
+      prevCategoryId === categoryId ? null : categoryId
+    );
+  };
 
   // State for header navigation
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -228,6 +276,20 @@ export function HomePageClient({
 
     fetchFeaturedProducts();
   }, [serverDataProvided]);
+
+  useEffect(() => {
+    setCarouselIndex(0);
+  }, [selectedFeaturedCategoryId]);
+
+  useEffect(() => {
+    const maxIndex = isTouchPhoneOrTabletLayout
+      ? Math.max(0, Math.floor((displayedFeaturedProducts.length - 4) / 4) * 4)
+      : Math.max(0, Math.floor((displayedFeaturedProducts.length - 3) / 3) * 3);
+
+    if (carouselIndex > maxIndex) {
+      setCarouselIndex(0);
+    }
+  }, [carouselIndex, displayedFeaturedProducts.length, isTouchPhoneOrTabletLayout]);
 
   // Handle click outside for search modal
   useEffect(() => {
@@ -410,8 +472,8 @@ export function HomePageClient({
       // If we go below 0, loop to the last valid index
       if (newIndex < 0) {
         const maxIndex = isTouchPhoneOrTabletLayout
-          ? Math.max(0, Math.floor((featuredProducts.length - 4) / 4) * 4) 
-          : Math.max(0, Math.floor((featuredProducts.length - 3) / 3) * 3);
+          ? Math.max(0, Math.floor((displayedFeaturedProducts.length - 4) / 4) * 4)
+          : Math.max(0, Math.floor((displayedFeaturedProducts.length - 3) / 3) * 3);
         return maxIndex;
       }
       return newIndex;
@@ -470,8 +532,8 @@ export function HomePageClient({
       const newIndex = prevIndex + step;
       // If we exceed the max, loop back to start (0)
       const maxIndex = isTouchPhoneOrTabletLayout
-        ? Math.max(0, Math.floor((featuredProducts.length - 4) / 4) * 4) 
-        : Math.max(0, Math.floor((featuredProducts.length - 3) / 3) * 3);
+        ? Math.max(0, Math.floor((displayedFeaturedProducts.length - 4) / 4) * 4)
+        : Math.max(0, Math.floor((displayedFeaturedProducts.length - 3) / 3) * 3);
       if (newIndex > maxIndex) {
         return 0; // First mode
       }
@@ -869,7 +931,7 @@ export function HomePageClient({
           </div>
         </div>
         {/* Mobile Shape — պլանշետում ցածր */}
-        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(15%+296.32px)] mix-blend-luminosity size-[537.421px] top-[2320px] min-[728px]:top-[2680px]">
+        <div className="-translate-x-1/2 absolute flex items-center justify-center left-[calc(15%+296.32px)] mix-blend-luminosity size-[537.421px] top-[2680px] min-[728px]:top-[2680px]">
           <div className="flex-none rotate-[55.86deg]">
             <div className="relative size-[256.94px]">
               <img alt="" className="block max-w-none size-full" src={imgShape} loading="lazy" />
@@ -977,9 +1039,9 @@ export function HomePageClient({
         </div>
 
         {/* Mobile Featured Products - 4 products in 2x2 grid, 9 products in 3x3 grid from 728px */}
-        {featuredProducts.length > 0 && (() => {
-          const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 4);
-          const visibleProductsTablet = featuredProducts.slice(carouselIndex, carouselIndex + 9);
+        {displayedFeaturedProducts.length > 0 && (() => {
+          const visibleProducts = displayedFeaturedProducts.slice(carouselIndex, carouselIndex + 4);
+          const visibleProductsTablet = displayedFeaturedProducts.slice(carouselIndex, carouselIndex + 9);
           return (
             <>
               {/* Mobile: 2x2 grid */}
@@ -1023,10 +1085,15 @@ export function HomePageClient({
             </>
           );
         })()}
+        {!productsLoading && displayedFeaturedProducts.length === 0 && (
+          <div className="-translate-x-1/2 absolute left-1/2 top-[1130px] min-[728px]:top-[1180px] w-full max-w-[429px] min-[728px]:max-w-[700px] px-6 text-center text-white">
+            <p className="text-[14px] leading-[22px]">{t('common.messages.noProductsFound')}</p>
+          </div>
+        )}
         {/* Mobile / Tablet View All Products Button — պլանշետում ցածր, որ product card-ներից ներքև */}
         <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1750px] min-[728px]:top-[2080px] w-[241px]">
           <button
-            onClick={() => router.push('/products')}
+            onClick={() => router.push(featuredProductsHref)}
             className="bg-[#FFFFFF] border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] items-center px-[34px] py-[12px] relative rounded-[9999px] shrink-0 transition-all duration-300 hover:border-[#1ac0fd] hover:bg-[#1ac0fd]/5 hover:shadow-md hover:shadow-[#1ac0fd]/20 hover:scale-105 active:scale-95"
           >
             <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#0f172a] text-[16px] text-center whitespace-nowrap">
@@ -1099,24 +1166,18 @@ export function HomePageClient({
         {/* Mobile Trusted By Background Ellipse */}
       
 
-        {/* Mobile / Tablet Trusted By Section — պլանշետում ցածր */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[9px] items-center justify-center left-[calc(50%+0.5px)] top-[2823px] min-[728px]:top-[2760px] w-full max-w-[429px] z-10">
-          <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
-            <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
-              <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[40px] text-center tracking-[-0.9px] uppercase w-full">
-                <p className="leading-[40px] whitespace-pre-wrap">{t('home.trustedBy.title')}</p>
-              </div>
+        {/* Mobile / Tablet Trusted By Section — նույն ոճը ինչ Featured (Montserrat Black, underline 80px) */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[6px] items-center justify-center left-[calc(50%+0.5px)] top-[2823px] min-[728px]:top-[2760px] w-full max-w-[429px] z-10">
+          <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
+            <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[30px] min-[728px]:leading-[26px] relative shrink-0 text-[28px] min-[728px]:text-[24px] text-center text-[#0f172a] tracking-[-0.9px] min-[728px]:tracking-[-0.7px] uppercase break-words">
+              <p className="mb-0">{t('home.trustedBy.title')}</p>
             </div>
           </div>
-          <div className="flex items-center justify-center relative shrink-0 w-full">
-            <div className="-scale-y-100 flex-none w-full">
-              <div className="content-stretch flex h-[9px] items-start justify-center relative w-full">
-                <div className="bg-[#00d1ff] h-[5px] rounded-[30px] shrink-0 w-[90px]" />
-              </div>
+          <div className="bg-[#00d1ff] h-[4px] rounded-[30px] shrink-0 w-[80px]" />
+          <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
+            <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[14px] text-center whitespace-nowrap">
+              <p className="leading-[16px]">{t('home.trustedBy.subtitle')}</p>
             </div>
-          </div>
-          <div className="flex flex-col font-['Inter:Regular',sans-serif] font-normal justify-center leading-[0] not-italic relative shrink-0 text-[#94a3b8] text-[14px] text-center  whitespace-nowrap">
-            <p className="leading-[16px]">{t('home.trustedBy.subtitle')}</p>
           </div>
         </div>
 
@@ -1466,11 +1527,11 @@ export function HomePageClient({
                   </div>
                 ))}
               </div>
-            ) : featuredProducts.length > 0 ? (
+            ) : displayedFeaturedProducts.length > 0 ? (
               // Render actual products - show 3 at a time based on carouselIndex with uniform grid
               <div className="flex gap-[32px] lg:gap-[32px] md:gap-[30px] sm:gap-[20px] justify-center items-start h-full">
                 {(() => {
-                  const visibleProducts = featuredProducts.slice(carouselIndex, carouselIndex + 3);
+                  const visibleProducts = displayedFeaturedProducts.slice(carouselIndex, carouselIndex + 3);
                   return visibleProducts.map((product) => (
                     <FeaturedProductCard
                       key={product.id}
@@ -1488,50 +1549,34 @@ export function HomePageClient({
                   ));
                 })()}
               </div>
-            ) : null}
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <p className="text-center text-[16px] text-white">{t('common.messages.noProductsFound')}</p>
+              </div>
+            )}
           </div>
           {/* Pagination Dots - Show 3 dots for 3 carousel modes (positioned above "View All Products" on non-mobile) */}
-          {featuredProducts.length > 3 && (
+          {desktopFeaturedPageIndices.length > 1 && (
             <div className="absolute flex items-center justify-center gap-2 left-1/2 top-[520px] lg:top-[520px] md:top-[350px] sm:top-[300px] translate-x-[-50%]">
-              {/* Dot 1 - First mode (products 0-2) */}
-              <button
-                type="button"
-                onClick={() => setCarouselIndex(0)}
-                className={`rounded-full transition-all duration-300 ${
-                  carouselIndex === 0
-                    ? 'bg-[#00d1ff] h-[6px] w-[16px]'
-                    : 'bg-[#e2e8f0] size-[6px] hover:bg-[#00d1ff]/50'
-                }`}
-                aria-label={t('home.trustedBy.showFirst3Products')}
-              />
-              {/* Dot 2 - Second mode (products 3-5) */}
-              <button
-                type="button"
-                onClick={() => setCarouselIndex(3)}
-                className={`rounded-full transition-all duration-300 ${
-                  carouselIndex === 3
-                    ? 'bg-[#00d1ff] h-[6px] w-[16px]'
-                    : 'bg-[#e2e8f0] size-[6px] hover:bg-[#00d1ff]/50'
-                }`}
-                aria-label={t('home.trustedBy.showSecond3Products')}
-              />
-              {/* Dot 3 - Third mode (products 6-8) */}
-              <button
-                type="button"
-                onClick={() => setCarouselIndex(6)}
-                className={`rounded-full transition-all duration-300 ${
-                  carouselIndex === 6
-                    ? 'bg-[#00d1ff] h-[6px] w-[16px]'
-                    : 'bg-[#e2e8f0] size-[6px] hover:bg-[#00d1ff]/50'
-                }`}
-                aria-label={t('home.trustedBy.showThird3Products')}
-              />
+              {desktopFeaturedPageIndices.map((pageIndex, index) => (
+                <button
+                  key={pageIndex}
+                  type="button"
+                  onClick={() => setCarouselIndex(pageIndex)}
+                  className={`rounded-full transition-all duration-300 ${
+                    carouselIndex === pageIndex
+                      ? 'bg-[#00d1ff] h-[6px] w-[16px]'
+                      : 'bg-[#e2e8f0] size-[6px] hover:bg-[#00d1ff]/50'
+                  }`}
+                  aria-label={`Show featured products page ${index + 1}`}
+                />
+              ))}
             </div>
           )}
           {/* View All Products Button — ցածր միայն desktop (lg) */}
           <div className="absolute content-stretch flex flex-col items-center left-[20px] lg:left-[20px] md:left-[16px] sm:left-[12px] right-[20px] lg:right-[20px] md:right-[16px] sm:right-[12px] top-[560px] lg:top-[600px] md:top-[380px] sm:top-[330px]">
             <div
-              onClick={() => router.push('/products')}
+              onClick={() => router.push(featuredProductsHref)}
               className="bg-[#FFFFFF] border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[7px] lg:gap-[7px] md:gap-[6px] sm:gap-[4px] items-center px-[30px] lg:px-[30px] md:px-[28px] sm:px-[20px] py-[10px] lg:py-[10px] md:py-[10px] sm:py-[8px] relative rounded-[9999px] shrink-0 cursor-pointer hover:border-[#00d1ff] hover:bg-[#00d1ff]/5 transition-all"
             >
               <div className="flex flex-col font-['Inter:Bold',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[#0f172a] text-[14px] lg:text-[14px] md:text-[14px] sm:text-[12px] text-center whitespace-nowrap">
@@ -1554,7 +1599,7 @@ export function HomePageClient({
         </div>
       </div>
       {/* Navigation Arrows - Only show if we have more than 3 products; max() prevents cutoff at 1152px, gap widens on large screens */}
-      {featuredProducts.length > 3 && (
+      {displayedFeaturedProducts.length > 3 && (
         <>
           {/* Next Button - Left side (աջ տանի) */}
           <FeaturedProductsNavigationArrow
@@ -1757,12 +1802,12 @@ export function HomePageClient({
       <div className="absolute content-stretch flex flex-col h-[328px] lg:h-[410px] md:h-[380px] sm:h-[320px] items-start left-1/2 px-[136px] lg:px-[170px] md:px-[48px] sm:px-[24px] py-[56px] lg:py-[70px] md:py-[60px] sm:py-[40px] top-[5050px] lg:top-[5050px] md:top-[4500px] sm:top-[3950px] translate-x-[-50%] w-full max-w-[1920px]">
         <div className="h-[200px] lg:h-[250px] md:h-[240px] sm:h-[200px] max-w-[1536px] relative shrink-0 w-full">
           <div className="absolute content-stretch flex flex-col items-center left-[calc(50%+0.5px)] top-[-24px] lg:top-[-30px] md:top-[-28px] sm:top-[-24px] translate-x-[-50%] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
-            <div className="flex flex-col font-['Montserrat',sans-serif] font-black justify-center leading-[0] relative shrink-0 text-[#0f172a] text-[48px] lg:text-[60px] md:text-[48px] sm:text-[32px] text-center uppercase whitespace-nowrap">
-              <p className="leading-[21px] lg:leading-[26px] md:leading-[24px] sm:leading-[22px]">{t('home.trustedBy.title')}</p>
+            <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[36px] lg:leading-[36px] md:leading-[32px] sm:leading-[28px] relative shrink-0 text-[#0f172a] text-[32px] md:text-[48px] lg:text-[60px] text-center tracking-[-0.8px] uppercase break-words">
+              <p className="mb-0">{t('home.trustedBy.title')}</p>
             </div>
           </div>
           <div className="absolute content-stretch flex items-start justify-center left-1/2 top-[50px] lg:top-[27px] md:top-[50px] sm:top-[110px] translate-x-[-50%] w-[980px] lg:w-[980px] md:w-[90%] sm:w-[95%]">
-            <div className="bg-[#00d1ff] h-[4px] lg:h-[4px] md:h-[5px] sm:h-[5px] rounded-[25px] lg:rounded-[25px] md:rounded-[30px] sm:rounded-[30px] shrink-0 w-[80px] lg:w-[80px] md:w-[90px] sm:w-[90px]" />
+            <div className="bg-[#00d1ff] h-[4px] rounded-[30px] shrink-0 w-[80px]" />
           </div>
         
           <div className="absolute content-stretch flex flex-col items-center left-[calc(50%+1px)] top-[26px] lg:top-[38px] md:top-[30px] sm:top-[24px] translate-x-[-50%] w-[784px] lg:w-[980px] md:w-[90%] sm:w-[95%]">

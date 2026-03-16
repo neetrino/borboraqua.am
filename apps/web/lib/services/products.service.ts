@@ -39,6 +39,22 @@ const getOutOfStockLabel = (lang: string = "en"): string => {
   return t(lang as any, "common.stock.outOfStock");
 };
 
+const getSizeLabelFromCategorySlug = (slug: string): string | null => {
+  const normalizedSlug = slug.trim().toLowerCase();
+  if (!normalizedSlug) {
+    return null;
+  }
+
+  if (normalizedSlug === "0-25") return "0.25L";
+  if (normalizedSlug === "0-33l") return "0.33L";
+  if (normalizedSlug === "0-5l") return "0.5L";
+  if (normalizedSlug === "1l") return "1L";
+  if (normalizedSlug === "5l") return "5L";
+  if (normalizedSlug === "19l") return "19L";
+
+  return null;
+};
+
 class ProductsService {
   /**
    * Get all child category IDs recursively
@@ -196,6 +212,9 @@ class ProductsService {
         .split(",")
         .map((slug) => slug.trim())
         .filter(Boolean);
+      const requestedSizeLabels = requestedCategorySlugs
+        .map(getSizeLabelFromCategorySlug)
+        .filter((label): label is string => Boolean(label));
 
       const localizedCategoryDocs = await db.category.findMany({
         where: {
@@ -248,17 +267,51 @@ class ProductsService {
           { primaryCategoryId: catId },
           { categoryIds: { has: catId } },
         ]);
+        const sizeLabelConditions = requestedSizeLabels.map((label) => ({
+          labels: {
+            some: {
+              value: {
+                equals: label,
+                mode: "insensitive" as const,
+              },
+            },
+          },
+        }));
+        const allCategoryConditions = [...categoryConditions, ...sizeLabelConditions];
 
         if (where.OR) {
           where.AND = [
             { OR: where.OR },
             {
-              OR: categoryConditions,
+              OR: allCategoryConditions,
             },
           ];
           delete where.OR;
         } else {
-          where.OR = categoryConditions;
+          where.OR = allCategoryConditions;
+        }
+      } else if (requestedSizeLabels.length > 0) {
+        const sizeLabelConditions = requestedSizeLabels.map((label) => ({
+          labels: {
+            some: {
+              value: {
+                equals: label,
+                mode: "insensitive" as const,
+              },
+            },
+          },
+        }));
+
+        if (where.OR) {
+          where.AND = [
+            { OR: where.OR },
+            {
+              OR: sizeLabelConditions,
+            },
+          ];
+          delete where.OR;
+        } else {
+          where.OR = sizeLabelConditions;
         }
       } else {
         // Return empty result if category not found
@@ -350,7 +403,7 @@ class ProductsService {
       where.featured = true;
     } else if (filter === "bestseller") {
       type BestsellerVariant = { variantId: string | null; _sum: { quantity: number | null } };
-      const bestsellerVariants: BestsellerVariant[] = await db.orderItem.groupBy({
+      const bestsellerVariants = await (db.orderItem.groupBy as any)({
         by: ["variantId"],
         _sum: { quantity: true },
         where: {
@@ -364,7 +417,7 @@ class ProductsService {
           },
         },
         take: 200,
-      });
+      }) as BestsellerVariant[];
 
       const variantIds = bestsellerVariants
         .map((item) => item.variantId)
@@ -465,7 +518,7 @@ class ProductsService {
       try {
         products = await db.product.findMany({
           where,
-          orderBy: orderByWithPosition,
+          orderBy: orderByWithPosition as Prisma.ProductOrderByWithRelationInput | Prisma.ProductOrderByWithRelationInput[],
           skip,
           take: limit,
           include: listInclude,
@@ -612,6 +665,7 @@ class ProductsService {
         
         // Get category title from translations (primary for backward compatibility)
         let categoryTitle: string | null = null;
+        let selectedCategorySlug: string | null = null;
         if (selectedCategory) {
           const categoryTranslations = Array.isArray(selectedCategory.translations)
             ? selectedCategory.translations
@@ -620,17 +674,29 @@ class ProductsService {
             || categoryTranslations[0]
             || null;
           categoryTitle = categoryTranslation?.title || null;
+          selectedCategorySlug = categoryTranslation?.slug || null;
         }
 
-        // All category titles for this product (current lang)
-        const categoryTitles: string[] = categories
-          .map((cat: { translations?: Array<{ locale: string; title: string }> }) => {
+        // All category titles/slugs for this product (current lang)
+        const localizedCategories = categories
+          .map((cat: { translations?: Array<{ locale: string; slug: string; title: string }> }) => {
             const tr = Array.isArray(cat.translations) ? cat.translations : [];
             const t = tr.find((x: { locale: string }) => x.locale === lang) || tr[0];
-            return t?.title || null;
-          })
+            return {
+              title: t?.title || null,
+              slug: t?.slug || null,
+            };
+          });
+        const categoryTitles: string[] = localizedCategories
+          .map((categoryItem: { title: string | null }) => categoryItem.title)
           .filter((title: string | null): title is string => !!title);
+        const categorySlugs: string[] = localizedCategories
+          .map((categoryItem: { slug: string | null }) => categoryItem.slug)
+          .filter((slug: string | null): slug is string => !!slug);
         const uniqueCategoryTitles = [...new Set(categoryTitles)];
+        const uniqueCategorySlugs = [...new Set(
+          selectedCategorySlug ? [selectedCategorySlug, ...categorySlugs] : categorySlugs
+        )];
         
         return {
           id: product.id,
@@ -640,6 +706,7 @@ class ProductsService {
           description: translation?.descriptionHtml || null,
           category: categoryTitle,
           categories: uniqueCategoryTitles.length > 0 ? uniqueCategoryTitles : undefined,
+          categorySlugs: uniqueCategorySlugs.length > 0 ? uniqueCategorySlugs : undefined,
           brand: product.brand
             ? { id: product.brand.id, name: brandTranslation?.name || "" }
             : null,
@@ -1418,7 +1485,7 @@ class ProductsService {
       publishedAt: product.publishedAt,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
-      productAttributes: Array.isArray(product.productAttributes) ? product.productAttributes.map((pa: any) => {
+      productAttributes: Array.isArray((product as any).productAttributes) ? (product as any).productAttributes.map((pa: any) => {
         const attr = pa.attribute;
         const attrTranslation = attr.translations?.find((t: { locale: string }) => t.locale === lang) || attr.translations?.[0];
         

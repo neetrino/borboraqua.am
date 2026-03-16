@@ -222,6 +222,7 @@ model Product {
   discountPercent        Int                  @default(0)
   minimumOrderQuantity   Int                  @default(1)
   orderQuantityIncrement Int                  @default(1)
+  position               Int?                 // Տեսակավորման հերթականություն (admin)
   deletedAt              DateTime?
   createdAt              DateTime             @default(now())
   updatedAt              DateTime             @updatedAt
@@ -236,6 +237,7 @@ model Product {
   @@index([published, publishedAt])
   @@index([featured])
   @@index([deletedAt])
+  @@index([position])
   @@map("products")
 }
 
