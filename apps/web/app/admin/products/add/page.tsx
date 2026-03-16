@@ -1841,7 +1841,9 @@ function AddProductPageContent() {
   };
 
   const buildDescriptionHtml = (locale: AdminLocale): string | undefined => {
-    const descriptionHtml = sanitizeDescriptionHtml(stripDescriptionImageTags(formData.translations[locale].descriptionHtml || '')).trim();
+    const raw = sanitizeDescriptionHtml(stripDescriptionImageTags(formData.translations[locale].descriptionHtml || '')).trim();
+    // Չավելացնել ավտոմատ կետ (․) — պահպանել այնպես, ինչպես մուտքագրված է
+    const descriptionHtml = raw === '.' ? '' : raw;
     const imageUrls = (descriptionImages[locale] || []).filter((url) => typeof url === 'string' && url.trim().length > 0);
 
     const imagesHtml = imageUrls.map((url) => `<p><img src="${url}" alt="" /></p>`).join('');

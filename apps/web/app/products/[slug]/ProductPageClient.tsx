@@ -1864,7 +1864,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             <div
               className="product-description text-gray-600 mb-2 text-sm max-w-none [&_p]:m-0 [&_p]:leading-[1.35] [&_p+_p]:mt-0 [&_h1]:m-0 [&_h1]:mb-1 [&_h1]:text-lg [&_h2]:m-0 [&_h2]:mb-0.5 [&_h2]:text-base [&_h3]:m-0 [&_h3]:mb-0.5 [&_ul]:m-0 [&_ul]:mt-0 [&_ul]:mb-0 [&_ul]:pl-5 [&_ul]:list-disc [&_ol]:m-0 [&_ol]:mt-0 [&_ol]:mb-0 [&_ol]:pl-5 [&_li]:m-0 [&_li]:leading-tight [&_li]:py-0 [&_img]:max-w-[67%] [&_img]:h-auto [&_img]:my-3 [&_img]:mx-0 [&_img]:contrast-135 [&_img]:saturate-160"
               style={{ lineHeight: 1.35 }}
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description || getProductText(language, product.id, 'longDescription') || '') }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml((product.description || getProductText(language, product.id, 'longDescription') || '').replace(/\n/g, '<br />')) }}
             />
            
             {/* Category label (black) + category values (gray, smaller) — one line */}
