@@ -952,10 +952,7 @@ export function MobileBottomNavigation() {
 
   return (
     <div 
-      className="-translate-x-1/2 fixed xl:hidden left-1/2 bottom-0 md:bottom-8 w-full max-w-[95%] sm:max-w-[420px] md:max-w-[700px] px-2 z-50 overflow-x-hidden"
-      style={{ 
-        paddingBottom: 'max(20px, env(safe-area-inset-bottom, 20px))',
-      }}
+          className="-translate-x-1/2 fixed xl:hidden left-1/2 bottom-0 w-full max-w-[95%] sm:max-w-[420px] md:max-w-[700px] px-2 pb-[env(safe-area-inset-bottom,0)] z-50 overflow-x-hidden"
     >
       <div 
         className="relative h-[72px] rounded-[999px] border overflow-hidden w-full"
