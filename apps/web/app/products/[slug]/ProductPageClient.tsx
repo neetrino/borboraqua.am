@@ -1862,20 +1862,19 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
             </div>
             {/* Description - tight spacing, no prose (custom compact styles) */}
             <div
-              className="product-description text-gray-600 mb-2 text-sm max-w-none [&_p]:m-0 [&_p]:leading-[1.35] [&_p+_p]:mt-0 [&_h1]:m-0 [&_h1]:mb-1 [&_h1]:text-lg [&_h2]:m-0 [&_h2]:mb-0.5 [&_h2]:text-base [&_h3]:m-0 [&_h3]:mb-0.5 [&_ul]:m-0 [&_ul]:mt-0 [&_ul]:mb-0 [&_ul]:pl-5 [&_ul]:list-disc [&_ol]:m-0 [&_ol]:mt-0 [&_ol]:mb-0 [&_ol]:pl-5 [&_li]:m-0 [&_li]:leading-tight [&_li]:py-0 [&_img]:max-w-[67%] [&_img]:h-auto [&_img]:rounded-xl [&_img]:my-3 [&_img]:mx-0 [&_img]:contrast-135 [&_img]:saturate-160"
+              className="product-description text-gray-600 mb-2 text-sm max-w-none [&_p]:m-0 [&_p]:leading-[1.35] [&_p+_p]:mt-0 [&_h1]:m-0 [&_h1]:mb-1 [&_h1]:text-lg [&_h2]:m-0 [&_h2]:mb-0.5 [&_h2]:text-base [&_h3]:m-0 [&_h3]:mb-0.5 [&_ul]:m-0 [&_ul]:mt-0 [&_ul]:mb-0 [&_ul]:pl-5 [&_ul]:list-disc [&_ol]:m-0 [&_ol]:mt-0 [&_ol]:mb-0 [&_ol]:pl-5 [&_li]:m-0 [&_li]:leading-tight [&_li]:py-0 [&_img]:max-w-[67%] [&_img]:h-auto [&_img]:my-3 [&_img]:mx-0 [&_img]:contrast-135 [&_img]:saturate-160"
               style={{ lineHeight: 1.35 }}
-              dangerouslySetInnerHTML={{ __html: sanitizeHtml(product.description || getProductText(language, product.id, 'longDescription') || '') }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml((product.description || getProductText(language, product.id, 'longDescription') || '').replace(/\n/g, '<br />')) }}
             />
            
-            {/* Categories - same style as Product Card (#00D1FF) */}
+            {/* Category label (black) + category values (gray, smaller) — one line */}
             {product.categories && product.categories.length > 0 && (
-              <div className="flex flex-col gap-1 mb-2 text-base lg:text-lg text-[#00D1FF] tracking-[1.4px]">
-                {product.categories.map((c) => (
-                  <p key={c.id} className="leading-[26px] lg:leading-[28px]">
-                    {formatCategoryLabel(c.title)}
-                  </p>
-                ))}
-              </div>
+              <p className="mb-2 text-base lg:text-lg tracking-[1.4px] leading-[26px] lg:leading-[28px]">
+                <span className="font-semibold text-black">{t(language, 'product.category')}: </span>
+                <span className="text-gray-600 text-sm lg:text-base">
+                  {product.categories.map((c) => formatCategoryLabel(c.title)).join(', ')}
+                </span>
+              </p>
             )}
           
             {/* Rating Section */}

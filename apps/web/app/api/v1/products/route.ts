@@ -3,6 +3,7 @@ import { unstable_cache } from "next/cache";
 import { productsService } from "@/lib/services/products.service";
 
 const PRODUCTS_LIST_CACHE_REVALIDATE = 120;
+const PRODUCTS_CATEGORY_FILTER_CACHE_VERSION = "category-filter-v2";
 
 const isDbUnavailableError = (error: unknown): boolean => {
   if (!error || typeof error !== "object") return false;
@@ -51,12 +52,14 @@ export async function GET(req: NextRequest) {
 
     const cacheKey = [
       "products-list",
+      PRODUCTS_CATEGORY_FILTER_CACHE_VERSION,
       filters.lang ?? "en",
       String(filters.page),
       String(filters.limit),
       filters.search ?? "",
       filters.filter ?? "",
       filters.category ?? "",
+      filters.sizes ?? "",
       String(filters.minPrice ?? ""),
       String(filters.maxPrice ?? ""),
       filters.sort ?? "createdAt",

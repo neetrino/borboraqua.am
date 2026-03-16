@@ -3,8 +3,8 @@ import { t } from '../../lib/i18n';
 import { cookies, headers } from 'next/headers';
 import { unstable_cache } from 'next/cache';
 
-/** Products per page: mobile 8, desktop 12 */
-const PER_PAGE_MOBILE = 8;
+/** Products per page: mobile shows all (up to 100), desktop 12 */
+const PER_PAGE_MOBILE = 12;
 const PER_PAGE_DESKTOP = 12;
 
 function isMobileUserAgent(userAgent: string | null): boolean {
@@ -19,6 +19,7 @@ import { productsService } from '../../lib/services/products.service';
 
 /** Cache revalidate (seconds). 3 minutes. */
 const PRODUCTS_PAGE_REVALIDATE = 180;
+const PRODUCTS_PAGE_CATEGORY_FILTER_CACHE_VERSION = 'category-filter-v2';
 
 const MAX_COLORS_PER_PRODUCT = 20;
 
@@ -106,14 +107,21 @@ function trimProductForGrid(p: {
   };
 }
 
+/** Params passed from URL for filtering (category, sizes, etc.) */
+interface GetProductsParams {
+  page?: number;
+  search?: string;
+  limit?: number;
+  category?: string;
+  sizes?: string;
+}
+
 /**
  * Fetch products with cache. We cache only the trimmed response (grid fields) to stay under 2MB.
+ * Category and sizes from URL are passed so filtering works when navigating from home categories.
  */
-async function getProducts(
-  page: number = 1,
-  search?: string,
-  limit: number = 24
-): Promise<ProductsResponse> {
+async function getProducts(params: GetProductsParams): Promise<ProductsResponse> {
+  const { page = 1, search, limit = 24, category, sizes } = params;
   try {
     let language: string = 'hy';
     try {
@@ -133,6 +141,8 @@ async function getProducts(
       limit,
       lang: language,
       search: search?.trim() || undefined,
+      category: category?.trim() || undefined,
+      sizes: sizes?.trim() || undefined,
       listOnly: true, // Use listOnly mode to get category field
     };
 
@@ -147,7 +157,18 @@ async function getProducts(
           meta: raw.meta,
         };
       },
-      ['products-page', language, String(page), String(limit), search?.trim() ?? '', 'listOnly', 'labels-v1'],
+      [
+        'products-page',
+        PRODUCTS_PAGE_CATEGORY_FILTER_CACHE_VERSION,
+        language,
+        String(page),
+        String(limit),
+        search?.trim() ?? '',
+        category?.trim() ?? '',
+        sizes?.trim() ?? '',
+        'listOnly',
+        'labels-v1',
+      ],
       { revalidate: PRODUCTS_PAGE_REVALIDATE }
     )();
 
@@ -174,7 +195,13 @@ export default async function ProductsPage({ searchParams }: any) {
   const userAgent = headersList.get('user-agent');
   const perPage = isMobileUserAgent(userAgent) ? PER_PAGE_MOBILE : PER_PAGE_DESKTOP;
 
-  const productsData = await getProducts(page, params?.search, perPage);
+  const productsData = await getProducts({
+    page,
+    search: params?.search,
+    limit: perPage,
+    category: params?.category,
+    sizes: params?.sizes,
+  });
   const normalizedProducts = [...productsData.data].sort((a, b) => {
     const aPosition = a.position ?? Number.POSITIVE_INFINITY;
     const bPosition = b.position ?? Number.POSITIVE_INFINITY;

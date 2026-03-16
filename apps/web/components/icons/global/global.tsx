@@ -655,9 +655,9 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
         <div className="absolute inset-0" />
         {/* Content width grows with viewport then approaches max (gets closer on large screens) */}
         <div className="absolute h-[400px] lg:h-[400px] md:h-[400px] sm:h-[350px] left-1/2 top-[200px] lg:top-[200px] md:top-[180px] sm:top-[120px] -translate-x-1/2 w-[95%] md:w-[90%] max-w-[1080px] relative z-10 px-[20px] lg:px-[20px] md:px-[40px] sm:px-[20px]">
-          <div className="absolute content-stretch flex gap-[clamp(50px,7vw,100px)] items-start justify-start left-[calc(50%+32px)] lg:left-[calc(50%+36px)] top-[100px] translate-x-[-50%] flex-col md:flex-row sm:flex-col">
+          <div className="absolute left-0 top-[100px] flex w-full flex-col items-start gap-[clamp(32px,5vw,72px)] md:flex-row md:justify-between">
             {/* Column 1: Logo + Description + Store badges — մի քիչ ձախ, գծի հետ մի ուղղությամբ */}
-            <div className="flex flex-col h-[280px] lg:h-[280px] md:h-[280px] sm:h-auto relative shrink-0 w-[300px] lg:w-[300px] md:w-[45%] sm:w-full gap-[clamp(12px,1.2vw,14px)]">
+            <div className="flex flex-col h-[280px] lg:h-[280px] md:h-[280px] sm:h-auto relative shrink-0 w-full max-w-[300px] md:w-[300px] gap-[clamp(12px,1.2vw,14px)]">
               <div className="content-stretch flex h-[14px] items-center left-0 top-0 w-[300px] lg:w-[300px] md:w-full sm:w-full">
                 <div className="h-[30px] lg:h-[30px] md:h-[30px] sm:h-[26px] relative shrink-0 w-[100px] lg:w-[100px] md:w-[95px] sm:w-[80px]">
                   <img alt="Borbor Aqua Logo" className="absolute inset-0 max-w-none object-cover pointer-events-none size-full figma-fade-in" src={imgBorborAguaLogoColorB2024Colored1} />
@@ -677,9 +677,9 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
             </div>
 
             {/* Column 2-4: Site Map, Policies, Contact */}
-            <div className="content-stretch flex gap-[clamp(40px,12vw,185px)] items-start relative shrink-0 flex-col md:flex-row sm:flex-col">
+            <div className="content-stretch flex w-full items-start gap-[clamp(28px,4vw,56px)] relative shrink-0 flex-col md:flex-1 md:flex-row md:justify-between">
               {/* Column 2: Site Map */}
-              <div className="content-stretch flex flex-col gap-[clamp(16px,1.8vw,20px)] items-start relative shrink-0 w-[94px] lg:w-[94px] md:w-[45%] sm:w-full">
+              <div className="content-stretch flex flex-col gap-[clamp(16px,1.8vw,20px)] items-start relative shrink-0 w-[94px] lg:w-[94px] md:w-[94px] sm:w-full">
                 <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
                   <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white tracking-[1.3px] lg:tracking-[1.3px] md:tracking-[1.2px] sm:tracking-[1px] uppercase w-full">
                     <p className="leading-[18px] lg:leading-[18px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.siteMap.title')}</p>
@@ -714,7 +714,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
               </div>
 
               {/* Column 3: Policies */}
-              <div className="content-stretch flex flex-col gap-[clamp(16px,1.8vw,20px)] items-start relative shrink-0 w-[140px] lg:w-[140px] md:w-[45%] sm:w-full">
+              <div className="content-stretch flex flex-col gap-[clamp(16px,1.8vw,20px)] items-start relative shrink-0 w-[140px] lg:w-[140px] md:w-[140px] sm:w-full">
                 <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
                   <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[16px] lg:text-[16px] md:text-[16px] sm:text-[14px] text-white tracking-[1.4px] lg:tracking-[1.4px] md:tracking-[1.4px] sm:tracking-[1.2px] uppercase w-full">
                     <p className="leading-[18px] lg:leading-[18px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.policies.title')}</p>
@@ -743,7 +743,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
               </div>
 
               {/* Column 4: Contact */}
-              <div className="content-stretch flex flex-col gap-[clamp(16px,1.8vw,20px)] items-start relative shrink-0 w-[215px] lg:w-[215px] md:w-[45%] sm:w-full">
+              <div className="content-stretch flex flex-col gap-[clamp(16px,1.8vw,20px)] items-start relative shrink-0 w-[215px] lg:w-[215px] md:w-[215px] sm:w-full">
                 <div className="content-stretch flex flex-col items-start relative shrink-0 w-full">
                   <div className="flex flex-col font-['Montserrat',sans-serif] font-bold justify-center leading-[0] relative shrink-0 text-[21px] lg:text-[21px] md:text-[20px] sm:text-[18px] text-white tracking-[1.6px] lg:tracking-[1.6px] md:tracking-[1.5px] sm:tracking-[1.2px] uppercase w-full">
                     <p className="leading-[18px] lg:leading-[18px] md:leading-[18px] sm:leading-[16px] whitespace-pre-wrap">{t('home.footer.contact.title')}</p>
@@ -785,8 +785,8 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
             </div>
           </div>
 
-          {/* Social Media Icons - left scales with viewport so they don't get cut off on small screens */}
-          <div className="absolute content-stretch flex gap-[clamp(14px,1.2vw,16px)] h-[clamp(32px,3vw,36px)] items-center left-[max(-90px,max(-2.5vw,min(-8vw,0px)))] pt-[clamp(7px,0.6vw,8px)] top-[295px] lg:top-[295px] md:top-[332px] sm:top-[332px] w-[clamp(300px,25vw,336px)]">
+          {/* Social Media Icons */}
+          <div className="absolute left-0 top-[295px] flex h-[clamp(32px,3vw,36px)] w-auto items-center gap-[clamp(14px,1.2vw,16px)] pt-[clamp(7px,0.6vw,8px)] lg:top-[295px] md:top-[332px] sm:top-[332px]">
             <div className="relative shrink-0 size-[clamp(28px,2.5vw,32px)] cursor-pointer hover:opacity-80 transition-opacity">
               <img alt="Instagram" className="block max-w-none size-full" src={socialInstagram} onClick={() => window.open('https://www.instagram.com/borbor_aqua/', '_blank')} />
             </div>
@@ -802,9 +802,9 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
           </div>
         </div>
 
-        {/* Copyright & Payment Icons - Full width border on desktop; position and width scale with viewport */}
-        <div className="absolute border-[#e2e8f0] border-solid border-t left-1/2 -translate-x-1/2 top-[550px] lg:top-[550px] md:top-[520px] sm:top-[480px] w-[95%] md:w-[90%] max-w-[1200px] z-10">
-          <div className="w-full mx-auto px-[clamp(20px,4vw,50px)] pt-[clamp(24px,4vw,36px)] content-stretch flex items-center justify-between flex-col sm:flex-col md:flex-row">
+        {/* Copyright & Payment Icons — գիծն ու լայնությունը նույնը, ինչ վերևի content */}
+        <div className="absolute left-1/2 top-[550px] z-10 ml-2 w-[95%] max-w-[1100px] -translate-x-1/2 border-t border-solid border-[#e2e8f0] md:w-[90%] lg:top-[550px] md:top-[520px] sm:top-[480px]">
+          <div className="mx-auto w-full px-[20px] pt-[clamp(24px,4vw,36px)] content-stretch flex items-center justify-between flex-col sm:flex-col md:flex-row lg:px-[20px] md:px-[40px] sm:px-[20px]">
             <div className="relative shrink-0">
               <div className="bg-clip-padding border-0 border-[transparent] border-solid content-stretch flex flex-col items-center justify-center relative">
                 <div className="flex flex-col font-['Inter',sans-serif] font-bold justify-center leading-[0] not-italic relative shrink-0 text-[12px] lg:text-[12px] md:text-[11px] sm:text-[10px] text-white whitespace-nowrap">

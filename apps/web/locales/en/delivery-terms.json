@@ -14,8 +14,7 @@
   },
   "orderRegistration": {
     "title": "Order registration",
-    "monThu": "Monday – Thursday",
-    "fri": "Friday"
+    "monFri": "Monday – Friday"
   },
   "deliveryDay": {
     "title": "The closest day for delivery of orders",

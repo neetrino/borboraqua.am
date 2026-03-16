@@ -35,8 +35,7 @@ export default function DeliveryTermsPage() {
 
             <h2 className="text-2xl font-semibold text-gray-900 mt-6">{t('delivery-terms.orderRegistration.title')}</h2>
             <div className="text-gray-600 mt-2 space-y-1">
-              <p>{t('delivery-terms.orderRegistration.monThu')}</p>
-              <p>{t('delivery-terms.orderRegistration.fri')}</p>
+              <p>{t('delivery-terms.orderRegistration.monFri')}</p>
             </div>
 
             <h2 className="text-2xl font-semibold text-gray-900 mt-6">{t('delivery-terms.deliveryDay.title')}</h2>
