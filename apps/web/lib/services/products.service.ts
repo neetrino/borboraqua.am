@@ -130,6 +130,71 @@ class ProductsService {
     });
   }
 
+  private async getProductLabelMediaMap(
+    productIds: string[]
+  ): Promise<Map<string, Map<string, { imageUrl: string | null; imagePosition: string | null }>>> {
+    if (productIds.length === 0) {
+      return new Map();
+    }
+
+    const rows = await db.$queryRaw<Array<{
+      id: string;
+      productId: string;
+      imageUrl: string | null;
+      imagePosition: string | null;
+    }>>(
+      Prisma.sql`
+        SELECT "id", "productId", "imageUrl", "imagePosition"
+        FROM "product_labels"
+        WHERE "productId" IN (${Prisma.join(productIds)})
+      `
+    );
+
+    const mediaMap = new Map<string, Map<string, { imageUrl: string | null; imagePosition: string | null }>>();
+
+    rows.forEach((row) => {
+      const productMap = mediaMap.get(row.productId) ?? new Map<string, { imageUrl: string | null; imagePosition: string | null }>();
+      productMap.set(row.id, {
+        imageUrl: row.imageUrl ?? null,
+        imagePosition: row.imagePosition ?? null,
+      });
+      mediaMap.set(row.productId, productMap);
+    });
+
+    return mediaMap;
+  }
+
+  private mapProductLabels(
+    product: { id: string; labels?: Array<{
+      id: string;
+      type: string;
+      value: string;
+      position: string;
+      color: string | null;
+      imageUrl?: string | null;
+      imagePosition?: string | null;
+    }> },
+    labelMediaMap: Map<string, Map<string, { imageUrl: string | null; imagePosition: string | null }>>
+  ) {
+    const productLabelMedia = labelMediaMap.get(product.id);
+
+    return Array.isArray(product.labels)
+      ? product.labels.map((label) => {
+          const media = productLabelMedia?.get(label.id);
+
+          return {
+            id: label.id,
+            type: label.type,
+            value: label.value,
+            position: label.position,
+            color: label.color,
+            imageUrl: label.imageUrl ?? media?.imageUrl ?? null,
+            imagePosition: label.imagePosition ?? media?.imagePosition ?? null,
+          };
+        })
+      : [];
+  }
+
   /**
    * Get all products with filters
    */
@@ -599,6 +664,10 @@ class ProductsService {
       }
     }
 
+    const labelMediaMap = await this.getProductLabelMediaMap(
+      products.map((product: ProductWithRelations) => product.id)
+    );
+
     // Format response
     const data = products.map((product: ProductWithRelations) => {
       // Безопасное получение translation с проверкой на существование массива
@@ -718,25 +787,7 @@ class ProductsService {
           image,
           inStock: (variant?.stock || 0) > 0,
           position: (product as any).position ?? null,
-          labels: Array.isArray(product.labels)
-            ? product.labels.map((label: {
-                id: string;
-                type: string;
-                value: string;
-                position: string;
-                color: string | null;
-                imageUrl?: string | null;
-                imagePosition?: string | null;
-              }) => ({
-                id: label.id,
-                type: label.type,
-                value: label.value,
-                position: label.position,
-                color: label.color,
-                imageUrl: label.imageUrl ?? null,
-                imagePosition: label.imagePosition ?? null,
-              }))
-            : [],
+          labels: this.mapProductLabels(product, labelMediaMap),
           minimumOrderQuantity: (product as any).minimumOrderQuantity || 1,
           orderQuantityIncrement: (product as any).orderQuantityIncrement || 1,
           defaultVariantId: (variant as any)?.id || null,
@@ -876,23 +927,7 @@ class ProductsService {
         defaultVariantId: (variant as any)?.id || null,
         labels: (() => {
           // Map existing labels
-          const existingLabels = Array.isArray(product.labels) ? product.labels.map((label: {
-            id: string;
-            type: string;
-            value: string;
-            position: string;
-            color: string | null;
-            imageUrl?: string | null;
-            imagePosition?: string | null;
-          }) => ({
-            id: label.id,
-            type: label.type,
-            value: label.value,
-            position: label.position,
-            color: label.color,
-            imageUrl: label.imageUrl ?? null,
-            imagePosition: label.imagePosition ?? null,
-          })) : [];
+          const existingLabels = this.mapProductLabels(product, labelMediaMap);
           
           // Check if product is out of stock
           const isOutOfStock = (variant?.stock || 0) <= 0;
@@ -920,6 +955,8 @@ class ProductsService {
                 value: outOfStockText,
                 position: position as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
                 color: '#6B7280', // Gray color for out of stock
+                imageUrl: null,
+                imagePosition: null,
               });
             }
           }
@@ -1289,6 +1326,8 @@ class ProductsService {
       };
     }
 
+    const labelMediaMap = await this.getProductLabelMediaMap([product.id]);
+
     // Безопасное получение translation с проверкой на существование массива
     const translations = Array.isArray(product.translations) ? product.translations : [];
     const translation = translations.find((t: { locale: string }) => t.locale === lang) || translations[0] || null;
@@ -1398,23 +1437,7 @@ class ProductsService {
       })(),
       labels: (() => {
         // Map existing labels
-        const existingLabels = Array.isArray(product.labels) ? product.labels.map((label: {
-          id: string;
-          type: string;
-          value: string;
-          position: string;
-          color: string | null;
-          imageUrl?: string | null;
-          imagePosition?: string | null;
-        }) => ({
-          id: label.id,
-          type: label.type,
-          value: label.value,
-          position: label.position,
-          color: label.color,
-          imageUrl: label.imageUrl ?? null,
-          imagePosition: label.imagePosition ?? null,
-        })) : [];
+        const existingLabels = this.mapProductLabels(product, labelMediaMap);
         
         // Check if all variants are out of stock
         const variants = Array.isArray(product.variants) ? product.variants : [];
