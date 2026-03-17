@@ -1995,12 +1995,16 @@ function AddProductPageContent() {
       reader.readAsDataURL(file);
     });
 
-  /** Upload product images to R2 only. Returns R2 public URLs on success, null on failure. No local/base64 fallback. */
-  const uploadImagesToR2 = async (base64Images: string[]): Promise<string[] | null> => {
+  /** Upload images to R2 only. Returns R2 public URLs on success, null on failure. Use folder 'labels' for label images. */
+  const uploadImagesToR2 = async (
+    base64Images: string[],
+    options?: { folder?: 'products' | 'labels' }
+  ): Promise<string[] | null> => {
     if (base64Images.length === 0) return null;
     try {
       const res = await apiClient.post<UploadImagesResponse>('/api/v1/admin/products/upload-images', {
         images: base64Images,
+        ...(options?.folder && { folder: options.folder }),
       });
       if (res?.urls?.length && res.urls.every((u): u is string => typeof u === 'string' && u.startsWith('http'))) {
         return res.urls;
@@ -2289,7 +2293,7 @@ function AddProductPageContent() {
     setImageUploadError(null);
     try {
       const base64 = await processProductImageFile(file);
-      const r2Urls = await uploadImagesToR2([base64]);
+      const r2Urls = await uploadImagesToR2([base64], { folder: 'labels' });
       const r2Url = r2Urls?.[0];
 
       if (!r2Url) {
