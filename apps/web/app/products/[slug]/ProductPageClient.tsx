@@ -62,6 +62,8 @@ interface ProductLabel {
   value: string;
   position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   color: string | null;
+  imageUrl?: string | null;
+  imagePosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | null;
 }
 
 interface ProductAttribute {

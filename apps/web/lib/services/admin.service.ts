@@ -4,6 +4,7 @@ import { printReceiptForOrder } from "@/lib/payments/ehdm";
 import { findOrCreateAttributeValue } from "../utils/variant-generator";
 import {
   ensureProductAttributesTable,
+  ensureProductLabelMediaColumns,
   ensureProductPositionColumn,
   ensureProductVariantAttributesColumn,
 } from "../utils/db-ensure";
@@ -1391,6 +1392,7 @@ class AdminService {
     // Try to include productAttributes, but handle case where table might not exist
     let product;
     let fallbackPosition: number | null | undefined;
+    await ensureProductLabelMediaColumns();
     try {
       product = await db.product.findUnique({
         where: { id: productId },
@@ -1539,12 +1541,22 @@ class AdminService {
       minimumOrderQuantity: (product as any).minimumOrderQuantity ?? 1,
       orderQuantityIncrement: (product as any).orderQuantityIncrement ?? 1,
       media: Array.isArray(product.media) ? product.media : [],
-      labels: labels.map((label: { id: string; type: string; value: string; position: string; color: string | null }) => ({
+      labels: labels.map((label: {
+        id: string;
+        type: string;
+        value: string;
+        position: string;
+        color: string | null;
+        imageUrl?: string | null;
+        imagePosition?: string | null;
+      }) => ({
         id: label.id,
         type: label.type,
         value: label.value,
         position: label.position,
         color: label.color,
+        imageUrl: label.imageUrl ?? null,
+        imagePosition: label.imagePosition ?? null,
       })),
       variants: variants.map((variant: any) => {
         // Безопасное получение options с проверкой на существование массива
@@ -1761,6 +1773,8 @@ class AdminService {
       value: string;
       position: string;
       color?: string | null;
+      imageUrl?: string | null;
+      imagePosition?: string | null;
     }>;
     attributeIds?: string[];
     variants: Array<{
@@ -1788,6 +1802,7 @@ class AdminService {
       if (data.position !== undefined) {
         await ensureProductPositionColumn();
       }
+      await ensureProductLabelMediaColumns();
 
       const result = await db.$transaction(async (tx: any) => {
         // Set UTF-8 encoding at the start of transaction to prevent encoding errors
@@ -2085,6 +2100,8 @@ class AdminService {
                     value: label.value,
                     position: label.position,
                     color: label.color || undefined,
+                    imageUrl: label.imageUrl || undefined,
+                    imagePosition: label.imagePosition || undefined,
                   })),
                 }
               : undefined,
@@ -2300,6 +2317,8 @@ class AdminService {
         value: string;
         position: string;
         color?: string | null;
+        imageUrl?: string | null;
+        imagePosition?: string | null;
       }>;
       attributeIds?: string[];
       variants?: Array<{
@@ -2328,6 +2347,7 @@ class AdminService {
       if (data.position !== undefined) {
         await ensureProductPositionColumn();
       }
+      await ensureProductLabelMediaColumns();
       
       // Check if product exists
       const existing = await db.product.findUnique({
@@ -2574,6 +2594,8 @@ class AdminService {
                 value: label.value,
                 position: label.position,
                 color: label.color || undefined,
+                imageUrl: label.imageUrl || undefined,
+                imagePosition: label.imagePosition || undefined,
               })),
             });
           }

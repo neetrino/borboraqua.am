@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { adminService } from "./admin.service";
 import { t } from "../i18n";
 import {
+  ensureProductLabelMediaColumns,
   ensureProductPositionColumn,
   ensureProductVariantAttributesColumn,
 } from "../utils/db-ensure";
@@ -151,6 +152,11 @@ class ProductsService {
       await ensureProductPositionColumn();
     } catch (error: unknown) {
       console.warn("⚠️ [PRODUCTS SERVICE] Could not ensure products.position column before listing:", error);
+    }
+    try {
+      await ensureProductLabelMediaColumns();
+    } catch (error: unknown) {
+      console.warn("⚠️ [PRODUCTS SERVICE] Could not ensure product_labels image columns before listing:", error);
     }
 
     const bestsellerProductIds: string[] = [];
@@ -478,7 +484,7 @@ class ProductsService {
         take: 1,
       },
       labels: {
-        select: { id: true, type: true, value: true, position: true, color: true },
+        select: { id: true, type: true, value: true, position: true, color: true, imageUrl: true, imagePosition: true },
       },
       categories: {
         select: {
@@ -715,12 +721,22 @@ class ProductsService {
           inStock: (variant?.stock || 0) > 0,
           position: (product as any).position ?? null,
           labels: Array.isArray(product.labels)
-            ? product.labels.map((label: { id: string; type: string; value: string; position: string; color: string | null }) => ({
+            ? product.labels.map((label: {
+                id: string;
+                type: string;
+                value: string;
+                position: string;
+                color: string | null;
+                imageUrl?: string | null;
+                imagePosition?: string | null;
+              }) => ({
                 id: label.id,
                 type: label.type,
                 value: label.value,
                 position: label.position,
                 color: label.color,
+                imageUrl: label.imageUrl ?? null,
+                imagePosition: label.imagePosition ?? null,
               }))
             : [],
           minimumOrderQuantity: (product as any).minimumOrderQuantity || 1,
@@ -862,12 +878,22 @@ class ProductsService {
         defaultVariantId: (variant as any)?.id || null,
         labels: (() => {
           // Map existing labels
-          const existingLabels = Array.isArray(product.labels) ? product.labels.map((label: { id: string; type: string; value: string; position: string; color: string | null }) => ({
+          const existingLabels = Array.isArray(product.labels) ? product.labels.map((label: {
+            id: string;
+            type: string;
+            value: string;
+            position: string;
+            color: string | null;
+            imageUrl?: string | null;
+            imagePosition?: string | null;
+          }) => ({
             id: label.id,
             type: label.type,
             value: label.value,
             position: label.position,
             color: label.color,
+            imageUrl: label.imageUrl ?? null,
+            imagePosition: label.imagePosition ?? null,
           })) : [];
           
           // Check if product is out of stock
@@ -1016,6 +1042,7 @@ class ProductsService {
    * Get product by slug
    */
   async findBySlug(slug: string, lang: string = "en") {
+    await ensureProductLabelMediaColumns();
     // Base include without productAttributes (for backward compatibility)
     const baseInclude = {
       translations: true,
@@ -1373,12 +1400,22 @@ class ProductsService {
       })(),
       labels: (() => {
         // Map existing labels
-        const existingLabels = Array.isArray(product.labels) ? product.labels.map((label: { id: string; type: string; value: string; position: string; color: string | null }) => ({
+        const existingLabels = Array.isArray(product.labels) ? product.labels.map((label: {
+          id: string;
+          type: string;
+          value: string;
+          position: string;
+          color: string | null;
+          imageUrl?: string | null;
+          imagePosition?: string | null;
+        }) => ({
           id: label.id,
           type: label.type,
           value: label.value,
           position: label.position,
           color: label.color,
+          imageUrl: label.imageUrl ?? null,
+          imagePosition: label.imagePosition ?? null,
         })) : [];
         
         // Check if all variants are out of stock

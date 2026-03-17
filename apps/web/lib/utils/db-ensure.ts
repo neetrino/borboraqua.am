@@ -20,6 +20,10 @@ let orderQuantityColumnsExist = false;
 let productPositionChecked = false;
 let productPositionExists = false;
 
+// Cache for product_labels image columns
+let productLabelMediaColumnsChecked = false;
+let productLabelMediaColumnsExist = false;
+
 /**
  * Ensures the product_attributes table exists in the database
  * This is a fallback mechanism for Vercel deployments where migrations might not run automatically
@@ -522,6 +526,63 @@ export async function ensureProductPositionColumn(): Promise<boolean> {
     console.error('❌ [DB UTILS] Unexpected error checking products.position column:', errMsg, (error as { code?: string })?.code ?? '');
     productPositionChecked = true;
     productPositionExists = false;
+    return false;
+  }
+}
+
+/**
+ * Ensures the imageUrl and imagePosition columns exist in product_labels.
+ * This keeps label image rendering working even when migrations have not run yet.
+ */
+export async function ensureProductLabelMediaColumns(): Promise<boolean> {
+  if (productLabelMediaColumnsChecked && productLabelMediaColumnsExist) {
+    return true;
+  }
+
+  try {
+    await db.$queryRaw`SELECT "imageUrl", "imagePosition" FROM "product_labels" LIMIT 1`;
+    productLabelMediaColumnsChecked = true;
+    productLabelMediaColumnsExist = true;
+    return true;
+  } catch (error: any) {
+    if (
+      error?.code === "P2022" ||
+      error?.message?.includes("does not exist") ||
+      error?.message?.includes("product_labels.imageUrl") ||
+      error?.message?.includes("product_labels.imagePosition") ||
+      (error?.message?.includes("column") &&
+        (error?.message?.includes("imageUrl") || error?.message?.includes("imagePosition")))
+    ) {
+      console.log('🔧 [DB UTILS] product_labels image columns not found, creating...');
+
+      try {
+        await db.$executeRaw`
+          ALTER TABLE "product_labels"
+          ADD COLUMN IF NOT EXISTS "imageUrl" TEXT
+        `;
+
+        await db.$executeRaw`
+          ALTER TABLE "product_labels"
+          ADD COLUMN IF NOT EXISTS "imagePosition" TEXT
+        `;
+
+        console.log('✅ [DB UTILS] product_labels image columns created successfully');
+        productLabelMediaColumnsChecked = true;
+        productLabelMediaColumnsExist = true;
+        return true;
+      } catch (createError: unknown) {
+        const err = createError instanceof Error ? createError : new Error(String(createError));
+        console.error('❌ [DB UTILS] Failed to create product_labels image columns:', err.message, (createError as { code?: string })?.code ?? '');
+        productLabelMediaColumnsChecked = true;
+        productLabelMediaColumnsExist = false;
+        return false;
+      }
+    }
+
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('❌ [DB UTILS] Unexpected error checking product_labels image columns:', errMsg, (error as { code?: string })?.code ?? '');
+    productLabelMediaColumnsChecked = true;
+    productLabelMediaColumnsExist = false;
     return false;
   }
 }
