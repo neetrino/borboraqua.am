@@ -965,8 +965,8 @@ export function HomePageClient({
        
 
 
-        {/* Mobile Hero Text — կենտրոն; 729+ մի քիչ էլ ներքև */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-1/2 top-[272px] min-[729px]:top-[340px] w-full max-w-[380px] px-6 z-10">
+        {/* Mobile Hero Text — կենտրոն, մի քիչ ձախ */}
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center justify-center left-[calc(50%-12px)] top-[272px] min-[729px]:top-[340px] w-full max-w-[380px] px-6 z-10">
           <div className="flex flex-col font-['Montserrat',sans-serif] justify-center text-center leading-[40px] relative shrink-0 text-[34px] text-white w-full">
             <p className="mb-0 font-black hero-headline-underline">{t('home.hero.your')}</p>
             <p className="mb-0 font-light hero-headline-underline">{t('home.hero.dailyDose')}</p>
@@ -999,7 +999,7 @@ export function HomePageClient({
 
 
         {/* Mobile CTA Buttons — 729+ մի քիչ ներքև */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col min-[728px]:flex-row gap-[14px] min-[728px]:gap-[12px] min-[728px]:h-[60px] items-center justify-end left-1/2 pt-[12px] min-[728px]:pt-0 top-[500px] min-[728px]:top-[590px] min-[729px]:top-[630px] w-full max-w-[430px] min-[728px]:max-w-[600px] px-4 z-10">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col min-[728px]:flex-row gap-[14px] min-[728px]:gap-[12px] min-[728px]:h-[60px] items-center justify-end left-1/2 pt-[12px] min-[728px]:pt-0 top-[525px] min-[728px]:top-[590px] min-[729px]:top-[630px] w-full max-w-[430px] min-[728px]:max-w-[600px] px-4 z-10">
           <button
             onClick={() => router.push('/products')}
             className="bg-[#31daff] content-stretch flex flex-col h-[62px] min-[728px]:h-[60px] items-center justify-center px-[34px] min-[728px]:px-[32px] py-[12px] relative rounded-[9999px] shrink-0 w-full min-[728px]:w-auto min-[728px]:flex-1 max-w-[340px] min-[728px]:max-w-none cursor-pointer transition-all duration-300 hover:bg-[#00b8e6] hover:shadow-lg hover:shadow-[#31daff]/50 hover:scale-105 active:scale-95"
@@ -1023,7 +1023,7 @@ export function HomePageClient({
         <MobileFeaturedCategories />
 
         {/* Mobile Featured Products Section */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[6px] items-center justify-center left-1/2 top-[948px] w-full max-w-[429px] px-4 z-10">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col gap-[6px] items-center justify-center left-1/2 top-[973px] w-full max-w-[429px] px-4 z-10">
           <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
             <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[30px] relative shrink-0 text-[28px] text-center text-white tracking-[-0.9px] uppercase break-words">
               <p className="mb-0">{t('home.featuredProducts.title')}</p>
@@ -1038,7 +1038,7 @@ export function HomePageClient({
         </div>
 
         {/* Left bulb — after Featured title, float + drag */}
-        <div className="absolute flex items-end justify-center left-2 right-auto top-[890px] bottom-auto z-10 max-w-[130px] overflow-visible">
+        <div className="absolute flex items-end justify-center left-2 right-auto top-[915px] bottom-auto z-10 max-w-[130px] overflow-visible">
           <DraggableBulb src={imgBulb} wrapperClassName="figma-float-active-7 flex-none rotate-[100.79deg] size-[130px]" maxDrag={80} loading="eager" />
         </div>
 
@@ -1049,7 +1049,7 @@ export function HomePageClient({
           return (
             <>
               {/* Mobile: 2x2 grid */}
-              <div className="-translate-x-1/2 absolute content-stretch grid grid-cols-2 min-[728px]:hidden gap-[16px] items-center justify-center left-1/2 top-[1113px] w-full max-w-[400px] px-4">
+              <div className="-translate-x-1/2 absolute content-stretch grid grid-cols-2 min-[728px]:hidden gap-[16px] items-center justify-center left-1/2 top-[1138px] w-full max-w-[400px] px-4">
                 {visibleProducts.map((product) => (
                   <FeaturedProductCard
                     key={product.id}
@@ -1068,7 +1068,7 @@ export function HomePageClient({
                 ))}
               </div>
               {/* Tablet: 3x3 grid from 728px */}
-              <div className="-translate-x-1/2 absolute content-stretch grid grid-cols-3 hidden min-[728px]:grid gap-[16px] items-center justify-center left-1/2 top-[1113px] w-full max-w-[700px] px-4">
+              <div className="-translate-x-1/2 absolute content-stretch grid grid-cols-3 hidden min-[728px]:grid gap-[16px] items-center justify-center left-1/2 top-[1138px] w-full max-w-[700px] px-4">
                 {visibleProductsTablet.map((product) => (
                   <FeaturedProductCard
                     key={product.id}
@@ -1090,12 +1090,12 @@ export function HomePageClient({
           );
         })()}
         {!productsLoading && displayedFeaturedProducts.length === 0 && (
-          <div className="-translate-x-1/2 absolute left-1/2 top-[1155px] min-[728px]:top-[1180px] w-full max-w-[429px] min-[728px]:max-w-[700px] px-6 text-center text-white">
+          <div className="-translate-x-1/2 absolute left-1/2 top-[1180px] min-[728px]:top-[1180px] w-full max-w-[429px] min-[728px]:max-w-[700px] px-6 text-center text-white">
             <p className="text-[14px] leading-[22px]">{t('common.messages.noProductsFound')}</p>
           </div>
         )}
         {/* Mobile / Tablet View All Products Button — պլանշետում ցածր, որ product card-ներից ներքև */}
-        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1775px] min-[728px]:top-[2080px] w-[241px]">
+        <div className="-translate-x-1/2 absolute content-stretch flex flex-col items-center left-[calc(50%+1.5px)] top-[1800px] min-[728px]:top-[2080px] w-[241px]">
           <button
             onClick={() => router.push(featuredProductsHref)}
             className="bg-[#FFFFFF] border-2 border-[#e2e8f0] border-solid content-stretch flex gap-[8px] items-center px-[34px] py-[12px] relative rounded-[9999px] shrink-0 transition-all duration-300 hover:border-[#1ac0fd] hover:bg-[#1ac0fd]/5 hover:shadow-md hover:shadow-[#1ac0fd]/20 hover:scale-105 active:scale-95"
@@ -1429,8 +1429,8 @@ export function HomePageClient({
        
       
 
-      {/* Hero Section - Main Content; միայն տեքստը մի քիչ էլ ներքև (pt + button -mt) */}
-      <div className="absolute content-stretch flex items-end justify-center left-[calc(50%+0.5px)] px-[20px] md:px-[16px] sm:px-[12px] top-[480px] sm:top-[280px] md:top-[500px] min-[729px]:top-[500px] lg:top-[520px] xl:top-[480px] translate-x-[-50%] w-[800px] lg:w-[800px] md:w-[90%] sm:w-[95%] z-20">
+      {/* Hero Section - Main Content; տեքստը մի քիչ ձախ */}
+      <div className="absolute content-stretch flex items-end justify-center left-[calc(50%-12px)] px-[20px] md:px-[16px] sm:px-[12px] top-[480px] sm:top-[280px] md:top-[500px] min-[729px]:top-[500px] lg:top-[520px] xl:top-[480px] translate-x-[-50%] w-[800px] lg:w-[800px] md:w-[90%] sm:w-[95%] z-20">
         <div className="content-stretch flex flex-col gap-[20px] lg:gap-[20px] md:gap-[20px] sm:gap-[16px] items-center justify-center relative shrink-0 w-[800px] lg:w-[800px] md:w-full sm:w-full pt-4 min-[729px]:pt-6 max-lg:min-[729px]:pt-6">
           {/* Experience Purity Label */}
           <div className="content-stretch flex gap-[10px] lg:gap-[10px] md:gap-[10px] sm:gap-[8px] items-center relative shrink-0 w-full">

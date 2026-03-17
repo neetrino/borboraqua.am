@@ -8,6 +8,7 @@ const FAQ_CATEGORIES = [
   { id: 'delivery', questionCount: 1 },
   { id: 'water', questionCount: 6 },
   { id: 'payment', questionCount: 3 },
+  { id: 'dispensers', questionCount: 8 },
 ] as const;
 
 function ChevronIcon({ open }: { open: boolean }) {

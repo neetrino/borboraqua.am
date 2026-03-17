@@ -69,7 +69,7 @@ export function MobileFeaturedCategories({
   };
 
   return (
-    <div className="-translate-x-1/2 absolute left-1/2 top-[698px] min-[728px]:top-[768px] z-10 w-full max-w-[429px] min-[728px]:max-w-[700px] min-[1025px]:hidden">
+    <div className="-translate-x-1/2 absolute left-1/2 top-[723px] min-[728px]:top-[768px] z-10 w-full max-w-[429px] min-[728px]:max-w-[700px] min-[1025px]:hidden">
       <div className="mb-3 min-[728px]:mb-2 flex flex-col items-center justify-center gap-[6px] min-[728px]:gap-[4px]">
         <div className="flex flex-col font-['Montserrat:Black',sans-serif] font-black justify-center leading-[30px] min-[728px]:leading-[26px] relative shrink-0 text-[28px] min-[728px]:text-[24px] text-center text-white tracking-[-0.9px] min-[728px]:tracking-[-0.7px] uppercase break-words">
           <p className="mb-0">{t('home.featuredCategories.title')}</p>

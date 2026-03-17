@@ -56,6 +56,43 @@
           "a": "The amount is refunded within 2–3 business days to the same Idram account or bank account from which the payment was made."
         }
       }
+    },
+    "dispensers": {
+      "title": "Dispensers",
+      "questions": {
+        "0": {
+          "q": "Where can I see all dispenser technical specifications in a comparison table?",
+          "a": "The dispenser selection guide (comparison table) presents the main technical data, functions and design features of all models available for sale. To view each device in more detail, go to the product page by clicking on the product model or image."
+        },
+        "1": {
+          "q": "What are the general operating rules for dispensers?",
+          "a": "After transport, wait 2 hours before connecting to power so that refrigerant circulation is correct.\nConnect the dispenser to power only when water is flowing from the hot water tap (meaning there is water in the tank), especially after installing a new bottle.\nDo not take water from the taps after the bottle is empty, so that the tanks do not empty while the unit is powered. If a new bottle is not installed immediately after the bottle is empty, the dispenser must be disconnected from power.\nThe dispenser should undergo sanitary cleaning at least twice a year.\nIf the dispenser will not be used for more than 1 week, disconnect it from power and drain the water from the tanks through the special tap at the back (CAUTION: the water may be at boiling temperature); otherwise the residual water left in the dispenser tanks may go bad."
+        },
+        "2": {
+          "q": "Do dispensers have filters inside?",
+          "a": "Dispensers do not have filters, as they are designed for water prepared for industrial bottle filling (the water we deliver is already filtered). Bottles filled with tap water must not be placed on the units, because tap water contains chlorine, the taste of which is transferred to the plastic water-carrying parts of the unit (taps, cold water tube, rod, etc.)."
+        },
+        "3": {
+          "q": "What is the most suitable place in a room for installing a dispenser?",
+          "a": "The dispenser MUST be installed away from direct sunlight and indoor plants."
+        },
+        "4": {
+          "q": "When pouring water from the dispenser tap into a glass I see particles and white flakes in the water, but they are not in the bottle. Why?",
+          "a": "When the dispenser tanks are half empty and a new bottle is installed, water turbulence occurs (you can tell if a lot of water flows into the tanks after installing the bottle and many bubbles appear). That turbulence lifts dust/contamination settled at the bottom of the cold water tank above the water collection level (above the level of the pipe to the taps), so the particles/white flakes are seen in the glass right after changing the bottle.\n\nTip. After the bottle is empty, do not take water from the taps so the tanks do not empty. Install a new full bottle immediately. When the tanks are full, the chance of air (and contamination) entering is reduced. Also, empty dispenser tanks heating and cooling can damage the tank metal.\n\nDispensers are not hermetic and do not self-clean. The upper part of the dispenser (the rod and its surroundings) is most at risk of contamination; the taps and drip tray underneath are also often contaminated. The water tanks (especially the cold water tank) are in contact with air; that air enters the tank and then appears as bubbles inside the bottle when water flows from the bottle into the tank. The more contaminated or dusty the room air, the higher the chance of the dispenser’s cold water tank becoming contaminated. Sanitary cleaning of the dispenser should be carried out at least twice a year; our website has a special video to help you do the sanitization yourself.\n\nWhite flakes can also form when ice forms in the cold water tank. This should be prevented using the temperature regulator at the back of the dispenser."
+        },
+        "5": {
+          "q": "We have a dispenser from another supplier. Can we use your bottles?",
+          "a": "Our bottle caps generally match all dispensers, as they are standard size. Models that may be incompatible are very rare."
+        },
+        "6": {
+          "q": "What is the cooling and heating range of the unit?",
+          "a": "In dispensers of models WFD-410L, WBF-1000LA, WBF-1000S and WFD-1050, hot water temperature is 75–90 ºC and cold water temperature is 4–12 ºC. Cold water temperature can be adjusted with the regulator next to the switches on the back of the dispenser."
+        },
+        "7": {
+          "q": "What should I do if water is leaking from under the unit?",
+          "a": "There can be 2 causes.\n\nThe installed bottle has a microcrack, so air enters the bottle and water keeps filling the dispenser tanks and overflowing, which shows as water leaking from under the unit. Disconnect the dispenser from power, remove the bottle, drain 2–3 glasses of water from each tap and install a new bottle. If the leak stops, inform the company and hand over that bottle separately to the driver so it can be written off and taken out of use. This is the most common cause of water leaking from under the dispenser.\n\nAttention. The customer is informed that microcracks may appear during transport and use of the bottles and may not be visible when inspecting the bottles. Such microcracks may lead to water leakage during storage or use; the customer should take this into account when storing bottles and choosing the dispenser location. If bottle damage is found after the product has been handed over to the customer, the company is not liable and does not compensate the customer’s costs or losses due to the leak. The company is ready to replace the damaged bottle free of charge.\n\nIf after following the steps in the first point the water leak continues, the problem is with the unit — you should contact a specialist. If the dispenser is under warranty, contact that company’s service center; otherwise contact us and we will be glad to help you."
+        }
+      }
     }
   }
 }
