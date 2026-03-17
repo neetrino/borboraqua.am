@@ -3,11 +3,21 @@ import { authenticateToken, requireAdmin } from "@/lib/middleware/auth";
 import { uploadToR2, isR2Configured } from "@/lib/r2-client";
 import { randomUUID } from "crypto";
 
+const ALLOWED_FOLDERS = ["products", "labels"] as const;
+type UploadFolder = (typeof ALLOWED_FOLDERS)[number];
+
+function parseFolder(value: unknown): UploadFolder {
+  if (typeof value === "string" && ALLOWED_FOLDERS.includes(value as UploadFolder)) {
+    return value as UploadFolder;
+  }
+  return "products";
+}
+
 /**
  * POST /api/v1/admin/products/upload-images
  * Upload images to R2 and return public URLs.
  *
- * Request body: { images: string[] } (base64 data:image/... strings)
+ * Request body: { images: string[], folder?: "products" | "labels" } (folder defaults to "products"; use "labels" for label images)
  * Response: { urls: string[] } (R2 public URLs)
  */
 export async function POST(req: NextRequest) {
@@ -28,7 +38,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let body: { images?: unknown };
+    let body: { images?: unknown; folder?: unknown };
     try {
       body = await req.json();
     } catch {
@@ -88,6 +98,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const folder = parseFolder(body.folder);
+
     const urls: string[] = [];
     for (let i = 0; i < validImages.length; i++) {
       const dataUrl = validImages[i];
@@ -99,7 +111,7 @@ export async function POST(req: NextRequest) {
       const contentType = match[1];
       const base64Data = match[2];
       const ext = contentType === "image/png" ? "png" : contentType === "image/webp" ? "webp" : "jpg";
-      const key = `assets/products/${randomUUID()}-${i}.${ext}`;
+      const key = `assets/${folder}/${randomUUID()}-${i}.${ext}`;
       const buffer = Buffer.from(base64Data, "base64");
       const url = await uploadToR2(key, buffer, contentType);
       urls.push(url ?? "");
@@ -120,7 +132,7 @@ export async function POST(req: NextRequest) {
     }
 
     const totalTime = Date.now() - requestStartTime;
-    console.log(`[ADMIN UPLOAD IMAGES] Uploaded ${urls.length} images in ${totalTime}ms`);
+    console.log(`[ADMIN UPLOAD IMAGES] Uploaded ${urls.length} images to assets/${folder} in ${totalTime}ms`);
     return NextResponse.json({ urls }, { status: 200 });
   } catch (error: unknown) {
     const totalTime = Date.now() - requestStartTime;

@@ -98,7 +98,7 @@ export const ProductLabels: React.FC<ProductLabelsProps> = ({ labels }) => {
                   key={item.id}
                   src={item.imageUrl || ''}
                   alt=""
-                  className={`pointer-events-auto h-8 w-8 md:h-12 md:w-12 object-contain ${position === 'top-right' ? '-translate-x-1' : ''}`}
+                  className={`pointer-events-auto h-12 w-12 md:h-14 md:w-14 object-contain ${position === 'top-right' ? '-translate-x-1' : ''}`}
                 />
               ) : (
                 <div
