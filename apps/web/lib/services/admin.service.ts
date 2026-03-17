@@ -15,6 +15,15 @@ import {
   separateMainAndVariantImages,
 } from "../utils/image-utils";
 
+interface ProductLabelWriteInput {
+  type: string;
+  value: string;
+  position: string;
+  color?: string | null;
+  imageUrl?: string | null;
+  imagePosition?: string | null;
+}
+
 class AdminService {
   /**
    * Ensure colors and imageUrl columns exist in attribute_values table
@@ -87,6 +96,66 @@ class AdminService {
   private isUnknownProductPositionError(error: unknown): boolean {
     const msg = (error as { message?: string })?.message ?? "";
     return msg.includes("Unknown argument") && msg.includes("position");
+  }
+
+  private isUnknownProductLabelMediaError(error: unknown): boolean {
+    const msg = (error as { message?: string })?.message ?? "";
+    return (
+      (msg.includes("Unknown argument") || msg.includes("Unknown field")) &&
+      (msg.includes("imageUrl") || msg.includes("imagePosition"))
+    );
+  }
+
+  private buildProductLabelWriteData(
+    labels: ProductLabelWriteInput[],
+    includeMedia: boolean
+  ): Array<{
+    type: string;
+    value: string;
+    position: string;
+    color?: string;
+    imageUrl?: string;
+    imagePosition?: string;
+  }> {
+    return labels.map((label) => ({
+      type: label.type,
+      value: label.value,
+      position: label.position,
+      color: label.color || undefined,
+      ...(includeMedia
+        ? {
+            imageUrl: label.imageUrl || undefined,
+            imagePosition: label.imagePosition || undefined,
+          }
+        : {}),
+    }));
+  }
+
+  private async createProductLabelsWithCompatibility(
+    tx: { productLabel: { createMany: (args: { data: Array<Record<string, unknown>> }) => Promise<unknown> } },
+    productId: string,
+    labels: ProductLabelWriteInput[]
+  ): Promise<void> {
+    const dataWithProductId = (includeMedia: boolean) =>
+      this.buildProductLabelWriteData(labels, includeMedia).map((label) => ({
+        productId,
+        ...label,
+      }));
+
+    try {
+      await tx.productLabel.createMany({
+        data: dataWithProductId(true),
+      });
+    } catch (error) {
+      if (!this.isUnknownProductLabelMediaError(error)) {
+        throw error;
+      }
+
+      console.warn("⚠️ [ADMIN SERVICE] Prisma client does not support product label media fields yet, retrying without them.");
+      await tx.productLabel.createMany({
+        data: dataWithProductId(false),
+      });
+    }
   }
 
   private normalizeProductPositionValue(value: unknown): number | null {
@@ -2076,6 +2145,13 @@ class AdminService {
           }
         }
 
+        const buildLabelsForCreate = (includeMedia: boolean) =>
+          data.labels && data.labels.length > 0
+            ? {
+                create: this.buildProductLabelWriteData(data.labels, includeMedia),
+              }
+            : undefined;
+
         const createData = {
             brandId: data.brandId || undefined,
             primaryCategoryId: data.primaryCategoryId || undefined,
@@ -2093,18 +2169,7 @@ class AdminService {
             variants: {
               create: variantsData,
             },
-            labels: data.labels && data.labels.length > 0
-              ? {
-                  create: data.labels.map((label) => ({
-                    type: label.type,
-                    value: label.value,
-                    position: label.position,
-                    color: label.color || undefined,
-                    imageUrl: label.imageUrl || undefined,
-                    imagePosition: label.imagePosition || undefined,
-                  })),
-                }
-              : undefined,
+            labels: buildLabelsForCreate(true),
             // Connect categories for many-to-many relation
             categories: data.categoryIds && data.categoryIds.length > 0
               ? {
@@ -2122,14 +2187,28 @@ class AdminService {
         try {
           product = await createProduct(createData);
         } catch (err: unknown) {
-          if (this.isUnknownProductPositionError(err)) {
-            const { position: _p, ...dataWithoutPosition } = createData;
-            product = await createProduct(dataWithoutPosition);
-            if (normalizedPosition !== null) {
-              await this.persistProductPositionRaw(tx, product.id, normalizedPosition);
-            }
-          } else {
+          if (!this.isUnknownProductPositionError(err) && !this.isUnknownProductLabelMediaError(err)) {
             throw err;
+          }
+
+          const retryDataBase = this.isUnknownProductLabelMediaError(err)
+            ? {
+                ...createData,
+                labels: buildLabelsForCreate(false),
+              }
+            : createData;
+
+          const retryData = this.isUnknownProductPositionError(err)
+            ? (() => {
+                const { position: _p, ...dataWithoutPosition } = retryDataBase;
+                return dataWithoutPosition;
+              })()
+            : retryDataBase;
+
+          product = await createProduct(retryData);
+
+          if (this.isUnknownProductPositionError(err) && normalizedPosition !== null) {
+            await this.persistProductPositionRaw(tx, product.id, normalizedPosition);
           }
         }
 
@@ -2587,17 +2666,7 @@ class AdminService {
         if (data.labels !== undefined) {
           await tx.productLabel.deleteMany({ where: { productId } });
           if (data.labels.length > 0) {
-            await tx.productLabel.createMany({
-              data: data.labels.map((label) => ({
-                productId,
-                type: label.type,
-                value: label.value,
-                position: label.position,
-                color: label.color || undefined,
-                imageUrl: label.imageUrl || undefined,
-                imagePosition: label.imagePosition || undefined,
-              })),
-            });
+            await this.createProductLabelsWithCompatibility(tx, productId, data.labels);
           }
         }
 

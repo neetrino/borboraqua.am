@@ -483,9 +483,7 @@ class ProductsService {
         orderBy: { price: 'asc' as const },
         take: 1,
       },
-      labels: {
-        select: { id: true, type: true, value: true, position: true, color: true, imageUrl: true, imagePosition: true },
-      },
+      labels: true,
       categories: {
         select: {
           id: true,
@@ -1445,6 +1443,8 @@ class ProductsService {
               value: outOfStockText,
               position: position as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right',
               color: '#6B7280', // Gray color for out of stock
+              imageUrl: null,
+              imagePosition: null,
             });
           }
         }
