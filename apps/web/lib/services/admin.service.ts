@@ -1,4 +1,6 @@
 import { db } from "@white-shop/db";
+import { Prisma } from "@prisma/client";
+import { randomUUID } from "crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
 import { findOrCreateAttributeValue } from "../utils/variant-generator";
@@ -132,7 +134,12 @@ class AdminService {
   }
 
   private async createProductLabelsWithCompatibility(
-    tx: { productLabel: { createMany: (args: { data: Array<Record<string, unknown>> }) => Promise<unknown> } },
+    tx: {
+      productLabel: {
+        createMany: (args: { data: Array<Record<string, unknown>> }) => Promise<unknown>;
+      };
+      $executeRaw: (query: TemplateStringsArray | Prisma.Sql, ...values: unknown[]) => Promise<unknown>;
+    },
     productId: string,
     labels: ProductLabelWriteInput[]
   ): Promise<void> {
@@ -151,10 +158,32 @@ class AdminService {
         throw error;
       }
 
-      console.warn("⚠️ [ADMIN SERVICE] Prisma client does not support product label media fields yet, retrying without them.");
-      await tx.productLabel.createMany({
-        data: dataWithProductId(false),
-      });
+      console.warn("⚠️ [ADMIN SERVICE] Prisma client does not support product label media fields yet, saving product label media via raw SQL.");
+
+      for (const label of labels) {
+        await tx.$executeRaw`
+          INSERT INTO "product_labels" (
+            "id",
+            "productId",
+            "type",
+            "value",
+            "position",
+            "color",
+            "imageUrl",
+            "imagePosition"
+          )
+          VALUES (
+            ${randomUUID()},
+            ${productId},
+            ${label.type},
+            ${label.value},
+            ${label.position},
+            ${label.color ?? null},
+            ${label.imageUrl ?? null},
+            ${label.imagePosition ?? null}
+          )
+        `;
+      }
     }
   }
 
@@ -2209,6 +2238,11 @@ class AdminService {
 
           if (this.isUnknownProductPositionError(err) && normalizedPosition !== null) {
             await this.persistProductPositionRaw(tx, product.id, normalizedPosition);
+          }
+
+          if (this.isUnknownProductLabelMediaError(err) && data.labels && data.labels.length > 0) {
+            await tx.productLabel.deleteMany({ where: { productId: product.id } });
+            await this.createProductLabelsWithCompatibility(tx, product.id, data.labels);
           }
         }
 
