@@ -1,8 +1,5 @@
-'use client';
-
 import Link from 'next/link';
 import { processImageUrl } from '../lib/utils/image-utils';
-import { useTranslation } from '../lib/i18n-client';
 
 interface BlogCardProps {
   slug: string;
@@ -10,6 +7,7 @@ interface BlogCardProps {
   excerpt?: string | null;
   featuredImage?: string | null;
   publishedAt?: string | null;
+  readMoreLabel: string;
   className?: string;
 }
 
@@ -52,9 +50,9 @@ export function BlogCard({
   excerpt,
   featuredImage,
   publishedAt,
+  readMoreLabel,
   className = '',
 }: BlogCardProps) {
-  const { t } = useTranslation();
   const imageUrl = featuredImage ? processImageUrl(featuredImage) : null;
   const formattedDate = publishedAt ? formatPublishedDate(publishedAt) : null;
   const encodedSlug = normalizeSlugForHref(slug);
@@ -94,7 +92,7 @@ export function BlogCard({
             </p>
           )}
           <span className="inline-flex items-center text-sm font-medium text-[#00d1ff] group-hover:underline">
-            {t('blog.readMore')}
+            {readMoreLabel}
             <svg
               className="ml-2 w-4 h-4"
               fill="none"
