@@ -285,15 +285,18 @@ export function HomePageClient({
     setCarouselIndex(0);
   }, [selectedFeaturedCategoryId]);
 
-  useEffect(() => {
-    const maxIndex = isTouchPhoneOrTabletLayout
-      ? Math.max(0, Math.floor((displayedFeaturedProducts.length - 4) / 4) * 4)
-      : Math.max(0, Math.floor((displayedFeaturedProducts.length - 3) / 3) * 3);
+  // Last valid carousel start index: by page size (3 desktop, 4 mobile), so pagination works for 5, 7, etc.
+  const featuredCarouselMaxIndex = useMemo(() => {
+    if (displayedFeaturedProducts.length === 0) return 0;
+    const pageSize = isTouchPhoneOrTabletLayout ? 4 : 3;
+    return (Math.ceil(displayedFeaturedProducts.length / pageSize) - 1) * pageSize;
+  }, [displayedFeaturedProducts.length, isTouchPhoneOrTabletLayout]);
 
-    if (carouselIndex > maxIndex) {
+  useEffect(() => {
+    if (carouselIndex > featuredCarouselMaxIndex) {
       setCarouselIndex(0);
     }
-  }, [carouselIndex, displayedFeaturedProducts.length, isTouchPhoneOrTabletLayout]);
+  }, [carouselIndex, featuredCarouselMaxIndex]);
 
   // Handle click outside for search modal
   useEffect(() => {
@@ -470,16 +473,9 @@ export function HomePageClient({
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      // Move to previous mode (4 products for touch mobile/tablet, 3 for desktop/laptop).
       const step = isTouchPhoneOrTabletLayout ? 4 : 3;
       const newIndex = prevIndex - step;
-      // If we go below 0, loop to the last valid index
-      if (newIndex < 0) {
-        const maxIndex = isTouchPhoneOrTabletLayout
-          ? Math.max(0, Math.floor((displayedFeaturedProducts.length - 4) / 4) * 4)
-          : Math.max(0, Math.floor((displayedFeaturedProducts.length - 3) / 3) * 3);
-        return maxIndex;
-      }
+      if (newIndex < 0) return featuredCarouselMaxIndex;
       return newIndex;
     });
   };
@@ -531,16 +527,9 @@ export function HomePageClient({
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      // Move to next mode (4 products for touch mobile/tablet, 3 for desktop/laptop).
       const step = isTouchPhoneOrTabletLayout ? 4 : 3;
       const newIndex = prevIndex + step;
-      // If we exceed the max, loop back to start (0)
-      const maxIndex = isTouchPhoneOrTabletLayout
-        ? Math.max(0, Math.floor((displayedFeaturedProducts.length - 4) / 4) * 4)
-        : Math.max(0, Math.floor((displayedFeaturedProducts.length - 3) / 3) * 3);
-      if (newIndex > maxIndex) {
-        return 0; // First mode
-      }
+      if (newIndex > featuredCarouselMaxIndex) return 0;
       return newIndex;
     });
   };
