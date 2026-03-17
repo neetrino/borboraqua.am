@@ -1,99 +1,41 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useTranslation } from '../../lib/i18n-client';
-import { apiClient } from '../../lib/api-client';
-import { getBlogFromCache, setBlogCache } from '../../lib/blog-cache';
+import { cookies } from 'next/headers';
 import { BlogCard } from '../../components/BlogCard';
 import { BlogPagination } from '../../components/BlogPagination';
+import { getBlogListServer } from '../../lib/blog-server';
+import { t } from '../../lib/i18n';
+import { DEFAULT_LANGUAGE, type LanguageCode } from '../../lib/language';
 
-interface PublicBlogPost {
-  id: string;
-  slug: string;
-  title: string;
-  contentHtml: string | null;
-  excerpt: string | null;
-  featuredImage: string | null;
-  publishedAt: string | null;
+interface BlogPageProps {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
-interface BlogListResponse {
-  data: PublicBlogPost[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
+function getSearchParamValue(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
 }
 
-export default function BlogPage() {
-  const { t, lang } = useTranslation();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [posts, setPosts] = useState<PublicBlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [meta, setMeta] = useState<BlogListResponse['meta'] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const currentPage = parseInt(searchParams.get('page') || '1', 10);
-  const limit = 6;
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadPosts(backgroundRevalidate = false) {
-      try {
-        if (!backgroundRevalidate) {
-          setLoading(true);
-          setError(null);
-        }
-
-        // Use cached blog list (like products/cart) for instant display
-        if (!backgroundRevalidate) {
-          const cached = getBlogFromCache(lang, currentPage, limit);
-          if (cached) {
-            setPosts(cached.data as PublicBlogPost[]);
-            setMeta(cached.meta);
-            setLoading(false);
-            loadPosts(true);
-            return;
-          }
-        }
-
-        const response = await apiClient.get<BlogListResponse>('/api/v1/blog', {
-          params: { lang, page: String(currentPage), limit: String(limit) },
-        });
-
-        if (!cancelled) {
-          setPosts(response.data || []);
-          setMeta(response.meta || null);
-          setBlogCache(lang, currentPage, limit, response.data || [], response.meta || { total: 0, page: currentPage, limit, totalPages: 0 });
-        }
-      } catch (err: any) {
-        if (!cancelled && !backgroundRevalidate) {
-          console.error('❌ [BLOG] Failed to load posts', err);
-          const errorMessage = err?.message?.includes('timeout')
-            ? 'Request timeout. Please try again.'
-            : t('blog.errorLoading');
-          setError(errorMessage);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
+async function getPageLanguage(): Promise<LanguageCode> {
+  try {
+    const cookieStore = await cookies();
+    const langCookie = cookieStore.get('shop_language');
+    if (langCookie?.value && ['hy', 'en', 'ru'].includes(langCookie.value)) {
+      return langCookie.value as LanguageCode;
     }
+  } catch {
+    // Ignore cookie access issues and use the default language.
+  }
 
-    void loadPosts();
+  return DEFAULT_LANGUAGE;
+}
 
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lang, currentPage]);
-
+export default async function BlogPage({ searchParams }: BlogPageProps) {
+  const params = searchParams ? await searchParams : {};
+  const rawPage = getSearchParamValue(params.page);
+  const parsedPage = Number.parseInt(rawPage ?? '1', 10);
+  const currentPage = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const limit = 6;
+  const language = await getPageLanguage();
+  const response = await getBlogListServer(language, currentPage, limit);
+  const readMoreLabel = t(language, 'blog.readMore');
 
   return (
     <div className="min-h-screen">
@@ -101,47 +43,30 @@ export default function BlogPage() {
         {/* Header */}
         <div className="mb-10 text-center">
           <p className="text-sm md:text-base font-semibold uppercase tracking-wider text-[#00d1ff] mb-2">
-            {t('blog.subtitle')}
+            {t(language, 'blog.subtitle')}
           </p>
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
-            {t('blog.title')}
+            {t(language, 'blog.title')}
           </h1>
           <p className="text-gray-600 text-sm md:text-base max-w-2xl mx-auto">
-            {t('blog.description')}
+            {t(language, 'blog.description')}
           </p>
         </div>
 
-        {/* Error State */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-center">
-            {error}
-          </div>
-        )}
-
-        {/* Loading State */}
-        {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
-              <p className="text-sm text-gray-600">{t('blog.loading')}</p>
-            </div>
-          </div>
-        )}
-
         {/* Empty State */}
-        {!loading && !error && posts.length === 0 && (
+        {response.data.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-sm md:text-base">
-              {t('blog.empty')}
+              {t(language, 'blog.empty')}
             </p>
           </div>
         )}
 
         {/* Blog Posts Grid */}
-        {!loading && !error && posts.length > 0 && (
+        {response.data.length > 0 && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {posts.map((post) => (
+              {response.data.map((post) => (
                 <BlogCard
                   key={post.id}
                   slug={post.slug}
@@ -149,15 +74,16 @@ export default function BlogPage() {
                   excerpt={post.excerpt}
                   featuredImage={post.featuredImage}
                   publishedAt={post.publishedAt}
+                  readMoreLabel={readMoreLabel}
                 />
               ))}
             </div>
 
             {/* Pagination */}
-            {meta && meta.totalPages > 1 && (
+            {response.meta.totalPages > 1 && (
               <BlogPagination
-                currentPage={meta.page}
-                totalPages={meta.totalPages}
+                currentPage={response.meta.page}
+                totalPages={response.meta.totalPages}
               />
             )}
           </>
