@@ -75,12 +75,16 @@ interface Variant {
   colors: ColorData[]; // Массив цветов, каждый со своими изображениями, stock, price, и sizes
 }
 
+type ProductLabelPosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+
 interface ProductLabel {
   id?: string;
   type: 'text' | 'percentage';
   value: string;
-  position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  position: ProductLabelPosition;
   color?: string | null;
+  imageUrl?: string | null;
+  imagePosition?: ProductLabelPosition | null;
 }
 
 interface ProductData {
@@ -439,6 +443,7 @@ function AddProductPageContent() {
     en: null,
     ru: null,
   });
+  const labelImageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const variantImageInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const attributesDropdownRef = useRef<HTMLDivElement | null>(null);
   const [attributesDropdownOpen, setAttributesDropdownOpen] = useState(false);
@@ -1158,6 +1163,8 @@ function AddProductPageContent() {
               value: label.value || '',
               position: label.position || 'top-left',
               color: label.color || null,
+              imageUrl: label.imageUrl || null,
+              imagePosition: label.imagePosition || null,
             })),
           });
           setDescriptionImages(descriptionImagesMap);
@@ -2239,6 +2246,8 @@ function AddProductPageContent() {
       value: '',
       position: 'top-left',
       color: null,
+      imageUrl: null,
+      imagePosition: 'top-left',
     };
     setFormData((prev) => ({
       ...prev,
@@ -2257,6 +2266,59 @@ function AddProductPageContent() {
     setFormData((prev) => {
       const newLabels = [...prev.labels];
       newLabels[index] = { ...newLabels[index], [field]: value };
+      return { ...prev, labels: newLabels };
+    });
+  };
+
+  const handleUploadLabelImage = async (index: number, event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    if (files.length === 0) {
+      return;
+    }
+
+    const file = files[0];
+    if (!file.type.startsWith('image/')) {
+      setImageUploadError(`"${file.name}" is not an image file`);
+      if (event.target) {
+        event.target.value = '';
+      }
+      return;
+    }
+
+    setImageUploadLoading(true);
+    setImageUploadError(null);
+    try {
+      const base64 = await processProductImageFile(file);
+      const r2Urls = await uploadImagesToR2([base64]);
+      const r2Url = r2Urls?.[0];
+
+      if (!r2Url) {
+        setImageUploadError(
+          t('admin.products.add.r2Required') || 'Label image must be uploaded to R2. Please check R2 configuration and try again.'
+        );
+        return;
+      }
+
+      updateLabel(index, 'imageUrl', r2Url);
+    } catch (error: any) {
+      console.error('❌ [LABEL IMAGE] Error processing label image:', error);
+      setImageUploadError(error?.message || t('admin.products.add.failedToProcessImage'));
+    } finally {
+      setImageUploadLoading(false);
+      if (event.target) {
+        event.target.value = '';
+      }
+    }
+  };
+
+  const removeLabelImage = (index: number) => {
+    setFormData((prev) => {
+      const newLabels = [...prev.labels];
+      newLabels[index] = {
+        ...newLabels[index],
+        imageUrl: null,
+        imagePosition: newLabels[index]?.imagePosition ?? newLabels[index]?.position ?? 'top-left',
+      };
       return { ...prev, labels: newLabels };
     });
   };
@@ -3694,12 +3756,14 @@ function AddProductPageContent() {
 
       // Add labels
       payload.labels = (formData.labels || [])
-        .filter((label) => label.value && label.value.trim() !== '')
+        .filter((label) => (label.value && label.value.trim() !== '') || label.imageUrl)
         .map((label) => ({
           type: label.type,
           value: label.value.trim(),
           position: label.position,
           color: label.color || null,
+          imageUrl: label.imageUrl || null,
+          imagePosition: label.imagePosition || null,
         }));
 
       console.log('📤 [ADMIN] Sending payload:', JSON.stringify(payload, null, 2));
@@ -5036,7 +5100,16 @@ function AddProductPageContent() {
                           {t('admin.products.add.remove')}
                         </ProductPageButton>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <input
+                        ref={(el) => {
+                          labelImageInputRefs.current[`label-${index}`] = el;
+                        }}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleUploadLabelImage(index, e)}
+                        className="hidden"
+                      />
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {/* Label Type */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -5056,14 +5129,13 @@ function AddProductPageContent() {
                         {/* Label Value */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {t('admin.products.add.value')} *
+                            {t('admin.products.add.value')}
                           </label>
                           <Input
                             type="text"
                             value={label.value}
                             onChange={(e) => updateLabel(index, 'value', e.target.value)}
                             placeholder={label.type === 'percentage' ? t('admin.products.add.percentagePlaceholder') : t('admin.products.add.newProductLabel')}
-                            required
                             className="w-full"
                           />
                           {label.type === 'percentage' && (
@@ -5071,6 +5143,9 @@ function AddProductPageContent() {
                               {t('admin.products.add.percentageAutoUpdateHint')}
                             </p>
                           )}
+                          <p className="mt-1 text-xs text-gray-500">
+                            {t('admin.products.add.labelTextOrImageHint')}
+                          </p>
                         </div>
 
                         {/* Label Position */}
@@ -5104,6 +5179,68 @@ function AddProductPageContent() {
                             className="w-full"
                           />
                           <p className="mt-1 text-xs text-gray-500">{t('admin.products.add.hexColorHint')}</p>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('admin.products.add.labelImageOptional')}
+                          </label>
+                          <div className="rounded-md border border-gray-300 bg-white p-3">
+                            {label.imageUrl ? (
+                              <div className="space-y-3">
+                                <img
+                                  src={label.imageUrl}
+                                  alt=""
+                                  className="h-20 w-20 rounded object-contain border border-gray-200 bg-gray-50"
+                                />
+                                <div className="flex flex-wrap gap-2">
+                                  <ProductPageButton
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => labelImageInputRefs.current[`label-${index}`]?.click()}
+                                    className="px-3 py-2 text-xs"
+                                    disabled={imageUploadLoading}
+                                  >
+                                    {imageUploadLoading ? t('admin.products.add.uploading') : t('admin.products.add.uploadImage')}
+                                  </ProductPageButton>
+                                  <ProductPageButton
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => removeLabelImage(index)}
+                                    className="px-3 py-2 text-xs text-red-600 border-red-300 hover:bg-red-50"
+                                  >
+                                    {t('admin.products.add.removeImage')}
+                                  </ProductPageButton>
+                                </div>
+                              </div>
+                            ) : (
+                              <ProductPageButton
+                                type="button"
+                                variant="outline"
+                                onClick={() => labelImageInputRefs.current[`label-${index}`]?.click()}
+                                className="px-3 py-2 text-xs"
+                                disabled={imageUploadLoading}
+                              >
+                                {imageUploadLoading ? t('admin.products.add.uploading') : t('admin.products.add.uploadImage')}
+                              </ProductPageButton>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t('admin.products.add.labelImagePosition')}
+                          </label>
+                          <select
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={label.imagePosition || 'top-left'}
+                            onChange={(e) => updateLabel(index, 'imagePosition', e.target.value as ProductLabelPosition)}
+                          >
+                            <option value="top-left">{t('admin.products.add.topLeft')}</option>
+                            <option value="top-right">{t('admin.products.add.topRight')}</option>
+                            <option value="bottom-left">{t('admin.products.add.bottomLeft')}</option>
+                            <option value="bottom-right">{t('admin.products.add.bottomRight')}</option>
+                          </select>
                         </div>
                       </div>
                     </div>

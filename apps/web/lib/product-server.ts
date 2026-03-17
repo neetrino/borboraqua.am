@@ -28,7 +28,15 @@ export type ProductServer = {
     globalDiscount?: number | null;
     imageUrl?: string;
   }>;
-  labels?: Array<{ id: string; type: string; value: string; position: string; color: string | null }>;
+  labels?: Array<{
+    id: string;
+    type: string;
+    value: string;
+    position: string;
+    color: string | null;
+    imageUrl?: string | null;
+    imagePosition?: string | null;
+  }>;
   brand?: { id: string; name: string };
   categories?: Array<{ id: string; slug: string; title: string }>;
   productAttributes?: unknown[];
