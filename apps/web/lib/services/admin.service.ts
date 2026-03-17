@@ -1587,8 +1587,30 @@ class AdminService {
     const translations = Array.isArray(product.translations) ? product.translations : [];
     
     // Безопасное получение labels с проверкой на существование массива
-    const labels = Array.isArray(product.labels) ? product.labels : [];
-    
+    let labels = Array.isArray(product.labels) ? product.labels : [];
+
+    // Ensure label imageUrl/imagePosition are present (e.g. on Vercel when Prisma client may not select them)
+    if (labels.length > 0) {
+      try {
+        const labelMediaRows = await db.$queryRaw<
+          Array<{ id: string; imageUrl: string | null; imagePosition: string | null }>
+        >`SELECT id, "imageUrl", "imagePosition" FROM "product_labels" WHERE "productId" = ${productId}`;
+        const mediaByLabelId = new Map(
+          (labelMediaRows || []).map((row) => [row.id, { imageUrl: row.imageUrl ?? null, imagePosition: row.imagePosition ?? null }])
+        );
+        labels = labels.map((label: { id: string; type: string; value: string; position: string; color: string | null; imageUrl?: string | null; imagePosition?: string | null }) => {
+          const media = mediaByLabelId.get(label.id);
+          return {
+            ...label,
+            imageUrl: media?.imageUrl ?? label.imageUrl ?? null,
+            imagePosition: media?.imagePosition ?? label.imagePosition ?? null,
+          };
+        });
+      } catch (labelMediaErr: unknown) {
+        // Columns may not exist yet; keep labels as from Prisma
+      }
+    }
+
     // Безопасное получение variants с проверкой на существование массива
     const variants = Array.isArray(product.variants) ? product.variants : [];
     
