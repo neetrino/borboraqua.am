@@ -722,7 +722,7 @@ export default function UsersPage() {
                 </div>
                 <ProductPageButton
                   variant="outline"
-                  className="px-4 py-2 text-sm"
+                  className="px-4 py-2 text-sm border-red-500 text-red-600 hover:bg-red-600 hover:border-red-600 hover:text-white disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:border-red-500 disabled:hover:text-red-600"
                   onClick={handleBulkDelete}
                   disabled={selectedIds.size === 0 || bulkDeleting}
                 >
