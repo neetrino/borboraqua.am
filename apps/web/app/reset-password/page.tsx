@@ -93,20 +93,6 @@ function ResetPasswordContent() {
 
           <form onSubmit={handleSubmit} noValidate className="space-y-3">
             <div>
-              <label htmlFor="token" className="block text-sm font-medium text-gray-700 mb-1.5">
-                {t('resetPassword.form.token')}
-              </label>
-              <input
-                id="token"
-                type="text"
-                placeholder={t('resetPassword.form.tokenPlaceholder')}
-                className="w-full px-4 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all disabled:opacity-50 font-mono text-sm"
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                disabled={isSubmitting}
-              />
-            </div>
-            <div>
               <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
                 {t('resetPassword.form.newPassword')}
                 <span className="text-red-500 ml-0.5">*</span>
