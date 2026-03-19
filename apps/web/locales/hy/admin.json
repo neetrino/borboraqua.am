@@ -274,7 +274,8 @@
     "previous": "Նախորդ",
     "next": "Հաջորդ",
     "sendPasswordReset": "Ուղարկել գաղտնաբառի վերականգնում",
-    "sendPasswordResetSending": "Ուղարկվում է...",
+    "sendPasswordResetShort": "Վերականգնում",
+    "sendPasswordResetSending": "…",
     "sendPasswordResetSent": "Գաղտնաբառի վերականգնման նամակը ուղարկվել է {email}",
     "sendPasswordResetNoEmail": "Օգտատիրոջ email չկա",
     "sendPasswordResetError": "Ուղարկել չհաջողվեց: {message}"

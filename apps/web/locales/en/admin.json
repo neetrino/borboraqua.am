@@ -275,7 +275,8 @@
     "previous": "Previous",
     "next": "Next",
     "sendPasswordReset": "Send password reset",
-    "sendPasswordResetSending": "Sending...",
+    "sendPasswordResetShort": "Reset",
+    "sendPasswordResetSending": "…",
     "sendPasswordResetSent": "Password reset email sent to {email}",
     "sendPasswordResetNoEmail": "User has no email",
     "sendPasswordResetError": "Failed to send: {message}"

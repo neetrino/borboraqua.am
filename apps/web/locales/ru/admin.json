@@ -275,7 +275,8 @@
     "previous": "Предыдущая",
     "next": "Следующая",
     "sendPasswordReset": "Отправить сброс пароля",
-    "sendPasswordResetSending": "Отправка...",
+    "sendPasswordResetShort": "Сброс",
+    "sendPasswordResetSending": "…",
     "sendPasswordResetSent": "Письмо для сброса пароля отправлено на {email}",
     "sendPasswordResetNoEmail": "У пользователя нет email",
     "sendPasswordResetError": "Ошибка отправки: {message}"

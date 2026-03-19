@@ -7,6 +7,7 @@ import { Card, Input } from '@shop/ui';
 import { apiClient } from '../../../lib/api-client';
 import { useTranslation } from '../../../lib/i18n-client';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
+import { Mail, Loader2 } from 'lucide-react';
 
 interface User {
   id: string;
@@ -581,7 +582,10 @@ export default function UsersPage() {
                         {t('admin.users.created')}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {t('admin.users.sendPasswordReset')}
+                        <span className="inline-flex items-center gap-1">
+                          <Mail className="w-3.5 h-3.5" aria-hidden />
+                          {t('admin.users.sendPasswordResetShort')}
+                        </span>
                       </th>
                     </tr>
                   </thead>
@@ -656,11 +660,17 @@ export default function UsersPage() {
                           {user.email ? (
                             <ProductPageButton
                               variant="outline"
-                              className="px-2 py-1 text-xs"
+                              className="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs"
                               onClick={() => handleSendPasswordReset(user)}
                               disabled={sendingResetForId === user.id}
+                              title={t('admin.users.sendPasswordReset')}
                             >
-                              {sendingResetForId === user.id ? t('admin.users.sendPasswordResetSending') : t('admin.users.sendPasswordReset')}
+                              {sendingResetForId === user.id ? (
+                                <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" aria-hidden />
+                              ) : (
+                                <Mail className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                              )}
+                              <span>{sendingResetForId === user.id ? t('admin.users.sendPasswordResetSending') : t('admin.users.sendPasswordResetShort')}</span>
                             </ProductPageButton>
                           ) : (
                             <span className="text-xs text-gray-400">{t('admin.users.sendPasswordResetNoEmail')}</span>
