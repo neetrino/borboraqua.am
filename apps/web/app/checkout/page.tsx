@@ -417,6 +417,18 @@ export default function CheckoutPage() {
     fetchRegions();
   }, []);
 
+  useEffect(() => {
+    if (shippingRegionId && shippingRegionId.trim().length > 0) {
+      return;
+    }
+
+    if (deliveryRegions.length === 0) {
+      return;
+    }
+
+    setValue('shippingRegionId', deliveryRegions[0].id);
+  }, [deliveryRegions, shippingRegionId, setValue]);
+
   // Fetch delivery price when region changes
   useEffect(() => {
     const fetchDeliveryPrice = async () => {
