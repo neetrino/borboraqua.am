@@ -308,6 +308,8 @@ model ProductLabel {
   value     String
   position  String  @default("top-left") // 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
   color     String?
+  imageUrl  String?
+  imagePosition String?
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 

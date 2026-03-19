@@ -55,6 +55,11 @@ export default function CartPage() {
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set());
   // Track if we updated locally to prevent unnecessary re-fetch
   const isLocalUpdateRef = useRef(false);
+  const orderSummaryColumnRef = useRef<HTMLDivElement>(null);
+  const orderSummaryRef = useRef<HTMLDivElement>(null);
+  const [orderSummaryMode, setOrderSummaryMode] = useState<'static' | 'fixed' | 'bottom'>('static');
+  const [orderSummaryFixedStyle, setOrderSummaryFixedStyle] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [orderSummaryPlaceholderHeight, setOrderSummaryPlaceholderHeight] = useState(0);
 
   useEffect(() => {
     fetchCart();
@@ -93,6 +98,72 @@ export default function CartPage() {
       window.removeEventListener('language-updated', handleLanguageUpdate);
       window.removeEventListener('cart-updated', handleCartUpdate);
       window.removeEventListener('auth-updated', handleAuthUpdate);
+    };
+  }, []);
+
+  const STICKY_TOP_PX = 96;
+
+  useEffect(() => {
+    const isLg = () => window.matchMedia('(min-width: 1024px)').matches;
+
+    const updateSticky = () => {
+      if (!isLg()) {
+        setOrderSummaryMode('static');
+        setOrderSummaryFixedStyle(null);
+        setOrderSummaryPlaceholderHeight(0);
+        return;
+      }
+
+      const col = orderSummaryColumnRef.current;
+      const summary = orderSummaryRef.current;
+
+      if (!col || !summary) {
+        return;
+      }
+
+      const colRect = col.getBoundingClientRect();
+      const summaryHeight = summary.offsetHeight;
+
+      if (colRect.top > STICKY_TOP_PX) {
+        setOrderSummaryMode('static');
+        setOrderSummaryFixedStyle(null);
+        setOrderSummaryPlaceholderHeight(0);
+        return;
+      }
+
+      if (colRect.bottom <= STICKY_TOP_PX + summaryHeight) {
+        setOrderSummaryMode('bottom');
+        setOrderSummaryFixedStyle({
+          top: STICKY_TOP_PX,
+          left: colRect.left,
+          width: colRect.width,
+        });
+        setOrderSummaryPlaceholderHeight(summaryHeight);
+        return;
+      }
+
+      setOrderSummaryMode('fixed');
+      setOrderSummaryFixedStyle({
+        top: STICKY_TOP_PX,
+        left: colRect.left,
+        width: colRect.width,
+      });
+      setOrderSummaryPlaceholderHeight(summaryHeight);
+    };
+
+    const onScrollOrResize = () => {
+      requestAnimationFrame(updateSticky);
+    };
+
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize);
+
+    const timeoutId = window.setTimeout(updateSticky, 100);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
     };
   }, []);
 
@@ -617,8 +688,39 @@ export default function CartPage() {
         </div>
 
         {/* Order Summary */}
-        <div className="lg:col-span-1">
-          <div className="relative lg:sticky lg:top-24">
+        <div
+          ref={orderSummaryColumnRef}
+          className="lg:col-span-1 lg:h-full relative"
+        >
+          {orderSummaryMode !== 'static' && (
+            <div
+              aria-hidden
+              style={{ height: orderSummaryPlaceholderHeight }}
+              className="w-full"
+            />
+          )}
+          <div
+            ref={orderSummaryRef}
+            className="relative"
+            style={
+              orderSummaryMode === 'fixed' && orderSummaryFixedStyle
+                ? {
+                    position: 'fixed',
+                    top: orderSummaryFixedStyle.top,
+                    left: orderSummaryFixedStyle.left,
+                    width: orderSummaryFixedStyle.width,
+                    zIndex: 30,
+                  }
+                : orderSummaryMode === 'bottom'
+                  ? {
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      width: orderSummaryFixedStyle?.width ?? '100%',
+                    }
+                  : undefined
+            }
+          >
             {/* Gradient Background */}
             <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
             
