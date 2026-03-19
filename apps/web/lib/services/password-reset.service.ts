@@ -65,6 +65,25 @@ export async function requestPasswordReset(email: string): Promise<{ ok: true }>
 }
 
 /**
+ * Check if reset token is valid (exists and not expired). Does not consume the token.
+ */
+export async function validateResetToken(token: string): Promise<{ valid: boolean }> {
+  const trimmedToken = token?.trim();
+  if (!trimmedToken) {
+    return { valid: false };
+  }
+  const user = await db.user.findFirst({
+    where: {
+      passwordResetToken: trimmedToken,
+      passwordResetExpires: { gt: new Date() },
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+  return { valid: !!user };
+}
+
+/**
  * Reset password using token from email link.
  */
 export async function resetPasswordByToken(token: string, newPassword: string): Promise<{ ok: true }> {

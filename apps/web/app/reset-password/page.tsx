@@ -20,9 +20,38 @@ function ResetPasswordContent() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tokenValid, setTokenValid] = useState<boolean | null>(null);
+  const [checkingToken, setCheckingToken] = useState(!!tokenFromUrl.trim());
 
   useEffect(() => {
     setToken(tokenFromUrl);
+  }, [tokenFromUrl]);
+
+  useEffect(() => {
+    const raw = tokenFromUrl.trim();
+    if (!raw) {
+      setCheckingToken(false);
+      setTokenValid(null);
+      return;
+    }
+    let cancelled = false;
+    setCheckingToken(true);
+    apiClient
+      .get<{ valid: boolean }>(`/api/v1/auth/validate-reset-token?token=${encodeURIComponent(raw)}`, { skipAuth: true })
+      .then((res) => {
+        if (!cancelled) {
+          setTokenValid(res.valid);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setTokenValid(false);
+      })
+      .finally(() => {
+        if (!cancelled) setCheckingToken(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [tokenFromUrl]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -57,6 +86,49 @@ function ResetPasswordContent() {
       setIsSubmitting(false);
     }
   };
+
+  if (checkingToken && tokenFromUrl.trim()) {
+    return (
+      <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+          <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-200/60 rounded w-2/3" />
+              <div className="h-4 bg-gray-200/60 rounded w-full" />
+              <div className="h-10 bg-gray-200/60 rounded-[12px]" />
+              <div className="h-10 bg-gray-200/60 rounded-[12px]" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (tokenFromUrl.trim() && tokenValid === false) {
+    return (
+      <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+          <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('resetPassword.linkExpiredTitle')}</h1>
+            <p className="text-gray-600 mb-6">{t('resetPassword.linkExpiredMessage')}</p>
+            <div className="flex flex-col gap-3">
+              <Link
+                href="/forgot-password"
+                className="inline-flex justify-center py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                {t('resetPassword.requestNewLink')}
+              </Link>
+              <Link href="/login" className="text-center text-sm text-blue-600 hover:underline font-medium">
+                {t('resetPassword.backToLogin')}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (
