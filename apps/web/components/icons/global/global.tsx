@@ -491,18 +491,14 @@ export function Header({
               )}
             </div>
 
-            {/* Login/Logout Icon with User Menu */}
+            {/* Login/Logout Icon: logged in = logout icon + menu, logged out = login icon */}
             {isLoggedIn ? (
               <div className="relative shrink-0" ref={userMenuRef}>
                 <div
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className="h-[26px] md:h-[24px] sm:h-[20px] w-[26px] md:w-[22px] sm:w-[20px] relative cursor-pointer flex items-center justify-center"
                 >
-                  <img 
-                    src="/assets/home/VectorHeader.svg" 
-                    alt="User Menu" 
-                    className="w-full h-full brightness-0"
-                  />
+                  <ExitIcon size={26} className="brightness-0" />
                 </div>
                 {showUserMenu && userMenuRect && typeof document !== 'undefined' &&
                   createPortal(
@@ -550,7 +546,11 @@ export function Header({
                 onClick={() => router.push('/login')}
                 className="h-[26px] md:h-[24px] sm:h-[20px] w-[26px] md:w-[22px] sm:w-[20px] relative shrink-0 cursor-pointer flex items-center justify-center"
               >
-                <ExitIcon size={26} className="brightness-0" />
+                <img
+                  src="/assets/home/VectorHeader.svg"
+                  alt={t('common.navigation.login')}
+                  className="w-full h-full brightness-0"
+                />
               </div>
             )}
           </div>

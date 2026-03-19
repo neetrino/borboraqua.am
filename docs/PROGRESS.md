@@ -44,6 +44,7 @@
 - [x] Instant search (Prisma) որոնում
 - [x] Checkout, վճարումներ (Ameriabank, Idram, Telcell, FastShift)
 - [x] EHDM (ֆիսկալ կտրոն) — ինտեգրացիա ecrm.taxservice.am, ցուցադրում ադմին/կլիենտ
+- [x] Admin product labels — ավելացվել է label image upload և card-ի վրա առանձին image position
 - [ ] Ադմին-պանել (ապրանքներ/պատվերներ)
 - [ ] i18n/SEO ամրապնդում
 
