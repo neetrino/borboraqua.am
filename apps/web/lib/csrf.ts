@@ -1,13 +1,28 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 /**
  * Allowed origins for mutating requests (P0 Security 2.3).
+ * Uses APP_URL (single canonical app URL) and/or ALLOWED_ORIGINS (comma-separated list).
  * Empty = allow same-origin only (no Origin or Referer from same host).
  */
 function getAllowedOrigins(): string[] {
+  const list: string[] = [];
+  const appUrl = process.env.APP_URL?.trim();
+  if (appUrl) {
+    try {
+      const u = new URL(appUrl);
+      list.push(`${u.protocol}//${u.host}`);
+    } catch {
+      // ignore invalid APP_URL
+    }
+  }
   const env = process.env.ALLOWED_ORIGINS;
-  if (!env) return [];
-  return env.split(",").map((o) => o.trim()).filter(Boolean);
+  if (env) {
+    for (const o of env.split(",").map((s) => s.trim()).filter(Boolean)) {
+      if (o && !list.includes(o)) list.push(o);
+    }
+  }
+  return list;
 }
 
 /**
@@ -24,8 +39,14 @@ export function validateOrigin(request: NextRequest): NextResponse | null {
 
   const url = request.nextUrl;
   const host = url.host;
+  const hostname = url.hostname;
   const protocol = url.protocol;
   const thisOrigin = `${protocol}//${host}`;
+
+  // In development, when server is localhost, allow any origin (browser may use tunnel URL like https://dev.example.com)
+  if (process.env.NODE_ENV === "development" && (hostname === "localhost" || hostname === "127.0.0.1")) {
+    return null;
+  }
 
   const check = (value: string): boolean => {
     try {

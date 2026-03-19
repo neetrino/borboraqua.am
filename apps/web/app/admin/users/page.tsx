@@ -7,6 +7,7 @@ import { Card, Input } from '@shop/ui';
 import { apiClient } from '../../../lib/api-client';
 import { useTranslation } from '../../../lib/i18n-client';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
+import { Mail, Loader2 } from 'lucide-react';
 
 interface User {
   id: string;
@@ -172,6 +173,8 @@ export default function UsersPage() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'customer'>('all');
   const [exporting, setExporting] = useState<'csv' | 'excel' | null>(null);
+  const [sendingResetForId, setSendingResetForId] = useState<string | null>(null);
+  const [resetSentForId, setResetSentForId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -373,6 +376,20 @@ export default function UsersPage() {
     }
   };
 
+  const handleSendPasswordReset = async (user: User) => {
+    if (!user.email) return;
+    setSendingResetForId(user.id);
+    try {
+      await apiClient.post(`/api/v1/admin/users/${user.id}/send-password-reset`, {});
+      setResetSentForId(user.id);
+      setTimeout(() => setResetSentForId(null), 10_000);
+    } catch (_err) {
+      // Ошибка логируется в apiClient; уведомление через зелёную кнопку не показываем
+    } finally {
+      setSendingResetForId(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -562,6 +579,12 @@ export default function UsersPage() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {t('admin.users.created')}
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <span className="inline-flex items-center gap-1">
+                          <Mail className="w-3.5 h-3.5" aria-hidden />
+                          {t('admin.users.sendPasswordResetShort')}
+                        </span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -630,6 +653,36 @@ export default function UsersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(user.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {user.email ? (
+                            <ProductPageButton
+                              variant="outline"
+                              className={`inline-flex items-center gap-1.5 px-2 py-1.5 text-xs transition-colors duration-200 ${
+                                resetSentForId === user.id
+                                  ? 'bg-transparent text-green-600 border border-green-500 hover:bg-green-500 hover:text-white hover:border-green-500'
+                                  : ''
+                              }`}
+                              onClick={() => handleSendPasswordReset(user)}
+                              disabled={sendingResetForId === user.id}
+                              title={t('admin.users.sendPasswordReset')}
+                            >
+                              {sendingResetForId === user.id ? (
+                                <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin" aria-hidden />
+                              ) : (
+                                <Mail className="w-3.5 h-3.5 shrink-0" aria-hidden />
+                              )}
+                              <span>
+                                {sendingResetForId === user.id
+                                  ? t('admin.users.sendPasswordResetSending')
+                                  : resetSentForId === user.id
+                                    ? t('admin.users.sendPasswordResetSentShort')
+                                    : t('admin.users.sendPasswordResetShort')}
+                              </span>
+                            </ProductPageButton>
+                          ) : (
+                            <span className="text-xs text-gray-400">{t('admin.users.sendPasswordResetNoEmail')}</span>
+                          )}
                         </td>
                       </tr>
                     ))}

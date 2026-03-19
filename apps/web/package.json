@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
     "dev": "next dev --port 3000",
     "dev:webpack": "next dev --no-turbo",
     "dev:clean": "node -e \"require('fs').rmSync('.next', {recursive: true, force: true})\" && next dev",
@@ -37,6 +39,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "vitest": "^2.1.0",
     "@types/browser-image-compression": "^1.0.1",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.10.0",
