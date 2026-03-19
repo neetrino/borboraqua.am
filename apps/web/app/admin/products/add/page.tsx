@@ -16,6 +16,7 @@ import {
   separateMainAndVariantImages,
   processProductImageFile,
 } from '../../../../lib/utils/image-utils';
+import { showToast } from '../../../../components/Toast';
 
 interface Brand {
   id: string;
@@ -1807,7 +1808,7 @@ function AddProductPageContent() {
       }));
     } catch (error: any) {
       console.error('❌ [DESCRIPTION IMAGE] Upload failed:', error);
-      alert(error?.message || t('admin.products.add.failedToUploadDescriptionImage'));
+      showToast(error?.message || t('admin.products.add.failedToUploadDescriptionImage'), 'error');
     } finally {
       setImageUploadLoading(false);
       event.target.value = '';
@@ -1840,7 +1841,7 @@ function AddProductPageContent() {
       }));
     } catch (error: any) {
       console.error('❌ [DESCRIPTION IMAGE] Replace failed:', error);
-      alert(error?.message || t('admin.products.add.failedToUploadDescriptionImage'));
+      showToast(error?.message || t('admin.products.add.failedToUploadDescriptionImage'), 'error');
     } finally {
       setImageUploadLoading(false);
       event.target.value = '';
@@ -3544,7 +3545,7 @@ function AddProductPageContent() {
 
       // Validate: at least one translation must be provided
       if (translations.length === 0) {
-        alert(t('admin.products.add.atLeastOneLanguageRequired') || 'Please fill at least one language (title is required)');
+        showToast(t('admin.products.add.atLeastOneLanguageRequired') || 'Please fill at least one language (title is required)', 'warning');
         setLoading(false);
         return;
       }
@@ -3555,7 +3556,7 @@ function AddProductPageContent() {
       const parsedPosition =
         formData.position.trim() === '' ? null : parseInt(formData.position, 10);
       if (parsedPosition !== null && (!Number.isInteger(parsedPosition) || parsedPosition < 1)) {
-        alert('Position must be a positive integer');
+        showToast('Position must be a positive integer', 'warning');
         setLoading(false);
         return;
       }
@@ -3778,14 +3779,14 @@ function AddProductPageContent() {
         console.log('✅ [ADMIN] Product updated:', product);
         const baseMessage = 'Ապրանքը հաջողությամբ թարմացվեց!';
         const extra = creationMessages.length ? `\n\n${creationMessages.join('\n')}` : '';
-        alert(`${baseMessage}${extra}`);
+        showToast(`${baseMessage}${extra}`, 'error');
       } else {
         // Create new product
         const product = await apiClient.post('/api/v1/admin/products', payload);
         console.log('✅ [ADMIN] Product created:', product);
         const baseMessage = 'Ապրանքը հաջողությամբ ստեղծվեց!';
         const extra = creationMessages.length ? `\n\n${creationMessages.join('\n')}` : '';
-        alert(`${baseMessage}${extra}`);
+        showToast(`${baseMessage}${extra}`, 'error');
       }
       
       router.push('/admin/products');
@@ -3815,7 +3816,7 @@ function AddProductPageContent() {
         }
       }
       
-      alert(errorMessage);
+      showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
     }

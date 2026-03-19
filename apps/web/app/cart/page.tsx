@@ -10,6 +10,7 @@ import { useTranslation } from '../../lib/i18n-client';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { CART_KEY } from '../../lib/storageCounts';
 import { ProductPageButton } from '../../components/icons/global/globalMobile';
+import { showToast } from '../../components/Toast';
 
 interface CartItem {
   id: string;
@@ -433,14 +434,14 @@ export default function CartPage() {
       if (quantity > cartItem.variant.stock) {
         // If stock is less than minimumOrderQuantity, show error
         if (cartItem.variant.stock < minimumOrderQuantity) {
-          alert(`Մատչելի քանակը ${cartItem.variant.stock} հատ է, բայց նվազագույն պատվերի քանակը ${minimumOrderQuantity} հատ է:`);
+          showToast(`Մատչելի քանակը ${cartItem.variant.stock} հատ է, բայց նվազագույն պատվերի քանակը ${minimumOrderQuantity} հատ է:`, 'warning');
           return;
         }
         // Round down to nearest valid quantity that fits in stock
         const maxValidQuantity = Math.floor(cartItem.variant.stock / orderQuantityIncrement) * orderQuantityIncrement;
         quantity = Math.max(maxValidQuantity, minimumOrderQuantity);
         if (quantity > cartItem.variant.stock) {
-          alert(`Մատչելի քանակը ${cartItem.variant.stock} հատ է: Դուք չեք կարող ավելացնել ավելի շատ քանակ:`);
+          showToast(`Մատչելի քանակը ${cartItem.variant.stock} հատ է: Դուք չեք կարող ավելացնել ավելի շատ քանակ:`, 'warning');
           return;
         }
       }
@@ -486,7 +487,7 @@ export default function CartPage() {
         );
         if (item) {
           if (cartItem.variant.stock !== undefined && quantity > cartItem.variant.stock) {
-            alert(`Մատչելի քանակը ${cartItem.variant.stock} հատ է: Դուք չեք կարող ավելացնել ավելի շատ քանակ:`);
+            showToast(`Մատչելի քանակը ${cartItem.variant.stock} հատ է: Դուք չեք կարող ավելացնել ավելի շատ քանակ:`, 'warning');
             fetchCart();
             setUpdatingItems(prev => { const next = new Set(prev); next.delete(itemId); return next; });
             return;
@@ -502,9 +503,9 @@ export default function CartPage() {
       const err = error as { detail?: string; message?: string };
       const errorMessage = err?.detail || err?.message || t('common.messages.failedToUpdateQuantity');
       if (errorMessage.includes('stock') || errorMessage.includes('exceeds')) {
-        alert(t('common.alerts.stockInsufficient').replace('{message}', errorMessage));
+        showToast(t('common.alerts.stockInsufficient').replace('{message}', errorMessage), 'error');
       } else {
-        alert(errorMessage);
+        showToast(errorMessage, 'error');
       }
     } finally {
       setUpdatingItems(prev => {

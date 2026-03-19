@@ -8,6 +8,7 @@ import { apiClient } from '../../../lib/api-client';
 import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/global/global';
 import { useTranslation } from '../../../lib/i18n-client';
 import { showToast } from '../../../components/Toast';
+import { showConfirm } from '../../../components/ConfirmDialog';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
 
 interface Category {
@@ -251,9 +252,13 @@ function CategoriesSection() {
   };
 
   const handleDeleteCategory = async (categoryId: string, categoryTitle: string) => {
-    if (!confirm(t('admin.categories.deleteConfirm').replace('{name}', categoryTitle))) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      message: t('admin.categories.deleteConfirm').replace('{name}', categoryTitle),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!confirmed) return;
 
     try {
       console.log(`🗑️ [ADMIN] Deleting category: ${categoryTitle} (${categoryId})`);

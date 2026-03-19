@@ -8,6 +8,8 @@ import { apiClient } from '../../../lib/api-client';
 import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/global/global';
 import { useTranslation } from '../../../lib/i18n-client';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
+import { showToast } from '../../../components/Toast';
+import { showConfirm } from '../../../components/ConfirmDialog';
 
 interface DeliveryRegion {
   id?: string;
@@ -99,7 +101,7 @@ export default function DeliveryPage() {
         },
         timeSlots,
       });
-      alert(t('admin.delivery.savedSuccess'));
+      showToast(t('admin.delivery.savedSuccess'), 'success');
       console.log('✅ [ADMIN] Delivery settings saved');
       setEditingId(null);
       await fetchDeliverySettings();
@@ -107,7 +109,7 @@ export default function DeliveryPage() {
       const e = err as { response?: { data?: { detail?: string } }; message?: string };
       console.error('❌ [ADMIN] Error saving delivery settings:', err);
       const errorMessage = e.response?.data?.detail || e.message || 'Failed to save delivery settings';
-      alert(t('admin.delivery.errorSaving').replace('{message}', errorMessage));
+      showToast(t('admin.delivery.errorSaving').replace('{message}', errorMessage), 'error');
     } finally {
       setSaving(false);
     }
@@ -145,8 +147,14 @@ export default function DeliveryPage() {
     setRegions(updated);
   };
 
-  const handleDeleteRegion = (index: number) => {
-    if (confirm(t('admin.delivery.deleteRegion'))) {
+  const handleDeleteRegion = async (index: number) => {
+    const confirmed = await showConfirm({
+      message: t('admin.delivery.deleteRegion'),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (confirmed) {
       const updated = regions.filter((_, i) => i !== index);
       setRegions(updated);
     }
@@ -172,12 +180,18 @@ export default function DeliveryPage() {
     setTimeSlots(updated);
   };
 
-  const handleDeleteTimeSlot = (index: number) => {
+  const handleDeleteTimeSlot = async (index: number) => {
     if (timeSlots.length <= 1) {
-      alert(t('admin.delivery.atLeastOneTimeSlot') || 'At least one time slot must exist');
+      showToast(t('admin.delivery.atLeastOneTimeSlot') || 'At least one time slot must exist', 'warning');
       return;
     }
-    if (confirm(t('admin.delivery.deleteTimeSlot') || 'Delete this time slot?')) {
+    const confirmed = await showConfirm({
+      message: t('admin.delivery.deleteTimeSlot') || 'Delete this time slot?',
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (confirmed) {
       const updated = timeSlots.filter((_, i) => i !== index);
       setTimeSlots(updated);
     }
@@ -188,7 +202,7 @@ export default function DeliveryPage() {
     updated[index].enabled = !updated[index].enabled;
     // Ensure at least one slot is enabled
     if (!updated.some(slot => slot.enabled)) {
-      alert(t('admin.delivery.atLeastOneTimeSlotEnabled') || 'At least one time slot must be enabled');
+      showToast(t('admin.delivery.atLeastOneTimeSlotEnabled') || 'At least one time slot must be enabled', 'warning');
       return;
     }
     setTimeSlots(updated);

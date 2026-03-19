@@ -13,6 +13,7 @@ import { UserAvatar } from '../../components/UserAvatar';
 import { useTranslation } from '../../lib/i18n-client';
 import { getStoredLanguage } from '../../lib/language';
 import { getProfileMenuTABS } from '../../components/icons/global/global';
+import { showConfirm } from '../../components/ConfirmDialog';
 
 interface Address {
   id?: string;
@@ -394,9 +395,13 @@ function ProfilePageContent() {
   };
 
   const handleDeleteAddress = async (addressId: string) => {
-    if (!confirm(t('profile.addresses.deleteConfirm'))) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      message: t('profile.addresses.deleteConfirm'),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!confirmed) return;
 
     try {
       await apiClient.delete(`/api/v1/users/addresses/${addressId}`);

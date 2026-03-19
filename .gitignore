@@ -35,4 +35,4 @@ Private/
 
 # Large binaries (GitHub 100MB limit)
 *.exe
-
+users-export*

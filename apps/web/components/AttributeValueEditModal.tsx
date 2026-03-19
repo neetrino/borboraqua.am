@@ -3,6 +3,7 @@
 import { useState, useRef, ChangeEvent, useEffect } from 'react';
 import { useTranslation } from '../lib/i18n-client';
 import { ColorPaletteSelector } from './ColorPaletteSelector';
+import { showToast } from './Toast';
 
 interface AttributeValueEditModalProps {
   isOpen: boolean;
@@ -92,7 +93,7 @@ export function AttributeValueEditModal({
 
     const imageFile = files.find((file) => file.type.startsWith('image/'));
     if (!imageFile) {
-      alert(t('admin.attributes.valueModal.selectImageFile'));
+      showToast(t('admin.attributes.valueModal.selectImageFile'), 'warning');
       if (event.target) {
         event.target.value = '';
       }
@@ -105,7 +106,7 @@ export function AttributeValueEditModal({
       setImageUrl(base64);
     } catch (error: any) {
       console.error('❌ [ADMIN] Error uploading image:', error);
-      alert(error?.message || t('admin.attributes.valueModal.failedToProcessImage'));
+      showToast(error?.message || t('admin.attributes.valueModal.failedToProcessImage'), 'error');
     } finally {
       setImageUploading(false);
       if (event.target) {
@@ -139,7 +140,7 @@ export function AttributeValueEditModal({
       onClose();
     } catch (error: any) {
       console.error('❌ [ADMIN] Error saving value:', error);
-      alert(error?.message || t('admin.attributes.valueModal.failedToSave'));
+      showToast(error?.message || t('admin.attributes.valueModal.failedToSave'), 'error');
     } finally {
       setSaving(false);
     }

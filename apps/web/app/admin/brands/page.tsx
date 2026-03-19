@@ -8,6 +8,8 @@ import { apiClient } from '../../../lib/api-client';
 import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/global/global';
 import { useTranslation } from '../../../lib/i18n-client';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
+import { showToast } from '../../../components/Toast';
+import { showConfirm } from '../../../components/ConfirmDialog';
 
 interface Brand {
   id: string;
@@ -76,16 +78,20 @@ function BrandsSection() {
   }, [showModal]);
 
   const handleDeleteBrand = async (brandId: string, brandName: string) => {
-    if (!confirm(t('admin.brands.deleteConfirm').replace('{name}', brandName))) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      message: t('admin.brands.deleteConfirm').replace('{name}', brandName),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!confirmed) return;
 
     try {
       console.log(`🗑️ [ADMIN] Deleting brand: ${brandName} (${brandId})`);
       await apiClient.delete(`/api/v1/admin/brands/${brandId}`);
       console.log('✅ [ADMIN] Brand deleted successfully');
       fetchBrands();
-      alert(t('admin.brands.deletedSuccess'));
+      showToast(t('admin.brands.deletedSuccess'), 'success');
     } catch (err: any) {
       console.error('❌ [ADMIN] Error deleting brand:', err);
       let errorMessage = 'Unknown error occurred';
@@ -98,7 +104,7 @@ function BrandsSection() {
       } else if (err.response?.data?.detail) {
         errorMessage = err.response.data.detail;
       }
-      alert(t('admin.brands.errorDeleting') + '\n\n' + errorMessage);
+      showToast(t('admin.brands.errorDeleting') + ' ' + errorMessage, 'error');
     }
   };
 
@@ -124,7 +130,7 @@ function BrandsSection() {
     e.preventDefault();
     
     if (!formData.name.trim()) {
-      alert(t('admin.brands.nameRequired'));
+      showToast(t('admin.brands.nameRequired'), 'warning');
       return;
     }
 
@@ -137,7 +143,7 @@ function BrandsSection() {
           name: formData.name.trim(),
         });
         console.log('✅ [ADMIN] Brand updated successfully');
-        alert(t('admin.brands.updatedSuccess'));
+        showToast(t('admin.brands.updatedSuccess'), 'success');
       } else {
         // Create new brand
         console.log('➕ [ADMIN] Creating brand:', formData.name);
@@ -145,7 +151,7 @@ function BrandsSection() {
           name: formData.name.trim(),
         });
         console.log('✅ [ADMIN] Brand created successfully');
-        alert(t('admin.brands.createdSuccess'));
+        showToast(t('admin.brands.createdSuccess'), 'success');
       }
       
       fetchBrands();
@@ -162,7 +168,7 @@ function BrandsSection() {
       } else if (err.response?.data?.detail) {
         errorMessage = err.response.data.detail;
       }
-      alert(t('admin.brands.errorSaving') + '\n\n' + errorMessage);
+      showToast(t('admin.brands.errorSaving') + ' ' + errorMessage, 'error');
     } finally {
       setSubmitting(false);
     }

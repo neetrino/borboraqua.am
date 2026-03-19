@@ -8,6 +8,8 @@ import { apiClient } from '../../../lib/api-client';
 import { useTranslation } from '../../../lib/i18n-client';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
 import { formatPrice, getStoredCurrency, type CurrencyCode } from '../../../lib/currency';
+import { showToast } from '../../../components/Toast';
+import { showConfirm } from '../../../components/ConfirmDialog';
 
 interface Order {
   id: string;
@@ -346,7 +348,7 @@ export default function OrdersPage() {
       return filtered;
     } catch (err) {
       console.error('❌ [ADMIN] Error fetching orders for export:', err);
-      alert(t('admin.orders.failedToDelete')); // generic error message reuse
+      showToast(t('admin.orders.failedToDelete'), 'error');
       return [];
     }
   }, [statusFilter, paymentStatusFilter, searchKeyword, sortBy, sortOrder, t]);
@@ -426,7 +428,13 @@ export default function OrdersPage() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!confirm(t('admin.orders.deleteConfirm').replace('{count}', selectedIds.size.toString()))) return;
+    const confirmed = await showConfirm({
+      message: t('admin.orders.deleteConfirm').replace('{count}', selectedIds.size.toString()),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!confirmed) return;
     setBulkDeleting(true);
     try {
       const ids = Array.from(selectedIds);
@@ -461,13 +469,13 @@ export default function OrdersPage() {
         const failedIds = failed.map(r => 
           r.status === 'fulfilled' ? r.value.id : 'unknown'
         );
-        alert(t('admin.orders.bulkDeleteFailed').replace('{success}', successful.length.toString()).replace('{total}', ids.length.toString()).replace('{failed}', failedIds.join(', ')));
+        showToast(t('admin.orders.bulkDeleteFailed').replace('{success}', successful.length.toString()).replace('{total}', ids.length.toString()).replace('{failed}', failedIds.join(', ')), 'error');
       } else {
-        alert(t('admin.orders.bulkDeleteFinished').replace('{success}', successful.length.toString()).replace('{total}', ids.length.toString()));
+        showToast(t('admin.orders.bulkDeleteFinished').replace('{success}', successful.length.toString()).replace('{total}', ids.length.toString()), 'success');
       }
     } catch (err) {
       console.error('❌ [ADMIN] Bulk delete orders error:', err);
-      alert(t('admin.orders.failedToDelete'));
+      showToast(t('admin.orders.failedToDelete'), 'error');
     } finally {
       setBulkDeleting(false);
     }
@@ -563,7 +571,7 @@ export default function OrdersPage() {
     try {
       const allOrders = await fetchAllOrdersForExport();
       if (!allOrders.length) {
-        alert(t('admin.orders.noOrders'));
+        showToast(t('admin.orders.noOrders'), 'warning');
         return;
       }
 

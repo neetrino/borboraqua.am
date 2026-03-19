@@ -11,6 +11,7 @@ import { useAuth } from '../lib/auth/AuthContext';
 import { FeaturedProductCard, type FeaturedProduct, addToCart, FeaturedProductsNavigationArrow } from './icons/global/global';
 import { useTranslation } from '../lib/i18n-client';
 import { DESKTOP_LAYOUT_MIN_WIDTH } from '../lib/device-layout';
+import { showToast } from './Toast';
 
 interface RelatedProduct {
   id: string;
@@ -286,9 +287,9 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
       onError: (error: any) => {
         console.error('❌ [RELATED PRODUCTS] Error adding to cart:', error);
         if (error?.message) {
-          alert(error.message);
+          showToast(error.message, 'error');
         } else {
-          alert(tClient('home.errors.failedToAddToCart'));
+          showToast(tClient('home.errors.failedToAddToCart'), 'error');
         }
       },
     });
