@@ -59,3 +59,12 @@ export const registerBodySchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
 }).refine((d) => !!d.email || !!d.phone, { message: "Either email or phone required" });
+
+export const forgotPasswordBodySchema = z.object({
+  email: z.string().email("Invalid email"),
+});
+
+export const resetPasswordBodySchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+});

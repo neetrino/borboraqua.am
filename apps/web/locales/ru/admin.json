@@ -273,7 +273,12 @@
     "failedToDelete": "Не удалось удалить выбранных пользователей",
     "showingPage": "Показана страница {page} из {totalPages} ({total} всего)",
     "previous": "Предыдущая",
-    "next": "Следующая"
+    "next": "Следующая",
+    "sendPasswordReset": "Отправить сброс пароля",
+    "sendPasswordResetSending": "Отправка...",
+    "sendPasswordResetSent": "Письмо для сброса пароля отправлено на {email}",
+    "sendPasswordResetNoEmail": "У пользователя нет email",
+    "sendPasswordResetError": "Ошибка отправки: {message}"
   },
   "products": {
     "title": "Товары",

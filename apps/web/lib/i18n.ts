@@ -30,6 +30,8 @@ import enCategories from '../locales/en/categories.json';
 import enOrders from '../locales/en/orders.json';
 import enAdmin from '../locales/en/admin.json';
 import enBlog from '../locales/en/blog.json';
+import enForgotPassword from '../locales/en/forgotPassword.json';
+import enResetPassword from '../locales/en/resetPassword.json';
 
 import hyCommon from '../locales/hy/common.json';
 import hyHome from '../locales/hy/home.json';
@@ -53,6 +55,8 @@ import hyCategories from '../locales/hy/categories.json';
 import hyOrders from '../locales/hy/orders.json';
 import hyAdmin from '../locales/hy/admin.json';
 import hyBlog from '../locales/hy/blog.json';
+import hyForgotPassword from '../locales/hy/forgotPassword.json';
+import hyResetPassword from '../locales/hy/resetPassword.json';
 
 import ruCommon from '../locales/ru/common.json';
 import ruHome from '../locales/ru/home.json';
@@ -76,9 +80,11 @@ import ruCategories from '../locales/ru/categories.json';
 import ruOrders from '../locales/ru/orders.json';
 import ruAdmin from '../locales/ru/admin.json';
 import ruBlog from '../locales/ru/blog.json';
+import ruForgotPassword from '../locales/ru/forgotPassword.json';
+import ruResetPassword from '../locales/ru/resetPassword.json';
 
 // Type definitions for better type safety
-export type Namespace = 'common' | 'home' | 'product' | 'products' | 'delivery' | 'about' | 'contact' | 'faq' | 'login' | 'delivery-terms' | 'terms' | 'privacy' | 'support' | 'stores' | 'returns' | 'profile' | 'checkout' | 'register' | 'categories' | 'orders' | 'admin' | 'blog';
+export type Namespace = 'common' | 'home' | 'product' | 'products' | 'delivery' | 'about' | 'contact' | 'faq' | 'login' | 'delivery-terms' | 'terms' | 'privacy' | 'support' | 'stores' | 'returns' | 'profile' | 'checkout' | 'register' | 'categories' | 'orders' | 'admin' | 'blog' | 'forgotPassword' | 'resetPassword';
 export type ProductField = 'title' | 'shortDescription' | 'longDescription';
 
 // Translation store - organized by language and namespace
@@ -107,6 +113,8 @@ const translations: Partial<Record<LanguageCode, Record<Namespace, any>>> = {
     orders: enOrders,
     admin: enAdmin,
     blog: enBlog,
+    forgotPassword: enForgotPassword,
+    resetPassword: enResetPassword,
   },
   hy: {
     common: hyCommon,
@@ -131,6 +139,8 @@ const translations: Partial<Record<LanguageCode, Record<Namespace, any>>> = {
     orders: hyOrders,
     admin: hyAdmin,
     blog: hyBlog,
+    forgotPassword: hyForgotPassword,
+    resetPassword: hyResetPassword,
   },
   ru: {
     common: ruCommon,
@@ -155,6 +165,8 @@ const translations: Partial<Record<LanguageCode, Record<Namespace, any>>> = {
     orders: ruOrders,
     admin: ruAdmin,
     blog: ruBlog,
+    forgotPassword: ruForgotPassword,
+    resetPassword: ruResetPassword,
   },
 };
 
@@ -242,7 +254,7 @@ export function t(lang: LanguageCode | undefined, path: string): string {
   }
 
   // Validate namespace
-  const validNamespaces: Namespace[] = ['common', 'home', 'product', 'products', 'delivery', 'about', 'contact', 'faq', 'login', 'delivery-terms', 'terms', 'privacy', 'support', 'stores', 'returns', 'profile', 'checkout', 'register', 'categories', 'orders', 'admin', 'blog'];
+  const validNamespaces: Namespace[] = ['common', 'home', 'product', 'products', 'delivery', 'about', 'contact', 'faq', 'login', 'delivery-terms', 'terms', 'privacy', 'support', 'stores', 'returns', 'profile', 'checkout', 'register', 'categories', 'orders', 'admin', 'blog', 'forgotPassword', 'resetPassword'];
   if (!validNamespaces.includes(namespace)) {
     if (process.env.NODE_ENV === 'development') {
       console.warn(`[i18n] Invalid namespace: "${namespace}". Valid namespaces: ${validNamespaces.join(', ')}`);
@@ -399,7 +411,7 @@ export function clearTranslationCache(): void {
  * Get all available namespaces
  */
 export function getAvailableNamespaces(): Namespace[] {
-  return ['common', 'home', 'product', 'products', 'delivery', 'about', 'contact', 'faq', 'login', 'delivery-terms', 'terms', 'privacy', 'support', 'stores', 'returns', 'profile', 'checkout', 'register', 'categories', 'orders', 'admin', 'blog'];
+  return ['common', 'home', 'product', 'products', 'delivery', 'about', 'contact', 'faq', 'login', 'delivery-terms', 'terms', 'privacy', 'support', 'stores', 'returns', 'profile', 'checkout', 'register', 'categories', 'orders', 'admin', 'blog', 'forgotPassword', 'resetPassword'];
 }
 
 /**

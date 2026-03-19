@@ -172,6 +172,7 @@ export default function UsersPage() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'customer'>('all');
   const [exporting, setExporting] = useState<'csv' | 'excel' | null>(null);
+  const [sendingResetForId, setSendingResetForId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -373,6 +374,23 @@ export default function UsersPage() {
     }
   };
 
+  const handleSendPasswordReset = async (user: User) => {
+    if (!user.email) {
+      alert(t('admin.users.sendPasswordResetNoEmail'));
+      return;
+    }
+    setSendingResetForId(user.id);
+    try {
+      await apiClient.post(`/api/v1/admin/users/${user.id}/send-password-reset`, {});
+      alert(t('admin.users.sendPasswordResetSent').replace('{email}', user.email));
+    } catch (err: any) {
+      const detail = err?.data?.detail ?? err?.message ?? t('admin.common.unknownErrorFallback');
+      alert(t('admin.users.sendPasswordResetError').replace('{message}', detail));
+    } finally {
+      setSendingResetForId(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -562,6 +580,9 @@ export default function UsersPage() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {t('admin.users.created')}
                       </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {t('admin.users.sendPasswordReset')}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -630,6 +651,20 @@ export default function UsersPage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(user.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {user.email ? (
+                            <ProductPageButton
+                              variant="outline"
+                              className="px-2 py-1 text-xs"
+                              onClick={() => handleSendPasswordReset(user)}
+                              disabled={sendingResetForId === user.id}
+                            >
+                              {sendingResetForId === user.id ? t('admin.users.sendPasswordResetSending') : t('admin.users.sendPasswordReset')}
+                            </ProductPageButton>
+                          ) : (
+                            <span className="text-xs text-gray-400">{t('admin.users.sendPasswordResetNoEmail')}</span>
+                          )}
                         </td>
                       </tr>
                     ))}

@@ -273,7 +273,12 @@
     "failedToDelete": "Failed to delete selected users",
     "showingPage": "Showing page {page} of {totalPages} ({total} total)",
     "previous": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "sendPasswordReset": "Send password reset",
+    "sendPasswordResetSending": "Sending...",
+    "sendPasswordResetSent": "Password reset email sent to {email}",
+    "sendPasswordResetNoEmail": "User has no email",
+    "sendPasswordResetError": "Failed to send: {message}"
   },
   "products": {
     "title": "Products",

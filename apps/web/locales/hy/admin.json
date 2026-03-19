@@ -272,7 +272,12 @@
     "failedToDelete": "Չհաջողվեց ջնջել ընտրված օգտատերերը",
     "showingPage": "Ցուցադրվում է {page} էջը {totalPages}-ից ({total} ընդամենը)",
     "previous": "Նախորդ",
-    "next": "Հաջորդ"
+    "next": "Հաջորդ",
+    "sendPasswordReset": "Ուղարկել գաղտնաբառի վերականգնում",
+    "sendPasswordResetSending": "Ուղարկվում է...",
+    "sendPasswordResetSent": "Գաղտնաբառի վերականգնման նամակը ուղարկվել է {email}",
+    "sendPasswordResetNoEmail": "Օգտատիրոջ email չկա",
+    "sendPasswordResetError": "Ուղարկել չհաջողվեց: {message}"
   },
   "products": {
     "title": "Ապրանքներ",
