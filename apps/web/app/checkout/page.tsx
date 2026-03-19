@@ -113,6 +113,11 @@ export default function CheckoutPage() {
   const [deliveryRegions, setDeliveryRegions] = useState<DeliveryRegionOption[]>([]);
   const [regionDropdownOpen, setRegionDropdownOpen] = useState(false);
   const regionDropdownRef = useRef<HTMLDivElement>(null);
+  const orderSummaryColumnRef = useRef<HTMLDivElement>(null);
+  const orderSummaryRef = useRef<HTMLDivElement>(null);
+  const [orderSummaryMode, setOrderSummaryMode] = useState<'static' | 'fixed' | 'bottom'>('static');
+  const [orderSummaryFixedStyle, setOrderSummaryFixedStyle] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [orderSummaryPlaceholderHeight, setOrderSummaryPlaceholderHeight] = useState(0);
   const [enabledWeekdays, setEnabledWeekdays] = useState<number[] | null>(null);
   const [deliveryTimeSlots, setDeliveryTimeSlots] = useState<DeliveryTimeSlotConfig[]>([]);
   const [calendarMonth, setCalendarMonth] = useState<Date>(() => {
@@ -454,6 +459,62 @@ export default function CheckoutPage() {
       };
     }
   }, [regionDropdownOpen]);
+
+  const STICKY_TOP_PX = 96;
+
+  useEffect(() => {
+    const isLg = () => window.matchMedia('(min-width: 1024px)').matches;
+    const updateSticky = () => {
+      if (!isLg()) {
+        setOrderSummaryMode('static');
+        setOrderSummaryFixedStyle(null);
+        setOrderSummaryPlaceholderHeight(0);
+        return;
+      }
+      const col = orderSummaryColumnRef.current;
+      const summary = orderSummaryRef.current;
+      if (!col || !summary) return;
+      const colRect = col.getBoundingClientRect();
+      const summaryHeight = summary.offsetHeight;
+
+      if (colRect.top > STICKY_TOP_PX) {
+        setOrderSummaryMode('static');
+        setOrderSummaryFixedStyle(null);
+        setOrderSummaryPlaceholderHeight(0);
+        return;
+      }
+
+      if (colRect.bottom <= STICKY_TOP_PX + summaryHeight) {
+        setOrderSummaryMode('bottom');
+        setOrderSummaryFixedStyle({
+          top: STICKY_TOP_PX,
+          left: colRect.left,
+          width: colRect.width,
+        });
+        setOrderSummaryPlaceholderHeight(summaryHeight);
+        return;
+      }
+
+      setOrderSummaryMode('fixed');
+      setOrderSummaryFixedStyle({
+        top: STICKY_TOP_PX,
+        left: colRect.left,
+        width: colRect.width,
+      });
+      setOrderSummaryPlaceholderHeight(summaryHeight);
+    };
+    const onScrollOrResize = () => {
+      requestAnimationFrame(updateSticky);
+    };
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize);
+    const t = setTimeout(updateSticky, 100);
+    return () => {
+      clearTimeout(t);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
+    };
+  }, []);
 
   useEffect(() => {
     if (!appliedCoupon) {
@@ -1036,6 +1097,93 @@ export default function CheckoutPage() {
     }
   }
 
+  const orderSummaryContent = (
+    <>
+      <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
+      <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.orderSummary')}</h2>
+        <div className="mb-5">
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            {t('checkout.coupon.label')}
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={couponCode}
+              onChange={(event) => {
+                setCouponCode(event.target.value);
+                setCouponError(null);
+              }}
+              placeholder={t('checkout.coupon.placeholder')}
+              className="flex-1 px-3 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all"
+              disabled={isSubmitting || applyingCoupon}
+            />
+            <button
+              type="button"
+              onClick={handleApplyCoupon}
+              disabled={isSubmitting || applyingCoupon}
+              className="px-4 py-2 rounded-[12px] bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] text-white text-sm font-medium shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {applyingCoupon ? t('checkout.coupon.applying') : t('checkout.coupon.apply')}
+            </button>
+          </div>
+          {couponError && (
+            <p className="mt-2 text-xs text-red-600">{couponError}</p>
+          )}
+          {appliedCoupon && !couponError && (
+            <p className="mt-2 text-xs text-green-700">
+              {t('checkout.coupon.applied').replace('{code}', appliedCoupon.code)}
+            </p>
+          )}
+        </div>
+        <div className="space-y-4 mb-6">
+          <div className="flex justify-between text-gray-600">
+            <span>{t('checkout.summary.subtotal')}</span>
+            <span>{formatPrice(cartSubtotal, currency)}</span>
+          </div>
+          {appliedCoupon && (
+            <div className="flex justify-between text-green-700">
+              <span>{t('checkout.summary.discount')}</span>
+              <span>-{formatPrice(couponDiscount, currency)}</span>
+            </div>
+          )}
+          <div className="flex justify-between text-gray-600">
+            <span>{t('checkout.summary.shipping')}</span>
+            <span>
+              {loadingDeliveryPrice
+                ? t('checkout.shipping.loading')
+                : deliveryPrice !== null
+                  ? formatPrice(deliveryPrice, currency) + (selectedRegion ? ` (${selectedRegion.name})` : ` (${t('checkout.shipping.delivery')})`)
+                  : t('checkout.shipping.selectRegion')}
+            </span>
+          </div>
+          <div className="border-t border-white/20 pt-4">
+            <div className="flex justify-between text-lg font-bold text-gray-900">
+              <span>{t('checkout.summary.total')}</span>
+              <span>
+                {formatPrice(finalCheckoutTotal, currency)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-[12px]">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? t('checkout.buttons.processing') : t('checkout.buttons.placeOrder')}
+        </button>
+      </div>
+    </>
+  );
+
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -1075,6 +1223,12 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('checkout.title')}</h1>
+
+      <div className="lg:hidden sticky top-20 z-20 mb-6 transition-transform duration-200">
+        <div className="relative">
+          {orderSummaryContent}
+        </div>
+      </div>
 
       <form onSubmit={handlePlaceOrder}>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -1490,92 +1644,41 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Order Summary */}
-          <div>
-
-            <div className="relative sticky top-4">
-              <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
-              <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.orderSummary')}</h2>
-                <div className="mb-5">
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    {t('checkout.coupon.label')}
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={couponCode}
-                      onChange={(event) => {
-                        setCouponCode(event.target.value);
-                        setCouponError(null);
-                      }}
-                      placeholder={t('checkout.coupon.placeholder')}
-                      className="flex-1 px-3 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all"
-                      disabled={isSubmitting || applyingCoupon}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleApplyCoupon}
-                      disabled={isSubmitting || applyingCoupon}
-                      className="px-4 py-2 rounded-[12px] bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] text-white text-sm font-medium shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                      {applyingCoupon ? t('checkout.coupon.applying') : t('checkout.coupon.apply')}
-                    </button>
-                  </div>
-                  {couponError && (
-                    <p className="mt-2 text-xs text-red-600">{couponError}</p>
-                  )}
-                  {appliedCoupon && !couponError && (
-                    <p className="mt-2 text-xs text-green-700">
-                      {t('checkout.coupon.applied').replace('{code}', appliedCoupon.code)}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-4 mb-6">
-                  <div className="flex justify-between text-gray-600">
-                    <span>{t('checkout.summary.subtotal')}</span>
-                    <span>{formatPrice(cart.totals.subtotal, currency)}</span>
-                  </div>
-                  {appliedCoupon && (
-                    <div className="flex justify-between text-green-700">
-                      <span>{t('checkout.summary.discount')}</span>
-                      <span>-{formatPrice(couponDiscount, currency)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-gray-600">
-                    <span>{t('checkout.summary.shipping')}</span>
-                    <span>
-                      {loadingDeliveryPrice
-                        ? t('checkout.shipping.loading')
-                        : deliveryPrice !== null
-                          ? formatPrice(deliveryPrice, currency) + (selectedRegion ? ` (${selectedRegion.name})` : ` (${t('checkout.shipping.delivery')})`)
-                          : t('checkout.shipping.selectRegion')}
-                    </span>
-                  </div>
-                  <div className="border-t border-white/20 pt-4">
-                    <div className="flex justify-between text-lg font-bold text-gray-900">
-                      <span>{t('checkout.summary.total')}</span>
-                      <span>
-                        {formatPrice(finalCheckoutTotal, currency)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-[12px]">
-                    <p className="text-sm text-red-600">{error}</p>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full py-2.5 px-6 bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] rounded-[12px] text-white font-semibold text-base shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? t('checkout.buttons.processing') : t('checkout.buttons.placeOrder')}
-                </button>
-              </div>
+          {/* Order Summary — sticky via JS so it stays visible on scroll */}
+          <div
+            ref={orderSummaryColumnRef}
+            className="hidden lg:block lg:col-span-1 lg:h-full relative"
+          >
+            {orderSummaryMode !== 'static' && (
+              <div
+                aria-hidden
+                style={{ height: orderSummaryPlaceholderHeight }}
+                className="w-full"
+              />
+            )}
+            <div
+              ref={orderSummaryRef}
+              className="relative"
+              style={
+                orderSummaryMode === 'fixed' && orderSummaryFixedStyle
+                  ? {
+                      position: 'fixed',
+                      top: orderSummaryFixedStyle.top,
+                      left: orderSummaryFixedStyle.left,
+                      width: orderSummaryFixedStyle.width,
+                      zIndex: 30,
+                    }
+                  : orderSummaryMode === 'bottom'
+                    ? {
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        width: orderSummaryFixedStyle?.width ?? '100%',
+                      }
+                  : undefined
+              }
+            >
+              {orderSummaryContent}
             </div>
           </div>
         </div>
