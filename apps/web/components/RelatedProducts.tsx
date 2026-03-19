@@ -218,7 +218,6 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      const count = visibleCount;
       // Calculate current page (0-based)
       const currentPage = Math.floor(prevIndex / visibleCount);
       // Move to previous page
@@ -239,7 +238,6 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
       e.stopPropagation();
     }
     setCarouselIndex((prevIndex) => {
-      const count = visibleCount;
       // Calculate current page (0-based)
       const currentPage = Math.floor(prevIndex / visibleCount);
       // Move to next page
@@ -428,18 +426,17 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                 {isMobile ? (
                   // Mobile: Arrows next to pagination dots
                   <div className="flex items-center justify-center gap-8 sm:gap-12 md:gap-16 pt-[2px] mt-6">
-                    {/* Next Button - Left side */}
+                    {/* Previous Button - Left side (←) */}
                     <FeaturedProductsNavigationArrow
-                      direction="next"
-                      onClick={handleNextProducts}
-                      className="size-[56px] relative border-[#eee] [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
-                      ariaLabel="Next products"
+                      direction="prev"
+                      onClick={handlePreviousProducts}
+                      className="size-[56px] relative border-[#eee] rotate-180 [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
+                      ariaLabel="Previous products"
                     />
 
                     {/* Pagination Dots */}
                     <div className="flex items-center justify-center gap-2">
                       {(() => {
-                        const count = visibleCount;
                         const totalPages = Math.ceil(products.length / visibleCount);
                         return Array.from({ length: totalPages }).map((_, index) => {
                           const pageStartIndex = index * visibleCount;
@@ -462,12 +459,12 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                       })()}
                     </div>
 
-                    {/* Previous Button - Right side */}
+                    {/* Next Button - Right side (→) */}
                     <FeaturedProductsNavigationArrow
-                      direction="prev"
-                      onClick={handlePreviousProducts}
-                      className="size-[56px] relative border-[#eee] [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
-                      ariaLabel="Previous products"
+                      direction="next"
+                      onClick={handleNextProducts}
+                      className="size-[56px] relative border-[#eee] rotate-180 [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
+                      ariaLabel="Next products"
                     />
                   </div>
                 ) : (
@@ -476,7 +473,6 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
                     {/* Pagination Dots */}
                     <div className="flex items-center justify-center gap-2 mt-6">
                       {(() => {
-                        const count = visibleCount;
                         const totalPages = Math.ceil(products.length / visibleCount);
                         return Array.from({ length: totalPages }).map((_, index) => {
                           const pageStartIndex = index * visibleCount;
@@ -508,16 +504,16 @@ export function RelatedProducts({ categorySlug, currentProductId }: RelatedProdu
             {!isMobile && products.length > visibleCount && (
               <>
                 <FeaturedProductsNavigationArrow
-                  direction="next"
-                  onClick={handleNextProducts}
-                  className="absolute left-[max(8px,calc(50%-560px))] md:left-[max(8px,calc(50%-520px))] lg:left-[max(8px,calc(50%-560px))] top-1/2 -translate-y-1/2 border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
-                  ariaLabel="Next products"
-                />
-                <FeaturedProductsNavigationArrow
                   direction="prev"
                   onClick={handlePreviousProducts}
-                  className="absolute right-[max(8px,calc(50%-560px))] md:right-[max(8px,calc(50%-520px))] lg:right-[max(8px,calc(50%-560px))] top-1/2 -translate-y-1/2 border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
+                  className="absolute left-[max(8px,calc(50%-560px))] md:left-[max(8px,calc(50%-520px))] lg:left-[max(8px,calc(50%-560px))] top-1/2 -translate-y-1/2 rotate-180 border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
                   ariaLabel="Previous products"
+                />
+                <FeaturedProductsNavigationArrow
+                  direction="next"
+                  onClick={handleNextProducts}
+                  className="absolute right-[max(8px,calc(50%-560px))] md:right-[max(8px,calc(50%-520px))] lg:right-[max(8px,calc(50%-560px))] top-1/2 -translate-y-1/2 rotate-180 border border-black border-solid shadow-none hover:shadow-none [&_svg_path]:fill-black [&_svg_path]:hover:fill-[#00d1ff]"
+                  ariaLabel="Next products"
                 />
               </>
             )}
