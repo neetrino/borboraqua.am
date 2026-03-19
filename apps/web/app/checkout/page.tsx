@@ -83,7 +83,7 @@ type CheckoutFormData = {
   email: string;
   phone: string;
   shippingMethod: 'pickup' | 'delivery';
-  paymentMethod: 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery';
+  paymentMethod?: 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery';
   shippingAddress?: string;
   shippingRegionId?: string;
   shippingPostalCode?: string;
@@ -174,9 +174,7 @@ export default function CheckoutPage() {
     shippingMethod: z.enum(['pickup', 'delivery'], {
       message: t('checkout.errors.selectShippingMethod'),
     }),
-    paymentMethod: z.enum(['idram', 'ameriabank', 'telcell', 'fastshift', 'cash_on_delivery'], {
-      message: t('checkout.errors.selectPaymentMethod'),
-    }),
+    paymentMethod: z.enum(['idram', 'ameriabank', 'telcell', 'fastshift', 'cash_on_delivery']).optional(),
     // Shipping address fields - required only for delivery
     shippingAddress: z.string().optional(),
     shippingRegionId: z.string().optional(),
@@ -207,6 +205,13 @@ export default function CheckoutPage() {
   }, {
     message: t('checkout.errors.deliveryTimeRequired'),
     path: ['deliveryTimeSlot'],
+  }).refine((data) => {
+    // User must select a payment method (no default)
+    const valid: Array<CheckoutFormData['paymentMethod']> = ['idram', 'ameriabank', 'telcell', 'fastshift', 'cash_on_delivery'];
+    return data.paymentMethod != null && valid.includes(data.paymentMethod);
+  }, {
+    message: t('checkout.errors.selectPaymentMethod'),
+    path: ['paymentMethod'],
   }), [t]);
 
   const {
@@ -223,7 +228,7 @@ export default function CheckoutPage() {
       email: '',
       phone: '',
       shippingMethod: 'delivery',
-      paymentMethod: 'cash_on_delivery',
+      paymentMethod: undefined,
       shippingAddress: '',
       shippingRegionId: '',
       shippingPostalCode: '',
