@@ -184,20 +184,14 @@ export async function adminSendPasswordReset(userId: string): Promise<{ ok: true
     },
   });
 
-  try {
-    await sendPasswordResetEmail(user.email, token);
-  } catch (e) {
+  // Отправка письма в фоне: ответ клиенту сразу, письмо уходит параллельно
+  sendPasswordResetEmail(user.email, token).catch(async (e) => {
+    console.error("❌ [ADMIN] Password reset email failed (sent in background):", e);
     await db.user.update({
       where: { id: user.id },
       data: { passwordResetToken: null, passwordResetExpires: null },
     });
-    throw {
-      status: 500,
-      type: "https://api.shop.am/problems/internal-error",
-      title: "Failed to send email",
-      detail: "Could not send password reset email. Try again later.",
-    };
-  }
+  });
 
   return { ok: true };
 }
