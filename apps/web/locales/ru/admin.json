@@ -278,6 +278,7 @@
     "sendPasswordResetShort": "Сброс",
     "sendPasswordResetSending": "…",
     "sendPasswordResetSent": "Письмо для сброса пароля отправлено на {email}",
+    "sendPasswordResetSentShort": "Отправлено",
     "sendPasswordResetNoEmail": "У пользователя нет email",
     "sendPasswordResetError": "Ошибка отправки: {message}"
   },

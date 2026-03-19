@@ -174,6 +174,7 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'customer'>('all');
   const [exporting, setExporting] = useState<'csv' | 'excel' | null>(null);
   const [sendingResetForId, setSendingResetForId] = useState<string | null>(null);
+  const [resetSentForId, setResetSentForId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading) {
@@ -376,17 +377,14 @@ export default function UsersPage() {
   };
 
   const handleSendPasswordReset = async (user: User) => {
-    if (!user.email) {
-      alert(t('admin.users.sendPasswordResetNoEmail'));
-      return;
-    }
+    if (!user.email) return;
     setSendingResetForId(user.id);
     try {
       await apiClient.post(`/api/v1/admin/users/${user.id}/send-password-reset`, {});
-      alert(t('admin.users.sendPasswordResetSent').replace('{email}', user.email));
-    } catch (err: any) {
-      const detail = err?.data?.detail ?? err?.message ?? t('admin.common.unknownErrorFallback');
-      alert(t('admin.users.sendPasswordResetError').replace('{message}', detail));
+      setResetSentForId(user.id);
+      setTimeout(() => setResetSentForId(null), 10_000);
+    } catch (_err) {
+      // Ошибка логируется в apiClient; уведомление через зелёную кнопку не показываем
     } finally {
       setSendingResetForId(null);
     }
@@ -660,7 +658,11 @@ export default function UsersPage() {
                           {user.email ? (
                             <ProductPageButton
                               variant="outline"
-                              className="inline-flex items-center gap-1.5 px-2 py-1.5 text-xs"
+                              className={`inline-flex items-center gap-1.5 px-2 py-1.5 text-xs transition-colors duration-200 ${
+                                resetSentForId === user.id
+                                  ? 'bg-transparent text-green-600 border border-green-500 hover:bg-green-500 hover:text-white hover:border-green-500'
+                                  : ''
+                              }`}
                               onClick={() => handleSendPasswordReset(user)}
                               disabled={sendingResetForId === user.id}
                               title={t('admin.users.sendPasswordReset')}
@@ -670,7 +672,13 @@ export default function UsersPage() {
                               ) : (
                                 <Mail className="w-3.5 h-3.5 shrink-0" aria-hidden />
                               )}
-                              <span>{sendingResetForId === user.id ? t('admin.users.sendPasswordResetSending') : t('admin.users.sendPasswordResetShort')}</span>
+                              <span>
+                                {sendingResetForId === user.id
+                                  ? t('admin.users.sendPasswordResetSending')
+                                  : resetSentForId === user.id
+                                    ? t('admin.users.sendPasswordResetSentShort')
+                                    : t('admin.users.sendPasswordResetShort')}
+                              </span>
                             </ProductPageButton>
                           ) : (
                             <span className="text-xs text-gray-400">{t('admin.users.sendPasswordResetNoEmail')}</span>

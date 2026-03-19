@@ -278,6 +278,7 @@
     "sendPasswordResetShort": "Reset",
     "sendPasswordResetSending": "…",
     "sendPasswordResetSent": "Password reset email sent to {email}",
+    "sendPasswordResetSentShort": "Sent",
     "sendPasswordResetNoEmail": "User has no email",
     "sendPasswordResetError": "Failed to send: {message}"
   },
