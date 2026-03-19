@@ -7,6 +7,7 @@ import { apiClient } from '../../../lib/api-client';
 import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/global/global';
 import { useTranslation } from '../../../lib/i18n-client';
 import { showToast } from '../../../components/Toast';
+import { showConfirm } from '../../../components/ConfirmDialog';
 import { ColorPaletteSelector } from '../../../components/ColorPaletteSelector';
 import { getColorHex } from '../../../lib/colorMap';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
@@ -163,9 +164,13 @@ function AttributesPageContent() {
   };
 
   const handleDeleteAttribute = async (attributeId: string, attributeName: string) => {
-    if (!confirm(t('admin.attributes.deleteConfirm').replace('{name}', attributeName))) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      message: t('admin.attributes.deleteConfirm').replace('{name}', attributeName),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!confirmed) return;
 
     try {
       console.log(`🗑️ [ADMIN] Deleting attribute: ${attributeName} (${attributeId})`);
@@ -322,9 +327,13 @@ function AttributesPageContent() {
   };
 
   const handleDeleteValue = async (attributeId: string, valueId: string, valueLabel: string) => {
-    if (!confirm(t('admin.attributes.deleteValueConfirm').replace('{label}', valueLabel))) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      message: t('admin.attributes.deleteValueConfirm').replace('{label}', valueLabel),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!confirmed) return;
 
     try {
       setDeletingValue(valueId);

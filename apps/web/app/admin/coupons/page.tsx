@@ -7,6 +7,8 @@ import { apiClient } from '@/lib/api-client';
 import { useTranslation } from '@/lib/i18n-client';
 import { AdminMenuDrawer, getAdminMenuTABS } from '@/components/icons/global/global';
 import { ProductPageButton } from '@/components/icons/global/globalMobile';
+import { showToast } from '@/components/Toast';
+import { showConfirm } from '@/components/ConfirmDialog';
 
 interface AdminUser {
   id: string;
@@ -290,9 +292,13 @@ export default function AdminCouponsPage() {
   };
 
   const handleDelete = async (couponId: string) => {
-    if (!confirm(t('admin.coupons.deleteConfirm') || 'Are you sure you want to delete this coupon?')) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      message: t('admin.coupons.deleteConfirm') || 'Are you sure you want to delete this coupon?',
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!confirmed) return;
 
     setDeletingId(couponId);
     setError(null);

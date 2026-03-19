@@ -7,6 +7,7 @@ import { useAuth } from '../lib/auth/AuthContext';
 import { useTranslation } from '../lib/i18n-client';
 import { apiClient } from '../lib/api-client';
 import { ProductPageButton } from './icons/global/globalMobile';
+import { showToast } from './Toast';
 
 interface Review {
   id: string;
@@ -70,17 +71,17 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
     e.preventDefault();
     
     if (!isLoggedIn) {
-      alert(t('common.reviews.loginRequired'));
+      showToast(t('common.reviews.loginRequired'), 'warning');
       return;
     }
 
     if (rating === 0) {
-      alert(t('common.reviews.ratingRequired'));
+      showToast(t('common.reviews.ratingRequired'), 'warning');
       return;
     }
 
     if (!comment.trim()) {
-      alert(t('common.reviews.commentRequired'));
+      showToast(t('common.reviews.commentRequired'), 'warning');
       return;
     }
 
@@ -90,7 +91,7 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
       // Use slug if available, otherwise fall back to productId
       const identifier = productSlug || productId;
       if (!identifier) {
-        alert(t('common.reviews.submitError'));
+        showToast(t('common.reviews.submitError'), 'error');
         return;
       }
 
@@ -122,7 +123,7 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
         try {
           const identifier = productSlug || productId;
           if (!identifier) {
-            alert(t('common.reviews.alreadyReviewed') || 'You have already reviewed this product');
+            showToast(t('common.reviews.alreadyReviewed') || 'You have already reviewed this product');
             return;
           }
 
@@ -138,24 +139,24 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
             
             // Show in edit mode
             handleEditReview(existingReview);
-            alert(t('common.reviews.alreadyReviewed') || 'You have already reviewed this product. You can update your review below.');
+            showToast(t('common.reviews.alreadyReviewed') || 'You have already reviewed this product. You can update your review below.');
           } else {
-            alert(t('common.reviews.alreadyReviewed') || 'You have already reviewed this product');
+            showToast(t('common.reviews.alreadyReviewed') || 'You have already reviewed this product');
           }
         } catch (loadError: any) {
           console.error('❌ [PRODUCT REVIEWS] Error loading existing review:', loadError);
           // Fallback to checking local reviews
           if (userReview) {
             handleEditReview(userReview);
-            alert(t('common.reviews.alreadyReviewed') || 'You have already reviewed this product. You can update your review below.');
+            showToast(t('common.reviews.alreadyReviewed') || 'You have already reviewed this product. You can update your review below.');
           } else {
-            alert(t('common.reviews.alreadyReviewed') || 'You have already reviewed this product');
+            showToast(t('common.reviews.alreadyReviewed') || 'You have already reviewed this product');
           }
         }
       } else if (error.status === 401) {
-        alert(t('common.reviews.loginRequired'));
+        showToast(t('common.reviews.loginRequired'), 'warning');
       } else {
-        alert(t('common.reviews.submitError'));
+        showToast(t('common.reviews.submitError'), 'error');
       }
     } finally {
       setSubmitting(false);
@@ -209,12 +210,12 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
     }
 
     if (rating === 0) {
-      alert(t('common.reviews.ratingRequired'));
+      showToast(t('common.reviews.ratingRequired'), 'warning');
       return;
     }
 
     if (!comment.trim()) {
-      alert(t('common.reviews.commentRequired'));
+      showToast(t('common.reviews.commentRequired'), 'warning');
       return;
     }
 
@@ -246,11 +247,11 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
       
       // Handle specific error cases
       if (error.status === 401) {
-        alert(t('common.reviews.loginRequired'));
+        showToast(t('common.reviews.loginRequired'), 'warning');
       } else if (error.status === 403) {
-        alert('You can only update your own reviews');
+        showToast('You can only update your own reviews', 'warning');
       } else {
-        alert(t('common.reviews.submitError'));
+        showToast(t('common.reviews.submitError'), 'error');
       }
     } finally {
       setSubmitting(false);
@@ -335,7 +336,7 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
             variant="cancel"
             onClick={() => {
               if (!isLoggedIn) {
-                alert(t('common.reviews.loginRequired'));
+                showToast(t('common.reviews.loginRequired'), 'warning');
                 return;
               }
               setShowForm(true);
@@ -446,7 +447,7 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
               variant="cancel"
               onClick={() => {
                 if (!isLoggedIn) {
-                  alert(t('common.reviews.loginRequired'));
+                  showToast(t('common.reviews.loginRequired'), 'warning');
                   return;
                 }
                 setShowForm(true);

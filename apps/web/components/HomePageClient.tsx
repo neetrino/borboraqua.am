@@ -18,6 +18,7 @@ import { MobileFeaturedCategories } from './MobileFeaturedCategories';
 import { MobileBottleShowcase } from './MobileBottleShowcase';
 import { DesktopFeaturedCategories } from './DesktopFeaturedCategories';
 import { getFeaturedCategoryConfig, type FeaturedCategoryId } from './featuredCategories.config';
+import { showToast } from './Toast';
 
 // Local image paths - Images stored in public/assets/home/
 const imgBorborAguaLogoColorB2024Colored1 = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
@@ -566,9 +567,9 @@ export function HomePageClient({
       onError: (error: any) => {
         console.error('❌ [HOMEPAGE] Error adding to cart:', error);
         if (error?.message) {
-          alert(error.message);
+          showToast(error.message, 'error');
         } else {
-          alert(t('home.errors.failedToAddToCart'));
+          showToast(t('home.errors.failedToAddToCart'), 'error');
         }
       },
     });

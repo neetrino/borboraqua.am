@@ -9,6 +9,7 @@ import { useTranslation } from '../../../lib/i18n-client';
 import { clearCurrencyRatesCache } from '../../../lib/currency';
 import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/global/global';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
+import { showToast } from '../../../components/Toast';
 
 interface Settings {
   defaultCurrency?: string;
@@ -178,7 +179,7 @@ export default function SettingsPage() {
       // Convert AMD-based rates back to USD-based for storage
       // Ensure all required rates are present
       if (!settings.currencyRates?.USD || settings.currencyRates.USD <= 0) {
-        alert(t('admin.settings.errorSaving').replace('{message}', 'USD rate is required and must be greater than 0'));
+        showToast(t('admin.settings.errorSaving').replace('{message}', 'USD rate is required and must be greater than 0'), 'error');
         setSaving(false);
         return;
       }
@@ -223,12 +224,12 @@ export default function SettingsPage() {
         }
       }, 100);
       
-      alert(t('admin.settings.savedSuccess'));
+      showToast(t('admin.settings.savedSuccess'), 'success');
       console.log('✅ [ADMIN] Settings saved, currency rates:', currencyRatesToSave);
     } catch (err: any) {
       console.error('❌ [ADMIN] Error saving settings:', err);
       const errorMessage = err.response?.data?.detail || err.message || 'Failed to save settings';
-      alert(t('admin.settings.errorSaving').replace('{message}', errorMessage));
+      showToast(t('admin.settings.errorSaving').replace('{message}', errorMessage), 'error');
     } finally {
       setSaving(false);
     }

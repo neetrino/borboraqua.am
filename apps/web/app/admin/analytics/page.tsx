@@ -7,6 +7,7 @@ import { Card } from '@shop/ui';
 import { apiClient } from '../../../lib/api-client';
 import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/global/global';
 import { useTranslation } from '../../../lib/i18n-client';
+import { showToast } from '../../../components/Toast';
 
 interface AnalyticsData {
   period: string;
@@ -116,7 +117,7 @@ export default function AnalyticsPage() {
         errorMessage = err.data.detail;
       }
       
-      alert(`${t('admin.common.error')}: ${errorMessage}`);
+      showToast(`${t('admin.common.error')}: ${errorMessage}`, 'error');
     } finally {
       setLoading(false);
     }

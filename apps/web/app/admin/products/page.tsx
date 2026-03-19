@@ -10,6 +10,8 @@ import { useTranslation } from '../../../lib/i18n-client';
 import { formatPrice, getStoredCurrency, initializeCurrencyRates, type CurrencyCode } from '../../../lib/currency';
 import { getStoredLanguage } from '../../../lib/language';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
+import { showToast } from '../../../components/Toast';
+import { showConfirm } from '../../../components/ConfirmDialog';
 
 interface Product {
   id: string;
@@ -364,7 +366,7 @@ export default function ProductsPage() {
       setMeta(response.meta || null);
     } catch (err: any) {
       console.error('❌ [ADMIN] Error fetching products:', err);
-      alert(t('admin.products.errorLoading').replace('{message}', err.message || t('admin.common.unknownErrorFallback')));
+      showToast(t('admin.products.errorLoading').replace('{message}', err.message || t('admin.common.unknownErrorFallback')), 'error');
     } finally {
       setLoading(false);
     }
@@ -426,7 +428,7 @@ export default function ProductsPage() {
       return filtered;
     } catch (err: any) {
       console.error('❌ [ADMIN] Error fetching products for export:', err);
-      alert(t('admin.products.errorLoading').replace('{message}', err.message || t('admin.common.unknownErrorFallback')));
+      showToast(t('admin.products.errorLoading').replace('{message}', err.message || t('admin.common.unknownErrorFallback')), 'error');
       return [];
     }
   };
@@ -443,7 +445,7 @@ export default function ProductsPage() {
     try {
       const allProducts = await fetchAllProductsForExport();
       if (!allProducts.length) {
-        alert(t('admin.products.noProducts'));
+        showToast(t('admin.products.noProducts'), 'warning');
         return;
       }
 
@@ -479,7 +481,13 @@ export default function ProductsPage() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!confirm(t('admin.products.bulkDeleteConfirm').replace('{count}', selectedIds.size.toString()))) return;
+    const bulkConfirmed = await showConfirm({
+      message: t('admin.products.bulkDeleteConfirm').replace('{count}', selectedIds.size.toString()),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!bulkConfirmed) return;
     setBulkDeleting(true);
     try {
       const ids = Array.from(selectedIds);
@@ -489,10 +497,10 @@ export default function ProductsPage() {
       const failed = results.filter(r => r.status === 'rejected');
       setSelectedIds(new Set());
       await fetchProducts();
-      alert(t('admin.products.bulkDeleteFinished').replace('{success}', (ids.length - failed.length).toString()).replace('{total}', ids.length.toString()));
+      showToast(t('admin.products.bulkDeleteFinished').replace('{success}', (ids.length - failed.length).toString()).replace('{total}', ids.length.toString()), 'success');
     } catch (err) {
       console.error('❌ [ADMIN] Bulk delete products error:', err);
-      alert(t('admin.products.failedToDelete'));
+      showToast(t('admin.products.failedToDelete'), 'error');
     } finally {
       setBulkDeleting(false);
     }
@@ -610,9 +618,12 @@ export default function ProductsPage() {
   };
 
   const handleDuplicateProduct = async (productId: string, productTitle: string) => {
-    if (!confirm(t('admin.products.duplicateConfirm')?.replace('{title}', productTitle) || `Duplicate "${productTitle}"?`)) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      message: t('admin.products.duplicateConfirm')?.replace('{title}', productTitle) || `Duplicate "${productTitle}"?`,
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+    });
+    if (!confirmed) return;
 
     try {
       await apiClient.post<{ id: string }>(`/api/v1/admin/products/${productId}/duplicate`);
@@ -622,14 +633,18 @@ export default function ProductsPage() {
       fetchProducts();
     } catch (err: any) {
       console.error('❌ [ADMIN] Error duplicating product:', err);
-      alert(t('admin.products.errorDuplicating')?.replace('{message}', err.message || t('admin.common.unknownErrorFallback')) || 'Error duplicating product');
+      showToast(t('admin.products.errorDuplicating')?.replace('{message}', err.message || t('admin.common.unknownErrorFallback')) || 'Error duplicating product', 'error');
     }
   };
 
   const handleDeleteProduct = async (productId: string, productTitle: string) => {
-    if (!confirm(t('admin.products.deleteConfirm').replace('{title}', productTitle))) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      message: t('admin.products.deleteConfirm').replace('{title}', productTitle),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!confirmed) return;
 
     try {
       await apiClient.delete(`/api/v1/admin/products/${productId}`);
@@ -638,10 +653,10 @@ export default function ProductsPage() {
       // Refresh products list
       fetchProducts();
       
-      alert(t('admin.products.deletedSuccess'));
+      showToast(t('admin.products.deletedSuccess'), 'success');
     } catch (err: any) {
       console.error('❌ [ADMIN] Error deleting product:', err);
-      alert(t('admin.products.errorDeleting').replace('{message}', err.message || t('admin.common.unknownErrorFallback')));
+      showToast(t('admin.products.errorDeleting').replace('{message}', err.message || t('admin.common.unknownErrorFallback')), 'error');
     }
   };
 
@@ -666,13 +681,13 @@ export default function ProductsPage() {
       fetchProducts();
       
       if (newStatus) {
-        alert(t('admin.products.productPublished').replace('{title}', productTitle));
+        showToast(t('admin.products.productPublished').replace('{title}', productTitle), 'success');
       } else {
-        alert(t('admin.products.productDraft').replace('{title}', productTitle));
+        showToast(t('admin.products.productDraft').replace('{title}', productTitle), 'success');
       }
     } catch (err: any) {
       console.error('❌ [ADMIN] Error updating product status:', err);
-      alert(t('admin.products.errorUpdatingStatus').replace('{message}', err.message || t('admin.common.unknownErrorFallback')));
+      showToast(t('admin.products.errorUpdatingStatus').replace('{message}', err.message || t('admin.common.unknownErrorFallback')), 'error');
     }
   };
 
@@ -694,7 +709,7 @@ export default function ProductsPage() {
       fetchProducts();
     } catch (err: any) {
       console.error('❌ [ADMIN] Error updating product featured status:', err);
-      alert(t('admin.products.errorUpdatingFeatured').replace('{message}', err.message || t('admin.common.unknownErrorFallback')));
+      showToast(t('admin.products.errorUpdatingFeatured').replace('{message}', err.message || t('admin.common.unknownErrorFallback')), 'error');
     }
   };
 
@@ -722,11 +737,11 @@ export default function ProductsPage() {
       await fetchProducts();
       
       if (failed.length > 0) {
-        alert(t('admin.products.featuredToggleFinished').replace('{success}', successCount.toString()).replace('{total}', products.length.toString()));
+        showToast(t('admin.products.featuredToggleFinished').replace('{success}', successCount.toString()).replace('{total}', products.length.toString()), 'warning');
       }
     } catch (err) {
       console.error('❌ [ADMIN] Toggle all featured error:', err);
-      alert(t('admin.products.failedToUpdateFeatured'));
+      showToast(t('admin.products.failedToUpdateFeatured'), 'error');
     } finally {
       setTogglingAllFeatured(false);
     }

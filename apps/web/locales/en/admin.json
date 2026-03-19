@@ -847,6 +847,8 @@
     "update": "Update",
     "saving": "Saving...",
     "back": "Back",
-    "backToAdmin": "Back to Admin Panel"
+    "backToAdmin": "Back to Admin Panel",
+    "yes": "Yes",
+    "no": "No"
   }
 }

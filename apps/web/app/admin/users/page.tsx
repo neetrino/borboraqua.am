@@ -8,6 +8,8 @@ import { apiClient } from '../../../lib/api-client';
 import { useTranslation } from '../../../lib/i18n-client';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
 import { Mail, Loader2 } from 'lucide-react';
+import { showToast } from '../../../components/Toast';
+import { showConfirm } from '../../../components/ConfirmDialog';
 
 interface User {
   id: string;
@@ -263,7 +265,7 @@ export default function UsersPage() {
       return filteredForExport;
     } catch (err) {
       console.error('❌ [ADMIN] Error fetching all users for export:', err);
-      alert('Failed to export users. Please try again.');
+      showToast('Failed to export users. Please try again.', 'error');
       return [];
     }
   }, [search, roleFilter]);
@@ -274,7 +276,7 @@ export default function UsersPage() {
     try {
       const allUsers = await fetchAllUsersForExport();
       if (!allUsers.length) {
-        alert('No users to export.');
+        showToast('No users to export.', 'warning');
         return;
       }
 
@@ -334,7 +336,13 @@ export default function UsersPage() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
-    if (!confirm(t('admin.users.deleteConfirm').replace('{count}', selectedIds.size.toString()))) return;
+    const confirmed = await showConfirm({
+      message: t('admin.users.deleteConfirm').replace('{count}', selectedIds.size.toString()),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!confirmed) return;
     setBulkDeleting(true);
     try {
       const ids = Array.from(selectedIds);
@@ -344,10 +352,13 @@ export default function UsersPage() {
       const failed = results.filter(r => r.status === 'rejected');
       setSelectedIds(new Set());
       await fetchUsers();
-      alert(t('admin.users.bulkDeleteFinished').replace('{success}', (ids.length - failed.length).toString()).replace('{total}', ids.length.toString()));
+      showToast(
+        t('admin.users.bulkDeleteFinished').replace('{success}', (ids.length - failed.length).toString()).replace('{total}', ids.length.toString()),
+        'success'
+      );
     } catch (err) {
       console.error('❌ [ADMIN] Bulk delete users error:', err);
-      alert(t('admin.users.failedToDelete'));
+      showToast(t('admin.users.failedToDelete'), 'error');
     } finally {
       setBulkDeleting(false);
     }
@@ -366,13 +377,13 @@ export default function UsersPage() {
       fetchUsers();
       
       if (newStatus) {
-        alert(t('admin.users.userBlocked').replace('{name}', userName));
+        showToast(t('admin.users.userBlocked').replace('{name}', userName), 'success');
       } else {
-        alert(t('admin.users.userActive').replace('{name}', userName));
+        showToast(t('admin.users.userActive').replace('{name}', userName), 'success');
       }
     } catch (err: any) {
       console.error('❌ [ADMIN] Error updating user status:', err);
-      alert(t('admin.users.errorUpdatingStatus').replace('{message}', err.message || t('admin.common.unknownErrorFallback')));
+      showToast(t('admin.users.errorUpdatingStatus').replace('{message}', err.message || t('admin.common.unknownErrorFallback')), 'error');
     }
   };
 

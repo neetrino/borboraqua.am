@@ -10,6 +10,8 @@ import { getStoredLanguage, LANGUAGES, type LanguageCode } from '../../../lib/la
 import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/global/global';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
 import { processImageFile } from '../../../lib/utils/image-utils';
+import { showToast } from '../../../components/Toast';
+import { showConfirm } from '../../../components/ConfirmDialog';
 import Image from 'next/image';
 
 interface AdminBlogPost {
@@ -259,16 +261,20 @@ export default function AdminBlogPage() {
     } catch (err: any) {
       console.error('❌ [ADMIN BLOG] Error loading post:', err);
       const message = err?.message || t('admin.common.unknownErrorFallback');
-      alert(t('admin.blog.errorLoading').replace('{message}', message));
+      showToast(t('admin.blog.errorLoading').replace('{message}', message), 'error');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (post: AdminBlogPost) => {
-    if (!confirm(t('admin.blog.deleteConfirm').replace('{title}', post.title))) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      message: t('admin.blog.deleteConfirm').replace('{title}', post.title),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!confirmed) return;
     
     // Optimistic update: remove from UI immediately
     const originalPosts = [...posts];
@@ -285,7 +291,7 @@ export default function AdminBlogPage() {
       // Rollback on error
       setPosts(originalPosts);
       const message = err?.message || t('admin.common.unknownErrorFallback');
-      alert(t('admin.blog.errorDeleting').replace('{message}', message));
+      showToast(t('admin.blog.errorDeleting').replace('{message}', message), 'error');
     }
   };
 
@@ -299,14 +305,17 @@ export default function AdminBlogPage() {
     } catch (err: any) {
       console.error('❌ [ADMIN BLOG] Error updating status:', err);
       const message = err?.message || t('admin.common.unknownErrorFallback');
-      alert(t('admin.blog.errorLoading').replace('{message}', message));
+      showToast(t('admin.blog.errorLoading').replace('{message}', message), 'error');
     }
   };
 
   const handleDuplicatePost = async (post: AdminBlogPost) => {
-    if (!confirm(t('admin.blog.duplicateConfirm').replace('{title}', post.title))) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      message: t('admin.blog.duplicateConfirm').replace('{title}', post.title),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+    });
+    if (!confirmed) return;
 
     // Set loading state for this specific post
     setDuplicating(post.id);
@@ -325,7 +334,7 @@ export default function AdminBlogPage() {
     } catch (err: any) {
       console.error('❌ [ADMIN BLOG] Error duplicating post:', err);
       const message = err?.message || t('admin.common.unknownErrorFallback');
-      alert(t('admin.blog.errorDuplicating').replace('{message}', message));
+      showToast(t('admin.blog.errorDuplicating').replace('{message}', message), 'error');
     } finally {
       setDuplicating(null);
     }
@@ -463,7 +472,7 @@ export default function AdminBlogPage() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert(t('admin.blog.selectImageFile'));
+      showToast(t('admin.blog.selectImageFile'), 'warning');
       return;
     }
 
@@ -484,7 +493,7 @@ export default function AdminBlogPage() {
     } catch (error: any) {
       console.error('❌ [ADMIN BLOG] Error uploading image:', error);
       const message = error?.message || t('admin.blog.unknownError');
-      alert(t('admin.blog.errorUploadingImage').replace('{message}', message));
+      showToast(t('admin.blog.errorUploadingImage').replace('{message}', message), 'error');
     } finally {
       setUploadingImage(null);
       if (event.target) {

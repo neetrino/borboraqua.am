@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { AuthProvider } from '../lib/auth/AuthContext';
 import { ToastContainer } from './Toast';
+import { ConfirmDialogContainer } from './ConfirmDialog';
 
 /**
  * ClientProviders component
@@ -13,6 +14,7 @@ export function ClientProviders({ children }: { children: ReactNode }) {
     <AuthProvider>
       {children}
       <ToastContainer />
+      <ConfirmDialogContainer />
     </AuthProvider>
   );
 }

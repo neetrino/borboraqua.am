@@ -7,6 +7,7 @@ import { useTranslation } from '../lib/i18n-client';
 import { useAuth } from '../lib/auth/AuthContext';
 import { formatPrice, getStoredCurrency, initializeCurrencyRates } from '../lib/currency';
 import { shouldUseCompactLayout } from '../lib/device-layout';
+import { showToast } from './Toast';
 
 interface Product {
   id: string;
@@ -176,9 +177,9 @@ export function ProductsGrid({ products, sortBy = 'default' }: ProductsGridProps
       onError: (error: any) => {
         console.error('❌ [PRODUCTS GRID] Error adding to cart:', error);
         if (error?.message) {
-          alert(error.message);
+          showToast(error.message, 'error');
         } else {
-          alert(t('home.errors.failedToAddToCart'));
+          showToast(t('home.errors.failedToAddToCart'), 'error');
         }
       },
     });

@@ -8,6 +8,7 @@ import { apiClient } from '../../../lib/api-client';
 import { AdminMenuDrawer, getAdminMenuTABS } from '../../../components/icons/global/global';
 import { useTranslation } from '../../../lib/i18n-client';
 import { showToast } from '../../../components/Toast';
+import { showConfirm } from '../../../components/ConfirmDialog';
 import { ProductPageButton } from '../../../components/icons/global/globalMobile';
 
 interface ContactMessage {
@@ -71,9 +72,13 @@ function MessagesSection() {
   }, [messages.length]);
 
   const handleDeleteMessage = async (messageId: string, messageSubject: string) => {
-    if (!confirm(t('admin.messages.deleteConfirm').replace('{subject}', messageSubject))) {
-      return;
-    }
+    const confirmed = await showConfirm({
+      message: t('admin.messages.deleteConfirm').replace('{subject}', messageSubject),
+      confirmLabel: t('admin.common.yes'),
+      cancelLabel: t('admin.common.no'),
+      danger: true,
+    });
+    if (!confirmed) return;
 
     try {
       console.log(`🗑️ [ADMIN] Deleting message: ${messageSubject} (${messageId})`);
