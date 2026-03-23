@@ -428,7 +428,7 @@ export default function UsersPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[min(100%,1920px)] px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <button
             onClick={() => router.push('/admin')}
@@ -590,10 +590,10 @@ export default function UsersPage() {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         {t('admin.users.created')}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        <span className="inline-flex items-center gap-1">
-                          <Mail className="w-3.5 h-3.5" aria-hidden />
-                          {t('admin.users.sendPasswordResetShort')}
+                      <th className="min-w-[10rem] max-w-[14rem] px-4 py-3 text-left text-xs font-medium uppercase leading-snug tracking-wider text-gray-500">
+                        <span className="inline-flex items-start gap-1.5">
+                          <Mail className="mt-0.5 w-3.5 shrink-0" aria-hidden />
+                          <span className="whitespace-normal break-words">{t('admin.users.sendPasswordResetShort')}</span>
                         </span>
                       </th>
                     </tr>
@@ -665,11 +665,11 @@ export default function UsersPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {new Date(user.createdAt).toLocaleDateString()}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="max-w-[16rem] px-4 py-4 align-top">
                           {user.email ? (
                             <ProductPageButton
                               variant="outline"
-                              className={`inline-flex items-center gap-1.5 px-2 py-1.5 text-xs transition-colors duration-200 ${
+                              className={`inline-flex max-w-full flex-wrap items-center gap-1.5 px-2 py-1.5 text-left text-xs transition-colors duration-200 ${
                                 resetSentForId === user.id
                                   ? 'bg-transparent text-green-600 border border-green-500 hover:bg-green-500 hover:text-white hover:border-green-500'
                                   : ''
@@ -683,7 +683,7 @@ export default function UsersPage() {
                               ) : (
                                 <Mail className="w-3.5 h-3.5 shrink-0" aria-hidden />
                               )}
-                              <span>
+                              <span className="min-w-0 break-words">
                                 {sendingResetForId === user.id
                                   ? t('admin.users.sendPasswordResetSending')
                                   : resetSentForId === user.id
