@@ -12,6 +12,9 @@ import {
 
 const RESET_EXPIRES_HOURS = 1;
 
+/** Public logo path (same as site header). */
+const BRAND_LOGO_PATH = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")
@@ -21,10 +24,11 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function buildResetEmailHtml(resetUrl: string, locale: LanguageCode): string {
+function buildResetEmailHtml(resetUrl: string, baseUrl: string, locale: LanguageCode): string {
   const copy = getPasswordResetEmailCopy(locale);
   const durationPhrase = formatPasswordResetExpiryDuration(locale, RESET_EXPIRES_HOURS);
   const expiresNotice = copy.buildExpiresNotice(durationPhrase);
+  const logoUrl = `${baseUrl}${BRAND_LOGO_PATH}`;
 
   return `
 <!DOCTYPE html>
@@ -36,13 +40,21 @@ function buildResetEmailHtml(resetUrl: string, locale: LanguageCode): string {
 </head>
 <body style="margin:0;font-family:system-ui,-apple-system,sans-serif;background:#f1f5f9;">
   <div style="max-width:480px;margin:24px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.05);">
+    <div style="padding:24px 28px;text-align:center;border-bottom:1px solid #e2e8f0;">
+      <img src="${escapeHtml(logoUrl)}" alt="${escapeHtml(copy.logoAlt)}" width="180" height="auto" style="max-width:180px;height:auto;display:block;margin:0 auto;" />
+      <p style="margin:12px 0 0;font-size:15px;font-weight:600;color:#0f172a;letter-spacing:0.02em;">${escapeHtml(copy.siteDomain)}</p>
+    </div>
     <div style="padding:24px 28px;">
       <h1 style="margin:0 0 16px;font-size:20px;color:#0f172a;">${escapeHtml(copy.heading)}</h1>
       <p style="margin:0 0 20px;font-size:15px;color:#475569;line-height:1.5;">
         ${escapeHtml(copy.intro)}
       </p>
-      <p style="margin:0 0 24px;">
+      <p style="margin:0 0 12px;">
         <a href="${escapeHtml(resetUrl)}" style="display:inline-block;padding:12px 24px;background:linear-gradient(to right,#00D1FF,#1AC0FD);color:#fff;text-decoration:none;font-weight:600;border-radius:8px;">${escapeHtml(copy.button)}</a>
+      </p>
+      <p style="margin:0 0 20px;font-size:13px;color:#64748b;line-height:1.45;">
+        ${escapeHtml(copy.orUseLink)}<br />
+        <a href="${escapeHtml(resetUrl)}" style="color:#0284c7;word-break:break-all;">${escapeHtml(resetUrl)}</a>
       </p>
       <p style="margin:0;font-size:13px;color:#64748b;">
         ${escapeHtml(expiresNotice)}
@@ -72,7 +84,7 @@ export async function sendPasswordResetEmail(
   const resetUrl = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
   const copy = getPasswordResetEmailCopy(locale);
   const durationPhrase = formatPasswordResetExpiryDuration(locale, RESET_EXPIRES_HOURS);
-  const html = buildResetEmailHtml(resetUrl, locale);
+  const html = buildResetEmailHtml(resetUrl, baseUrl, locale);
   const text = copy.buildPlainText(resetUrl, durationPhrase);
 
   await sendEmail({
