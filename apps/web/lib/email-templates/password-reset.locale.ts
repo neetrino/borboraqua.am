@@ -42,12 +42,12 @@ const COPY: Record<LanguageCode, PasswordResetCopy> = {
     siteDomain: "borboraqua.am",
     logoAlt: "Borbor Aqua",
     heading: "Reset your password",
-    intro: "Tap the button to set a new password.",
+    intro: "To change or reset your password, tap the button below.",
     button: "Reset password",
     buildExpiresNotice: (durationPhrase: string) => `Valid for ${durationPhrase}.`,
     footerAuto: "borboraqua.am",
     buildPlainText: (resetUrl: string, durationPhrase: string) =>
-      `borboraqua.am — password reset\n\n${resetUrl}\n\nValid for ${durationPhrase}.`,
+      `borboraqua.am — password reset\n\nTo change or reset your password, open this link:\n${resetUrl}\n\nValid for ${durationPhrase}.`,
   },
   hy: {
     subject: "borboraqua.am — Գաղտնաբառի վերականգնում",
@@ -55,12 +55,12 @@ const COPY: Record<LanguageCode, PasswordResetCopy> = {
     siteDomain: "borboraqua.am",
     logoAlt: "Borbor Aqua",
     heading: "Գաղտնաբառի վերականգնում",
-    intro: "Սեղմեք կոճակը։",
+    intro: "Գաղտնաբառը փոխելու և վերականգնելու համար սեղմեք կոճակը։",
     button: "Վերականգնել գաղտնաբառը",
     buildExpiresNotice: (durationPhrase: string) => `Վավեր է ${durationPhrase}։`,
     footerAuto: "borboraqua.am",
     buildPlainText: (resetUrl: string, durationPhrase: string) =>
-      `borboraqua.am — գաղտնաբառի վերականգնում\n\n${resetUrl}\n\nՎավեր է ${durationPhrase}։`,
+      `borboraqua.am — գաղտնաբառի վերականգնում\n\nԳաղտնաբառը փոխելու և վերականգնելու համար բացեք հղումը՝\n${resetUrl}\n\nՎավեր է ${durationPhrase}։`,
   },
   ru: {
     subject: "borboraqua.am — Сброс пароля",
@@ -68,12 +68,12 @@ const COPY: Record<LanguageCode, PasswordResetCopy> = {
     siteDomain: "borboraqua.am",
     logoAlt: "Borbor Aqua",
     heading: "Сброс пароля",
-    intro: "Нажмите кнопку, чтобы задать новый пароль.",
+    intro: "Для смены и восстановления пароля нажмите на кнопку.",
     button: "Сбросить пароль",
     buildExpiresNotice: (durationPhrase: string) => `Действует ${durationPhrase}.`,
     footerAuto: "borboraqua.am",
     buildPlainText: (resetUrl: string, durationPhrase: string) =>
-      `borboraqua.am — сброс пароля\n\n${resetUrl}\n\nДействует ${durationPhrase}.`,
+      `borboraqua.am — сброс пароля\n\nДля смены и восстановления пароля перейдите по ссылке:\n${resetUrl}\n\nДействует ${durationPhrase}.`,
   },
 };
 
