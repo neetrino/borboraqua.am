@@ -62,6 +62,12 @@ export const registerBodySchema = z.object({
 
 export const forgotPasswordBodySchema = z.object({
   email: z.string().email("Invalid email"),
+  /** Language for email subject and body (en / hy / ru) */
+  locale: z.enum(["en", "hy", "ru"]).optional(),
+});
+
+export const adminSendPasswordResetBodySchema = z.object({
+  locale: z.enum(["en", "hy", "ru"]).optional(),
 });
 
 export const resetPasswordBodySchema = z.object({

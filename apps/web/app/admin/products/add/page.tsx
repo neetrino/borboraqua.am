@@ -3779,14 +3779,14 @@ function AddProductPageContent() {
         console.log('✅ [ADMIN] Product updated:', product);
         const baseMessage = 'Ապրանքը հաջողությամբ թարմացվեց!';
         const extra = creationMessages.length ? `\n\n${creationMessages.join('\n')}` : '';
-        showToast(`${baseMessage}${extra}`, 'error');
+        showToast(`${baseMessage}${extra}`, 'success');
       } else {
         // Create new product
         const product = await apiClient.post('/api/v1/admin/products', payload);
         console.log('✅ [ADMIN] Product created:', product);
         const baseMessage = 'Ապրանքը հաջողությամբ ստեղծվեց!';
         const extra = creationMessages.length ? `\n\n${creationMessages.join('\n')}` : '';
-        showToast(`${baseMessage}${extra}`, 'error');
+        showToast(`${baseMessage}${extra}`, 'success');
       }
       
       router.push('/admin/products');
