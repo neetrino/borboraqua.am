@@ -163,7 +163,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
 };
 
 export default function UsersPage() {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const { isLoggedIn, isAdmin, isLoading } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
@@ -391,7 +391,7 @@ export default function UsersPage() {
     if (!user.email) return;
     setSendingResetForId(user.id);
     try {
-      await apiClient.post(`/api/v1/admin/users/${user.id}/send-password-reset`, {});
+      await apiClient.post(`/api/v1/admin/users/${user.id}/send-password-reset`, { locale: lang });
       setResetSentForId(user.id);
       setTimeout(() => setResetSentForId(null), 10_000);
     } catch (_err) {

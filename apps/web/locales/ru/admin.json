@@ -753,6 +753,7 @@
     "noMessages": "Сообщений пока нет",
     "from": "От",
     "noSubject": "(Без темы)",
+    "unknownError": "Произошла неизвестная ошибка",
     "deleteConfirm": "Вы уверены, что хотите удалить сообщение '{subject}'?",
     "deletedSuccess": "Сообщение успешно удалено",
     "errorDeleting": "Ошибка при удалении сообщения: {message}",

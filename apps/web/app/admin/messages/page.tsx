@@ -21,7 +21,7 @@ interface ContactMessage {
 }
 
 function MessagesSection() {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,7 +88,7 @@ function MessagesSection() {
       showToast(t('admin.messages.deletedSuccess'), 'success');
     } catch (err: any) {
       console.error('❌ [ADMIN] Error deleting message:', err);
-      let errorMessage = 'Unknown error occurred';
+      let errorMessage = t('admin.messages.unknownError');
       if (err.data?.detail) {
         errorMessage = err.data.detail;
       } else if (err.detail) {
@@ -104,7 +104,8 @@ function MessagesSection() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    const locale = lang === 'hy' ? 'hy-AM' : lang === 'ru' ? 'ru-RU' : 'en-US';
+    return date.toLocaleDateString(locale, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',

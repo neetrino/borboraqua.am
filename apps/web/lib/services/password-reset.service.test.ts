@@ -59,7 +59,26 @@ describe("password-reset.service", () => {
         }),
       });
       const emailModule = await import("@/lib/email-templates/password-reset");
-      expect(vi.mocked(emailModule.sendPasswordResetEmail).mock.calls[0]).toEqual(["user@example.com", expect.any(String)]);
+      expect(vi.mocked(emailModule.sendPasswordResetEmail).mock.calls[0]).toEqual([
+        "user@example.com",
+        expect.any(String),
+        "hy",
+      ]);
+    });
+
+    it("passes locale to email when provided", async () => {
+      (db.user.findFirst as ReturnType<typeof vi.fn>).mockResolvedValue({
+        id: "user-1",
+        email: "user@example.com",
+      });
+      (db.user.update as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
+      await requestPasswordReset("user@example.com", "en");
+      const emailModule = await import("@/lib/email-templates/password-reset");
+      expect(vi.mocked(emailModule.sendPasswordResetEmail).mock.calls[0]).toEqual([
+        "user@example.com",
+        expect.any(String),
+        "en",
+      ]);
     });
   });
 
@@ -152,7 +171,11 @@ describe("password-reset.service", () => {
         }),
       });
       const emailModule2 = await import("@/lib/email-templates/password-reset");
-      expect(vi.mocked(emailModule2.sendPasswordResetEmail).mock.calls[0]).toEqual(["admin-send@test.com", expect.any(String)]);
+      expect(vi.mocked(emailModule2.sendPasswordResetEmail).mock.calls[0]).toEqual([
+        "admin-send@test.com",
+        expect.any(String),
+        "hy",
+      ]);
     });
   });
 });

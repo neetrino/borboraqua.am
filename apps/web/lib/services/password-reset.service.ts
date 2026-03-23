@@ -2,6 +2,7 @@ import * as crypto from "crypto";
 import * as bcrypt from "bcryptjs";
 import { db } from "@white-shop/db";
 import { sendPasswordResetEmail } from "@/lib/email-templates/password-reset";
+import { DEFAULT_LANGUAGE, type LanguageCode } from "@/lib/language";
 
 const TOKEN_BYTES = 32;
 const TOKEN_EXPIRES_MS = 60 * 60 * 1000; // 1 hour
@@ -11,7 +12,11 @@ const MIN_PASSWORD_LENGTH = 6;
  * Request password reset: create token, save to user, send email.
  * Only for users with email and passwordHash. Does not reveal whether email exists.
  */
-export async function requestPasswordReset(email: string): Promise<{ ok: true }> {
+export async function requestPasswordReset(
+  email: string,
+  locale?: LanguageCode
+): Promise<{ ok: true }> {
+  const lang = locale ?? DEFAULT_LANGUAGE;
   const normalizedEmail = email.trim().toLowerCase();
   if (!normalizedEmail) {
     throw {
@@ -47,7 +52,7 @@ export async function requestPasswordReset(email: string): Promise<{ ok: true }>
   });
 
   try {
-    await sendPasswordResetEmail(user.email, token);
+    await sendPasswordResetEmail(user.email, token, lang);
   } catch (e) {
     await db.user.update({
       where: { id: user.id },
@@ -140,7 +145,8 @@ export async function resetPasswordByToken(token: string, newPassword: string): 
 /**
  * Admin: send password reset email to a user by id. User must have email and password.
  */
-export async function adminSendPasswordReset(userId: string): Promise<{ ok: true }> {
+export async function adminSendPasswordReset(userId: string, locale?: LanguageCode): Promise<{ ok: true }> {
+  const lang = locale ?? DEFAULT_LANGUAGE;
   const user = await db.user.findUnique({
     where: { id: userId, deletedAt: null },
     select: { id: true, email: true, passwordHash: true },
@@ -185,7 +191,7 @@ export async function adminSendPasswordReset(userId: string): Promise<{ ok: true
   });
 
   // Отправка письма в фоне: ответ клиенту сразу, письмо уходит параллельно
-  sendPasswordResetEmail(user.email, token).catch(async (e) => {
+  sendPasswordResetEmail(user.email, token, lang).catch(async (e) => {
     console.error("❌ [ADMIN] Password reset email failed (sent in background):", e);
     await db.user.update({
       where: { id: user.id },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateToken, requireAdmin } from "@/lib/middleware/auth";
 import { adminSendPasswordReset } from "@/lib/services/password-reset.service";
+import { parseBody, adminSendPasswordResetBodySchema } from "@/lib/validate";
 
 export async function POST(
   req: NextRequest,
@@ -22,7 +23,9 @@ export async function POST(
     }
 
     const { id } = await params;
-    await adminSendPasswordReset(id);
+    const parsed = await parseBody(req, adminSendPasswordResetBodySchema);
+    if (parsed.error) return parsed.error;
+    await adminSendPasswordReset(id, parsed.data.locale);
     return NextResponse.json({ ok: true });
   } catch (error: unknown) {
     const err = error as { status?: number; type?: string; title?: string; detail?: string; message?: string };

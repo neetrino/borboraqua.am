@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const parsed = await parseBody(req, forgotPasswordBodySchema);
   if (parsed.error) return parsed.error;
   try {
-    await requestPasswordReset(parsed.data.email);
+    await requestPasswordReset(parsed.data.email, parsed.data.locale);
     return NextResponse.json({ ok: true });
   } catch (error: unknown) {
     const status = error && typeof error === "object" && "status" in error ? (error as { status: number }).status : 500;

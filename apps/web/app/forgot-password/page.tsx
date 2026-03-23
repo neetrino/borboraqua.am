@@ -6,7 +6,7 @@ import { useTranslation } from '../../lib/i18n-client';
 import { apiClient } from '../../lib/api-client';
 
 export default function ForgotPasswordPage() {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -23,7 +23,11 @@ export default function ForgotPasswordPage() {
     }
     setIsSubmitting(true);
     try {
-      await apiClient.post('/api/v1/auth/forgot-password', { email: trimmed }, { skipAuth: true });
+      await apiClient.post(
+        '/api/v1/auth/forgot-password',
+        { email: trimmed, locale: lang },
+        { skipAuth: true }
+      );
       setSuccess(true);
     } catch (err: unknown) {
       const message = err && typeof err === 'object' && 'message' in err ? String((err as { message: string }).message) : t('forgotPassword.errors.requestFailed');
