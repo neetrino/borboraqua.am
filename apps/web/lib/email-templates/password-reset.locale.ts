@@ -28,8 +28,11 @@ export function formatPasswordResetExpiryDuration(locale: LanguageCode, hours: n
     return hours === 1 ? "1 ժամ" : `${hours} ժամ`;
   }
   if (locale === "ru") {
-    if (hours === 1) return "1 час";
-    if (hours >= 2 && hours <= 4) return `${hours} часа`;
+    const n = hours % 100;
+    const last = hours % 10;
+    if (n >= 11 && n <= 14) return `${hours} часов`;
+    if (last === 1) return `${hours} час`;
+    if (last >= 2 && last <= 4) return `${hours} часа`;
     return `${hours} часов`;
   }
   return `${hours} hour${hours > 1 ? "s" : ""}`;

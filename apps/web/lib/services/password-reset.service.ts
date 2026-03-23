@@ -2,10 +2,10 @@ import * as crypto from "crypto";
 import * as bcrypt from "bcryptjs";
 import { db } from "@white-shop/db";
 import { sendPasswordResetEmail } from "@/lib/email-templates/password-reset";
+import { PASSWORD_RESET_LINK_VALIDITY_MS } from "@/lib/constants/password-reset.constants";
 import { DEFAULT_LANGUAGE, type LanguageCode } from "@/lib/language";
 
 const TOKEN_BYTES = 32;
-const TOKEN_EXPIRES_MS = 60 * 60 * 1000; // 1 hour
 const MIN_PASSWORD_LENGTH = 6;
 
 /**
@@ -41,7 +41,7 @@ export async function requestPasswordReset(
   }
 
   const token = crypto.randomBytes(TOKEN_BYTES).toString("hex");
-  const expiresAt = new Date(Date.now() + TOKEN_EXPIRES_MS);
+  const expiresAt = new Date(Date.now() + PASSWORD_RESET_LINK_VALIDITY_MS);
 
   await db.user.update({
     where: { id: user.id },
@@ -180,7 +180,7 @@ export async function adminSendPasswordReset(userId: string, locale?: LanguageCo
   }
 
   const token = crypto.randomBytes(TOKEN_BYTES).toString("hex");
-  const expiresAt = new Date(Date.now() + TOKEN_EXPIRES_MS);
+  const expiresAt = new Date(Date.now() + PASSWORD_RESET_LINK_VALIDITY_MS);
 
   await db.user.update({
     where: { id: user.id },

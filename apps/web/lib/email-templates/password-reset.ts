@@ -5,12 +5,11 @@
 
 import { sendEmail } from "@/lib/email";
 import { DEFAULT_LANGUAGE, type LanguageCode } from "@/lib/language";
+import { PASSWORD_RESET_LINK_VALIDITY_HOURS } from "@/lib/constants/password-reset.constants";
 import {
   formatPasswordResetExpiryDuration,
   getPasswordResetEmailCopy,
 } from "@/lib/email-templates/password-reset.locale";
-
-const RESET_EXPIRES_HOURS = 1;
 
 /** Public logo path (same as site header). */
 const BRAND_LOGO_PATH = "/assets/home/imgBorborAguaLogoColorB2024Colored1.png";
@@ -26,7 +25,7 @@ function escapeHtml(s: string): string {
 
 function buildResetEmailHtml(resetUrl: string, baseUrl: string, locale: LanguageCode): string {
   const copy = getPasswordResetEmailCopy(locale);
-  const durationPhrase = formatPasswordResetExpiryDuration(locale, RESET_EXPIRES_HOURS);
+  const durationPhrase = formatPasswordResetExpiryDuration(locale, PASSWORD_RESET_LINK_VALIDITY_HOURS);
   const expiresNotice = copy.buildExpiresNotice(durationPhrase);
   const logoUrl = `${baseUrl}${BRAND_LOGO_PATH}`;
 
@@ -81,7 +80,7 @@ export async function sendPasswordResetEmail(
   );
   const resetUrl = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}`;
   const copy = getPasswordResetEmailCopy(locale);
-  const durationPhrase = formatPasswordResetExpiryDuration(locale, RESET_EXPIRES_HOURS);
+  const durationPhrase = formatPasswordResetExpiryDuration(locale, PASSWORD_RESET_LINK_VALIDITY_HOURS);
   const html = buildResetEmailHtml(resetUrl, baseUrl, locale);
   const text = copy.buildPlainText(resetUrl, durationPhrase);
 
