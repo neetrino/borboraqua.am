@@ -45,18 +45,16 @@ function buildResetEmailHtml(resetUrl: string, baseUrl: string, locale: Language
       <p style="margin:12px 0 0;font-size:15px;font-weight:600;color:#0f172a;letter-spacing:0.02em;">${escapeHtml(copy.siteDomain)}</p>
     </div>
     <div style="padding:24px 28px;">
-      <h1 style="margin:0 0 16px;font-size:20px;color:#0f172a;">${escapeHtml(copy.heading)}</h1>
-      <p style="margin:0 0 20px;font-size:15px;color:#475569;line-height:1.5;">
+      <h1 style="margin:0 0 12px;font-size:18px;font-weight:600;color:#0f172a;text-align:center;line-height:1.3;">
+        ${escapeHtml(copy.heading)}
+      </h1>
+      <p style="margin:0 0 20px;font-size:14px;color:#64748b;line-height:1.5;text-align:center;">
         ${escapeHtml(copy.intro)}
       </p>
-      <p style="margin:0 0 12px;">
-        <a href="${escapeHtml(resetUrl)}" style="display:inline-block;padding:12px 24px;background:linear-gradient(to right,#00D1FF,#1AC0FD);color:#fff;text-decoration:none;font-weight:600;border-radius:8px;">${escapeHtml(copy.button)}</a>
+      <p style="margin:0;text-align:center;">
+        <a href="${escapeHtml(resetUrl)}" style="display:inline-block;padding:12px 28px;background:linear-gradient(to right,#00D1FF,#1AC0FD);color:#fff;text-decoration:none;font-weight:600;border-radius:8px;">${escapeHtml(copy.button)}</a>
       </p>
-      <p style="margin:0 0 20px;font-size:13px;color:#64748b;line-height:1.45;">
-        ${escapeHtml(copy.orUseLink)}<br />
-        <a href="${escapeHtml(resetUrl)}" style="color:#0284c7;word-break:break-all;">${escapeHtml(resetUrl)}</a>
-      </p>
-      <p style="margin:0;font-size:13px;color:#64748b;">
+      <p style="margin:16px 0 0;font-size:12px;color:#94a3b8;line-height:1.45;text-align:center;">
         ${escapeHtml(expiresNotice)}
       </p>
     </div>
