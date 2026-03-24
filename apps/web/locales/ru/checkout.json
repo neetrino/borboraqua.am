@@ -47,9 +47,9 @@
     }
   },
   "payment": {
-    "cashOnDelivery": "Наложенный платеж",
+    "cashOnDelivery": "Наличные",
     "cashOnDeliveryDescription": "Оплатите наличными при получении заказа",
-    "cardPayment": "Оплата картой",
+    "cardPayment": "Карта",
     "cardPaymentDescription": "Оплата картой Visa, Mastercard или ArCa",
     "idram": "Idram",
     "idramDescription": "Оплатите кошельком Idram или картой",

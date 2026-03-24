@@ -113,11 +113,6 @@ export default function CheckoutPage() {
   const [deliveryRegions, setDeliveryRegions] = useState<DeliveryRegionOption[]>([]);
   const [regionDropdownOpen, setRegionDropdownOpen] = useState(false);
   const regionDropdownRef = useRef<HTMLDivElement>(null);
-  const orderSummaryColumnRef = useRef<HTMLDivElement>(null);
-  const orderSummaryRef = useRef<HTMLDivElement>(null);
-  const [orderSummaryMode, setOrderSummaryMode] = useState<'static' | 'fixed' | 'bottom'>('static');
-  const [orderSummaryFixedStyle, setOrderSummaryFixedStyle] = useState<{ top: number; left: number; width: number } | null>(null);
-  const [orderSummaryPlaceholderHeight, setOrderSummaryPlaceholderHeight] = useState(0);
   const [enabledWeekdays, setEnabledWeekdays] = useState<number[] | null>(null);
   const [deliveryTimeSlots, setDeliveryTimeSlots] = useState<DeliveryTimeSlotConfig[]>([]);
   const [calendarMonth, setCalendarMonth] = useState<Date>(() => {
@@ -179,7 +174,7 @@ export default function CheckoutPage() {
     shippingMethod: z.enum(['pickup', 'delivery'], {
       message: t('checkout.errors.selectShippingMethod'),
     }),
-    paymentMethod: z.enum(['idram', 'ameriabank', 'telcell', 'fastshift', 'cash_on_delivery']).optional(),
+    paymentMethod: z.string().optional(),
     // Shipping address fields - required only for delivery
     shippingAddress: z.string().optional(),
     shippingRegionId: z.string().optional(),
@@ -471,62 +466,6 @@ export default function CheckoutPage() {
       };
     }
   }, [regionDropdownOpen]);
-
-  const STICKY_TOP_PX = 96;
-
-  useEffect(() => {
-    const isLg = () => window.matchMedia('(min-width: 1024px)').matches;
-    const updateSticky = () => {
-      if (!isLg()) {
-        setOrderSummaryMode('static');
-        setOrderSummaryFixedStyle(null);
-        setOrderSummaryPlaceholderHeight(0);
-        return;
-      }
-      const col = orderSummaryColumnRef.current;
-      const summary = orderSummaryRef.current;
-      if (!col || !summary) return;
-      const colRect = col.getBoundingClientRect();
-      const summaryHeight = summary.offsetHeight;
-
-      if (colRect.top > STICKY_TOP_PX) {
-        setOrderSummaryMode('static');
-        setOrderSummaryFixedStyle(null);
-        setOrderSummaryPlaceholderHeight(0);
-        return;
-      }
-
-      if (colRect.bottom <= STICKY_TOP_PX + summaryHeight) {
-        setOrderSummaryMode('bottom');
-        setOrderSummaryFixedStyle({
-          top: STICKY_TOP_PX,
-          left: colRect.left,
-          width: colRect.width,
-        });
-        setOrderSummaryPlaceholderHeight(summaryHeight);
-        return;
-      }
-
-      setOrderSummaryMode('fixed');
-      setOrderSummaryFixedStyle({
-        top: STICKY_TOP_PX,
-        left: colRect.left,
-        width: colRect.width,
-      });
-      setOrderSummaryPlaceholderHeight(summaryHeight);
-    };
-    const onScrollOrResize = () => {
-      requestAnimationFrame(updateSticky);
-    };
-    window.addEventListener('scroll', onScrollOrResize, { passive: true });
-    window.addEventListener('resize', onScrollOrResize);
-    const t = setTimeout(updateSticky, 100);
-    return () => {
-      clearTimeout(t);
-      window.removeEventListener('scroll', onScrollOrResize);
-      window.removeEventListener('resize', onScrollOrResize);
-    };
-  }, []);
 
   useEffect(() => {
     if (!appliedCoupon) {
@@ -1236,16 +1175,8 @@ export default function CheckoutPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('checkout.title')}</h1>
 
-      <div className="lg:hidden sticky top-20 z-20 mb-6 transition-transform duration-200">
-        <div className="relative">
-          {orderSummaryContent}
-        </div>
-      </div>
-
       <form onSubmit={handlePlaceOrder}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Checkout Form */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 max-w-3xl">
             {/* Contact Information */}
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
@@ -1579,41 +1510,34 @@ export default function CheckoutPage() {
               <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.paymentMethod')}</h2>
                 {errors.paymentMethod && (
-                  <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-[12px]">
-                    <p className="text-sm text-red-600">{errors.paymentMethod.message}</p>
+                  <div className="mb-4 flex items-start gap-3 p-4 bg-amber-50/90 backdrop-blur-sm border border-amber-200 rounded-[16px]">
+                    <svg className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-sm text-amber-900">
+                      {t('checkout.errors.selectPaymentMethod')}
+                    </p>
                   </div>
                 )}
-              <div className="space-y-3">
-                {paymentMethods.map((method) => (
-                  <label
-                    key={method.id}
-                    className={`flex flex-col md:flex-row md:items-center gap-3 md:gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
-                      paymentMethod === method.id
-                        ? 'border-[#1AC0FD] bg-[#E8F9FE] shadow-sm'
-                        : 'border-gray-200 bg-white/60 hover:border-gray-300 hover:bg-white/80'
-                    }`}
-                  >
-                    {/* Mobile: text on top; Desktop: same row as logos */}
-                    <div className="flex-1 min-w-0 order-1 md:order-2">
-                      <div className="font-semibold text-gray-900">{method.name}</div>
-                      <div className="text-sm text-gray-600 mt-0.5">{method.description}</div>
-                    </div>
-                    <div className="flex items-center gap-4 flex-shrink-0 order-2 md:order-1">
-                      <input
-                        type="radio"
-                        {...register('paymentMethod')}
-                        value={method.id}
-                        checked={paymentMethod === method.id}
-                        onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery')}
-                        className="w-5 h-5 text-[#1AC0FD] focus:ring-[#1AC0FD] shrink-0"
-                        disabled={isSubmitting}
-                      />
+              <div className="space-y-2 md:space-y-3">
+                {paymentMethods.map((method) => {
+                  const isSelected = paymentMethod === method.id;
+                  return (
+                    <label
+                      key={method.id}
+                      className={`flex items-center gap-3 p-3 md:p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 ${
+                        isSelected
+                          ? 'border-[#00B7FF] bg-[#00B7FF]/15 shadow-lg shadow-[#00B7FF]/20 ring-2 ring-[#00B7FF]/30'
+                          : 'border-gray-200 bg-white/60 hover:border-gray-300 hover:bg-white/80'
+                      }`}
+                    >
+                      {/* Иконка */}
                       {method.logos ? (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 flex-shrink-0">
                           {method.logos.map((src, i) => (
                             <div
                               key={`${method.id}-${src}`}
-                              className="w-11 h-8 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0"
+                              className="w-9 h-6 md:w-11 md:h-8 bg-white rounded-lg border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm"
                             >
                               {logoErrors[`${method.id}-${i}`] ? (
                                 <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1632,7 +1556,7 @@ export default function CheckoutPage() {
                           ))}
                         </div>
                       ) : (
-                        <div className="w-14 h-10 bg-white rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm">
+                        <div className="w-10 h-8 md:w-14 md:h-10 bg-white rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden shadow-sm flex-shrink-0">
                           {!method.logo || logoErrors[method.id] ? (
                             <svg className="w-7 h-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -1648,50 +1572,31 @@ export default function CheckoutPage() {
                           )}
                         </div>
                       )}
-                    </div>
-                  </label>
-                ))}
-              </div>
+                      {/* Текст — иконка и текст на одном уровне */}
+                      <div className="flex-1 min-w-0">
+                        <div className={`font-semibold ${isSelected ? 'text-[#0066CC]' : 'text-gray-900'}`}>{method.name}</div>
+                        <div className="hidden md:block text-sm text-gray-600 mt-0.5">{method.description}</div>
+                      </div>
+                      <input
+                        type="radio"
+                        {...register('paymentMethod')}
+                        value={method.id}
+                        checked={isSelected}
+                        onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery')}
+                        className="sr-only"
+                        disabled={isSubmitting}
+                        aria-label={method.name}
+                      />
+                    </label>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* Order Summary — sticky via JS so it stays visible on scroll */}
-          <div
-            ref={orderSummaryColumnRef}
-            className="hidden lg:block lg:col-span-1 lg:h-full relative"
-          >
-            {orderSummaryMode !== 'static' && (
-              <div
-                aria-hidden
-                style={{ height: orderSummaryPlaceholderHeight }}
-                className="w-full"
-              />
-            )}
-            <div
-              ref={orderSummaryRef}
-              className="relative"
-              style={
-                orderSummaryMode === 'fixed' && orderSummaryFixedStyle
-                  ? {
-                      position: 'fixed',
-                      top: orderSummaryFixedStyle.top,
-                      left: orderSummaryFixedStyle.left,
-                      width: orderSummaryFixedStyle.width,
-                      zIndex: 30,
-                    }
-                  : orderSummaryMode === 'bottom'
-                    ? {
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        width: orderSummaryFixedStyle?.width ?? '100%',
-                      }
-                  : undefined
-              }
-            >
-              {orderSummaryContent}
-            </div>
+          {/* Order Summary — в самом низу страницы */}
+          <div className="relative mt-8 max-w-md">
+            {orderSummaryContent}
           </div>
         </div>
       </form>
