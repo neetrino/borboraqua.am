@@ -777,9 +777,11 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                   <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
                     <p className="mb-0">{t('home.footer.contact.location')} {t('home.footer.contact.locationLine1')}</p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
-                    <p className="mb-0">{t('home.footer.contact.locationLine2')}</p>
-                  </div>
+                  {t('home.footer.contact.locationLine2') && (
+                    <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
+                      <p className="mb-0">{t('home.footer.contact.locationLine2')}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
