@@ -565,7 +565,11 @@
     "rateToUSD": "Rate to USD (1 USD = specified value)",
     "rateToAMD": "Rate to AMD (1 currency = specified AMD)",
     "siteNamePlaceholder": "My Shop",
-    "siteDescriptionPlaceholder": "Your shop description"
+    "siteDescriptionPlaceholder": "Your shop description",
+    "serverIpsTitle": "Server IP Addresses",
+    "serverIpsDescription": "Backend IP — outgoing IP of the server. Client IP — your IP.",
+    "backendIp": "Backend IP",
+    "clientIp": "Client IP"
   },
   "quickSettings": {
     "title": "Quick Settings",

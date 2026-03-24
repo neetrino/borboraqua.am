@@ -555,7 +555,11 @@
     "currencyRatesDescription": "Սահմանեք արտարժույթի փոխարժեքները AMD-ի նկատմամբ: Այս փոխարժեքները օգտագործվում են ապրանքների գների փոխարկման համար:",
     "baseCurrency": "Հիմնական արժույթ (միշտ 1)",
     "rateToUSD": "Փոխարժեք USD-ի նկատմամբ (1 USD = նշված արժեք)",
-    "rateToAMD": "Փոխարժեք AMD-ի նկատմամբ (1 արժույթ = նշված AMD)"
+    "rateToAMD": "Փոխարժեք AMD-ի նկատմամբ (1 արժույթ = նշված AMD)",
+    "serverIpsTitle": "Սերվերի IP հասցեներ",
+    "serverIpsDescription": "Backend IP — սերվերի ելքային IP. Client IP — ձեր IP.",
+    "backendIp": "Backend IP",
+    "clientIp": "Client IP"
   },
   "quickSettings": {
     "title": "Արագ կարգավորումներ",

@@ -569,61 +569,30 @@ interface FooterProps {
 
 const ANDROID_APP_URL = 'https://play.google.com/store/apps/details?id=borboraqua.neetrino.app&hl=ru';
 const IOS_APP_URL = 'https://apps.apple.com/us/app/borboraqua/id6759641035';
-const APPLE_BADGE_ICON_SRC = '/assets/stores/app-store-apple.svg';
-const GOOGLE_PLAY_BADGE_ICON_SRC = '/assets/stores/google-play-icon.svg';
-const GOOGLE_PLAY_BADGE_WORDMARK_SRC = '/assets/stores/google-play-wordmark.svg';
-
-function StoreDownloadBadge({
-  store,
-  href,
-}: {
-  store: 'google-play' | 'app-store';
-  href: string;
-}) {
-  const isGooglePlay = store === 'google-play';
-
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={isGooglePlay ? 'Download on Google Play' : 'Download on App Store'}
-      className="group relative h-[32px] w-[96px] overflow-hidden rounded-[5px] border border-[#a6a6a6] bg-black transition-opacity hover:opacity-90"
-    >
-      {isGooglePlay ? (
-        <>
-          <div className="absolute left-[5px] top-[5px] h-[18px] w-[16px]">
-            <img alt="Google Play" className="block size-full object-contain" src={GOOGLE_PLAY_BADGE_ICON_SRC} />
-          </div>
-          <div className="absolute left-[28px] top-[3px] flex flex-col items-start gap-[1px]">
-            <p className="min-w-full text-[8px] uppercase leading-normal text-white">GET IT ON</p>
-            <div className="flex items-center justify-center">
-              <div className="h-[12px] w-[59px] -scale-y-100">
-                <img alt="Google Play" className="block size-full object-contain" src={GOOGLE_PLAY_BADGE_WORDMARK_SRC} />
-              </div>
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="absolute left-[5px] top-[5px] h-[18px] w-[16px]">
-            <img alt="App Store" className="block size-full object-contain" src={APPLE_BADGE_ICON_SRC} />
-          </div>
-          <div className="absolute left-[26px] top-1/2 flex w-[64px] -translate-y-1/2 flex-col items-start justify-center gap-0 text-white">
-            <span className="block w-full shrink-0 text-[8px] leading-[10px] font-medium antialiased">Download on the</span>
-            <span className="block w-full shrink-0 text-[13px] leading-[14px] font-semibold tracking-[-0.2px]">App Store</span>
-          </div>
-        </>
-      )}
-    </a>
-  );
-}
+const APPLE_BADGE_SRC = '/footer/download-on-the-app-store-apple-logo.svg';
+const GOOGLE_PLAY_BADGE_SRC = '/footer/google-play-badge-logo.svg';
 
 function StoreDownloadBadges({ className = '' }: { className?: string }) {
   return (
-    <div className={`flex items-center gap-1.5 ${className}`}>
-      <StoreDownloadBadge store="google-play" href={ANDROID_APP_URL} />
-      <StoreDownloadBadge store="app-store" href={IOS_APP_URL} />
+    <div className={`flex items-center gap-4 ${className}`}>
+      <a
+        href={ANDROID_APP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Download on Google Play"
+        className="h-[120px] transition-opacity hover:opacity-90"
+      >
+        <img alt="Download on Google Play" src={GOOGLE_PLAY_BADGE_SRC} className="h-full w-auto object-contain" />
+      </a>
+      <a
+        href={IOS_APP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Download on the App Store"
+        className="h-[120px] transition-opacity hover:opacity-90"
+      >
+        <img alt="Download on the App Store" src={APPLE_BADGE_SRC} className="h-full w-auto object-contain" />
+      </a>
     </div>
   );
 }
@@ -671,7 +640,7 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                 </div>
               </div>
               {/* Store badges — ներքևի հատված «Նյու Ակվա» նկարագրության */}
-              <div className="mt-4">
+              <div className="-mt-6">
                 <StoreDownloadBadges />
               </div>
             </div>
@@ -777,9 +746,11 @@ export function Footer({ router, t, isHomePage = false }: FooterProps) {
                   <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
                     <p className="mb-0">{t('home.footer.contact.location')} {t('home.footer.contact.locationLine1')}</p>
                   </div>
-                  <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
-                    <p className="mb-0">{t('home.footer.contact.locationLine2')}</p>
-                  </div>
+                  {t('home.footer.contact.locationLine2') && (
+                    <div className="flex font-['Inter',sans-serif] font-normal justify-center leading-[22px] lg:leading-[22px] md:leading-[22px] sm:leading-[20px] not-italic relative shrink-0 text-[15px] lg:text-[15px] md:text-[15px] sm:text-[13px] text-white break-words">
+                      <p className="mb-0">{t('home.footer.contact.locationLine2')}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

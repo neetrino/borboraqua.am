@@ -4,6 +4,7 @@ import {
   isFastshiftConfigured,
   registerOrder,
   generateFastshiftOrderGuid,
+  getConfig,
 } from "@/lib/payments/fastshift";
 
 const PAYMENT_PROVIDER = "fastshift";
@@ -111,6 +112,9 @@ export async function POST(req: NextRequest) {
     const orderGuid = generateFastshiftOrderGuid();
     const callbackUrl = `${baseUrl}/wc-api/fastshift_response?order=${encodeURIComponent(order.number)}`;
     const webhookUrl = callbackUrl;
+
+    const config = getConfig();
+    console.info("[payments/fastshift/init] mode=%s callback=%s tokenLen=%d", config.isTest ? "test" : "live", callbackUrl, config.token?.length ?? 0);
 
     const { redirectUrl, orderNumber: fastshiftOrderNumber } = await registerOrder({
       order_number: orderGuid,
