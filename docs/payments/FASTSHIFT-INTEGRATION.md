@@ -56,6 +56,20 @@ APP_URL=https://yoursite.com
 - **Test.** `FASTSHIFT_TEST_MODE=true` → FASTSHIFT_TOKEN.
 - **Live.** FASTSHIFT_LIVE_TOKEN.
 
+### 2.1 Локальный тест Live-режима (туннель dev.neetrino.com)
+
+При тестировании Live через туннель **положи в .env**:
+
+```env
+FASTSHIFT_TEST_MODE=false
+FASTSHIFT_LIVE_TOKEN=<твой live-токен>
+APP_URL=https://borboraqua.am
+```
+
+Так callback_url и webhook_url в запросе будут `https://borboraqua.am/...` — домен, который FastShift может требовать для live-токена. Запрос к register API идёт с твоей машины; после оплаты FastShift перенаправит пользователя на prod-сайт.
+
+**Если 403 продолжается** — значит ограничение на стороне FastShift (IP whitelist для live, активация live-токена, домен в их dashboard). Свяжись с поддержкой FastShift.
+
 ---
 
 ## 3. Callback URL

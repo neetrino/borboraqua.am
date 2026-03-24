@@ -559,7 +559,11 @@
     "currencyRatesDescription": "Установите курсы валют относительно AMD. Эти курсы используются для конвертации цен товаров.",
     "baseCurrency": "Базовая валюта (всегда 1)",
     "rateToUSD": "Курс к USD (1 USD = указанное значение)",
-    "rateToAMD": "Курс к AMD (1 валюта = указанное AMD)"
+    "rateToAMD": "Курс к AMD (1 валюта = указанное AMD)",
+    "serverIpsTitle": "IP-адреса сервера",
+    "serverIpsDescription": "Backend IP — исходящий IP сервера. Client IP — ваш IP.",
+    "backendIp": "Backend IP",
+    "clientIp": "Client IP"
   },
   "quickSettings": {
     "title": "Быстрые настройки",

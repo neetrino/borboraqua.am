@@ -28,6 +28,7 @@ export default function SettingsPage() {
   const currentPath = pathname || '/admin/settings';
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [ips, setIps] = useState<{ backendIp?: string; clientIp?: string }>({});
   const [settings, setSettings] = useState<Settings>({
     defaultCurrency: 'AMD',
     currencyRates: {
@@ -51,6 +52,9 @@ export default function SettingsPage() {
   useEffect(() => {
     if (isLoggedIn && isAdmin) {
       fetchSettings();
+      apiClient.get<{ backendIp?: string; clientIp?: string }>('/api/v1/admin/settings/ips')
+        .then((data) => setIps({ backendIp: data.backendIp, clientIp: data.clientIp }))
+        .catch(() => setIps({}));
     }
   }, [isLoggedIn, isAdmin]);
 
@@ -349,6 +353,31 @@ export default function SettingsPage() {
                 />
                 <span className="text-sm font-medium text-gray-700">{t('admin.settings.enableOnlinePayments')}</span>
               </label>
+            </div>
+          </div>
+        </Card>
+
+        {/* Server IPs */}
+        <Card className="p-6 mb-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('admin.settings.serverIpsTitle')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.settings.backendIp')}</label>
+              <input
+                type="text"
+                value={ips.backendIp ?? '—'}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 font-mono text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('admin.settings.clientIp')}</label>
+              <input
+                type="text"
+                value={ips.clientIp ?? '—'}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 font-mono text-sm"
+              />
             </div>
           </div>
         </Card>
