@@ -77,13 +77,23 @@ interface DeliveryRegionOption {
   price: number;
 }
 
+const CHECKOUT_PAYMENT_METHOD_IDS = [
+  'idram',
+  'ameriabank',
+  'telcell',
+  'fastshift',
+  'cash_on_delivery',
+] as const;
+
+type CheckoutPaymentMethodId = (typeof CHECKOUT_PAYMENT_METHOD_IDS)[number];
+
 type CheckoutFormData = {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   shippingMethod: 'pickup' | 'delivery';
-  paymentMethod?: 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery';
+  paymentMethod?: CheckoutPaymentMethodId;
   shippingAddress?: string;
   shippingRegionId?: string;
   shippingPostalCode?: string;
@@ -179,7 +189,7 @@ export default function CheckoutPage() {
     shippingMethod: z.enum(['pickup', 'delivery'], {
       message: t('checkout.errors.selectShippingMethod'),
     }),
-    paymentMethod: z.string().optional(),
+    paymentMethod: z.enum(CHECKOUT_PAYMENT_METHOD_IDS).optional(),
     // Shipping address fields - required only for delivery
     shippingAddress: z.string().optional(),
     shippingRegionId: z.string().optional(),
@@ -210,11 +220,7 @@ export default function CheckoutPage() {
   }, {
     message: t('checkout.errors.deliveryTimeRequired'),
     path: ['deliveryTimeSlot'],
-  }).refine((data) => {
-    // User must select a payment method (no default)
-    const valid: Array<CheckoutFormData['paymentMethod']> = ['idram', 'ameriabank', 'telcell', 'fastshift', 'cash_on_delivery'];
-    return data.paymentMethod != null && valid.includes(data.paymentMethod);
-  }, {
+  }).refine((data) => data.paymentMethod != null, {
     message: t('checkout.errors.selectPaymentMethod'),
     path: ['paymentMethod'],
   }), [t]);
@@ -1141,13 +1147,13 @@ export default function CheckoutPage() {
   const orderSummaryContent = (
     <>
       <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
-      <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+      <div className="min-w-0 bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-hidden">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.orderSummary')}</h2>
-        <div className="mb-5">
+        <div className="mb-5 min-w-0">
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             {t('checkout.coupon.label')}
           </label>
-          <div className="flex gap-2">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-2">
             <input
               type="text"
               value={couponCode}
@@ -1156,14 +1162,14 @@ export default function CheckoutPage() {
                 setCouponError(null);
               }}
               placeholder={t('checkout.coupon.placeholder')}
-              className="flex-1 px-3 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all"
+              className="w-full min-w-0 flex-1 px-3 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all"
               disabled={isSubmitting || applyingCoupon}
             />
             <button
               type="button"
               onClick={handleApplyCoupon}
               disabled={isSubmitting || applyingCoupon}
-              className="px-4 py-2 rounded-[12px] bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] text-white text-sm font-medium shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full shrink-0 px-4 py-2 rounded-[12px] bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] text-white text-sm font-medium shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed sm:w-auto sm:self-stretch"
             >
               {applyingCoupon ? t('checkout.coupon.applying') : t('checkout.coupon.apply')}
             </button>
@@ -1266,8 +1272,8 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('checkout.title')}</h1>
 
       <form onSubmit={handlePlaceOrder}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid min-w-0 grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="min-w-0 lg:col-span-2 space-y-6">
             {/* Contact Information */}
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
@@ -1673,7 +1679,7 @@ export default function CheckoutPage() {
                         {...register('paymentMethod')}
                         value={method.id}
                         checked={isSelected}
-                        onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery')}
+                        onChange={(e) => setValue('paymentMethod', e.target.value as CheckoutPaymentMethodId)}
                         className="sr-only"
                         disabled={isSubmitting}
                         aria-label={method.name}
@@ -1689,7 +1695,7 @@ export default function CheckoutPage() {
           {/* Order Summary — справа, sticky как на странице корзины */}
           <div
             ref={orderSummaryColumnRef}
-            className="lg:col-span-1 lg:h-full relative"
+            className="min-w-0 lg:col-span-1 lg:h-full relative"
           >
             {orderSummaryMode !== 'static' && (
               <div
@@ -1700,7 +1706,7 @@ export default function CheckoutPage() {
             )}
             <div
               ref={orderSummaryRef}
-              className="relative"
+              className="relative min-w-0 w-full max-w-full"
               style={
                 orderSummaryMode === 'fixed' && orderSummaryFixedStyle
                   ? {
