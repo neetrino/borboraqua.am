@@ -113,6 +113,11 @@ export default function CheckoutPage() {
   const [deliveryRegions, setDeliveryRegions] = useState<DeliveryRegionOption[]>([]);
   const [regionDropdownOpen, setRegionDropdownOpen] = useState(false);
   const regionDropdownRef = useRef<HTMLDivElement>(null);
+  const orderSummaryColumnRef = useRef<HTMLDivElement>(null);
+  const orderSummaryRef = useRef<HTMLDivElement>(null);
+  const [orderSummaryMode, setOrderSummaryMode] = useState<'static' | 'fixed' | 'bottom'>('static');
+  const [orderSummaryFixedStyle, setOrderSummaryFixedStyle] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [orderSummaryPlaceholderHeight, setOrderSummaryPlaceholderHeight] = useState(0);
   const [enabledWeekdays, setEnabledWeekdays] = useState<number[] | null>(null);
   const [deliveryTimeSlots, setDeliveryTimeSlots] = useState<DeliveryTimeSlotConfig[]>([]);
   const [calendarMonth, setCalendarMonth] = useState<Date>(() => {
@@ -247,6 +252,91 @@ export default function CheckoutPage() {
   const cartSubtotal = cart?.totals?.subtotal || 0;
   const couponDiscount = appliedCoupon?.discountAmount || 0;
   const finalCheckoutTotal = Math.max(0, cartSubtotal + (deliveryPrice !== null ? deliveryPrice : 0) - couponDiscount);
+
+  const STICKY_TOP_PX = 96;
+
+  useEffect(() => {
+    const isLg = () => window.matchMedia('(min-width: 1024px)').matches;
+
+    const updateSticky = () => {
+      if (!isLg()) {
+        setOrderSummaryMode('static');
+        setOrderSummaryFixedStyle(null);
+        setOrderSummaryPlaceholderHeight(0);
+        return;
+      }
+
+      const col = orderSummaryColumnRef.current;
+      const summary = orderSummaryRef.current;
+
+      if (!col || !summary) {
+        return;
+      }
+
+      const colRect = col.getBoundingClientRect();
+      const summaryHeight = summary.offsetHeight;
+
+      if (colRect.top > STICKY_TOP_PX) {
+        setOrderSummaryMode('static');
+        setOrderSummaryFixedStyle(null);
+        setOrderSummaryPlaceholderHeight(0);
+        return;
+      }
+
+      if (colRect.bottom <= STICKY_TOP_PX + summaryHeight) {
+        setOrderSummaryMode('bottom');
+        setOrderSummaryFixedStyle({
+          top: STICKY_TOP_PX,
+          left: colRect.left,
+          width: colRect.width,
+        });
+        setOrderSummaryPlaceholderHeight(summaryHeight);
+        return;
+      }
+
+      setOrderSummaryMode('fixed');
+      setOrderSummaryFixedStyle({
+        top: STICKY_TOP_PX,
+        left: colRect.left,
+        width: colRect.width,
+      });
+      setOrderSummaryPlaceholderHeight(summaryHeight);
+    };
+
+    const onScrollOrResize = () => {
+      requestAnimationFrame(updateSticky);
+    };
+
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize);
+
+    const timeoutId = window.setTimeout(updateSticky, 100);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const id = window.requestAnimationFrame(() => {
+      window.dispatchEvent(new Event('resize'));
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [
+    cart,
+    appliedCoupon,
+    couponDiscount,
+    deliveryPrice,
+    loadingDeliveryPrice,
+    error,
+    isSubmitting,
+    applyingCoupon,
+  ]);
 
   const availableDeliveryDays: DeliveryDayOption[] = useMemo(() => {
     // Calculate enabled delivery days for the currently visible calendar month.
@@ -1176,7 +1266,8 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('checkout.title')}</h1>
 
       <form onSubmit={handlePlaceOrder}>
-        <div className="space-y-6 max-w-3xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
             {/* Contact Information */}
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
@@ -1593,10 +1684,44 @@ export default function CheckoutPage() {
               </div>
             </div>
           </div>
+          </div>
 
-          {/* Order Summary — в самом низу страницы */}
-          <div className="relative mt-8 max-w-md">
-            {orderSummaryContent}
+          {/* Order Summary — справа, sticky как на странице корзины */}
+          <div
+            ref={orderSummaryColumnRef}
+            className="lg:col-span-1 lg:h-full relative"
+          >
+            {orderSummaryMode !== 'static' && (
+              <div
+                aria-hidden
+                style={{ height: orderSummaryPlaceholderHeight }}
+                className="w-full"
+              />
+            )}
+            <div
+              ref={orderSummaryRef}
+              className="relative"
+              style={
+                orderSummaryMode === 'fixed' && orderSummaryFixedStyle
+                  ? {
+                      position: 'fixed',
+                      top: orderSummaryFixedStyle.top,
+                      left: orderSummaryFixedStyle.left,
+                      width: orderSummaryFixedStyle.width,
+                      zIndex: 30,
+                    }
+                  : orderSummaryMode === 'bottom'
+                    ? {
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        width: orderSummaryFixedStyle?.width ?? '100%',
+                      }
+                    : undefined
+              }
+            >
+              {orderSummaryContent}
+            </div>
           </div>
         </div>
       </form>
