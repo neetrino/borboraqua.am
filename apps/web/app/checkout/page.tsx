@@ -1692,8 +1692,6 @@ export default function CheckoutPage() {
           </div>
           </div>
 
-          </div>
-
           {/* Order Summary — sticky sidebar on desktop */}
           <div className="hidden lg:block sticky top-[160px] self-start z-20">
             <div className="relative">
