@@ -1,4 +1,5 @@
 import { db } from "@white-shop/db";
+import { after } from "next/server";
 import { getConfig } from "./config";
 import { verifyTelcellResultChecksum } from "./security";
 import { TELCELL_STATUS_PAID } from "./constants";
@@ -176,8 +177,10 @@ async function updateOrderPayment(
     if (order.userId) {
       await db.cart.deleteMany({ where: { userId: order.userId } });
     }
-    printReceiptForOrder(order.id).catch((err) =>
-      console.error("[EHDM] printReceiptForOrder", err)
+    after(() =>
+      printReceiptForOrder(order.id).catch((err) =>
+        console.error("[EHDM] printReceiptForOrder", err)
+      )
     );
   } else {
     await db.$transaction([

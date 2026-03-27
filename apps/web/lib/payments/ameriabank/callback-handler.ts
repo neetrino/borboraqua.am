@@ -1,4 +1,5 @@
 import { db } from "@white-shop/db";
+import { after } from "next/server";
 import { getPaymentDetails } from "./client";
 import {
   AMERIA_PAYMENT_SUCCESS_RESPONSE_CODE,
@@ -103,9 +104,11 @@ export async function handleAmeriabankCallback(searchParams: URLSearchParams): P
     if (order.userId) {
       await db.cart.deleteMany({ where: { userId: order.userId } });
     }
-    printReceiptForOrder(order.id)
-      .then((r) => { if (!r.ok) console.error("[EHDM]", r.error); })
-      .catch(() => {});
+    after(() =>
+      printReceiptForOrder(order.id)
+        .then((r) => { if (!r.ok) console.error("[EHDM]", r.error); })
+        .catch(() => {})
+    );
     return {
       redirect: `${successRedirect}?order=${encodeURIComponent(order.number)}`,
     };

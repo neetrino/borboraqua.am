@@ -2,6 +2,7 @@ import { db } from "@white-shop/db";
 import { Prisma } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { after } from "next/server";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
 import { findOrCreateAttributeValue } from "../utils/variant-generator";
 import {
@@ -1067,8 +1068,10 @@ class AdminService {
       });
 
       if (data.paymentStatus === 'paid' && existing.paymentStatus !== 'paid') {
-        printReceiptForOrder(order.id).catch((err) =>
-          console.error("[EHDM] printReceiptForOrder", err)
+        after(() =>
+          printReceiptForOrder(order.id).catch((err) =>
+            console.error("[EHDM] printReceiptForOrder", err)
+          )
         );
       }
 

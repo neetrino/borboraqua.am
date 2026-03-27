@@ -1,4 +1,5 @@
 import { db } from "@white-shop/db";
+import { after } from "next/server";
 import { getConfig } from "./config";
 import { verifyIdramChecksum } from "./checksum";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
@@ -144,8 +145,10 @@ export async function handleIdramPaymentConfirm(
   if (order.userId) {
     await db.cart.deleteMany({ where: { userId: order.userId } });
   }
-  printReceiptForOrder(order.id).catch((err) =>
-    console.error("[EHDM] printReceiptForOrder", err)
+  after(() =>
+    printReceiptForOrder(order.id).catch((err) =>
+      console.error("[EHDM] printReceiptForOrder", err)
+    )
   );
   return { body: "OK" };
 }
