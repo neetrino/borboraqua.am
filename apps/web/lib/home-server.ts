@@ -11,18 +11,32 @@ const HOME_REVALIDATE = 120;
 export type HomeProductItem = {
   id: string;
   slug: string;
-  title?: string;
-  subtitle?: string | null;
-  media?: Array<{ url?: string; type?: string } | string>;
-  variants?: Array<{
+  title: string;
+  subtitle?: string;
+  description?: string;
+  category?: string;
+  categories?: string[];
+  categorySlugs?: string[];
+  price: number;
+  image: string | null;
+  inStock: boolean;
+  minimumOrderQuantity?: number;
+  orderQuantityIncrement?: number;
+  defaultVariantId?: string | null;
+  brand: {
     id: string;
-    sku: string;
-    price: number;
-    originalPrice?: number | null;
-    stock?: number;
+    name: string;
+  } | null;
+  position?: number | null;
+  labels?: Array<{
+    id: string;
+    type: string;
+    value: string;
+    position: string;
+    color: string | null;
     imageUrl?: string | null;
+    imagePosition?: string | null;
   }>;
-  [key: string]: unknown;
 };
 
 export type HomePageData = {
@@ -35,6 +49,15 @@ export type HomePageData = {
  * Result is cached with unstable_cache (revalidate: 60s).
  */
 const EMPTY_HOME_DATA: HomePageData = { featured: [], kids: [] };
+
+function normalizeHomeProduct(product: HomeProductItem): HomeProductItem {
+  return {
+    ...product,
+    subtitle: product.subtitle ?? undefined,
+    description: product.description ?? undefined,
+    category: product.category ?? undefined,
+  };
+}
 
 export async function getHomePageData(lang: string): Promise<HomePageData> {
   if (!process.env.DATABASE_URL) {
@@ -60,8 +83,12 @@ export async function getHomePageData(lang: string): Promise<HomePageData> {
             listOnly: true,
           }),
         ]);
-        const featured = featuredRes.data ?? [];
-        let kids = kidsRes.data ?? [];
+        const featured = (featuredRes.data ?? []).map((item) =>
+          normalizeHomeProduct(item as HomeProductItem)
+        );
+        let kids = (kidsRes.data ?? []).map((item) =>
+          normalizeHomeProduct(item as HomeProductItem)
+        );
         if (kids.length === 0 && featured.length > 0) {
           kids = featured.slice(0, 10);
         }

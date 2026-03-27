@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
-import { getProductBySlugServer, getPreferredLangFromHeaders } from '../../../lib/product-server';
+import { cookies } from 'next/headers';
+import { getProductBySlugServer } from '../../../lib/product-server';
+import { getStoredLanguage } from '../../../lib/language';
 import { ProductPageClient, type Product } from './ProductPageClient';
 
 const RESERVED_ROUTES = ['admin', 'login', 'register', 'cart', 'checkout', 'profile', 'orders', 'categories', 'products', 'about', 'contact', 'delivery', 'shipping', 'returns', 'faq', 'questions', 'support', 'stores', 'privacy', 'terms'];
@@ -24,9 +25,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
     redirect(`/${slugPart}`);
   }
 
-  const headersList = await headers();
-  const acceptLanguage = headersList.get('accept-language');
-  const lang = getPreferredLangFromHeaders(acceptLanguage);
+  let lang = 'hy';
+  try {
+    const cookieStore = await cookies();
+    const langCookie = cookieStore.get('shop_language');
+
+    if (langCookie?.value && ['hy', 'en', 'ru'].includes(langCookie.value)) {
+      lang = langCookie.value;
+    } else {
+      lang = getStoredLanguage();
+    }
+  } catch {
+    lang = getStoredLanguage();
+  }
 
   const initialProduct = await getProductBySlugServer(slugPart, lang);
 

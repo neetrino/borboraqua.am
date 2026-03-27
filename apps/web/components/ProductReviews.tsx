@@ -330,23 +330,6 @@ export function ProductReviews({ productId, productSlug }: ProductReviewsProps) 
           </div>
         </div>
 
-        {/* Write Review Button */}
-        {!showForm && (
-          <ProductPageButton
-            variant="cancel"
-            onClick={() => {
-              if (!isLoggedIn) {
-                showToast(t('common.reviews.loginRequired'), 'warning');
-                return;
-              }
-              setShowForm(true);
-            }}
-            className="mb-8"
-          >
-            {t('common.reviews.writeReview')}
-          </ProductPageButton>
-        )}
-
         {/* Review Form */}
         {showForm && (
           <div className="mb-8 relative max-w-6xl mx-auto">

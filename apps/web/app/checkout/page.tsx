@@ -77,13 +77,23 @@ interface DeliveryRegionOption {
   price: number;
 }
 
+const CHECKOUT_PAYMENT_METHOD_IDS = [
+  'idram',
+  'ameriabank',
+  'telcell',
+  'fastshift',
+  'cash_on_delivery',
+] as const;
+
+type CheckoutPaymentMethodId = (typeof CHECKOUT_PAYMENT_METHOD_IDS)[number];
+
 type CheckoutFormData = {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   shippingMethod: 'pickup' | 'delivery';
-  paymentMethod?: 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery';
+  paymentMethod?: CheckoutPaymentMethodId;
   shippingAddress?: string;
   shippingRegionId?: string;
   shippingPostalCode?: string;
@@ -113,6 +123,11 @@ export default function CheckoutPage() {
   const [deliveryRegions, setDeliveryRegions] = useState<DeliveryRegionOption[]>([]);
   const [regionDropdownOpen, setRegionDropdownOpen] = useState(false);
   const regionDropdownRef = useRef<HTMLDivElement>(null);
+  const orderSummaryColumnRef = useRef<HTMLDivElement>(null);
+  const orderSummaryRef = useRef<HTMLDivElement>(null);
+  const [orderSummaryMode, setOrderSummaryMode] = useState<'static' | 'fixed' | 'bottom'>('static');
+  const [orderSummaryFixedStyle, setOrderSummaryFixedStyle] = useState<{ top: number; left: number; width: number } | null>(null);
+  const [orderSummaryPlaceholderHeight, setOrderSummaryPlaceholderHeight] = useState(0);
   const [enabledWeekdays, setEnabledWeekdays] = useState<number[] | null>(null);
   const [deliveryTimeSlots, setDeliveryTimeSlots] = useState<DeliveryTimeSlotConfig[]>([]);
   const [calendarMonth, setCalendarMonth] = useState<Date>(() => {
@@ -174,7 +189,7 @@ export default function CheckoutPage() {
     shippingMethod: z.enum(['pickup', 'delivery'], {
       message: t('checkout.errors.selectShippingMethod'),
     }),
-    paymentMethod: z.string().optional(),
+    paymentMethod: z.enum(CHECKOUT_PAYMENT_METHOD_IDS).optional(),
     // Shipping address fields - required only for delivery
     shippingAddress: z.string().optional(),
     shippingRegionId: z.string().optional(),
@@ -205,11 +220,7 @@ export default function CheckoutPage() {
   }, {
     message: t('checkout.errors.deliveryTimeRequired'),
     path: ['deliveryTimeSlot'],
-  }).refine((data) => {
-    // User must select a payment method (no default)
-    const valid: Array<CheckoutFormData['paymentMethod']> = ['idram', 'ameriabank', 'telcell', 'fastshift', 'cash_on_delivery'];
-    return data.paymentMethod != null && valid.includes(data.paymentMethod);
-  }, {
+  }).refine((data) => data.paymentMethod != null, {
     message: t('checkout.errors.selectPaymentMethod'),
     path: ['paymentMethod'],
   }), [t]);
@@ -247,6 +258,91 @@ export default function CheckoutPage() {
   const cartSubtotal = cart?.totals?.subtotal || 0;
   const couponDiscount = appliedCoupon?.discountAmount || 0;
   const finalCheckoutTotal = Math.max(0, cartSubtotal + (deliveryPrice !== null ? deliveryPrice : 0) - couponDiscount);
+
+  const STICKY_TOP_PX = 96;
+
+  useEffect(() => {
+    const isLg = () => window.matchMedia('(min-width: 1024px)').matches;
+
+    const updateSticky = () => {
+      if (!isLg()) {
+        setOrderSummaryMode('static');
+        setOrderSummaryFixedStyle(null);
+        setOrderSummaryPlaceholderHeight(0);
+        return;
+      }
+
+      const col = orderSummaryColumnRef.current;
+      const summary = orderSummaryRef.current;
+
+      if (!col || !summary) {
+        return;
+      }
+
+      const colRect = col.getBoundingClientRect();
+      const summaryHeight = summary.offsetHeight;
+
+      if (colRect.top > STICKY_TOP_PX) {
+        setOrderSummaryMode('static');
+        setOrderSummaryFixedStyle(null);
+        setOrderSummaryPlaceholderHeight(0);
+        return;
+      }
+
+      if (colRect.bottom <= STICKY_TOP_PX + summaryHeight) {
+        setOrderSummaryMode('bottom');
+        setOrderSummaryFixedStyle({
+          top: STICKY_TOP_PX,
+          left: colRect.left,
+          width: colRect.width,
+        });
+        setOrderSummaryPlaceholderHeight(summaryHeight);
+        return;
+      }
+
+      setOrderSummaryMode('fixed');
+      setOrderSummaryFixedStyle({
+        top: STICKY_TOP_PX,
+        left: colRect.left,
+        width: colRect.width,
+      });
+      setOrderSummaryPlaceholderHeight(summaryHeight);
+    };
+
+    const onScrollOrResize = () => {
+      requestAnimationFrame(updateSticky);
+    };
+
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize);
+
+    const timeoutId = window.setTimeout(updateSticky, 100);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener('scroll', onScrollOrResize);
+      window.removeEventListener('resize', onScrollOrResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const id = window.requestAnimationFrame(() => {
+      window.dispatchEvent(new Event('resize'));
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [
+    cart,
+    appliedCoupon,
+    couponDiscount,
+    deliveryPrice,
+    loadingDeliveryPrice,
+    error,
+    isSubmitting,
+    applyingCoupon,
+  ]);
 
   const availableDeliveryDays: DeliveryDayOption[] = useMemo(() => {
     // Calculate enabled delivery days for the currently visible calendar month.
@@ -1051,13 +1147,13 @@ export default function CheckoutPage() {
   const orderSummaryContent = (
     <>
       <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
-      <div className="bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-clip">
+      <div className="min-w-0 bg-[rgba(135, 135, 135, 0.05)] backdrop-blur-[5px] rounded-[34px] p-5 md:p-6 sm:p-4 border border-[rgba(255,255,255,0)] overflow-hidden">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('checkout.orderSummary')}</h2>
-        <div className="mb-5">
+        <div className="mb-5 min-w-0">
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             {t('checkout.coupon.label')}
           </label>
-          <div className="flex gap-2">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-2">
             <input
               type="text"
               value={couponCode}
@@ -1066,14 +1162,14 @@ export default function CheckoutPage() {
                 setCouponError(null);
               }}
               placeholder={t('checkout.coupon.placeholder')}
-              className="flex-1 px-3 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all"
+              className="w-full min-w-0 flex-1 px-3 py-2 bg-white/50 backdrop-blur-md rounded-[12px] border border-white/30 shadow-inner focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 text-gray-900 placeholder:text-gray-500 transition-all"
               disabled={isSubmitting || applyingCoupon}
             />
             <button
               type="button"
               onClick={handleApplyCoupon}
               disabled={isSubmitting || applyingCoupon}
-              className="px-4 py-2 rounded-[12px] bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] text-white text-sm font-medium shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full shrink-0 px-4 py-2 rounded-[12px] bg-gradient-to-r from-[#00D1FF] to-[#1AC0FD] text-white text-sm font-medium shadow-lg hover:shadow-xl hover:from-[#00B8E6] hover:to-[#00A8D6] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed sm:w-auto sm:self-stretch"
             >
               {applyingCoupon ? t('checkout.coupon.applying') : t('checkout.coupon.apply')}
             </button>
@@ -1583,7 +1679,7 @@ export default function CheckoutPage() {
                         {...register('paymentMethod')}
                         value={method.id}
                         checked={isSelected}
-                        onChange={(e) => setValue('paymentMethod', e.target.value as 'idram' | 'ameriabank' | 'telcell' | 'fastshift' | 'cash_on_delivery')}
+                        onChange={(e) => setValue('paymentMethod', e.target.value as CheckoutPaymentMethodId)}
                         className="sr-only"
                         disabled={isSubmitting}
                         aria-label={method.name}
@@ -1593,6 +1689,7 @@ export default function CheckoutPage() {
                 })}
               </div>
             </div>
+          </div>
           </div>
 
           </div>
