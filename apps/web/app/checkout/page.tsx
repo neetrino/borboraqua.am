@@ -1176,7 +1176,8 @@ export default function CheckoutPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">{t('checkout.title')}</h1>
 
       <form onSubmit={handlePlaceOrder}>
-        <div className="space-y-6 max-w-3xl">
+        <div className="lg:grid lg:grid-cols-[1fr_380px] lg:gap-8">
+          <div className="space-y-6">
             {/* Contact Information */}
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-b from-[#B2D8E82E] to-[#62B3E82E] rounded-[34px] -z-10" />
@@ -1594,8 +1595,17 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Order Summary — в самом низу страницы */}
-          <div className="relative mt-8 max-w-md">
+          </div>
+
+          {/* Order Summary — sticky sidebar on desktop */}
+          <div className="hidden lg:block sticky top-[160px] self-start z-20">
+            <div className="relative">
+              {orderSummaryContent}
+            </div>
+          </div>
+
+          {/* Order Summary — mobile only, at bottom */}
+          <div className="lg:hidden relative mt-8 max-w-md">
             {orderSummaryContent}
           </div>
         </div>

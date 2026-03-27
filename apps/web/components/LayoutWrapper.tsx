@@ -182,7 +182,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className={`relative flex min-h-screen flex-col pb-16 lg:pb-0 overflow-x-hidden ${isAdminPage || isProfilePage ? 'bg-white' : 'app-page-background'}`}>
+    <div className={`relative flex min-h-screen flex-col pb-16 lg:pb-0 overflow-x-clip ${isAdminPage || isProfilePage ? 'bg-white' : 'app-page-background'}`}>
       {/* Top Header Bar - Only visible on mobile, hidden when a popup is open */}
       {isTouchPhoneOrTabletLayout && !showMobileMenu && !showSearchModal && !globalModalOpen && (
         <TopHeaderBar
