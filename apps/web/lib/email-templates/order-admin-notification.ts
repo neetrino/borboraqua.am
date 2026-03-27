@@ -134,10 +134,6 @@ function buildOrderAdminHtml(order: OrderForAdminEmail): string {
           <td style="padding:6px 0;font-size:14px;">${escapeHtml(order.customerPhone ?? "—")}</td>
         </tr>
         <tr>
-          <td style="padding:6px 0;color:#64748b;font-size:14px;">Առաքում</td>
-          <td style="padding:6px 0;font-size:14px;">${escapeHtml(order.shippingMethod ?? "—")}</td>
-        </tr>
-        <tr>
           <td style="padding:6px 0;color:#64748b;font-size:14px;">Վճարում</td>
           <td style="padding:6px 0;font-size:14px;font-weight:600;color:#2563eb;">${escapeHtml(paymentLabel)}</td>
         </tr>
@@ -217,7 +213,6 @@ export async function sendOrderNotificationToAdmin(
         `Հաճախորդ՝ ${formatCustomerName(order.shippingAddress)}`,
         `Էլ. փոստ՝ ${order.customerEmail ?? "—"}, Հեռախոս՝ ${order.customerPhone ?? "—"}`,
         `Վճարում՝ ${formatPaymentMethod(order.paymentMethod)}`,
-        `Առաքում՝ ${order.shippingMethod ?? "—"}`,
         `Առաքման օր՝ ${formatDeliveryDay(order.shippingAddress)}`,
         `Հասցե՝ ${formatAddress(order.shippingAddress)}`,
         ``,
