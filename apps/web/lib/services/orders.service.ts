@@ -697,6 +697,7 @@ class OrdersService {
         currency: fullOrder.currency ?? "AMD",
         shippingAddress: fullOrder.shippingAddress,
         shippingMethod: fullOrder.shippingMethod,
+        paymentMethod: paymentMethod ?? null,
         items: fullOrder.items,
       }).catch(() => {});
 

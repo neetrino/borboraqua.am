@@ -1,4 +1,5 @@
 import { db } from "@white-shop/db";
+import { after } from "next/server";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
 import type { FastshiftCallbackParams } from "./types";
 import {
@@ -144,8 +145,10 @@ export async function handleFastshiftResponse(
     if (order.userId) {
       await db.cart.deleteMany({ where: { userId: order.userId } });
     }
-    printReceiptForOrder(order.id).catch((err) =>
-      console.error("[EHDM] printReceiptForOrder", err)
+    after(() =>
+      printReceiptForOrder(order.id).catch((err) =>
+        console.error("[EHDM] printReceiptForOrder", err)
+      )
     );
   } else {
     await db.$transaction([
