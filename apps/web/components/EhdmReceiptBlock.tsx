@@ -33,11 +33,18 @@ const QR_IMAGE_SIZE = 120;
 
 function formatReceiptTime(unixSeconds: number | undefined): string {
   if (unixSeconds == null) return "—";
-  const d = new Date(unixSeconds * 1000);
-  return d.toLocaleString("hy-AM", {
-    dateStyle: "short",
-    timeStyle: "short",
-  });
+  const d = new Date(unixSeconds);
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Yerevan",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "00";
+  return `${get("day")}.${get("month")}.${get("year")} ${get("hour")}:${get("minute")}`;
 }
 
 export function EhdmReceiptBlock({
