@@ -31,19 +31,30 @@ export interface AuthResponse {
   token: string;
 }
 
+function normalizeOptionalText(value?: string): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmedValue = value.trim();
+  return trimmedValue === "" ? undefined : trimmedValue;
+}
+
 class AuthService {
   /**
    * Register new user
    */
   async register(data: RegisterData): Promise<AuthResponse> {
+    const normalizedEmail = normalizeOptionalText(data.email);
+    const normalizedPhone = normalizeOptionalText(data.phone);
+    const normalizedFirstName = normalizeOptionalText(data.firstName);
+    const normalizedLastName = normalizeOptionalText(data.lastName);
+
     console.log("🔐 [AUTH] Registration attempt:", {
-      email: data.email || "not provided",
-      phone: data.phone || "not provided",
-      hasFirstName: !!data.firstName,
-      hasLastName: !!data.lastName,
+      email: normalizedEmail || "not provided",
+      phone: normalizedPhone || "not provided",
+      hasFirstName: !!normalizedFirstName,
+      hasLastName: !!normalizedLastName,
     });
 
-    if (!data.email && !data.phone) {
+    if (!normalizedEmail && !normalizedPhone) {
       throw {
         status: 400,
         type: "https://api.shop.am/problems/validation-error",
@@ -65,8 +76,8 @@ class AuthService {
     const existingUser = await db.user.findFirst({
       where: {
         OR: [
-          ...(data.email ? [{ email: data.email }] : []),
-          ...(data.phone ? [{ phone: data.phone }] : []),
+          ...(normalizedEmail ? [{ email: normalizedEmail }] : []),
+          ...(normalizedPhone ? [{ phone: normalizedPhone }] : []),
         ],
         deletedAt: null,
       },
@@ -97,11 +108,11 @@ class AuthService {
     try {
       user = await db.user.create({
         data: {
-          email: data.email || null,
-          phone: data.phone || null,
+          email: normalizedEmail || null,
+          phone: normalizedPhone || null,
           passwordHash,
-          firstName: data.firstName || null,
-          lastName: data.lastName || null,
+          firstName: normalizedFirstName || null,
+          lastName: normalizedLastName || null,
           locale: "en",
           roles: ["customer"],
         },
