@@ -48,8 +48,8 @@ class AuthService {
     const normalizedLastName = normalizeOptionalText(data.lastName);
 
     console.log("🔐 [AUTH] Registration attempt:", {
-      email: normalizedEmail || "not provided",
-      phone: normalizedPhone || "not provided",
+      hasEmail: !!normalizedEmail,
+      hasPhone: !!normalizedPhone,
       hasFirstName: !!normalizedFirstName,
       hasLastName: !!normalizedLastName,
     });
@@ -177,8 +177,8 @@ class AuthService {
    */
   async login(data: LoginData): Promise<AuthResponse> {
     console.log("🔐 [AUTH] Login attempt:", {
-      email: data.email || "not provided",
-      phone: data.phone || "not provided",
+      hasEmail: !!data.email,
+      hasPhone: !!data.phone,
     });
 
     if (!data.email && !data.phone) {

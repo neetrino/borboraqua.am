@@ -47,12 +47,11 @@ interface RegisterData {
  */
 interface AuthResponse {
   user: User;
-  token: string;
+  token?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_TOKEN_KEY = 'auth_token';
 const AUTH_USER_KEY = 'auth_user';
 
 /**
@@ -60,48 +59,44 @@ const AUTH_USER_KEY = 'auth_user';
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Load auth state from localStorage on mount
+  // Load optimistic user from localStorage, then validate session by HttpOnly cookie.
   useEffect(() => {
-    console.log('🔐 [AUTH] Loading auth state from localStorage...');
+    console.log('🔐 [AUTH] Loading auth state...');
     
     const loadAuthState = async () => {
       try {
-        const storedToken = localStorage.getItem(AUTH_TOKEN_KEY);
         const storedUser = localStorage.getItem(AUTH_USER_KEY);
+        const legacyToken = localStorage.getItem('auth_token');
 
-        if (storedToken && storedUser) {
-          console.log('✅ [AUTH] Found stored auth data');
-          const parsedUser = JSON.parse(storedUser);
-          
-          // If user doesn't have roles, fetch from API
-          if (!parsedUser.roles || !Array.isArray(parsedUser.roles)) {
-            console.log('⚠️ [AUTH] User data missing roles, fetching from API...');
-            try {
-              const profileData = await apiClient.get<{ roles: string[] }>('/api/v1/users/profile');
-              if (profileData.roles) {
-                parsedUser.roles = profileData.roles;
-                localStorage.setItem(AUTH_USER_KEY, JSON.stringify(parsedUser));
-                console.log('✅ [AUTH] Roles updated from API:', profileData.roles);
-              }
-            } catch (fetchError) {
-              console.error('❌ [AUTH] Failed to fetch user roles:', fetchError);
-            }
+        if (legacyToken) {
+          localStorage.removeItem('auth_token');
+        }
+
+        if (storedUser) {
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch {
+            localStorage.removeItem(AUTH_USER_KEY);
           }
-          
-          setToken(storedToken);
-          setUser(parsedUser);
-        } else {
-          console.log('ℹ️ [AUTH] No stored auth data found');
+        }
+
+        try {
+          const profileData = await apiClient.get<User>('/api/v1/users/profile', { skipAuth: true });
+          setUser(profileData);
+          localStorage.setItem(AUTH_USER_KEY, JSON.stringify(profileData));
+          console.log('✅ [AUTH] Active cookie session restored');
+        } catch {
+          localStorage.removeItem(AUTH_USER_KEY);
+          setUser(null);
+          console.log('ℹ️ [AUTH] No active cookie session');
         }
       } catch (error) {
         console.error('❌ [AUTH] Error loading auth state:', error);
-        // Clear corrupted data
-        localStorage.removeItem(AUTH_TOKEN_KEY);
         localStorage.removeItem(AUTH_USER_KEY);
+        localStorage.removeItem('auth_token');
       } finally {
         setIsLoading(false);
       }
@@ -136,11 +131,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAdmin: response.user.roles?.includes('admin')
       });
 
-      // Store auth data
-      localStorage.setItem(AUTH_TOKEN_KEY, response.token);
+      // Persist user only; token is stored in HttpOnly cookie by API.
       localStorage.setItem(AUTH_USER_KEY, JSON.stringify(response.user));
-
-      setToken(response.token);
       setUser(response.user);
 
       // Trigger auth update event
@@ -201,26 +193,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         skipAuth: true, // Don't send token for registration
       });
 
-      console.log('✅ [AUTH] Registration response received:', response);
+      console.log('✅ [AUTH] Registration response received');
 
-      if (!response || !response.user || !response.token) {
+      if (!response || !response.user) {
         console.error('❌ [AUTH] Invalid response structure:', response);
         throw new Error('Invalid response from server');
       }
 
       console.log('✅ [AUTH] Registration successful:', { userId: response.user.id });
 
-      // Store auth data
+      // Persist user only; token is stored in HttpOnly cookie by API.
       try {
-        localStorage.setItem(AUTH_TOKEN_KEY, response.token);
         localStorage.setItem(AUTH_USER_KEY, JSON.stringify(response.user));
-        console.log('💾 [AUTH] Auth data stored in localStorage');
+        console.log('💾 [AUTH] User data stored in localStorage');
       } catch (storageError) {
         console.error('❌ [AUTH] Failed to store auth data:', storageError);
         throw new Error('Failed to save authentication data');
       }
 
-      setToken(response.token);
       setUser(response.user);
 
       // Trigger auth update event
@@ -285,16 +275,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const logout = () => {
     console.log('🔐 [AUTH] Logging out...');
-    const currentToken = token;
-    // Invalidate token on server first (while we still have it)
-    if (currentToken && typeof window !== 'undefined') {
+    // Invalidate server-side cookie session.
+    if (typeof window !== 'undefined') {
       const base = process.env.NEXT_PUBLIC_API_URL || '';
       const url = base ? `${base}/api/v1/auth/logout` : '/api/v1/auth/logout';
-      fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${currentToken}` } }).catch(() => {});
+      fetch(url, { method: 'POST', credentials: 'include' }).catch(() => {});
     }
-    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem('auth_token');
     localStorage.removeItem(AUTH_USER_KEY);
-    setToken(null);
     setUser(null);
     window.dispatchEvent(new Event('auth-updated'));
     router.push('/');
@@ -306,7 +294,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   // Debug logging and ensure roles are loaded
   useEffect(() => {
-    if (user && token) {
+    if (user) {
       const userRoles = Array.isArray(user.roles) ? user.roles : [];
       const userIsAdmin = userRoles.includes('admin');
       
@@ -336,12 +324,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
       }
     }
-  }, [user, token]);
+  }, [user]);
 
   const value: AuthContextType = {
     user,
-    token,
-    isLoggedIn: !!token && !!user,
+    token: null,
+    isLoggedIn: !!user,
     isLoading,
     isAdmin,
     roles,

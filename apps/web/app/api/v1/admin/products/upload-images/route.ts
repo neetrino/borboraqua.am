@@ -2,9 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateToken, requireAdmin } from "@/lib/middleware/auth";
 import { uploadToR2, isR2Configured } from "@/lib/r2-client";
 import { randomUUID } from "crypto";
+import { parseBody, adminUploadImagesBodySchema } from "@/lib/validate";
+import { validateOrigin } from "@/lib/csrf";
 
 const ALLOWED_FOLDERS = ["products", "labels"] as const;
 type UploadFolder = (typeof ALLOWED_FOLDERS)[number];
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB per image
+const MAX_TOTAL_BYTES = 20 * 1024 * 1024; // 20MB per request
+const ALLOWED_IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 function parseFolder(value: unknown): UploadFolder {
   if (typeof value === "string" && ALLOWED_FOLDERS.includes(value as UploadFolder)) {
@@ -22,6 +27,8 @@ function parseFolder(value: unknown): UploadFolder {
  */
 export async function POST(req: NextRequest) {
   const requestStartTime = Date.now();
+  const csrf = validateOrigin(req);
+  if (csrf) return csrf;
 
   try {
     const user = await authenticateToken(req);
@@ -38,45 +45,76 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let body: { images?: unknown; folder?: unknown };
-    try {
-      body = await req.json();
-    } catch {
-      return NextResponse.json(
-        {
-          type: "https://api.shop.am/problems/validation-error",
-          title: "Validation Error",
-          status: 400,
-          detail: "Invalid JSON in request body",
-          instance: req.url,
-        },
-        { status: 400 }
-      );
-    }
-
-    if (!Array.isArray(body.images) || body.images.length === 0) {
-      return NextResponse.json(
-        {
-          type: "https://api.shop.am/problems/validation-error",
-          title: "Validation Error",
-          status: 400,
-          detail: "Field 'images' is required and must be a non-empty array",
-          instance: req.url,
-        },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(req, adminUploadImagesBodySchema);
+    if (parsed.error) return parsed.error;
+    const body = parsed.data;
 
     const validImages: string[] = [];
+    let totalApproxBytes = 0;
     for (let i = 0; i < body.images.length; i++) {
       const image = body.images[i];
-      if (typeof image !== "string" || !image.startsWith("data:image/")) {
+      if (typeof image !== "string") {
         return NextResponse.json(
           {
             type: "https://api.shop.am/problems/validation-error",
             title: "Validation Error",
             status: 400,
-            detail: `Image at index ${i} must be a valid base64 image (data:image/...)`,
+            detail: `Image at index ${i} must be a string`,
+            instance: req.url,
+          },
+          { status: 400 }
+        );
+      }
+
+      const match = image.match(/^data:(image\/[a-z0-9.+-]+);base64,([A-Za-z0-9+/=]+)$/i);
+      if (!match) {
+        return NextResponse.json(
+          {
+            type: "https://api.shop.am/problems/validation-error",
+            title: "Validation Error",
+            status: 400,
+            detail: `Image at index ${i} must be a valid base64 data URL`,
+            instance: req.url,
+          },
+          { status: 400 }
+        );
+      }
+      const contentType = match[1].toLowerCase();
+      if (!ALLOWED_IMAGE_MIME_TYPES.has(contentType)) {
+        return NextResponse.json(
+          {
+            type: "https://api.shop.am/problems/validation-error",
+            title: "Validation Error",
+            status: 400,
+            detail: `Image at index ${i} uses unsupported type ${contentType}`,
+            instance: req.url,
+          },
+          { status: 400 }
+        );
+      }
+
+      const approxBytes = Math.floor((match[2].length * 3) / 4);
+      if (approxBytes > MAX_IMAGE_BYTES) {
+        return NextResponse.json(
+          {
+            type: "https://api.shop.am/problems/validation-error",
+            title: "Validation Error",
+            status: 400,
+            detail: `Image at index ${i} exceeds ${MAX_IMAGE_BYTES} bytes`,
+            instance: req.url,
+          },
+          { status: 400 }
+        );
+      }
+
+      totalApproxBytes += approxBytes;
+      if (totalApproxBytes > MAX_TOTAL_BYTES) {
+        return NextResponse.json(
+          {
+            type: "https://api.shop.am/problems/validation-error",
+            title: "Validation Error",
+            status: 400,
+            detail: `Total upload size exceeds ${MAX_TOTAL_BYTES} bytes`,
             instance: req.url,
           },
           { status: 400 }
@@ -103,16 +141,24 @@ export async function POST(req: NextRequest) {
     const urls: string[] = [];
     for (let i = 0; i < validImages.length; i++) {
       const dataUrl = validImages[i];
-      const match = dataUrl.match(/^data:(image\/[a-z+]+);base64,(.+)$/i);
+      const match = dataUrl.match(/^data:(image\/[a-z0-9.+-]+);base64,([A-Za-z0-9+/=]+)$/i);
       if (!match) {
         urls.push("");
         continue;
       }
       const contentType = match[1];
       const base64Data = match[2];
+      if (!ALLOWED_IMAGE_MIME_TYPES.has(contentType.toLowerCase())) {
+        urls.push("");
+        continue;
+      }
       const ext = contentType === "image/png" ? "png" : contentType === "image/webp" ? "webp" : "jpg";
       const key = `assets/${folder}/${randomUUID()}-${i}.${ext}`;
       const buffer = Buffer.from(base64Data, "base64");
+      if (buffer.byteLength > MAX_IMAGE_BYTES) {
+        urls.push("");
+        continue;
+      }
       const url = await uploadToR2(key, buffer, contentType);
       urls.push(url ?? "");
     }

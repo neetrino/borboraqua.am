@@ -41,7 +41,7 @@ export class ApiError extends Error {
 }
 
 /**
- * Get auth token from localStorage
+ * Legacy bearer token support for migration period.
  */
 function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -151,20 +151,12 @@ class ApiClient {
       ...(options?.headers as Record<string, string> || {}),
     };
 
-    // Add auth token if available and not skipped
+    // Legacy: keep Bearer fallback if an old token still exists in localStorage.
     if (!options?.skipAuth) {
       const token = getAuthToken();
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
-        logger.log('🔑 [API CLIENT] Token added to request headers', {
-          tokenLength: token.length,
-          tokenPreview: token.substring(0, 20) + '...',
-        });
-      } else {
-        logger.warn('⚠️ [API CLIENT] No token found in localStorage for authenticated request');
       }
-    } else {
-      logger.log('🔓 [API CLIENT] Auth skipped for this request');
     }
 
     return headers as globalThis.HeadersInit;
@@ -234,6 +226,7 @@ class ApiClient {
         response = await fetch(url, {
           method: 'GET',
           headers: this.getHeaders(options),
+          credentials: 'include',
           cache: 'no-store', // Disable caching for server components
           signal: controller.signal,
           ...options,
@@ -430,6 +423,7 @@ class ApiClient {
         response = await fetch(url, {
           method: 'POST',
           headers: this.getHeaders(options),
+          credentials: 'include',
           body: data ? JSON.stringify(data) : undefined,
           signal: controller.signal,
           ...options,
@@ -528,6 +522,7 @@ class ApiClient {
     const response = await fetch(url, {
       method: 'PUT',
       headers: this.getHeaders(options),
+      credentials: 'include',
       body: data ? JSON.stringify(data) : undefined,
       ...options,
     });
@@ -647,6 +642,7 @@ class ApiClient {
     const response = await fetch(url, {
       method: 'PATCH',
       headers: this.getHeaders(options),
+      credentials: 'include',
       body: data ? JSON.stringify(data) : undefined,
       ...options,
     });
@@ -700,6 +696,7 @@ class ApiClient {
     const response = await fetch(url, {
       method: 'DELETE',
       headers: this.getHeaders(options),
+      credentials: 'include',
       ...options,
     });
 

@@ -5,6 +5,7 @@ import { db } from "@white-shop/db";
 import { isBlacklisted } from "@/lib/token-blacklist";
 import { logApi } from "@/lib/safe-log";
 import { getRequestId } from "@/lib/request-id";
+import { getAuthTokenFromRequest } from "@/lib/auth-cookie";
 
 export interface AuthUser {
   id: string;
@@ -21,8 +22,7 @@ export async function authenticateToken(
   request: NextRequest
 ): Promise<AuthUser | null> {
   try {
-    const authHeader = request.headers.get("authorization");
-    const token = authHeader?.split(" ")[1]; // Bearer TOKEN
+    const token = getAuthTokenFromRequest(request);
 
     const requestId = getRequestId(request);
 

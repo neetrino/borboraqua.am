@@ -3,8 +3,13 @@ import { authenticateToken } from "@/lib/middleware/auth";
 import { ordersService } from "@/lib/services/orders.service";
 import { getIdempotentResponse, setIdempotentResponse } from "@/lib/idempotency";
 import { safeErrorResponse } from "@/lib/api-error";
+import { parseBody, checkoutBodySchema } from "@/lib/validate";
+import { validateOrigin } from "@/lib/csrf";
 
 export async function POST(req: NextRequest) {
+  const csrf = validateOrigin(req);
+  if (csrf) return csrf;
+
   const idemKey = req.headers.get("Idempotency-Key");
   if (idemKey && idemKey.length <= 128) {
     const cached = getIdempotentResponse(idemKey);
@@ -13,9 +18,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const user = await authenticateToken(req);
-    const data = await req.json();
+    const parsed = await parseBody(req, checkoutBodySchema);
+    if (parsed.error) return parsed.error;
 
-    const result = await ordersService.checkout(data, user?.id);
+    const result = await ordersService.checkout(parsed.data, user?.id);
 
     if (idemKey && idemKey.length <= 128) {
       setIdempotentResponse(idemKey, result, 201);
