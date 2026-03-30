@@ -5,8 +5,6 @@
 export interface FastshiftConfig {
   isTest: boolean;
   token: string;
-  webhookSecret: string;
-  webhookFailOpen: boolean;
 }
 
 export interface FastshiftRegisterRequest {

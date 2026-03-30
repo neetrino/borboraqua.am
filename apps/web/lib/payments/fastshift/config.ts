@@ -5,10 +5,8 @@ function getFastshiftConfig(): FastshiftConfig {
   const token = isTest
     ? (process.env.FASTSHIFT_TOKEN ?? "")
     : (process.env.FASTSHIFT_LIVE_TOKEN ?? "");
-  const webhookSecret = process.env.FASTSHIFT_WEBHOOK_SECRET ?? "";
-  const webhookFailOpen = process.env.FASTSHIFT_WEBHOOK_FAIL_OPEN === "true";
 
-  return { isTest, token, webhookSecret, webhookFailOpen };
+  return { isTest, token };
 }
 
 let cachedConfig: FastshiftConfig | null = null;
