@@ -349,7 +349,7 @@ class ApiClient {
       }
       
       // Handle 401 Unauthorized - clear token and redirect
-      if (isUnauthorized) {
+      if (isUnauthorized && !options?.skipAuth) {
         this.handleUnauthorized();
       }
       
@@ -445,7 +445,7 @@ class ApiClient {
         const isUnauthorized = response.status === 401;
         
         // Handle 401 Unauthorized - clear token and redirect
-        if (isUnauthorized) {
+        if (isUnauthorized && !options?.skipAuth) {
           this.handleUnauthorized();
         }
         
@@ -549,7 +549,7 @@ class ApiClient {
       }
       
       // Handle 401 Unauthorized - clear token and redirect
-      if (isUnauthorized) {
+      if (isUnauthorized && !options?.skipAuth) {
         this.handleUnauthorized();
       }
       
