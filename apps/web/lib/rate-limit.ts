@@ -56,6 +56,8 @@ export function checkRateLimit(request: Request, limit: number, pathLabel: strin
 export const RATE_LIMITS = {
   /** /api/v1/auth/* — login, register */
   AUTH_PER_MIN: 50,
+  /** /api/v1/auth/register — stricter anti-bot limit */
+  AUTH_REGISTER_PER_MIN: 5,
   /** /api/v1/contact — contact form */
   CONTACT_PER_MIN: 20,
   /** General /api/* */

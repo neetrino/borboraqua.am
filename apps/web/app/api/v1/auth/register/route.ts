@@ -3,8 +3,28 @@ import { authService } from "@/lib/services/auth.service";
 import { validateOrigin } from "@/lib/csrf";
 import { parseBody, registerBodySchema } from "@/lib/validate";
 import { safeErrorResponse } from "@/lib/api-error";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  const retryAfter = checkRateLimit(req, RATE_LIMITS.AUTH_REGISTER_PER_MIN, "auth-register");
+  if (retryAfter !== null) {
+    return NextResponse.json(
+      {
+        type: "https://api.shop.am/problems/too-many-requests",
+        title: "Too Many Requests",
+        status: 429,
+        detail: "Too many registration attempts. Please try again later.",
+        instance: req.url,
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(retryAfter),
+        },
+      }
+    );
+  }
+
   const csrf = validateOrigin(req);
   if (csrf) return csrf;
   const parsed = await parseBody(req, registerBodySchema);

@@ -1,6 +1,27 @@
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
 
+const MAX_NAME_LENGTH = 80;
+const NAME_SAFE_REGEX = /^[\p{L}\p{M}\s'-]+$/u;
+
+const optionalSafeNameSchema = z.preprocess(
+  (value) => {
+    if (typeof value !== "string") return value;
+    const trimmedValue = value.trim();
+    return trimmedValue === "" ? undefined : trimmedValue;
+  },
+  z
+    .string()
+    .max(MAX_NAME_LENGTH, `Name must be at most ${MAX_NAME_LENGTH} characters`)
+    .refine((value) => !/[<>]/.test(value), {
+      message: "Name cannot contain angle brackets",
+    })
+    .refine((value) => NAME_SAFE_REGEX.test(value), {
+      message: "Name contains invalid characters",
+    })
+    .optional()
+);
+
 /**
  * Parse and validate JSON body with Zod (P0 Security 3.1). Returns parsed data or 400 response.
  */
@@ -56,8 +77,8 @@ export const registerBodySchema = z.object({
   email: z.string().email().optional(),
   phone: z.string().optional(),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
+  firstName: optionalSafeNameSchema,
+  lastName: optionalSafeNameSchema,
 }).refine((d) => !!d.email || !!d.phone, { message: "Either email or phone required" });
 
 export const forgotPasswordBodySchema = z.object({
