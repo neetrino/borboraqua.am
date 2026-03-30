@@ -17,9 +17,7 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      isProduction
-        ? "script-src 'self'"
-        : "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Dev tooling requires relaxed policy.
+      "script-src 'self' 'unsafe-inline'", // Next.js App Router requires unsafe-inline for hydration scripts.
       "style-src 'self' 'unsafe-inline' https:",
       "img-src 'self' data: https: blob:",
       "font-src 'self' data:",
