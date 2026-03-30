@@ -95,3 +95,39 @@ export const resetPasswordBodySchema = z.object({
   token: z.string().min(1, "Token is required"),
   newPassword: z.string().min(6, "Password must be at least 6 characters"),
 });
+
+export const fastshiftInitBodySchema = z.object({
+  orderNumber: z.string().trim().min(1, "orderNumber is required").max(64, "orderNumber is too long"),
+});
+
+const checkoutItemSchema = z.object({
+  productId: z.string().min(1, "productId is required"),
+  variantId: z.string().min(1, "variantId is required"),
+  quantity: z.number().int().positive().max(100),
+});
+
+export const checkoutBodySchema = z.object({
+  cartId: z.string().optional(),
+  items: z.array(checkoutItemSchema).optional(),
+  couponCode: z.string().trim().max(64).optional(),
+  email: z.string().email("Invalid email"),
+  phone: z.string().trim().min(3, "Invalid phone").max(32, "Invalid phone"),
+  firstName: optionalSafeNameSchema,
+  lastName: optionalSafeNameSchema,
+  shippingMethod: z.string().trim().max(32).optional(),
+  shippingAddress: z.record(z.unknown()).optional(),
+  paymentMethod: z
+    .enum(["idram", "arca", "ameriabank", "telcell", "fastshift", "cash", "card"])
+    .optional(),
+  locale: z.enum(["en", "hy", "ru"]).optional(),
+}).refine((d) => !!d.cartId || (Array.isArray(d.items) && d.items.length > 0), {
+  message: "Either cartId or items is required",
+});
+
+export const adminUploadImagesBodySchema = z.object({
+  images: z
+    .array(z.string().min(1, "Image data is required"))
+    .min(1, "At least one image is required")
+    .max(10, "Too many images in one request"),
+  folder: z.enum(["products", "labels"]).optional(),
+});

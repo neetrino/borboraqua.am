@@ -65,6 +65,7 @@ export async function POST(req: NextRequest) {
     } else {
       params = getQueryParams(req);
     }
+
     await handleFastshiftResponse(params as FastshiftCallbackParams);
     return new NextResponse(null, { status: 200 });
   } catch (err) {

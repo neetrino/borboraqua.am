@@ -6,6 +6,8 @@ import {
   generateFastshiftOrderGuid,
   getConfig,
 } from "@/lib/payments/fastshift";
+import { parseBody, fastshiftInitBodySchema } from "@/lib/validate";
+import { validateOrigin } from "@/lib/csrf";
 
 const PAYMENT_PROVIDER = "fastshift";
 
@@ -15,6 +17,9 @@ const PAYMENT_PROVIDER = "fastshift";
  * Returns: { redirectUrl: string } — redirect user to FastShift to pay.
  */
 export async function POST(req: NextRequest) {
+  const csrf = validateOrigin(req);
+  if (csrf) return csrf;
+
   try {
     if (!isFastshiftConfigured()) {
       return NextResponse.json(
@@ -29,22 +34,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
-    const orderNumber =
-      typeof body.orderNumber === "string" ? body.orderNumber.trim() : "";
-
-    if (!orderNumber) {
-      return NextResponse.json(
-        {
-          type: "https://api.shop.am/problems/validation-error",
-          title: "Validation Error",
-          status: 400,
-          detail: "orderNumber is required",
-          instance: req.url,
-        },
-        { status: 400 }
-      );
-    }
+    const parsed = await parseBody(req, fastshiftInitBodySchema);
+    if (parsed.error) return parsed.error;
+    const orderNumber = parsed.data.orderNumber;
 
     const order = await db.order.findFirst({
       where: { number: orderNumber },

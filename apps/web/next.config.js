@@ -5,21 +5,28 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 /** Security headers (P0 checklist 1.5). CORS allowlist is in middleware (3.3). */
+const isProduction = process.env.NODE_ENV === 'production';
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  ...(isProduction
+    ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' }]
+    : []),
   {
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js/React needs unsafe-eval in dev; tighten in prod if possible
+      isProduction
+        ? "script-src 'self'"
+        : "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Dev tooling requires relaxed policy.
       "style-src 'self' 'unsafe-inline' https:",
       "img-src 'self' data: https: blob:",
       "font-src 'self' data:",
       "connect-src 'self' https:",
       "frame-src 'self' https://www.google.com https://maps.google.com",
       "frame-ancestors 'self'",
+      ...(isProduction ? ["upgrade-insecure-requests"] : []),
     ].join('; '),
   },
 ];

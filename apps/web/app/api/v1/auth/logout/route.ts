@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as jwt from "jsonwebtoken";
 import { addToBlacklist } from "@/lib/token-blacklist";
+import { clearAuthCookie, getAuthTokenFromRequest } from "@/lib/auth-cookie";
 
 /**
  * POST /api/v1/auth/logout — invalidate current token (P0 Security 2.7).
  * Client should send Authorization: Bearer <token>; after this, the token returns 401.
  */
 export async function POST(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  const token = authHeader?.split(" ")[1];
+  const token = getAuthTokenFromRequest(req);
 
   if (token) {
     try {
@@ -20,5 +20,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return new NextResponse(null, { status: 204 });
+  const response = new NextResponse(null, { status: 204 });
+  clearAuthCookie(response);
+  return response;
 }
