@@ -115,9 +115,18 @@ export const checkoutBodySchema = z.object({
   firstName: optionalSafeNameSchema,
   lastName: optionalSafeNameSchema,
   shippingMethod: z.string().trim().max(32).optional(),
-  shippingAddress: z.record(z.unknown()).optional(),
+  shippingAddress: z.record(z.string(), z.unknown()).optional(),
   paymentMethod: z
-    .enum(["idram", "arca", "ameriabank", "telcell", "fastshift", "cash", "card"])
+    .enum([
+      "idram",
+      "arca",
+      "ameriabank",
+      "telcell",
+      "fastshift",
+      "cash",
+      "cash_on_delivery",
+      "card",
+    ])
     .optional(),
   locale: z.enum(["en", "hy", "ru"]).optional(),
 }).refine((d) => !!d.cartId || (Array.isArray(d.items) && d.items.length > 0), {

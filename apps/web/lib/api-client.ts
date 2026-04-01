@@ -458,7 +458,20 @@ class ApiClient {
             try {
               errorData = JSON.parse(errorText);
               if (this.shouldLogError(response.status)) {
-                logger.error('❌ [API CLIENT] POST Error response (JSON):', errorData);
+                const keys =
+                  errorData && typeof errorData === 'object' && !Array.isArray(errorData)
+                    ? Object.keys(errorData as object)
+                    : [];
+                if (keys.length === 0) {
+                  logger.error(
+                    '❌ [API CLIENT] POST Error: status',
+                    response.status,
+                    'body (raw):',
+                    errorText.slice(0, 500)
+                  );
+                } else {
+                  logger.error('❌ [API CLIENT] POST Error:', response.status, errorData);
+                }
               }
             } catch (parseErr) {
               // If JSON parse fails, use text as is
