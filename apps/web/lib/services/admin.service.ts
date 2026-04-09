@@ -1068,13 +1068,26 @@ class AdminService {
         },
       });
 
-      if (data.paymentStatus === 'paid' && existing.paymentStatus !== 'paid') {
+      const paidTransition =
+        data.paymentStatus === "paid" && existing.paymentStatus !== "paid";
+      const retryCustomerPaidEmailOnly =
+        data.paymentStatus === "paid" &&
+        existing.paymentStatus === "paid" &&
+        existing.customerPaidOrderEmailSentAt == null;
+
+      if (paidTransition) {
         const printResult = await printReceiptForOrder(order.id);
         if (!printResult.ok) {
           console.error("[EHDM] printReceiptForOrder", order.id, printResult.error);
         }
         await notifyCustomerAfterPaidOrder(order.id);
         await notifyAdminOrderPaid(order.id);
+      } else if (retryCustomerPaidEmailOnly) {
+        console.warn(
+          "[EMAIL] Retrying customer paid email (order already paid, flag unset)",
+          order.id
+        );
+        await notifyCustomerAfterPaidOrder(order.id);
       }
 
       return order;

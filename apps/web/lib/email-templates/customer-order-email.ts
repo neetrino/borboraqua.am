@@ -3,6 +3,7 @@
  */
 
 import { sendEmail } from "@/lib/email";
+import { resend } from "@/lib/resend";
 import {
   buildItemsRows,
   escapeHtml,
@@ -240,6 +241,12 @@ export async function sendCustomerCashOrderEmail(
 ): Promise<void> {
   const to = order.customerEmail.trim();
   if (!to) return;
+  if (!resend) {
+    console.warn(
+      "[EMAIL] RESEND_API_KEY / resend client missing — skip customer cash order email"
+    );
+    return;
+  }
   const locale = resolveLocale(order.customerLocale ?? undefined);
   const L = strings(locale);
   try {
@@ -263,6 +270,12 @@ export async function sendCustomerPaidOrderEmail(
 ): Promise<void> {
   const to = order.customerEmail.trim();
   if (!to) return;
+  if (!resend) {
+    console.warn(
+      "[EMAIL] RESEND_API_KEY / resend client missing — skip customer paid order email"
+    );
+    return;
+  }
   const locale = resolveLocale(order.customerLocale ?? undefined);
   const L = strings(locale);
   try {

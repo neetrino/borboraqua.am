@@ -112,15 +112,20 @@ export async function notifyCustomerAfterPaidOrder(
       include: { items: true, payments: true, ehdmReceipt: true },
     });
     if (!order || order.paymentStatus !== "paid") {
+      if (order && order.paymentStatus !== "paid") {
+        console.warn(
+          "[EMAIL] notifyCustomerAfterPaidOrder: order not paid",
+          orderId,
+          order.paymentStatus
+        );
+      }
       return;
     }
     if (!order.customerEmail?.trim()) {
-      return;
-    }
-
-    const method =
-      order.payments[0]?.method ?? order.payments[0]?.provider ?? null;
-    if (isCashLikePaymentMethod(method)) {
+      console.warn(
+        "[EMAIL] notifyCustomerAfterPaidOrder: no customer email",
+        orderId
+      );
       return;
     }
 
@@ -132,6 +137,10 @@ export async function notifyCustomerAfterPaidOrder(
       data: { customerPaidOrderEmailSentAt: new Date() },
     });
     if (claimed.count === 0) {
+      console.warn(
+        "[EMAIL] notifyCustomerAfterPaidOrder: already sent or race",
+        orderId
+      );
       return;
     }
 
