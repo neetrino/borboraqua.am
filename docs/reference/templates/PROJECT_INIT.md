@@ -56,17 +56,17 @@
 ### Frontend
 | Տեխնոլոգիա | Տարբերակ | Նշանակություն |
 |-------------|-----------|----------------|
-| Next.js | 14.x | Framework |
-| React | 18.x | UI |
-| TypeScript | 5.x | Տիպացում |
-| Tailwind CSS | 3.x | Ոճեր |
+| Next.js | 16.x | Framework |
+| React | 19.x | UI |
+| TypeScript | 5.9 | Տիպացում |
+| Tailwind CSS | 4.x | Ոճեր |
 
 ### Backend
 | Տեխնոլոգիա | Տարբերակ | Նշանակություն |
 |-------------|-----------|----------------|
 | [NestJS / Next.js API] | X.x | API |
-| Prisma | 5.x | ORM |
-| PostgreSQL | 15.x | ԲԴ |
+| Prisma | 7.x | ORM |
+| PostgreSQL | 17.x | ԲԴ |
 
 ### Ինֆրակառուցվածք
 | Տեխնոլոգիա | Նշանակություն |

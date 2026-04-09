@@ -1,8 +1,6 @@
----
-description: Որակի ստուգացուցակներ։ Բոլոր կանոններին համապատասխանության ամբողջական ստուգում։
-globs: ["**/*"]
-alwaysApply: false
----
+# Project quality checklists (reference)
+
+> Human-readable checklists. Moved from `.cursor/rules/19-checklists.mdc` (not loaded as AI rules — saves tokens). For coding limits use `00-core.mdc` and `03-typescript.mdc` (replaces removed `02-coding-standards.mdc`). Ops/reliability: `14-ops.mdc` (replaces `14-observability` + `18-reliability`).
 
 # ՈՐԱԿԻ ՍՏՈՒԳԱՑՈՒՑԱԿՆԵՐ
 
@@ -27,7 +25,7 @@ alwaysApply: false
 - [ ] Circular dependencies չկան
 - [ ] Barrel export-ներ (`index.ts`) որտեղ անհրաժեշտ է
 
-### 3. Կոդի ստանդարտներ (02-coding-standards)
+### 3. Կոդի ստանդարտներ (00-core + 03-typescript; former 02-coding-standards removed)
 
 - [ ] Naming conventions պահպանված են.
   - [ ] PascalCase — կոմպոնենտներ, դասեր, տիպեր
@@ -203,7 +201,7 @@ alwaysApply: false
 - [ ] Commit-ներում գաղտնիքներ չկան
 - [ ] CHANGELOG-ը վարելի է
 
-### 15. Observability (14-observability)
+### 15. Observability (14-ops.mdc)
 
 - [ ] Structured logging (`pino`)
 - [ ] Ճիշտ log level-ներ
@@ -270,7 +268,7 @@ alwaysApply: false
   - [ ] Environment variables
   - [ ] Health check endpoint
 
-### 19. Reliability (18-reliability)
+### 19. Reliability (14-ops.mdc; former 18-reliability merged)
 
 - [ ] Timeout-եր բոլոր արտաքին կանչերի վրա
 - [ ] Retry с exponential backoff
@@ -522,6 +520,15 @@ alwaysApply: false
 - [ ] docs/ папка создана
 - [ ] PROGRESS.md создан
 
+## Quality Automation (Step 3.1.1 from onboarding)
+- [ ] `pnpm add -D prettier vitest husky lint-staged @commitlint/cli @commitlint/config-conventional`
+- [ ] `pnpm husky init` + hooks: `.husky/pre-commit` (lint-staged), `.husky/commit-msg` (commitlint)
+- [ ] lint-staged config added to package.json
+- [ ] Scripts from 17-cicd.mdc added (ci:check, format:check, lint, typecheck, test, build)
+- [ ] `--max-warnings=0` in lint, `--passWithNoTests` in test
+- [ ] CI workflow: `cp docs/reference/workflows/ci-quality.yml.example .github/workflows/ci.yml`
+- [ ] Dependabot: uncomment npm section in `.github/dependabot.yml`
+
 ## DevOps
 - [ ] CI/CD настроен (или Vercel/Railway auto)
 - [ ] .env.example создан
@@ -536,6 +543,11 @@ alwaysApply: false
 ## Хранилище файлов
 - [ ] Cloudflare R2 подключён (env vars заполнены)
 - [ ] `public/` используется только для статических ассетов (favicon, robots.txt)
+
+## GitHub Settings (manual, developer does this)
+- [ ] Branch Protection on main: require "Quality checks" to pass
+- [ ] Secret Protection (Scanning) enabled: Settings > Code security > Enable
+- [ ] Dependabot enabled (already in repo if template used)
 
 ## Безопасность
 - [ ] Нет секретов в коде

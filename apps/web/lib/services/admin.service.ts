@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
+import { notifyAdminOrderPaid } from "@/lib/email-templates/notify-admin-order-paid";
 import { findOrCreateAttributeValue } from "../utils/variant-generator";
 import {
   ensureProductAttributesTable,
@@ -1073,6 +1074,8 @@ class AdminService {
             console.error("[EHDM] printReceiptForOrder", err)
           )
         );
+        // Await (not after): serverless may terminate the isolate before after() runs; admin PUT should reliably send.
+        await notifyAdminOrderPaid(order.id);
       }
 
       return order;
