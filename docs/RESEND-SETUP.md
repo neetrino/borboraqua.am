@@ -29,6 +29,14 @@ EMAIL_FROM="test@dev.neetrino.com"
 | `apps/web/app/api/v1/email/test/route.ts` | POST թեստային նամակ ուղարկելու համար |
 | `apps/web/lib/email-templates/order-admin-notification.ts` | Պատվերի մասին նամակ ադմինին (HTML շաբլոն + `sendOrderNotificationToAdmin`) |
 | `orders.service.ts` (checkout) | Պատվեր ստեղծվելուց հետո ադմինին email ուղարկում |
+| `customer-order-email.ts` | Հաճախորդին՝ cash/COD հաստատում checkout-ից; online՝ վճարված պատվեր + EHDM (կամ fallback) |
+| `notify-customer-order-paid.ts` | Idempotent `customerCashOrderEmailSentAt` / `customerPaidOrderEmailSentAt` |
+| `post-payment-side-effects.ts` | Callback-ներում՝ EHDM print → հաճախորդ → ադմին |
+
+**Հաճախորդի նամակներ (կարճ).**
+
+- **Կանխիկ / առաքումով վճարում** — մեկ նամակ անմիջապես checkout-ից հետո, առանց EHDM։
+- **Առցանց վճարում** — մեկ նամակ վճարման հաջողությունից հետո, EHDM print փորձից հետո՝ եթե `ehdm_receipts`-ում կա գրառում, նամակում ներառվում է ֆիսկալ համար և QR; եթե ոչ՝ նամակը գնում է առանց чека, բայց պատվերը հաստատված է (fallback)։
 
 ### Թեստային նամակ ուղարկել
 
@@ -55,8 +63,8 @@ curl -X POST http://localhost:3000/api/v1/email/test \
    - Հիմա contact-ը միայն DB-ում է պահում (`createContactMessage`).
    - Ուզում ես՝ ավելացնել ադմինին նամակ կամ օգտատիրոջը auto-reply.
 
-4. **Պատվեր → հաճախորդ**
-   - Order confirmation email հասցեատիրոջը (ըստ ցանկության)։
+4. **Պատվեր → հաճախորդ** (արված)
+   - Cash/COD՝ checkout; online՝ վճարում + EHDM փորձ։
 
 5. **Շաբլոններ (ընտրովի)**
    - React Email (`@react-email/components`) — HTML շաբլոններ order/contact-ի համար.
@@ -78,5 +86,5 @@ curl -X POST http://localhost:3000/api/v1/email/test \
 - [ ] Թեստ նամակ ուղարկել և ստուգել
 - [ ] Contact form — email ադմինին / auto-reply (ըստ ցանկության)
 - [x] Order notification to admin (ADMIN_EMAIL) on new order
-- [ ] Order confirmation email to customer (ըստ ցանկության)
+- [x] Order confirmation / paid email to customer (cash + online + EHDM fallback)
 - [ ] Production domain և EMAIL_FROM (երբ պատրաստ լինի)

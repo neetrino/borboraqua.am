@@ -1,10 +1,8 @@
 import { db } from "@white-shop/db";
-import { after } from "next/server";
 import { getConfig } from "./config";
 import { verifyTelcellResultChecksum } from "./security";
 import { TELCELL_STATUS_PAID } from "./constants";
-import { printReceiptForOrder } from "@/lib/payments/ehdm";
-import { notifyAdminOrderPaid } from "@/lib/email-templates/notify-admin-order-paid";
+import { scheduleAfterSuccessfulOnlinePayment } from "@/lib/payments/post-payment-side-effects";
 
 const PAYMENT_PROVIDER = "telcell";
 
@@ -178,14 +176,7 @@ async function updateOrderPayment(
     if (order.userId) {
       await db.cart.deleteMany({ where: { userId: order.userId } });
     }
-    after(() =>
-      printReceiptForOrder(order.id).catch((err) =>
-        console.error("[EHDM] printReceiptForOrder", err)
-      )
-    );
-    after(() => {
-      void notifyAdminOrderPaid(order.id);
-    });
+    scheduleAfterSuccessfulOnlinePayment(order.id);
   } else {
     await db.$transaction([
       db.order.update({ where: { id: order.id }, data: { paymentStatus: "failed" } }),

@@ -1,7 +1,5 @@
 import { db } from "@white-shop/db";
-import { after } from "next/server";
-import { printReceiptForOrder } from "@/lib/payments/ehdm";
-import { notifyAdminOrderPaid } from "@/lib/email-templates/notify-admin-order-paid";
+import { scheduleAfterSuccessfulOnlinePayment } from "@/lib/payments/post-payment-side-effects";
 import type { FastshiftCallbackParams } from "./types";
 import {
   FASTSHIFT_STATUS_SUCCESS,
@@ -146,14 +144,7 @@ export async function handleFastshiftResponse(
     if (order.userId) {
       await db.cart.deleteMany({ where: { userId: order.userId } });
     }
-    after(() =>
-      printReceiptForOrder(order.id).catch((err) =>
-        console.error("[EHDM] printReceiptForOrder", err)
-      )
-    );
-    after(() => {
-      void notifyAdminOrderPaid(order.id);
-    });
+    scheduleAfterSuccessfulOnlinePayment(order.id);
   } else {
     await db.$transaction([
       db.order.update({
