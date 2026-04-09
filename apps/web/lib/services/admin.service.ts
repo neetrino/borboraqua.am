@@ -2,9 +2,9 @@ import { db } from "@white-shop/db";
 import { Prisma } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { after } from "next/server";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
 import { notifyAdminOrderPaid } from "@/lib/email-templates/notify-admin-order-paid";
+import { notifyCustomerAfterPaidOrder } from "@/lib/email-templates/notify-customer-order-paid";
 import { findOrCreateAttributeValue } from "../utils/variant-generator";
 import {
   ensureProductAttributesTable,
@@ -1069,12 +1069,11 @@ class AdminService {
       });
 
       if (data.paymentStatus === 'paid' && existing.paymentStatus !== 'paid') {
-        after(() =>
-          printReceiptForOrder(order.id).catch((err) =>
-            console.error("[EHDM] printReceiptForOrder", err)
-          )
-        );
-        // Await (not after): serverless may terminate the isolate before after() runs; admin PUT should reliably send.
+        const printResult = await printReceiptForOrder(order.id);
+        if (!printResult.ok) {
+          console.error("[EHDM] printReceiptForOrder", order.id, printResult.error);
+        }
+        await notifyCustomerAfterPaidOrder(order.id);
         await notifyAdminOrderPaid(order.id);
       }
 

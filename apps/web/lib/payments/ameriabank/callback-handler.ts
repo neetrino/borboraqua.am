@@ -1,13 +1,11 @@
 import { db } from "@white-shop/db";
-import { after } from "next/server";
 import { getPaymentDetails } from "./client";
 import {
   AMERIA_PAYMENT_SUCCESS_RESPONSE_CODE,
   AMERIA_PAYMENT_STATE_SUCCESSFUL,
   AMERIA_ORDER_STATUS_DEPOSITED,
 } from "./constants";
-import { printReceiptForOrder } from "@/lib/payments/ehdm";
-import { notifyAdminOrderPaid } from "@/lib/email-templates/notify-admin-order-paid";
+import { scheduleAfterSuccessfulOnlinePayment } from "@/lib/payments/post-payment-side-effects";
 
 const PAYMENT_PROVIDER = "ameriabank";
 
@@ -105,14 +103,7 @@ export async function handleAmeriabankCallback(searchParams: URLSearchParams): P
     if (order.userId) {
       await db.cart.deleteMany({ where: { userId: order.userId } });
     }
-    after(() =>
-      printReceiptForOrder(order.id)
-        .then((r) => { if (!r.ok) console.error("[EHDM]", r.error); })
-        .catch(() => {})
-    );
-    after(() => {
-      void notifyAdminOrderPaid(order.id);
-    });
+    scheduleAfterSuccessfulOnlinePayment(order.id);
     return {
       redirect: `${successRedirect}?order=${encodeURIComponent(order.number)}`,
     };

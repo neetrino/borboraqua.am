@@ -1,6 +1,7 @@
 import { db } from "@white-shop/db";
 import { sendOrderNotificationToAdmin } from "@/lib/email-templates/order-admin-notification";
 import { isCashLikePaymentMethod } from "@/lib/payments/constants";
+import { notifyCustomerCashOrderEmail } from "@/lib/email-templates/notify-customer-order-paid";
 import { couponsService, type CheckoutCouponValidationResult } from "@/lib/services/coupons.service";
 
 /**
@@ -704,6 +705,10 @@ class OrdersService {
           ? "cash_like"
           : "awaiting_online_payment",
       }).catch(() => {});
+
+      if (isCashLikePaymentMethod(paymentMethod ?? null)) {
+        notifyCustomerCashOrderEmail(order.order.id).catch(() => {});
+      }
 
       // Return order and payment info
       return {

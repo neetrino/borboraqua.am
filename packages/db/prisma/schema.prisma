@@ -464,8 +464,12 @@ model Order {
   fulfilledAt                 DateTime?
   cancelledAt                 DateTime?
   /// Set when admin "order paid" email was sent (online payments only; idempotent).
-  adminPaidNotificationSentAt DateTime?
-  items                       OrderItem[]
+  adminPaidNotificationSentAt   DateTime?
+  /// Cash/COD: customer confirmation email sent at checkout (idempotent).
+  customerCashOrderEmailSentAt DateTime?
+  /// Online: customer email after payment + EHDM attempt (with receipt or fallback; idempotent).
+  customerPaidOrderEmailSentAt  DateTime?
+  items                         OrderItem[]
   payments                    Payment[]
   events                      OrderEvent[]
   ehdmReceipt                 EhdmReceipt?
