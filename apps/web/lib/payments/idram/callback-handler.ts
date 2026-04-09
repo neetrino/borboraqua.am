@@ -3,6 +3,7 @@ import { after } from "next/server";
 import { getConfig } from "./config";
 import { verifyIdramChecksum } from "./checksum";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
+import { notifyAdminOrderPaid } from "@/lib/email-templates/notify-admin-order-paid";
 
 const PAYMENT_PROVIDER = "idram";
 
@@ -150,6 +151,9 @@ export async function handleIdramPaymentConfirm(
       console.error("[EHDM] printReceiptForOrder", err)
     )
   );
+  after(() => {
+    void notifyAdminOrderPaid(order.id);
+  });
   return { body: "OK" };
 }
 

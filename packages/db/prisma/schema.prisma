@@ -460,15 +460,17 @@ model Order {
   adminNotes        String?      @db.Text
   ipAddress         String?
   userAgent         String?
-  paidAt            DateTime?
-  fulfilledAt       DateTime?
-  cancelledAt       DateTime?
-  items             OrderItem[]
-  payments          Payment[]
-  events            OrderEvent[]
-  ehdmReceipt       EhdmReceipt?
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+  paidAt                      DateTime?
+  fulfilledAt                 DateTime?
+  cancelledAt                 DateTime?
+  /// Set when admin "order paid" email was sent (online payments only; idempotent).
+  adminPaidNotificationSentAt DateTime?
+  items                       OrderItem[]
+  payments                    Payment[]
+  events                      OrderEvent[]
+  ehdmReceipt                 EhdmReceipt?
+  createdAt                   DateTime     @default(now())
+  updatedAt                   DateTime     @updatedAt
 
   // Relations
   user             User?             @relation(fields: [userId], references: [id])

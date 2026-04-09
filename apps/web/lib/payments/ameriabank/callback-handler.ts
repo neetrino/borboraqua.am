@@ -7,6 +7,7 @@ import {
   AMERIA_ORDER_STATUS_DEPOSITED,
 } from "./constants";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
+import { notifyAdminOrderPaid } from "@/lib/email-templates/notify-admin-order-paid";
 
 const PAYMENT_PROVIDER = "ameriabank";
 
@@ -109,6 +110,9 @@ export async function handleAmeriabankCallback(searchParams: URLSearchParams): P
         .then((r) => { if (!r.ok) console.error("[EHDM]", r.error); })
         .catch(() => {})
     );
+    after(() => {
+      void notifyAdminOrderPaid(order.id);
+    });
     return {
       redirect: `${successRedirect}?order=${encodeURIComponent(order.number)}`,
     };

@@ -4,6 +4,7 @@ import { getConfig } from "./config";
 import { verifyTelcellResultChecksum } from "./security";
 import { TELCELL_STATUS_PAID } from "./constants";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
+import { notifyAdminOrderPaid } from "@/lib/email-templates/notify-admin-order-paid";
 
 const PAYMENT_PROVIDER = "telcell";
 
@@ -182,6 +183,9 @@ async function updateOrderPayment(
         console.error("[EHDM] printReceiptForOrder", err)
       )
     );
+    after(() => {
+      void notifyAdminOrderPaid(order.id);
+    });
   } else {
     await db.$transaction([
       db.order.update({ where: { id: order.id }, data: { paymentStatus: "failed" } }),

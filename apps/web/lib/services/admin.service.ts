@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
+import { notifyAdminOrderPaid } from "@/lib/email-templates/notify-admin-order-paid";
 import { findOrCreateAttributeValue } from "../utils/variant-generator";
 import {
   ensureProductAttributesTable,
@@ -1073,6 +1074,9 @@ class AdminService {
             console.error("[EHDM] printReceiptForOrder", err)
           )
         );
+        after(() => {
+          void notifyAdminOrderPaid(order.id);
+        });
       }
 
       return order;

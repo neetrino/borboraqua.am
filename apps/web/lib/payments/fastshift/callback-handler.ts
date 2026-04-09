@@ -1,6 +1,7 @@
 import { db } from "@white-shop/db";
 import { after } from "next/server";
 import { printReceiptForOrder } from "@/lib/payments/ehdm";
+import { notifyAdminOrderPaid } from "@/lib/email-templates/notify-admin-order-paid";
 import type { FastshiftCallbackParams } from "./types";
 import {
   FASTSHIFT_STATUS_SUCCESS,
@@ -150,6 +151,9 @@ export async function handleFastshiftResponse(
         console.error("[EHDM] printReceiptForOrder", err)
       )
     );
+    after(() => {
+      void notifyAdminOrderPaid(order.id);
+    });
   } else {
     await db.$transaction([
       db.order.update({

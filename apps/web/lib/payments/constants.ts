@@ -22,3 +22,13 @@ export const PAYMENT_STATUS_LABELS: Record<string, string> = {
   [PAYMENT_STATUS.CANCELLED]: "Cancelled",
   [PAYMENT_STATUS.REFUNDED]: "Refunded",
 };
+
+/** Checkout methods with no online PSP: admin gets one email at checkout only (no separate "paid" email). */
+const CASH_LIKE_PAYMENT_METHODS = new Set(["cash", "cash_on_delivery"]);
+
+export function isCashLikePaymentMethod(
+  method: string | null | undefined
+): boolean {
+  if (method == null || method === "") return false;
+  return CASH_LIKE_PAYMENT_METHODS.has(method.trim().toLowerCase());
+}
