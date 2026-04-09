@@ -1074,9 +1074,8 @@ class AdminService {
             console.error("[EHDM] printReceiptForOrder", err)
           )
         );
-        after(() => {
-          void notifyAdminOrderPaid(order.id);
-        });
+        // Await (not after): serverless may terminate the isolate before after() runs; admin PUT should reliably send.
+        await notifyAdminOrderPaid(order.id);
       }
 
       return order;
