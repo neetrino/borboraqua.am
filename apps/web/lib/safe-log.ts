@@ -41,7 +41,13 @@ export function logApi(
   meta?: Record<string, unknown> | null,
   requestId?: string | null
 ): void {
-  const safe = meta ? redact(meta) : {};
+  const redacted = meta ? redact(meta) : {};
+  const safe: Record<string, unknown> =
+    redacted !== null &&
+    typeof redacted === "object" &&
+    !Array.isArray(redacted)
+      ? (redacted as Record<string, unknown>)
+      : {};
   const prefix = requestId ? `[${requestId}] ` : "";
   if (process.env.NODE_ENV === "production") {
     console.error(prefix + message, Object.keys(safe).length > 0 ? safe : "");

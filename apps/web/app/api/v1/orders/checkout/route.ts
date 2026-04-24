@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
   const idemKey = req.headers.get("Idempotency-Key");
   if (idemKey && idemKey.length <= 128) {
-    const cached = getIdempotentResponse(idemKey);
+    const cached = await getIdempotentResponse(idemKey);
     if (cached) return NextResponse.json(cached.body, { status: cached.status });
   }
 
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     const result = await ordersService.checkout(parsed.data, user?.id);
 
     if (idemKey && idemKey.length <= 128) {
-      setIdempotentResponse(idemKey, result, 201);
+      await setIdempotentResponse(idemKey, result, 201);
     }
     return NextResponse.json(result, { status: 201 });
   } catch (error: unknown) {

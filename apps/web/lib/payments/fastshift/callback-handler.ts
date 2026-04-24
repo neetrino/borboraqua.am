@@ -10,6 +10,14 @@ import { getOrderStatus } from "./client";
 
 const PAYMENT_PROVIDER = "fastshift";
 
+type OrderWithPayments = {
+  id: string;
+  number: string;
+  paymentStatus: string;
+  userId: string | null;
+  payments: { id: string; provider: string; providerTransactionId: string | null }[];
+};
+
 function isSuccessStatus(status: string): boolean {
   const s = (status ?? "").trim();
   return FASTSHIFT_STATUS_SUCCESS.some((v) => v === s);
@@ -53,13 +61,7 @@ export async function handleFastshiftResponse(
     throw new Error("Invalid order_number format");
   }
 
-  let order: {
-    id: string;
-    number: string;
-    paymentStatus: string;
-    userId: string | null;
-    payments: { id: string; provider: string; providerTransactionId: string | null }[];
-  } | null = null;
+  let order: OrderWithPayments | null = null;
 
   if (ourOrderNumber) {
     order = await db.order.findFirst({
@@ -76,7 +78,7 @@ export async function handleFastshiftResponse(
       include: { order: { include: { payments: true } } },
     });
     if (payment?.order) {
-      order = payment.order as typeof order;
+      order = payment.order as OrderWithPayments;
     }
   }
 

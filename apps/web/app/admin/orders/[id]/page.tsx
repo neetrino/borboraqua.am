@@ -160,9 +160,9 @@ export default function OrderDetailPage() {
         if (currentShipping === 0) {
           setLoadingDeliveryPrice(true);
           try {
-            const params = shipAddr.regionId
+            const params: Record<string, string> = shipAddr.regionId
               ? { regionId: shipAddr.regionId }
-              : { city: shipAddr.city };
+              : { city: shipAddr.city ?? "" };
             const deliveryResponse = await apiClient.get<{ price: number }>('/api/v1/delivery/price', { params });
             setDeliveryPrice(deliveryResponse.price);
           } catch {

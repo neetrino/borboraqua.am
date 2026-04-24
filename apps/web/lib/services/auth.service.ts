@@ -87,7 +87,7 @@ class AuthService {
     if (existingUser) {
       console.log(
         "❌ [AUTH] User already exists:",
-        existingUser.email || existingUser.phone
+        normalizedEmail || normalizedPhone || existingUser.id
       );
       throw {
         status: 409,

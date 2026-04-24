@@ -1620,6 +1620,7 @@ class AdminService {
           const media = mediaByLabelId.get(label.id);
           return {
             ...label,
+            productId,
             imageUrl: media?.imageUrl ?? label.imageUrl ?? null,
             imagePosition: media?.imagePosition ?? label.imagePosition ?? null,
           };

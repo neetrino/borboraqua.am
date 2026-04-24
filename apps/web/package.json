@@ -14,7 +14,7 @@
     "prebuild:migrate": "node scripts/check-db-and-migrate.js",
     "build": "npm run prebuild:migrate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "tsc --noEmit",
     "clean": "node -e \"require('fs').rmSync('.next', {recursive: true, force: true})\"",
     "prisma:generate": "cd ../../packages/db && npm run db:generate",
     "reset": "node -e \"require('fs').rmSync('.next', {recursive: true, force: true})\" && cd ../../packages/db && npm run db:generate"
@@ -25,6 +25,7 @@
     "@prisma/client": "^5.9.0",
     "@shop/design-tokens": "*",
     "@shop/ui": "*",
+    "@upstash/redis": "^1.37.0",
     "@white-shop/db": "*",
     "bcryptjs": "^2.4.3",
     "browser-image-compression": "^2.0.2",
@@ -39,7 +40,6 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
-    "vitest": "^2.1.0",
     "@types/browser-image-compression": "^1.0.1",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.10.0",
@@ -52,6 +52,7 @@
     "eslint-config-next": "^16.0.7",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.3.0"
+    "typescript": "^5.3.0",
+    "vitest": "^2.1.0"
   }
 }
