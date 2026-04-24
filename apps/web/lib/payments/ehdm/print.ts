@@ -1,4 +1,4 @@
-import type { Order, OrderItem, Payment } from "@white-shop/db";
+import type { Order, OrderItem, Payment } from "@prisma/client";
 import { getConfig } from "./config";
 import { ehdmPost } from "./client";
 import type {

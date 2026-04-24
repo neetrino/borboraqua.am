@@ -14,7 +14,7 @@
     "prebuild:migrate": "node scripts/check-db-and-migrate.js",
     "build": "npm run prebuild:migrate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "tsc --noEmit",
     "clean": "node -e \"require('fs').rmSync('.next', {recursive: true, force: true})\"",
     "prisma:generate": "cd ../../packages/db && npm run db:generate",
     "reset": "node -e \"require('fs').rmSync('.next', {recursive: true, force: true})\" && cd ../../packages/db && npm run db:generate"
