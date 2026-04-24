@@ -14,7 +14,7 @@ function generateRequestId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   if (!path.startsWith('/api')) {
@@ -55,7 +55,7 @@ export function middleware(request: NextRequest) {
     pathLabel = 'api';
   }
 
-  const retryAfter = checkRateLimit(request, limit, pathLabel);
+  const retryAfter = await checkRateLimit(request, limit, pathLabel);
   if (retryAfter !== null) {
     return new NextResponse(
       JSON.stringify({ error: 'Too Many Requests', message: 'Rate limit exceeded' }),

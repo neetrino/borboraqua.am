@@ -8,7 +8,7 @@ import { setAuthCookie } from "@/lib/auth-cookie";
 import { logApi } from "@/lib/safe-log";
 
 export async function POST(req: NextRequest) {
-  const retryAfter = checkRateLimit(req, RATE_LIMITS.AUTH_REGISTER_PER_MIN, "auth-register");
+  const retryAfter = await checkRateLimit(req, RATE_LIMITS.AUTH_REGISTER_PER_MIN, "auth-register");
   if (retryAfter !== null) {
     return NextResponse.json(
       {

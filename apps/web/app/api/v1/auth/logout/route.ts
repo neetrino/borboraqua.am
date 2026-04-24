@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     try {
       const decoded = jwt.decode(token) as { exp?: number } | null;
       const expiresAtMs = decoded?.exp ? decoded.exp * 1000 : Date.now() + 24 * 60 * 60 * 1000;
-      addToBlacklist(token, expiresAtMs);
+      await addToBlacklist(token, expiresAtMs);
     } catch {
       // ignore decode errors
     }

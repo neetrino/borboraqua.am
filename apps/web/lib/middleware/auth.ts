@@ -36,7 +36,7 @@ export async function authenticateToken(
       return null;
     }
 
-    if (isBlacklisted(token)) {
+    if (await isBlacklisted(token)) {
       logApi("AUTH: Token revoked (logout)", null, requestId);
       return null;
     }
