@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { apiClient, ApiError } from '../../lib/api-client';
 import { formatPrice, formatPriceInCurrency, getStoredCurrency, convertPrice, type CurrencyCode } from '../../lib/currency';
+import { clampCartQuantity } from '../../lib/cart-constraints';
 import { getStoredLanguage } from '../../lib/language';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { useTranslation } from '../../lib/i18n-client';
@@ -741,7 +742,14 @@ export default function CheckoutPage() {
 
       const CART_KEY = 'shop_cart_guest';
       const stored = localStorage.getItem(CART_KEY);
-      const guestCart: Array<{ productId: string; productSlug?: string; variantId: string; quantity: number }> = stored ? JSON.parse(stored) : [];
+      const guestCartRaw: Array<{ productId: string; productSlug?: string; variantId: string; quantity: number }> = stored ? JSON.parse(stored) : [];
+      const guestCart = guestCartRaw.map((item) => ({
+        ...item,
+        quantity: clampCartQuantity(item.quantity),
+      }));
+      if (JSON.stringify(guestCartRaw) !== JSON.stringify(guestCart)) {
+        localStorage.setItem(CART_KEY, JSON.stringify(guestCart));
+      }
 
       if (guestCart.length === 0) {
         setCart(null);
@@ -805,9 +813,9 @@ export default function CheckoutPage() {
                     image: imageUrl,
                   },
                 },
-                quantity: item.quantity,
+                quantity: clampCartQuantity(item.quantity),
                 price: variant.price,
-                total: variant.price * item.quantity,
+                total: variant.price * clampCartQuantity(item.quantity),
               },
               shouldRemove: false,
             };
@@ -951,7 +959,7 @@ export default function CheckoutPage() {
         items = cart.items.map(item => ({
           productId: item.variant.product.id,
           variantId: item.variant.id,
-          quantity: item.quantity,
+          quantity: clampCartQuantity(item.quantity),
         }));
         cartId = 'guest-cart';
       }

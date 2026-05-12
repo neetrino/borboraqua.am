@@ -25,7 +25,7 @@
     "@prisma/client": "^5.9.0",
     "@shop/design-tokens": "*",
     "@shop/ui": "*",
-    "@upstash/redis": "^1.37.0",
+    "@upstash/redis": "^1.38.0",
     "@white-shop/db": "*",
     "bcryptjs": "^2.4.3",
     "browser-image-compression": "^2.0.2",
