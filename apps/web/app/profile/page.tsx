@@ -12,6 +12,7 @@ import { formatPrice, type CurrencyCode } from '../../lib/currency';
 import { UserAvatar } from '../../components/UserAvatar';
 import { useTranslation } from '../../lib/i18n-client';
 import { getStoredLanguage } from '../../lib/language';
+import { clampCartQuantity } from '../../lib/cart-constraints';
 import { getProfileMenuTABS } from '../../components/icons/global/global';
 import { showConfirm } from '../../components/ConfirmDialog';
 
@@ -667,13 +668,13 @@ function ProfilePageContent() {
           const cart: Array<{ productId: string; productSlug?: string; variantId: string; quantity: number }> = stored ? JSON.parse(stored) : [];
           const existing = cart.find((i) => i.productId === variantDetails.productId && i.variantId === item.variantId);
           if (existing) {
-            existing.quantity += item.quantity;
+            existing.quantity = clampCartQuantity(existing.quantity + item.quantity);
           } else {
             cart.push({
               productId: variantDetails.productId,
               productSlug: variantDetails.productSlug,
               variantId: item.variantId,
-              quantity: item.quantity,
+              quantity: clampCartQuantity(item.quantity),
             });
           }
           if (typeof window !== 'undefined') {

@@ -14,6 +14,7 @@ import { RelatedProducts } from '../../../components/RelatedProducts';
 import { Minus, Plus, Maximize2 } from 'lucide-react';
 import { ProductLabels } from '../../../components/ProductLabels';
 import { addToCart } from '../../../components/icons/global/global';
+import { maxAllowedQuantityByStock } from '../../../lib/cart-constraints';
 import {
   processImageUrl,
   smartSplitUrls,
@@ -1291,7 +1292,7 @@ export function ProductPageClient({ initialProduct, slug, variantIdFromUrl }: Pr
   const originalPrice = currentVariant?.originalPrice;
   const compareAtPrice = currentVariant?.compareAtPrice;
   const discountPercent = currentVariant?.productDiscount || product?.productDiscount || null;
-  const maxQuantity = currentVariant?.stock && currentVariant.stock > 0 ? currentVariant.stock : 0;
+  const maxQuantity = maxAllowedQuantityByStock(currentVariant?.stock);
   const isOutOfStock = !currentVariant || currentVariant.stock <= 0;
 
   // Check which attributes are available and required

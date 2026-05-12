@@ -9,6 +9,7 @@ import { getStoredLanguage } from '../../lib/language';
 import { useTranslation } from '../../lib/i18n-client';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { CART_KEY } from '../../lib/storageCounts';
+import { clampCartQuantity, maxAllowedQuantityByStock } from '../../lib/cart-constraints';
 import { ProductPageButton } from '../../components/icons/global/globalMobile';
 import { showToast } from '../../components/Toast';
 
@@ -177,13 +178,20 @@ export default function CartPage() {
         return;
       }
       const stored = localStorage.getItem(CART_KEY);
-          const guestCart: Array<{ productId: string; productSlug?: string; variantId: string; quantity: number }> = stored ? JSON.parse(stored) : [];
+      const guestCartRaw: Array<{ productId: string; productSlug?: string; variantId: string; quantity: number }> = stored ? JSON.parse(stored) : [];
+      const guestCart = guestCartRaw.map((item) => ({
+        ...item,
+        quantity: clampCartQuantity(item.quantity),
+      }));
+      if (JSON.stringify(guestCartRaw) !== JSON.stringify(guestCart)) {
+        localStorage.setItem(CART_KEY, JSON.stringify(guestCart));
+      }
           
-          if (guestCart.length === 0) {
-            setCart(null);
-            setLoading(false);
-            return;
-          }
+      if (guestCart.length === 0) {
+        setCart(null);
+        setLoading(false);
+        return;
+      }
 
           const currentLang = getStoredLanguage();
           const guestCartJson = JSON.stringify(guestCart);
@@ -289,10 +297,10 @@ export default function CartPage() {
                     image: imageUrl,
                   },
                 },
-                quantity: item.quantity,
+                quantity: clampCartQuantity(item.quantity),
                 price: variant.price,
                 originalPrice: variant.originalPrice || null,
-                total: variant.price * item.quantity,
+                total: variant.price * clampCartQuantity(item.quantity),
                 minimumOrderQuantity: productData.minimumOrderQuantity || 1,
                 orderQuantityIncrement: productData.orderQuantityIncrement || 1,
               },
@@ -430,6 +438,13 @@ export default function CartPage() {
       }
     }
 
+    const maxAllowedByStock = maxAllowedQuantityByStock(cartItem.variant.stock);
+    quantity = Math.min(quantity, maxAllowedByStock);
+    if (quantity < 1) {
+      handleRemoveItem(itemId);
+      return;
+    }
+
     if (cartItem.variant.stock !== undefined) {
       if (quantity > cartItem.variant.stock) {
         // If stock is less than minimumOrderQuantity, show error
@@ -492,7 +507,7 @@ export default function CartPage() {
             setUpdatingItems(prev => { const next = new Set(prev); next.delete(itemId); return next; });
             return;
           }
-          item.quantity = quantity;
+          item.quantity = clampCartQuantity(quantity);
           localStorage.setItem(CART_KEY, JSON.stringify(guestCart));
           window.dispatchEvent(new Event('cart-updated'));
         }
@@ -657,15 +672,15 @@ export default function CartPage() {
                     onClick={() => {
                       const increment = item.orderQuantityIncrement || 1;
                       const newQuantity = item.quantity + increment;
-                      const maxQuantity = item.variant.stock !== undefined ? item.variant.stock : Infinity;
+                      const maxQuantity = maxAllowedQuantityByStock(item.variant.stock);
                       if (newQuantity <= maxQuantity) {
                         handleUpdateQuantity(item.id, newQuantity);
                       }
                     }}
-                    disabled={updatingItems.has(item.id) || (item.variant.stock !== undefined && item.quantity >= item.variant.stock)}
+                    disabled={updatingItems.has(item.id) || item.quantity >= maxAllowedQuantityByStock(item.variant.stock)}
                     className="h-full flex-1 flex items-center justify-center leading-5 text-[#111827] hover:bg-white/20 active:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     aria-label={t('common.ariaLabels.increaseQuantity')}
-                    title={item.variant.stock !== undefined && item.quantity >= item.variant.stock ? t('common.messages.availableQuantity').replace('{stock}', item.variant.stock.toString()) : t('common.messages.addQuantity')}
+                    title={item.quantity >= maxAllowedQuantityByStock(item.variant.stock) ? t('common.messages.availableQuantity').replace('{stock}', maxAllowedQuantityByStock(item.variant.stock).toString()) : t('common.messages.addQuantity')}
                   >
                     +
                   </button>

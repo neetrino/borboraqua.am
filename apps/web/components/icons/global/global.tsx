@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { getStoredLanguage, setStoredLanguage, LANGUAGES, type LanguageCode } from '../../../lib/language';
 import { apiClient } from '../../../lib/api-client';
 import { type CurrencyCode, CURRENCIES, getStoredCurrency, setStoredCurrency } from '../../../lib/currency';
+import { clampCartQuantity } from '../../../lib/cart-constraints';
 import { SearchIcon } from '../SearchIcon';
 import { HeaderCartIcon } from '../HeaderCartIcon';
 import { LanguageIcon } from '../LanguageIcon';
@@ -104,14 +105,14 @@ export async function addToCart({
       // Match by both productId and variantId so different products never merge (production-safe)
       const existing = cart.find((i: { productId?: string; variantId?: string }) => i.productId === product.id && i.variantId === finalVariantId);
       if (existing) {
-        existing.quantity += quantity;
+        existing.quantity = clampCartQuantity(existing.quantity + quantity);
       } else {
         const slug = (product.slug || '').trim();
         cart.push({
           productId: product.id,
           productSlug: slug || undefined,
           variantId: finalVariantId,
-          quantity,
+          quantity: clampCartQuantity(quantity),
         });
       }
       localStorage.setItem('shop_cart_guest', JSON.stringify(cart));

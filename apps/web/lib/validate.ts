@@ -103,7 +103,7 @@ export const fastshiftInitBodySchema = z.object({
 const checkoutItemSchema = z.object({
   productId: z.string().min(1, "productId is required"),
   variantId: z.string().min(1, "variantId is required"),
-  quantity: z.number().int().positive().max(100),
+  quantity: z.number().int().positive(),
 });
 
 export const checkoutBodySchema = z.object({
