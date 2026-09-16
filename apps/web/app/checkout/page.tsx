@@ -83,7 +83,6 @@ const CHECKOUT_PAYMENT_METHOD_IDS = [
   'ameriabank',
   'telcell',
   'fastshift',
-  'cash_on_delivery',
 ] as const;
 
 type CheckoutPaymentMethodId = (typeof CHECKOUT_PAYMENT_METHOD_IDS)[number];
@@ -139,18 +138,12 @@ export default function CheckoutPage() {
 
   // Payment methods configuration (logo or logos: single image or multiple for card payment)
   const paymentMethods: Array<{
-    id: 'cash_on_delivery' | 'idram' | 'ameriabank' | 'telcell' | 'fastshift';
+    id: CheckoutPaymentMethodId;
     name: string;
     description: string;
     logo?: string | null;
     logos?: string[];
   }> = [
-    {
-      id: 'cash_on_delivery',
-      name: t('checkout.payment.cashOnDelivery'),
-      description: t('checkout.payment.cashOnDeliveryDescription'),
-      logo: '/assets/payments/dollar.svg',
-    },
     {
       id: 'ameriabank',
       name: t('checkout.payment.cardPayment'),
@@ -1046,7 +1039,7 @@ export default function CheckoutPage() {
         }
       }
 
-      // Clear guest cart only when not redirecting to payment (e.g. cash). For card/ameriabank, cart is cleared after payment success.
+      // Guest cart is cleared after successful online payment, not at checkout.
       if (!isLoggedIn && response.nextAction === 'view_order') {
         localStorage.removeItem('shop_cart_guest');
         window.dispatchEvent(new Event('cart-updated'));
