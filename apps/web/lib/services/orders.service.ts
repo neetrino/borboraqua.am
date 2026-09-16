@@ -103,6 +103,15 @@ class OrdersService {
         };
       }
 
+      if (isCashLikePaymentMethod(paymentMethod)) {
+        throw {
+          status: 400,
+          type: "https://api.shop.am/problems/validation-error",
+          title: "Validation Error",
+          detail: "Cash payment is not available",
+        };
+      }
+
       // Get cart items - either from user cart or guest items
       let cartItems: Array<{
         variantId: string;

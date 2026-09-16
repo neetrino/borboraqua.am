@@ -123,8 +123,6 @@ export const checkoutBodySchema = z.object({
       "ameriabank",
       "telcell",
       "fastshift",
-      "cash",
-      "cash_on_delivery",
       "card",
     ])
     .optional(),
